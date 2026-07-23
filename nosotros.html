@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nosotros — TodoEventos.pe</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
+:root{--bg:hsl(258,20%,14%);--bg2:hsl(258,18%,18%);--bg3:hsl(258,16%,22%);--fg:hsl(250,12%,95%);--sub:hsl(250,8%,68%);--pu:#a855f7;--ind:#6366f1;--gold:#fbbf24;--or:#f97316;--border:rgba(255,255,255,.09);--ink:#171022;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:var(--fg);overflow-x:hidden;}
+.container{max-width:1000px;margin:0 auto;padding:0 2.5rem;}
+/* gradient text now ORANGE-forward, purple as minor accent only */
+.gt{background:linear-gradient(to left,#ea580c,#f97316,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;}
+section{position:relative;overflow:hidden;}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 0 0 rgba(234,88,12,.5);}70%{box-shadow:0 0 0 12px rgba(234,88,12,0);}}
+@keyframes floatY{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+@keyframes spin-slow{from{transform:rotate(0);}to{transform:rotate(360deg);}}
+
+/* ── NAV ── */
+#nav{position:sticky;top:0;z-index:100;background:rgba(20,15,30,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.nav-i{display:flex;align-items:center;justify-content:space-between;padding:16px 2.5rem;max-width:1200px;margin:0 auto;}
+.logo{font-size:19px;font-weight:700;text-decoration:none;}
+.logo .lp{color:var(--pu);}
+.logo .lo{background:linear-gradient(to right,var(--pu),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo .dot{color:rgba(255,255,255,.32);font-weight:400;}
+.nav-links{display:flex;align-items:center;gap:2px;}
+.nl{background:transparent;border:none;color:rgba(255,255,255,.75);font-size:14px;font-family:'General Sans',sans-serif;padding:8px 15px;border-radius:8px;cursor:pointer;transition:all .18s;text-decoration:none;display:inline-block;}
+.nl:hover{background:rgba(255,255,255,.07);color:var(--fg);}
+.nl.active{color:var(--fg);background:rgba(255,255,255,.07);}
+.nav-end{display:flex;align-items:center;gap:10px;}
+.btn-login{background:rgba(255,255,255,.08);border:1px solid var(--border);color:var(--fg);padding:9px 20px;border-radius:100px;font-size:13.5px;font-weight:500;font-family:'General Sans',sans-serif;cursor:pointer;}
+.btn-prov{background:linear-gradient(135deg,#ea580c,#fbbf24);color:#1a0500;border:none;padding:10px 22px;border-radius:100px;font-size:13.5px;font-weight:700;font-family:'General Sans',sans-serif;cursor:pointer;animation:pulse-glow 2.5s ease infinite;text-decoration:none;display:inline-flex;align-items:center;gap:7px;}
+.user-menu{position:relative;display:none;align-items:center;}
+.user-menu.show{display:flex;}
+.user-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--pu),var(--ind));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;cursor:pointer;border:none;font-family:'General Sans',sans-serif;}
+.user-dropdown{position:absolute;top:calc(100% + 10px);right:0;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:8px;min-width:190px;box-shadow:0 12px 30px rgba(0,0,0,.4);display:none;z-index:50;}
+.user-dropdown.open{display:block;}
+.user-dropdown-name{padding:8px 10px 10px;font-size:13px;font-weight:600;color:var(--fg);border-bottom:1px solid var(--border);margin-bottom:6px;}
+.user-dropdown a,.user-dropdown button{width:100%;text-align:left;display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--fg);font-size:13px;font-family:'General Sans',sans-serif;padding:9px 10px;border-radius:8px;cursor:pointer;text-decoration:none;}
+.user-dropdown a:hover,.user-dropdown button:hover{background:rgba(255,255,255,.06);}
+.user-dropdown .salir{color:#f87171;}
+
+/* ── PAGE HEADER — Notion style: small label + big two-line title ── */
+#page-hero{padding:4rem 2.5rem 1rem;background:var(--bg);}
+.back-link{display:inline-flex;align-items:center;gap:6px;color:rgba(255,255,255,.45);text-decoration:none;font-size:13px;font-weight:500;margin-bottom:2.25rem;transition:color .18s;}
+.back-link:hover{color:var(--or);}
+.story-label{font-size:13px;font-weight:600;color:var(--or);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.9rem;}
+.story-title{font-size:clamp(2.1rem,5vw,3.1rem);font-weight:700;line-height:1.18;max-width:760px;}
+
+/* ── STORY FLOW ── */
+#story{padding:3rem 0 5rem;background:var(--bg);}
+.story-hook{max-width:680px;font-size:1.05rem;color:var(--sub);line-height:1.85;margin-bottom:4.5rem;}
+.story-hook strong{color:var(--fg);}
+
+.story-block{display:flex;align-items:center;gap:3.5rem;margin-bottom:5rem;}
+.story-block.reverse{flex-direction:row-reverse;}
+.story-illus{width:280px;flex-shrink:0;}
+.story-illus svg{width:100%;height:auto;display:block;}
+.story-text{flex:1;}
+.story-text p{font-size:.98rem;color:var(--sub);line-height:1.85;}
+.story-text p + p{margin-top:1rem;}
+.story-text strong{color:var(--fg);}
+.story-caption{font-size:11.5px;color:rgba(255,255,255,.32);margin-top:.6rem;font-style:italic;}
+
+/* ── TEAM STORY BLOCK (climax of the narrative) ── */
+#team-story{padding:1rem 0 5rem;background:var(--bg);}
+.team-intro{max-width:680px;margin-bottom:3rem;}
+.team-intro p{font-size:1.02rem;color:var(--sub);line-height:1.85;}
+.team-intro strong{color:var(--fg);}
+.founder-block{display:flex;align-items:center;gap:3rem;margin-bottom:3rem;}
+.founder-block.reverse{flex-direction:row-reverse;}
+.founder-photo{width:230px;height:270px;border-radius:20px;object-fit:cover;flex-shrink:0;border:1px solid rgba(249,115,22,.25);box-shadow:0 14px 32px rgba(0,0,0,.3);}
+.founder-avatar{width:230px;height:270px;border-radius:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:4.2rem;font-weight:800;color:#fff;background:linear-gradient(135deg,#ea580c,#fbbf24);box-shadow:0 14px 32px rgba(0,0,0,.3);}
+.founder-text{flex:1;}
+.founder-name{font-size:1.6rem;font-weight:700;margin-bottom:.5rem;}
+.founder-badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.1rem;}
+.founder-uni{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--or);background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.22);padding:5px 13px;border-radius:100px;}
+.founder-role{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--pu);background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.2);padding:5px 13px;border-radius:100px;}
+.founder-bio{font-size:.98rem;color:var(--sub);line-height:1.85;}
+.founder-credential{display:flex;align-items:center;gap:14px;background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:12px 16px;margin-top:1.25rem;}
+.fc-photo{width:80px;height:80px;border-radius:12px;object-fit:cover;flex-shrink:0;}
+.fc-text{font-size:12.5px;color:var(--sub);line-height:1.5;}
+.fc-text strong{color:var(--fg);font-size:13.5px;display:block;margin-bottom:2px;}
+
+/* ── MISSION QUOTE ── */
+#mission{padding:1rem 0 5rem;background:var(--bg);}
+.mission-block{max-width:760px;background:linear-gradient(135deg,rgba(249,115,22,.07),rgba(251,191,36,.07));border:1px solid rgba(249,115,22,.18);border-radius:22px;padding:3rem;position:relative;}
+.mission-q{font-size:2.75rem;line-height:.8;color:rgba(249,115,22,.35);font-family:Georgia,serif;margin-bottom:.5rem;}
+.mission-text{font-size:1.15rem;font-style:italic;color:var(--fg);line-height:1.75;}
+
+/* ── WHY TRUST + CLOSING ── */
+#closing{padding:1rem 0 5rem;background:var(--bg);}
+.trust-row{display:flex;align-items:flex-start;gap:1.5rem;max-width:760px;margin-bottom:2.5rem;}
+.trust-ico{width:46px;height:46px;border-radius:12px;background:rgba(249,115,22,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.trust-ico i{color:var(--or);font-size:21px;}
+.trust-row h3{font-size:1.15rem;font-weight:700;margin-bottom:.5rem;}
+.trust-row p{font-size:.95rem;color:var(--sub);line-height:1.8;}
+.closing-tagline{font-size:1.5rem;font-weight:700;margin-top:3rem;}
+
+/* ── CTA back ── */
+#cta-back{padding:0 0 6rem;background:var(--bg);}
+.cta-box{max-width:760px;margin:0 auto;border:1px solid var(--border);border-radius:22px;padding:2.5rem 2rem;text-align:center;position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(249,115,22,.06),rgba(251,191,36,.08));}
+.cta-box h3{font-size:1.4rem;font-weight:700;margin-bottom:.6rem;position:relative;z-index:1;}
+.cta-box p{font-size:.9rem;color:var(--sub);margin-bottom:1.5rem;position:relative;z-index:1;}
+.cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1;}
+.btn-main{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#ea580c,#f97316);color:#fff;border:none;padding:13px 26px;border-radius:11px;font-size:14px;font-weight:700;font-family:'General Sans',sans-serif;cursor:pointer;transition:opacity .2s;text-decoration:none;}
+.btn-main:hover{opacity:.88;}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--fg);padding:13px 26px;border-radius:11px;font-size:14px;font-weight:600;font-family:'General Sans',sans-serif;cursor:pointer;text-decoration:none;}
+.btn-ghost:hover{background:rgba(255,255,255,.12);}
+
+/* ── FOOTER ── */
+#foot{background:hsl(260,90%,2%);border-top:1px solid var(--border);padding:3rem 2.5rem 2rem;}
+.foot-inner{max-width:1100px;margin:0 auto;}
+.foot-top{display:grid;grid-template-columns:1.7fr 1fr 1fr 1fr;gap:3rem;margin-bottom:2.5rem;}
+.flogo{font-size:17px;font-weight:700;text-decoration:none;}
+.flogo .lp{color:var(--pu);}
+.flogo .lo{background:linear-gradient(to right,var(--pu),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.fdesc{font-size:12.5px;color:rgba(245,243,235,.3);line-height:1.65;margin-top:9px;max-width:210px;}
+.pay-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px;}
+.payb{background:rgba(255,255,255,.06);border:1px solid var(--border);color:rgba(245,243,235,.65);font-size:11px;font-weight:700;padding:5px 11px;border-radius:7px;}
+.payb.yp{background:#5b21b6;border-color:#5b21b6;color:#fff;}
+.payb.pl{background:#059669;border-color:#059669;color:#fff;}
+.fcol h5{font-size:12px;font-weight:700;color:var(--fg);margin-bottom:12px;text-transform:uppercase;letter-spacing:.07em;}
+.fcol a{display:block;font-size:12.5px;color:rgba(245,243,235,.35);text-decoration:none;margin-bottom:8px;transition:color .18s;}
+.fcol a:hover{color:var(--or);}
+.foot-bot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem;padding-top:2rem;border-top:1px solid var(--border);}
+.fcopy{font-size:11.5px;color:rgba(245,243,235,.22);}
+.flinks{display:flex;gap:1.25rem;}
+.flinks a{font-size:11.5px;color:rgba(245,243,235,.22);text-decoration:none;}
+.flinks a:hover{color:var(--or);}
+
+@media(max-width:850px){
+  .nav-links{display:none;}
+  .foot-top{grid-template-columns:1fr 1fr;}
+  .story-block,.story-block.reverse{flex-direction:column;gap:1.75rem;}
+  .story-illus{width:220px;margin:0 auto;}
+  .story-text{text-align:left;}
+  .founder-block,.founder-block.reverse{flex-direction:column;text-align:center;gap:1.5rem;}
+  .founder-photo,.founder-avatar{width:100%;max-width:240px;height:260px;margin:0 auto;}
+  .founder-badges{justify-content:center;}
+  .founder-credential{text-align:left;}
+  .trust-row{flex-direction:column;}
+}
+@media(max-width:560px){
+  .foot-top{grid-template-columns:1fr;}
+  #page-hero{padding:3rem 1.25rem 1rem;}
+  #story,#team-story,#mission,#closing{padding-left:0;padding-right:0;}
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+
+
+<!-- ═══ NAVBAR ═══ -->
+<header id="nav">
+  <div class="nav-i">
+    <span class="logo"><span class="lp">Todo</span><span class="lo">Eventos</span><span class="dot">.pe</span></span>
+    <nav class="nav-links">
+      <a href="index_14.html#why" class="nl">¿Por qué nosotros?</a>
+      <a href="catalogo.html" class="nl">Marketplace</a>
+      <a href="index_14.html#hub" class="nl">Categorías</a>
+      <a href="nosotros.html" class="nl active">Nosotros</a>
+    </nav>
+    <div class="nav-end">
+      <a href="login.html?v=2" class="btn-login" id="btn-ingresar" style="text-decoration:none;display:inline-flex;align-items:center;">Ingresar</a>
+
+      <div class="user-menu" id="user-menu">
+        <button class="user-avatar" id="user-avatar-btn" onclick="toggleUserDropdown()"></button>
+        <div class="user-dropdown" id="user-dropdown">
+          <div class="user-dropdown-name" id="user-dropdown-name"></div>
+          <a href="#" id="link-mi-espacio"><i class="ti ti-layout-dashboard" style="font-size:15px;"></i> <span id="link-mi-espacio-texto">Ir al marketplace</span></a>
+          <a href="cuenta.html"><i class="ti ti-user-circle" style="font-size:15px;"></i> Mi cuenta</a>
+          <a href="admin.html" id="link-admin" style="display:none;"><i class="ti ti-shield-lock" style="font-size:15px;"></i> Panel de admin</a>
+          <button class="salir" onclick="cerrarSesion()"><i class="ti ti-logout-2" style="font-size:15px;"></i> Cerrar sesión</button>
+        </div>
+      </div>
+
+      <a href="proveedores.html" class="btn-prov">
+        <i class="ti ti-building-store" style="font-size:14px;"></i> Para Proveedores
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ PAGE HEADER ═══ -->
+<section id="page-hero">
+  <div class="container">
+    <a href="index_14.html" class="back-link"><i class="ti ti-arrow-left" style="font-size:14px;"></i> Volver al inicio</a>
+    <div class="story-label">Acerca de TodoEventos.pe</div>
+    <h1 class="story-title">Una historia sobre el caos de organizar eventos en Lima, y cómo decidimos arreglarlo</h1>
+  </div>
+</section>
+
+<!-- ═══ STORY FLOW ═══ -->
+<section id="story">
+  <div class="container">
+
+    <!-- Block 0: hook paired with illustration, like Notion's opening block -->
+    <div class="story-block">
+      <div class="story-illus">
+        <svg viewBox="0 0 280 210" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- soft bg ring -->
+          <circle cx="105" cy="118" r="82" stroke="rgba(249,115,22,.1)" stroke-width="1.5"/>
+          <!-- person seated, flat design -->
+          <ellipse cx="85" cy="175" rx="34" ry="12" fill="rgba(0,0,0,.15)"/>
+          <!-- pants -->
+          <path d="M65 162 Q60 178 68 188 L82 188 L84 160 Z" fill="#2d1a0a"/>
+          <path d="M85 160 L87 188 L101 188 Q108 178 104 162 Z" fill="#2d1a0a"/>
+          <!-- shirt/torso -->
+          <path d="M57 118 C52 138 54 162 60 172 L110 172 C116 162 118 138 113 118 C101 108 69 108 57 118 Z" fill="var(--or)"/>
+          <!-- collar -->
+          <path d="M80 118 L85 130 L90 118" stroke="white" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+          <!-- left arm down -->
+          <path d="M59 130 Q42 142 36 158" stroke="var(--or)" stroke-width="12" stroke-linecap="round"/>
+          <!-- right arm reaching up in despair -->
+          <path d="M111 128 Q130 112 138 94" stroke="var(--or)" stroke-width="12" stroke-linecap="round"/>
+          <!-- hands (small circles) -->
+          <circle cx="34" cy="160" r="7" fill="#f4c49e"/>
+          <circle cx="139" cy="91" r="7" fill="#f4c49e"/>
+          <!-- head -->
+          <circle cx="85" cy="90" r="26" fill="#f4c49e"/>
+          <!-- hair flat blob -->
+          <path d="M60 82 C58 62 70 52 85 52 C100 52 112 62 110 82 C104 68 95 62 85 64 C75 62 66 68 60 82 Z" fill="#2d1a0a"/>
+          <!-- eyes -->
+          <circle cx="78" cy="90" r="3" fill="#2d1a0a"/>
+          <circle cx="93" cy="90" r="3" fill="#2d1a0a"/>
+          <!-- stressed brow lines -->
+          <path d="M73 82 q5 -4 9 -1" stroke="#2d1a0a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <path d="M89 81 q5 -3 9 1" stroke="#2d1a0a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <!-- squiggly mouth (stressed) -->
+          <path d="M76 100 q5 2 8 0" stroke="#2d1a0a" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- sweat drop -->
+          <path d="M108 68 q1 4 -2 5 q-3 0 -2 -4 q1 -4 4 -1 Z" fill="#93c5fd" opacity=".8"/>
+          <!-- chat bubbles floating right -->
+          <rect x="162" y="30" width="80" height="38" rx="14" fill="var(--gold)"/>
+          <circle cx="179" cy="49" r="3.5" fill="white"/><circle cx="192" cy="49" r="3.5" fill="white"/><circle cx="205" cy="49" r="3.5" fill="white"/>
+          <rect x="172" y="78" width="74" height="34" rx="12" fill="var(--or)" opacity=".8"/>
+          <circle cx="188" cy="95" r="3" fill="white"/><circle cx="201" cy="95" r="3" fill="white"/><circle cx="214" cy="95" r="3" fill="white"/>
+          <rect x="166" y="122" width="66" height="30" rx="11" fill="var(--pu)" opacity=".7"/>
+          <circle cx="181" cy="137" r="2.8" fill="white"/><circle cx="194" cy="137" r="2.8" fill="white"/>
+          <!-- tails on bubbles -->
+          <path d="M162 56 L152 62 L166 62 Z" fill="var(--gold)"/>
+          <path d="M172 101 L162 107 L176 107 Z" fill="var(--or)" opacity=".8"/>
+        </svg>
+      </div>
+      <div class="story-text">
+        <p>¡Buenas! Si estás leyendo esto, es <strong>muy probable que seas como nosotros</strong>: alguien que alguna vez intentó organizar un evento en Lima — una boda, un cumpleaños, una reunión de trabajo — y terminó con el chat de WhatsApp más largo y agotador de su vida.</p>
+        <p class="story-caption">Así nos sentíamos casi todos, antes de TodoEventos.pe.</p>
+      </div>
+    </div>
+
+    <!-- Block 1: endless waiting for replies -->
+    <div class="story-block reverse">
+      <div class="story-illus">
+        <svg viewBox="0 0 280 210" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- bg circle -->
+          <circle cx="175" cy="110" r="75" stroke="rgba(251,191,36,.1)" stroke-width="1.5"/>
+          <!-- walking person, flat design -->
+          <ellipse cx="96" cy="200" rx="28" ry="9" fill="rgba(0,0,0,.15)"/>
+          <!-- back leg -->
+          <path d="M105 165 Q118 180 128 198" stroke="#2d1a0a" stroke-width="14" stroke-linecap="round"/>
+          <!-- front leg -->
+          <path d="M88 165 Q75 180 65 198" stroke="#2d1a0a" stroke-width="14" stroke-linecap="round"/>
+          <!-- shoes -->
+          <ellipse cx="62" cy="200" rx="12" ry="6" fill="#2d1a0a"/>
+          <ellipse cx="130" cy="200" rx="12" ry="6" fill="#2d1a0a"/>
+          <!-- torso/shirt -->
+          <path d="M70 120 C64 138 66 158 72 168 L120 168 C126 158 128 138 122 120 C110 110 82 110 70 120 Z" fill="var(--or)"/>
+          <!-- collar -->
+          <path d="M91 120 L96 132 L101 120" stroke="white" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+          <!-- arm up with phone -->
+          <path d="M72 133 Q54 118 46 100" stroke="var(--or)" stroke-width="12" stroke-linecap="round"/>
+          <circle cx="44" cy="97" r="7" fill="#f4c49e"/>
+          <!-- phone graphic -->
+          <rect x="29" y="76" width="18" height="28" rx="4" fill="#1f1f1f"/>
+          <rect x="32" y="80" width="12" height="18" rx="2" fill="#60a5fa" opacity=".8"/>
+          <!-- other arm swinging down/back -->
+          <path d="M122 133 Q138 148 142 164" stroke="var(--or)" stroke-width="12" stroke-linecap="round"/>
+          <circle cx="143" cy="167" r="7" fill="#f4c49e"/>
+          <!-- head -->
+          <circle cx="96" cy="92" r="26" fill="#f4c49e"/>
+          <!-- hair -->
+          <path d="M71 84 C69 64 81 54 96 54 C111 54 123 64 121 84 C115 70 106 64 96 66 C86 64 77 70 71 84 Z" fill="#2d1a0a"/>
+          <!-- eyes (looking to side - stressed) -->
+          <circle cx="90" cy="92" r="3" fill="#2d1a0a"/>
+          <circle cx="105" cy="91" r="3" fill="#2d1a0a"/>
+          <!-- raised brow -->
+          <path d="M85 84 q5 -4 9 -1" stroke="#2d1a0a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <path d="M101 83 q5 -3 9 1" stroke="#2d1a0a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <!-- flat mouth (frustrated) -->
+          <line x1="88" y1="102" x2="104" y2="102" stroke="#2d1a0a" stroke-width="2" stroke-linecap="round"/>
+          <!-- stack of pending messages + clock (right side) -->
+          <rect x="168" y="38" width="80" height="30" rx="10" fill="rgba(255,255,255,.08)" stroke="var(--gold)" stroke-width="2"/>
+          <rect x="168" y="76" width="80" height="30" rx="10" fill="rgba(255,255,255,.08)" stroke="var(--gold)" stroke-width="2" opacity=".75"/>
+          <rect x="168" y="114" width="80" height="30" rx="10" fill="rgba(255,255,255,.08)" stroke="var(--gold)" stroke-width="2" opacity=".5"/>
+          <!-- clock -->
+          <circle cx="208" cy="168" r="22" fill="rgba(255,255,255,.06)" stroke="var(--sub)" stroke-width="2.5"/>
+          <path d="M208 152 L208 168 L218 174" stroke="var(--sub)" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- no-reply icon in bubbles -->
+          <path d="M175 53 L240 53 M175 91 L220 91" stroke="var(--sub)" stroke-width="2" opacity=".5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="story-text">
+        <p>Seguramente tengas (o hayas tenido) quince conversaciones de WhatsApp abiertas al mismo tiempo: una con el DJ que tarda dos días en responder, otra con la empresa de catering que te cotiza distinto cada vez que preguntas, y otra con un local que «ya te confirma mañana sin falta».</p>
+        <p>Pero, ¿alguna vez te preguntaste por qué organizar un evento en Perú se siente exactamente igual desde hace años? ¿O por qué hay tanta informalidad en un sector que mueve tanto dinero?</p>
+      </div>
+    </div>
+
+    <!-- Block 2: provider chaos — notebook & overbooking -->
+    <div class="story-block">
+      <div class="story-illus">
+        <svg viewBox="0 0 280 210" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- bg circle -->
+          <circle cx="110" cy="110" r="80" stroke="rgba(168,85,247,.08)" stroke-width="1.5"/>
+          <!-- table -->
+          <rect x="20" y="162" width="155" height="10" rx="4" fill="rgba(255,255,255,.15)"/>
+          <line x1="38" y1="172" x2="38" y2="195" stroke="rgba(255,255,255,.15)" stroke-width="6" stroke-linecap="round"/>
+          <line x1="156" y1="172" x2="156" y2="195" stroke="rgba(255,255,255,.15)" stroke-width="6" stroke-linecap="round"/>
+          <!-- open notebook on table -->
+          <path d="M28 160 L30 128 L78 120 L78 155 Z" fill="rgba(255,255,255,.92)" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
+          <path d="M78 155 L78 120 L120 128 L122 160 Z" fill="rgba(255,255,255,.82)" stroke="rgba(255,255,255,.2)" stroke-width="1.5"/>
+          <line x1="40" y1="136" x2="70" y2="132" stroke="var(--sub)" stroke-width="2" opacity=".5"/>
+          <line x1="40" y1="144" x2="68" y2="140" stroke="var(--sub)" stroke-width="2" opacity=".5"/>
+          <path d="M85 132 q16 6 26 0" stroke="var(--or)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="85" y1="144" x2="108" y2="142" stroke="var(--sub)" stroke-width="2" opacity=".5"/>
+          <!-- seated person flat design, behind table -->
+          <circle cx="82" cy="78" r="26" fill="#f4c49e"/>
+          <path d="M57 70 C55 50 67 40 82 40 C97 40 109 50 107 70 C101 56 92 50 82 52 C72 50 63 56 57 70 Z" fill="#2d1a0a"/>
+          <!-- worried eyes -->
+          <circle cx="75" cy="78" r="3" fill="#2d1a0a"/>
+          <circle cx="90" cy="78" r="3" fill="#2d1a0a"/>
+          <path d="M70 70 q5 -4 9 -1" stroke="#2d1a0a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <path d="M86 69 q5 -3 9 1" stroke="#2d1a0a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <!-- worried mouth (downturned) -->
+          <path d="M73 90 q9 -5 18 0" stroke="#2d1a0a" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- shirt visible above table -->
+          <path d="M52 103 C48 118 50 138 54 148 L110 148 C114 138 116 118 112 103 C100 94 64 94 52 103 Z" fill="var(--or)"/>
+          <path d="M77 103 L82 115 L87 103" stroke="white" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+          <!-- arms resting on table -->
+          <path d="M54 118 Q40 135 35 152" stroke="var(--or)" stroke-width="12" stroke-linecap="round"/>
+          <circle cx="33" cy="154" r="7" fill="#f4c49e"/>
+          <path d="M110 118 Q124 135 129 152" stroke="var(--or)" stroke-width="12" stroke-linecap="round"/>
+          <circle cx="131" cy="154" r="7" fill="#f4c49e"/>
+          <!-- calendar with double booking CONFLICT (right side) -->
+          <rect x="170" y="45" width="88" height="90" rx="10" fill="rgba(255,255,255,.08)" stroke="var(--gold)" stroke-width="3"/>
+          <rect x="170" y="45" width="88" height="24" rx="10" fill="var(--gold)" opacity=".3"/>
+          <line x1="194" y1="45" x2="194" y2="32" stroke="var(--gold)" stroke-width="3.5" stroke-linecap="round"/>
+          <line x1="224" y1="45" x2="224" y2="32" stroke="var(--gold)" stroke-width="3.5" stroke-linecap="round"/>
+          <!-- grid of days -->
+          <line x1="170" y1="90" x2="258" y2="90" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
+          <line x1="170" y1="108" x2="258" y2="108" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
+          <line x1="214" y1="69" x2="214" y2="135" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
+          <!-- conflict X -->
+          <rect x="180" y="94" width="44" height="30" rx="5" fill="rgba(234,88,12,.18)" stroke="var(--or)" stroke-width="3"/>
+          <path d="M186 98 L218 120 M218 98 L186 120" stroke="var(--or)" stroke-width="3.5" stroke-linecap="round"/>
+          <!-- question mark above calendar -->
+          <circle cx="255" cy="35" r="14" fill="rgba(249,115,22,.2)" stroke="var(--or)" stroke-width="2"/>
+          <path d="M250 30 q5 -6 11 0 q4 4 0 8 q-2 2 -5 2" stroke="var(--or)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <circle cx="255" cy="43" r="1.8" fill="var(--or)"/>
+        </svg>
+      </div>
+      <div class="story-text">
+        <p>Del otro lado tampoco es más fácil. El 80% de los proveedores de eventos en Lima son empíricos o informales: gestionan su negocio en cuadernos, calculan sus precios "a ojo", y de vez en cuando cruzan dos eventos en la misma fecha por error — algo que puede arruinar años de buena reputación en un solo fin de semana.</p>
+        <p>Mientras están atendiendo un evento, no pueden responder las diez cotizaciones que les llegaron ese mismo día. Pierden clientes simplemente por no dar abasto.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ TEAM STORY — el origen de TodoEventos ═══ -->
+<section id="team-story">
+  <div class="container">
+
+    <div class="team-intro">
+      <p>Fue ahí, en medio de esa misma frustración, que dos estudiantes universitarios se hicieron la misma pregunta en voz alta: <strong>¿por qué nadie ha resuelto esto todavía?</strong> Así nació TodoEventos.pe — no como un directorio más, sino como el puente de confianza que le faltaba a un mercado caótico.</p>
+    </div>
+
+    <!-- Vicente -->
+    <div class="founder-block">
+      <div class="founder-avatar">VG</div>
+      <div class="founder-text">
+        <div class="founder-name">Vicente Guzmán</div>
+        <div class="founder-badges">
+          <span class="founder-uni"><i class="ti ti-school" style="font-size:11px;"></i> Universidad de Lima</span>
+          <span class="founder-role"><i class="ti ti-code" style="font-size:11px;"></i> Producto & Tecnología</span>
+        </div>
+        <p class="founder-bio">Con el chip de la innovación, la gestión estratégica y el desarrollo tecnológico metido en el ADN. Vicente lidera la arquitectura del producto y la experiencia digital, asegurando que nuestra IA y plataforma funcionen con la precisión y fluidez que los usuarios y proveedores necesitan.</p>
+      </div>
+    </div>
+
+    <!-- Julián -->
+    <div class="founder-block reverse">
+      <img src="julian-2.png" alt="Julián Hidalgo" class="founder-photo">
+      <div class="founder-text">
+        <div class="founder-name">Julián Hidalgo</div>
+        <div class="founder-badges">
+          <span class="founder-uni"><i class="ti ti-school" style="font-size:11px;"></i> Universidad del Pacífico</span>
+          <span class="founder-role"><i class="ti ti-chart-line" style="font-size:11px;"></i> Negocios & Finanzas</span>
+        </div>
+        <p class="founder-bio">Enfocado en la ingeniería de negocios, la viabilidad financiera y el crecimiento sostenible de la plataforma. Julián se encarga de que el modelo bilateral (SaaS + Marketplace) genere valor económico real, ayudando a los proveedores a multiplicar sus ingresos y formalizar sus operaciones.</p>
+        <div class="founder-credential">
+          <img src="julian-1.png" alt="Julián Hidalgo en la Universidad del Pacífico" class="fc-photo">
+          <div class="fc-text"><strong>Julián en campus</strong>Universidad del Pacífico, Lima</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ AI SOLUTION STORY ═══ -->
+<section id="story-ai">
+  <div class="container">
+    <div class="story-block">
+      <div class="story-illus">
+        <svg viewBox="0 0 280 210" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- bg glow -->
+          <circle cx="140" cy="110" r="85" fill="rgba(249,115,22,.05)"/>
+          <!-- robot (left, geometric flat design) -->
+          <rect x="25" y="80" width="72" height="62" rx="12" fill="rgba(255,255,255,.1)" stroke="var(--or)" stroke-width="3.5"/>
+          <!-- robot eyes -->
+          <rect x="36" y="96" width="14" height="10" rx="3" fill="var(--or)"/>
+          <rect x="60" y="96" width="14" height="10" rx="3" fill="var(--or)"/>
+          <!-- robot mouth/grill -->
+          <rect x="37" y="115" width="36" height="6" rx="3" fill="rgba(255,255,255,.2)"/>
+          <!-- antenna -->
+          <line x1="61" y1="80" x2="61" y2="60" stroke="var(--or)" stroke-width="3.5" stroke-linecap="round"/>
+          <circle cx="61" cy="54" r="7" fill="var(--gold)"/>
+          <!-- robot legs -->
+          <line x1="42" y1="142" x2="42" y2="165" stroke="var(--or)" stroke-width="3.5" stroke-linecap="round"/>
+          <line x1="76" y1="142" x2="76" y2="165" stroke="var(--or)" stroke-width="3.5" stroke-linecap="round"/>
+          <!-- robot arm handing checklist -->
+          <path d="M97 112 Q125 112 138 108" stroke="var(--or)" stroke-width="3.5" stroke-linecap="round"/>
+          <!-- checklist card in the middle -->
+          <rect x="136" y="72" width="64" height="78" rx="8" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.3)" stroke-width="2.5"/>
+          <!-- checkmarks -->
+          <path d="M148 92 L154 98 L167 84" stroke="var(--gold)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="174" y1="91" x2="190" y2="91" stroke="rgba(255,255,255,.4)" stroke-width="2.5"/>
+          <path d="M148 113 L154 119 L167 105" stroke="var(--gold)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="174" y1="112" x2="190" y2="112" stroke="rgba(255,255,255,.4)" stroke-width="2.5"/>
+          <path d="M148 133 L154 139 L167 125" stroke="var(--gold)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="174" y1="132" x2="188" y2="132" stroke="rgba(255,255,255,.4)" stroke-width="2.5"/>
+          <!-- happy person receiving (right) -->
+          <ellipse cx="232" cy="202" rx="26" ry="9" fill="rgba(0,0,0,.2)"/>
+          <!-- legs standing -->
+          <path d="M222 172 Q218 188 215 200" stroke="#2d1a0a" stroke-width="13" stroke-linecap="round"/>
+          <path d="M240 172 Q244 188 248 200" stroke="#2d1a0a" stroke-width="13" stroke-linecap="round"/>
+          <!-- shirt -->
+          <path d="M206 122 C200 140 202 162 208 172 L254 172 C260 162 262 140 256 122 C244 112 218 112 206 122 Z" fill="var(--pu)"/>
+          <path d="M227 122 L232 134 L237 122" stroke="white" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+          <!-- arm reaching for card -->
+          <path d="M206 135 Q188 132 176 120" stroke="var(--pu)" stroke-width="12" stroke-linecap="round"/>
+          <circle cx="174" cy="118" r="7" fill="#f4c49e"/>
+          <!-- other arm up happy -->
+          <path d="M256 132 Q270 118 272 102" stroke="var(--pu)" stroke-width="12" stroke-linecap="round"/>
+          <circle cx="273" cy="99" r="7" fill="#f4c49e"/>
+          <!-- head -->
+          <circle cx="232" cy="94" r="26" fill="#f4c49e"/>
+          <!-- hair -->
+          <path d="M207 86 C205 66 217 56 232 56 C247 56 259 66 257 86 C251 72 242 66 232 68 C222 66 213 72 207 86 Z" fill="#2d1a0a"/>
+          <!-- happy eyes -->
+          <path d="M222 94 q3 -4 7 0" stroke="#2d1a0a" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+          <path d="M236 94 q3 -4 7 0" stroke="#2d1a0a" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+          <!-- big smile -->
+          <path d="M222 106 q10 8 20 0" stroke="#2d1a0a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <!-- sparkles -->
+          <path d="M35 50 l2.5 7 7 2.5 -7 2.5 -2.5 7 -2.5 -7 -7 -2.5 7 -2.5 z" fill="var(--gold)" opacity=".9"/>
+          <path d="M250 55 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 z" fill="var(--or)" opacity=".8"/>
+          <path d="M145 48 l1.5 4 4 1.5 -4 1.5 -1.5 4 -1.5 -4 -4 -1.5 4 -1.5 z" fill="var(--pu)" opacity=".8"/>
+        </svg>
+      </div>
+      <div class="story-text">
+        <p>Por eso el corazón de TodoEventos.pe no es solo un catálogo: es un <strong>asistente con inteligencia artificial</strong> que entiende lo que necesitas en lenguaje natural, consulta disponibilidad real entre cientos de proveedores verificados, y te entrega un presupuesto armado en menos de 30 segundos — sin que tengas que escribirle a nadie por WhatsApp.</p>
+        <p>Combinamos la rigurosidad analítica de nuestras casas de estudio con la agilidad del mundo de las startups. No estamos construyendo un directorio más; estamos construyendo el motor de confianza que digitaliza las celebraciones en el Perú.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ MISSION ═══ -->
+<section id="mission">
+  <div class="container">
+    <div class="mission-block">
+      <div class="mission-q">"</div>
+      <p class="mission-text">No creamos un directorio de eventos; construimos el motor de confianza e Inteligencia Artificial que digitaliza las celebraciones en el Perú.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ WHY TRUST + CLOSING ═══ -->
+<section id="closing">
+  <div class="container">
+
+    <div class="trust-row">
+      <div class="trust-ico"><i class="ti ti-scale"></i></div>
+      <div>
+        <h3>¿Por qué confiar en nosotros?</h3>
+        <p>Porque entendemos a ambos lados de la moneda. Sabemos el esfuerzo que le cuesta a un proveedor peruano gestionar su negocio día a día, y conocemos la frustración de un cliente al buscar opciones confiables. Cruzamos esa brecha con datos, diseño centrado en las personas y mucha pasión.</p>
+      </div>
+    </div>
+
+    <p class="closing-tagline"><span class="gt">¡Bienvenidos a la nueva era de las celebraciones!</span></p>
+
+  </div>
+</section>
+
+<!-- ═══ CTA BACK ═══ -->
+<section id="cta-back">
+  <div class="container">
+    <div class="cta-box">
+      <h3>¿Listo para planificar tu <span class="gt">evento perfecto?</span></h3>
+      <p>+1,200 proveedores verificados esperando tu solicitud.</p>
+      <div class="cta-btns">
+        <a href="catalogo.html" class="btn-main"><i class="ti ti-search"></i> Explorar el marketplace</a>
+        <a href="index_14.html" class="btn-ghost"><i class="ti ti-home"></i> Volver al inicio</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer id="foot">
+  <div class="foot-inner">
+    <div class="foot-top">
+      <div>
+        <a href="index_14.html" class="flogo"><span class="lp">Todo</span><span class="lo">Eventos</span><span style="color:rgba(245,243,235,.3);font-weight:400;">.pe</span></a>
+        <p class="fdesc">El marketplace de servicios para eventos en Lima, Perú.</p>
+        <div class="pay-row">
+          <span class="payb yp">Yape</span>
+          <span class="payb pl">Plin</span>
+          <span class="payb">Visa</span>
+          <span class="payb">Mastercard</span>
+          <span class="payb">Culqi</span>
+        </div>
+      </div>
+      <div class="fcol">
+        <h5>Marketplace</h5>
+        <a href="catalogo.html">Ver todos los servicios</a>
+        <a href="catalogo.html?cat=musica">Música & DJs</a>
+        <a href="catalogo.html?cat=catering">Catering</a>
+        <a href="catalogo.html?cat=fotografia">Fotografía</a>
+      </div>
+      <div class="fcol">
+        <h5>Compañía</h5>
+        <a href="nosotros.html">Nosotros</a>
+        <a href="#">Blog</a>
+        <a href="#">Contacto</a>
+        <a href="proveedores.html">Para Proveedores</a>
+      </div>
+      <div class="fcol">
+        <h5>Legal</h5>
+        <a href="#">Términos y Condiciones</a>
+        <a href="#">Política de Privacidad</a>
+        <a href="#">Centro de Ayuda</a>
+      </div>
+    </div>
+    <div class="foot-bot">
+      <span class="fcopy">© 2026 TodoEventos.pe — Marketplace de Servicios para Eventos en el Perú.</span>
+      <div class="flinks">
+        <a href="#">Términos</a>
+        <a href="#">Privacidad</a>
+        <a href="#">Contacto</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ─── Sesión: mostrar "Ingresar" o el menú de usuario según corresponda ─── */
+const SUPABASE_URL = 'https://vqnyaozauljtashpjfoo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxbnlhb3phdWxqdGFzaHBqZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDM0NzIsImV4cCI6MjA5OTI3OTQ3Mn0.0JT-UAQnSUygXPNjI69Sf3Rg3mv_NeTwwz9-7vnWcno';
+
+let sb = null;
+try {
+  const storageAdapter = {
+    getItem: (key) => localStorage.getItem(key) ?? sessionStorage.getItem(key),
+    setItem: (key, value) => {
+      const recordar = localStorage.getItem('te_remember') !== 'false';
+      if(recordar){
+        localStorage.setItem(key, value);
+        sessionStorage.removeItem(key);
+      } else {
+        sessionStorage.setItem(key, value);
+        localStorage.removeItem(key);
+      }
+    },
+    removeItem: (key) => {
+      localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
+    }
+  };
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { storage: storageAdapter }
+  });
+} catch(e) {
+  console.error('No se pudo inicializar Supabase:', e);
+}
+
+function toggleUserDropdown(){
+  document.getElementById('user-dropdown').classList.toggle('open');
+}
+document.addEventListener('click', function(e){
+  const menu = document.getElementById('user-menu');
+  if(menu && !menu.contains(e.target)){
+    document.getElementById('user-dropdown').classList.remove('open');
+  }
+});
+
+async function cerrarSesion(){
+  if(sb) await sb.auth.signOut();
+  window.location.href = 'index_14.html';
+}
+
+async function verificarSesionNav(){
+  if(!sb) return;
+  const { data } = await sb.auth.getSession();
+  if(!data.session) return;
+
+  const usuario = data.session.user;
+  const { data: perfil } = await sb
+    .from('profiles')
+    .select('full_name, role, is_admin')
+    .eq('id', usuario.id)
+    .single();
+
+  const nombre = (perfil && perfil.full_name) ? perfil.full_name : usuario.email;
+  const rol = perfil ? perfil.role : 'cliente';
+
+  // El acceso al panel de admin solo aparece si la cuenta es administradora
+  if(perfil && perfil.is_admin){
+    const linkAdmin = document.getElementById('link-admin');
+    if(linkAdmin) linkAdmin.style.display = 'flex';
+  }
+  const inicial = nombre.trim().charAt(0).toUpperCase();
+
+  document.getElementById('btn-ingresar').style.display = 'none';
+  document.getElementById('user-menu').classList.add('show');
+  document.getElementById('user-avatar-btn').textContent = inicial;
+  document.getElementById('user-dropdown-name').textContent = nombre;
+
+  const destino = rol === 'proveedor' ? 'dashboard.html' : 'catalogo.html';
+  const textoLink = rol === 'proveedor' ? 'Mi dashboard' : 'Ir al marketplace';
+  document.getElementById('link-mi-espacio').href = destino;
+  document.getElementById('link-mi-espacio-texto').textContent = textoLink;
+}
+
+verificarSesionNav();
+</script>
+</body>
+</html>

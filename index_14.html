@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TodoEventos.pe — Tu Evento Perfecto en Minutos</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
+:root{--bg:hsl(260,87%,3%);--bg2:hsl(258,60%,6%);--bg3:hsl(256,40%,8%);--fg:hsl(40,6%,95%);--sub:hsl(40,6%,68%);--pu:#a855f7;--ind:#6366f1;--gold:#fcd34d;--or:#f97316;--border:rgba(255,255,255,.07);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:var(--fg);overflow-x:hidden;}
+
+/* ── NAV ── */
+#nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(4,1,12,.82);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);pointer-events:auto;}
+.nav-i,.nav-links,.nav-end{pointer-events:auto;}
+.nav-i{display:flex;align-items:center;justify-content:space-between;padding:16px 2.5rem;max-width:1200px;margin:0 auto;}
+.logo{font-size:19px;font-weight:700;text-decoration:none;}
+.logo .lp{color:var(--pu);}
+.logo .lo{background:linear-gradient(to right,var(--pu),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo .dot{color:rgba(245,243,235,.3);font-weight:400;}
+.nav-links{display:flex;align-items:center;gap:2px;}
+.nl{background:transparent;border:none;color:rgba(245,243,235,.72);font-size:14px;font-family:'General Sans',sans-serif;padding:8px 15px;border-radius:8px;cursor:pointer;transition:all .18s;text-decoration:none;display:inline-block;}
+.nl:hover{background:rgba(255,255,255,.07);color:var(--fg);}
+.nav-end{display:flex;align-items:center;gap:10px;}
+.user-menu{position:relative;display:none;align-items:center;}
+.user-menu.show{display:flex;}
+.user-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--pu),var(--ind));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;cursor:pointer;border:none;font-family:'General Sans',sans-serif;}
+.user-dropdown{position:absolute;top:calc(100% + 10px);right:0;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:8px;min-width:190px;box-shadow:0 12px 30px rgba(0,0,0,.4);display:none;z-index:50;}
+.user-dropdown.open{display:block;}
+.user-dropdown-name{padding:8px 10px 10px;font-size:13px;font-weight:600;color:var(--fg);border-bottom:1px solid var(--border);margin-bottom:6px;}
+.user-dropdown a,.user-dropdown button{width:100%;text-align:left;display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--fg);font-size:13px;font-family:'General Sans',sans-serif;padding:9px 10px;border-radius:8px;cursor:pointer;text-decoration:none;}
+.user-dropdown a:hover,.user-dropdown button:hover{background:rgba(255,255,255,.06);}
+.user-dropdown .salir{color:#f87171;}
+.btn-login{background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--fg);padding:9px 20px;border-radius:100px;font-size:13.5px;font-weight:500;font-family:'General Sans',sans-serif;cursor:pointer;}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 0 0 rgba(234,88,12,.5);}70%{box-shadow:0 0 0 12px rgba(234,88,12,0);}}
+.btn-prov{background:linear-gradient(135deg,#ea580c,#fbbf24);color:#1a0500;border:none;padding:10px 22px;border-radius:100px;font-size:13.5px;font-weight:700;font-family:'General Sans',sans-serif;cursor:pointer;animation:pulse-glow 2.5s ease infinite;text-decoration:none;display:inline-flex;align-items:center;gap:7px;}
+
+/* ── HERO — FULL SCREEN ── */
+#hero{position:relative;height:100vh;min-height:640px;display:flex;flex-direction:column;overflow:hidden;}
+#bv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;pointer-events:none;z-index:0;}
+.blur-blob{position:absolute;top:50%;left:40%;transform:translate(-50%,-50%);width:900px;height:560px;background:hsl(260,87%,4%);opacity:.88;filter:blur(100px);pointer-events:none;z-index:1;border-radius:50%;}
+
+/* Decorative rings */
+.rings{position:absolute;inset:0;pointer-events:none;z-index:2;}
+@keyframes spin-slow{from{transform:rotate(0);}to{transform:rotate(360deg);}}
+.ring{position:absolute;border-radius:50%;border:1px solid;}
+.r1{width:720px;height:720px;top:-200px;right:-200px;border-color:rgba(168,85,247,.09);animation:spin-slow 80s linear infinite;}
+.r2{width:480px;height:480px;top:-60px;right:-60px;border-color:rgba(99,102,241,.07);animation:spin-slow 50s linear infinite reverse;}
+.r3{width:260px;height:260px;top:80px;right:80px;border-color:rgba(252,211,77,.05);}
+
+/* Orbs */
+.orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;}
+@keyframes floatY{0%,100%{transform:translateY(0);}50%{transform:translateY(-16px);}}
+.oh1{width:560px;height:560px;background:rgba(168,85,247,.14);top:-140px;right:-120px;}
+.oh2{width:320px;height:320px;background:rgba(99,102,241,.11);bottom:60px;left:-80px;animation:floatY 10s ease-in-out infinite;}
+.oh3{width:200px;height:200px;background:rgba(252,211,77,.07);top:35%;right:8%;animation:floatY 7s ease-in-out infinite 2s;}
+
+.hero-layer{position:relative;z-index:10;display:flex;flex-direction:column;height:100%;}
+
+/* Hero content — vertically centered */
+.hero-center{flex:1;display:flex;align-items:center;padding:0 2.5rem;max-width:1200px;margin:0 auto;width:100%;gap:4rem;padding-top:68px;}/* 68px = nav height */
+
+/* LEFT */
+.hero-left{flex:1;max-width:560px;}
+.hero-pill{display:inline-flex;align-items:center;gap:7px;background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.25);color:var(--pu);padding:5px 17px;border-radius:100px;font-size:12.5px;font-weight:600;margin-bottom:1.5rem;}
+@keyframes pulse-pu{0%,100%{opacity:1;}50%{opacity:.4;}}
+.hero-pill .pdot{width:7px;height:7px;background:var(--pu);border-radius:50%;animation:pulse-pu 2s ease-in-out infinite;}
+.hero-hl{font-size:clamp(44px,6.5vw,80px);font-weight:700;line-height:1.04;letter-spacing:-.035em;margin-bottom:1rem;}
+.gt{background:linear-gradient(to left,#6366f1,#a855f7,#fcd34d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{font-size:1.05rem;color:var(--sub);line-height:1.75;max-width:420px;margin-bottom:1.75rem;}
+
+/* Search bar */
+.search-box{display:flex;align-items:center;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:7px 7px 7px 18px;gap:10px;max-width:480px;margin-bottom:1rem;transition:border-color .2s;}
+.search-box:focus-within{border-color:rgba(168,85,247,.4);}
+.search-box i{color:var(--sub);font-size:18px;flex-shrink:0;}
+.search-box input{flex:1;background:transparent;border:none;outline:none;font-family:'General Sans',sans-serif;font-size:15px;color:var(--fg);}
+.search-box input::placeholder{color:rgba(245,243,235,.32);}
+.search-btn{background:linear-gradient(135deg,#7c3aed,#6366f1);color:#fff;border:none;padding:13px 22px;border-radius:10px;font-size:14px;font-weight:700;font-family:'General Sans',sans-serif;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:7px;text-decoration:none;transition:opacity .2s;}
+.search-btn:hover{opacity:.88;}
+
+/* Event type chips */
+.chips-label{font-size:12px;color:var(--sub);margin-bottom:8px;letter-spacing:.02em;}
+.chips{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(245,243,235,.68);padding:7px 15px;border-radius:100px;font-size:13px;cursor:pointer;transition:all .18s;text-decoration:none;}
+.chip:hover{background:rgba(168,85,247,.14);border-color:rgba(168,85,247,.28);color:var(--fg);}
+.chip i{font-size:13px;}
+
+/* RIGHT — floating provider cards */
+.hero-right{width:300px;flex-shrink:0;display:flex;flex-direction:column;gap:10px;}
+@keyframes floatY2{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.pmc{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;overflow:hidden;display:flex;cursor:pointer;transition:border-color .2s;text-decoration:none;}
+.pmc:nth-child(1){animation:floatY 6s ease-in-out infinite;}
+.pmc:nth-child(2){animation:floatY2 7.5s ease-in-out infinite 1s;}
+.pmc:nth-child(3){animation:floatY 8s ease-in-out infinite 2s;}
+.pmc:hover{border-color:rgba(168,85,247,.32);}
+.pmc-thumb{width:68px;height:68px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pmc-thumb i{font-size:1.7rem;color:rgba(255,255,255,.78);}
+.t-a{background:linear-gradient(135deg,#d97706,#ef4444);}
+.t-b{background:linear-gradient(135deg,#2563eb,#06b6d4);}
+.t-c{background:linear-gradient(135deg,#7c3aed,#ec4899);}
+.pmc-info{flex:1;padding:10px 12px;display:flex;flex-direction:column;justify-content:center;}
+.pmc-name{font-size:13px;font-weight:700;margin-bottom:2px;}
+.pmc-cat{font-size:11.5px;color:var(--sub);margin-bottom:5px;}
+.pmc-bot{display:flex;align-items:center;justify-content:space-between;}
+.pmc-stars{font-size:11.5px;color:#fbbf24;font-weight:600;}
+.pmc-price{font-size:12px;font-weight:700;background:rgba(168,85,247,.14);color:var(--pu);padding:3px 9px;border-radius:100px;}
+.pmc-avail{position:absolute;top:6px;right:8px;font-size:10px;font-weight:700;color:#86efac;}
+.pmc-see{text-align:center;font-size:12.5px;color:var(--sub);padding:6px;cursor:pointer;transition:color .18s;text-decoration:none;display:block;}
+.pmc-see:hover{color:var(--pu);}
+
+/* ── MARQUEE (bottom of hero) ── */
+.mq-wrap{position:relative;z-index:10;padding:0 2.5rem 2rem;}
+.mq-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:28px;}
+.mq-lbl{font-size:11.5px;color:rgba(245,243,235,.35);line-height:1.5;white-space:nowrap;flex-shrink:0;}
+.mq-outer{flex:1;overflow:hidden;mask-image:linear-gradient(to right,transparent,#000 10%,#000 90%,transparent);-webkit-mask-image:linear-gradient(to right,transparent,#000 10%,#000 90%,transparent);}
+@keyframes mq{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.mq-track{display:flex;gap:40px;animation:mq 22s linear infinite;width:max-content;}
+.mq-item{display:flex;align-items:center;gap:7px;flex-shrink:0;}
+.mq-ico{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(245,243,235,.85);}
+.mq-nm{font-size:13px;font-weight:600;color:rgba(245,243,235,.55);white-space:nowrap;}
+
+/* ── HUB SECTION — Jump pads ── */
+#hub{background:var(--bg2);padding:5.5rem 2.5rem;}
+.hub-inner{max-width:1100px;margin:0 auto;}
+.hub-title{font-size:2rem;font-weight:700;text-align:center;line-height:1.15;margin-bottom:.6rem;}
+.hub-sub{font-size:.95rem;color:var(--sub);text-align:center;max-width:440px;margin:0 auto 3.5rem;}
+
+/* Category grid */
+.cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:3.5rem;}
+.cat-card{display:flex;flex-direction:column;align-items:center;text-align:center;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:16px;padding:1.75rem 1rem;cursor:pointer;transition:all .22s;text-decoration:none;color:var(--fg);}
+.cat-card:hover{background:rgba(168,85,247,.1);border-color:rgba(168,85,247,.28);transform:translateY(-3px);}
+.cat-ico{width:54px;height:54px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:.85rem;font-size:23px;transition:transform .2s;}
+.cat-card:hover .cat-ico{transform:scale(1.1);}
+.cat-ico.p{background:rgba(168,85,247,.15);color:var(--pu);}
+.cat-ico.i{background:rgba(99,102,241,.15);color:#818cf8;}
+.cat-ico.g{background:rgba(252,211,77,.12);color:var(--gold);}
+.cat-ico.o{background:rgba(249,115,22,.12);color:var(--or);}
+.cat-name{font-size:14px;font-weight:700;margin-bottom:3px;}
+.cat-count{font-size:11.5px;color:var(--sub);}
+
+/* Dual CTA */
+.dual-cta{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
+.dcta{border-radius:18px;padding:2.25rem;display:flex;align-items:center;gap:1.5rem;text-decoration:none;color:var(--fg);transition:all .22s;border:1px solid;}
+.dcta.user{background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(168,85,247,.1));border-color:rgba(168,85,247,.2);}
+.dcta.user:hover{background:linear-gradient(135deg,rgba(99,102,241,.14),rgba(168,85,247,.18));border-color:rgba(168,85,247,.38);transform:translateY(-2px);}
+.dcta.prov{background:linear-gradient(135deg,rgba(234,88,12,.07),rgba(251,191,36,.07));border-color:rgba(249,115,22,.2);}
+.dcta.prov:hover{background:linear-gradient(135deg,rgba(234,88,12,.13),rgba(251,191,36,.12));border-color:rgba(249,115,22,.4);transform:translateY(-2px);}
+.dcta-icon{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:26px;}
+.dcta.user .dcta-icon{background:rgba(168,85,247,.15);color:var(--pu);}
+.dcta.prov .dcta-icon{background:rgba(249,115,22,.15);color:var(--or);}
+.dcta-text h3{font-size:1.15rem;font-weight:700;margin-bottom:.35rem;}
+.dcta-text p{font-size:13px;color:var(--sub);line-height:1.55;}
+.dcta-arrow{margin-left:auto;color:var(--sub);font-size:20px;flex-shrink:0;transition:transform .2s;}
+.dcta:hover .dcta-arrow{transform:translateX(4px);color:var(--fg);}
+
+/* ── FOOTER ── */
+#foot{background:hsl(260,90%,2%);border-top:1px solid var(--border);padding:3rem 2.5rem 2rem;}
+.foot-inner{max-width:1100px;margin:0 auto;}
+.foot-top{display:grid;grid-template-columns:1.7fr 1fr 1fr 1fr;gap:3rem;margin-bottom:2.5rem;}
+.flogo{font-size:17px;font-weight:700;text-decoration:none;}
+.flogo .lp{color:var(--pu);}
+.flogo .lo{background:linear-gradient(to right,var(--pu),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.fdesc{font-size:12.5px;color:rgba(245,243,235,.3);line-height:1.65;margin-top:9px;max-width:210px;}
+.pay-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px;}
+.payb{background:rgba(255,255,255,.06);border:1px solid var(--border);color:rgba(245,243,235,.65);font-size:11px;font-weight:700;padding:5px 11px;border-radius:7px;}
+.payb.yp{background:#5b21b6;border-color:#5b21b6;color:#fff;}
+.payb.pl{background:#059669;border-color:#059669;color:#fff;}
+.fcol h5{font-size:12px;font-weight:700;color:var(--fg);margin-bottom:12px;text-transform:uppercase;letter-spacing:.07em;}
+.fcol a{display:block;font-size:12.5px;color:rgba(245,243,235,.35);text-decoration:none;margin-bottom:8px;transition:color .18s;}
+.fcol a:hover{color:var(--or);}
+.foot-bot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem;padding-top:2rem;border-top:1px solid var(--border);}
+.fcopy{font-size:11.5px;color:rgba(245,243,235,.22);}
+.flinks{display:flex;gap:1.25rem;}
+.flinks a{font-size:11.5px;color:rgba(245,243,235,.22);text-decoration:none;}
+.flinks a:hover{color:var(--or);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:960px){
+  .nav-links{display:none;}
+  .hero-center{flex-direction:column;gap:2rem;padding-top:80px;align-items:flex-start;}
+  .hero-right{width:100%;max-width:340px;}
+  .cat-grid{grid-template-columns:repeat(2,1fr);}
+  .dual-cta{grid-template-columns:1fr;}
+  .foot-top{grid-template-columns:1fr 1fr;}
+  .hero-hl{font-size:clamp(38px,8vw,62px);}
+}
+@media(max-width:560px){
+  .cat-grid{grid-template-columns:repeat(2,1fr);}
+  .nav-i{padding:14px 1.25rem;}
+  #hub{padding:4rem 1.25rem;}
+}
+/* ── shared utility (used by merged sections) ── */
+.container{max-width:1100px;margin:0 auto;padding:0 2.5rem;}
+section{position:relative;overflow:hidden;}
+.btn-main{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#7c3aed,#6366f1);color:#fff;border:none;padding:13px 26px;border-radius:11px;font-size:14px;font-weight:700;font-family:'General Sans',sans-serif;cursor:pointer;transition:opacity .2s;text-decoration:none;}
+.btn-main:hover{opacity:.88;}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--fg);padding:13px 26px;border-radius:11px;font-size:14px;font-weight:600;font-family:'General Sans',sans-serif;cursor:pointer;text-decoration:none;}
+.btn-ghost:hover{background:rgba(255,255,255,.1);}
+
+/* ── WHY SECTION ── */
+#why{padding:6rem 0;background:var(--bg2);}
+.why-orb1{width:500px;height:500px;background:rgba(168,85,247,.08);top:50%;left:50%;transform:translate(-50%,-50%);z-index:0;}
+.sec-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 15px;border-radius:100px;font-size:12px;font-weight:600;background:rgba(168,85,247,.1);color:var(--pu);border:1px solid rgba(168,85,247,.2);margin-bottom:.75rem;}
+.sec-title{font-size:2.1rem;font-weight:700;line-height:1.15;margin-bottom:.8rem;}
+.sec-sub{font-size:.95rem;color:var(--sub);max-width:480px;line-height:1.65;margin-bottom:3rem;}
+.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;position:relative;z-index:1;}
+.why-card{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:18px;padding:2rem;transition:border-color .22s,transform .22s;}
+.why-card:hover{border-color:rgba(168,85,247,.25);transform:translateY(-3px);}
+.wc-ico{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1.1rem;font-size:22px;}
+.wc-ico.pu{background:rgba(168,85,247,.15);color:var(--pu);}
+.wc-ico.in{background:rgba(99,102,241,.15);color:#818cf8;}
+.wc-ico.go{background:rgba(252,211,77,.12);color:var(--gold);}
+.wc-ico.or{background:rgba(249,115,22,.12);color:var(--or);}
+.wc-h{font-size:1rem;font-weight:700;margin-bottom:.5rem;}
+.wc-p{font-size:13px;color:var(--sub);line-height:1.65;}
+
+/* ── AI DEMO ── */
+#ai{padding:6rem 0;background:var(--bg);}
+.ai-orb1{width:480px;height:480px;background:rgba(99,102,241,.1);top:50%;left:-100px;transform:translateY(-50%);z-index:0;}
+.ai-orb2{width:280px;height:280px;background:rgba(168,85,247,.09);bottom:-60px;right:-60px;z-index:0;}
+.ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;position:relative;z-index:1;}
+.ai-h{font-size:2.1rem;font-weight:700;line-height:1.15;margin-bottom:.9rem;}
+.ai-sub{color:var(--sub);font-size:.95rem;line-height:1.7;margin-bottom:1.75rem;}
+.ai-feats{display:flex;flex-direction:column;gap:10px;}
+.ai-f{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;}
+.ai-f i{color:var(--pu);font-size:18px;flex-shrink:0;margin-top:2px;}
+.ai-f p{font-size:13px;color:var(--sub);line-height:1.5;}
+/* Chat widget */
+.chat-w{background:var(--bg3);border:1px solid rgba(168,85,247,.15);border-radius:20px;overflow:hidden;}
+.chat-h{background:rgba(168,85,247,.09);border-bottom:1px solid rgba(168,85,247,.14);padding:13px 17px;display:flex;align-items:center;gap:10px;}
+.chat-av{width:32px;height:32px;background:linear-gradient(135deg,var(--ind),var(--pu));border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.chat-name{font-size:13px;font-weight:700;}
+.chat-st{font-size:11px;color:var(--sub);}
+.chat-dot{display:inline-block;width:6px;height:6px;background:#22c55e;border-radius:50%;margin-right:4px;vertical-align:middle;}
+.chat-body{padding:15px;display:flex;flex-direction:column;gap:10px;}
+.msg-b{background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.14);border-radius:13px 13px 13px 4px;padding:11px 13px;font-size:13px;line-height:1.55;max-width:92%;}
+.msg-u{background:rgba(99,102,241,.17);border:1px solid rgba(99,102,241,.2);border-radius:13px 13px 4px 13px;padding:11px 13px;font-size:13px;line-height:1.55;max-width:92%;align-self:flex-end;}
+.bgt{background:rgba(168,85,247,.07);border:1px solid rgba(168,85,247,.16);border-radius:10px;padding:11px;margin-top:8px;}
+.bgt-r{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px;}
+.bgt-r:last-child{border:none;color:var(--gold);font-weight:700;padding-top:8px;}
+.bgt-r span:first-child{color:var(--sub);}
+.chat-inp{display:flex;gap:7px;padding:11px 14px;border-top:1px solid var(--border);}
+.chat-inp input{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:12.5px;color:var(--fg);font-family:'General Sans',sans-serif;outline:none;}
+.chat-inp button{background:var(--pu);border:none;border-radius:8px;width:33px;height:33px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+
+/* ── HOW IT WORKS ── */
+#how{padding:6rem 0;background:var(--bg2);}
+.how-orb{width:400px;height:400px;background:rgba(252,211,77,.06);top:50%;right:-80px;transform:translateY(-50%);z-index:0;}
+.steps-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;position:relative;z-index:1;}
+.steps-row::after{content:'';position:absolute;top:38px;left:calc(16.66% + 2rem);right:calc(16.66% + 2rem);height:1px;background:linear-gradient(to right,rgba(168,85,247,.3),rgba(252,211,77,.3));z-index:0;}
+.step{background:var(--bg3);border:1px solid var(--border);border-radius:18px;padding:2rem;position:relative;z-index:1;transition:border-color .22s;}
+.step:hover{border-color:rgba(168,85,247,.28);}
+.step-n{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,rgba(168,85,247,.2),rgba(99,102,241,.2));border:1px solid rgba(168,85,247,.28);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--pu);margin-bottom:1.1rem;}
+.step-ico{font-size:1.6rem;margin-bottom:.7rem;display:block;}
+.step h3{font-size:1rem;font-weight:700;margin-bottom:.5rem;}
+.step p{font-size:13px;color:var(--sub);line-height:1.65;}
+
+/* ── TESTIMONIALS ── */
+#test{padding:6rem 0;background:var(--bg);}
+.test-orb1{width:400px;height:400px;background:rgba(252,211,77,.06);bottom:-80px;left:-60px;z-index:0;}
+.test-orb2{width:300px;height:300px;background:rgba(168,85,247,.08);top:-60px;right:-40px;z-index:0;}
+.test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;position:relative;z-index:1;}
+.tcard{background:var(--bg3);border:1px solid var(--border);border-radius:18px;padding:26px;transition:border-color .22s;}
+.tcard:hover{border-color:rgba(168,85,247,.22);}
+.qm{font-size:3.5rem;line-height:.9;color:rgba(168,85,247,.22);font-family:Georgia,serif;margin-bottom:6px;}
+.ttxt{font-size:13.5px;color:var(--sub);line-height:1.7;font-style:italic;margin-bottom:14px;}
+.tstars{color:#fbbf24;font-size:13px;margin-bottom:14px;letter-spacing:1px;}
+.tau{display:flex;align-items:center;gap:10px;}
+.tav{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;}
+.av1{background:linear-gradient(135deg,#7c3aed,#6366f1);}
+.av2{background:linear-gradient(135deg,#0d9488,#0ea5e9);}
+.av3{background:linear-gradient(135deg,#7c3aed,#ec4899);}
+.tnm{font-size:14px;font-weight:700;}
+.trl{font-size:12px;color:var(--sub);}
+
+/* ── FINAL CTA ── */
+#cta-final{padding:3.5rem 0;background:var(--bg2);}
+.cta-box{border:1px solid var(--border);border-radius:22px;padding:2.75rem 2rem;text-align:center;position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(99,102,241,.06),rgba(168,85,247,.08),rgba(252,211,77,.04));}
+.cta-orb1{width:280px;height:280px;background:rgba(168,85,247,.12);top:-90px;right:-70px;filter:blur(70px);border-radius:50%;pointer-events:none;z-index:0;}
+.cta-orb2{width:200px;height:200px;background:rgba(99,102,241,.1);bottom:-60px;left:-50px;filter:blur(70px);border-radius:50%;pointer-events:none;z-index:0;}
+.cta-h{font-size:1.9rem;font-weight:700;line-height:1.2;max-width:460px;margin:.6rem auto;position:relative;z-index:1;}
+.cta-sub{color:var(--sub);font-size:.9rem;max-width:340px;margin:.6rem auto 1.5rem;line-height:1.6;position:relative;z-index:1;}
+.cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1;}
+
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<span id="top"></span>
+
+<!-- ═══ NAVBAR ═══ -->
+<header id="nav">
+  <div class="nav-i">
+    <span class="logo"><span class="lp">Todo</span><span class="lo">Eventos</span><span class="dot">.pe</span></span>
+    <nav class="nav-links">
+      <a href="#top" class="nl">Inicio</a>
+      <a href="catalogo.html" class="nl">Marketplace</a>
+      <a href="#how" class="nl">Cómo funciona</a>
+      <a href="nosotros.html" class="nl">Nosotros</a>
+    </nav>
+    <div class="nav-end">
+      <a href="login.html?v=2" class="btn-login" id="btn-ingresar" style="text-decoration:none;display:inline-flex;align-items:center;">Ingresar</a>
+
+      <div class="user-menu" id="user-menu">
+        <button class="user-avatar" id="user-avatar-btn" onclick="toggleUserDropdown()"></button>
+        <div class="user-dropdown" id="user-dropdown">
+          <div class="user-dropdown-name" id="user-dropdown-name"></div>
+          <a href="#" id="link-mi-espacio"><i class="ti ti-layout-dashboard" style="font-size:15px;"></i> <span id="link-mi-espacio-texto">Ir al marketplace</span></a>
+          <a href="cuenta.html"><i class="ti ti-user-circle" style="font-size:15px;"></i> Mi cuenta</a>
+          <a href="admin.html" id="link-admin" style="display:none;"><i class="ti ti-shield-lock" style="font-size:15px;"></i> Panel de admin</a>
+          <button class="salir" onclick="cerrarSesion()"><i class="ti ti-logout-2" style="font-size:15px;"></i> Cerrar sesión</button>
+        </div>
+      </div>
+
+      <a href="proveedores.html" class="btn-prov">
+        <i class="ti ti-building-store" style="font-size:14px;"></i> Para Proveedores
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ HERO — FULL SCREEN ═══ -->
+<section id="hero">
+  <video id="bv" autoplay muted playsinline preload="auto">
+    <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260328_065045_c44942da-53c6-4804-b734-f9e07fc22e08.mp4" type="video/mp4">
+  </video>
+  <div class="blur-blob"></div>
+  <div class="orb oh1"></div>
+  <div class="orb oh2"></div>
+  <div class="orb oh3"></div>
+  <div class="rings">
+    <div class="ring r1"></div>
+    <div class="ring r2"></div>
+    <div class="ring r3"></div>
+  </div>
+
+  <div class="hero-layer">
+
+    <!-- HERO CONTENT -->
+    <div class="hero-center">
+
+      <!-- LEFT — copy + search -->
+      <div class="hero-left">
+        <div class="hero-pill">
+          <span class="pdot"></span>
+          Marketplace de Servicios para Eventos · Lima
+        </div>
+        <h1 class="hero-hl">Tu evento ideal,<br><span class="gt">en minutos.</span></h1>
+        <p class="hero-sub">+1,200 proveedores verificados en Lima. Búscalos, compáralos y contratalos con un solo clic.</p>
+
+        <div class="search-box">
+          <i class="ti ti-search"></i>
+          <input type="text" placeholder="Busca DJ, catering, fotógrafo, local…" id="hero-search" onkeydown="if(event.key==='Enter') goSearch()">
+          <a class="search-btn" href="javascript:void(0)" id="search-link" onclick="goSearch()">
+            <i class="ti ti-sparkles" style="font-size:13px;"></i> Buscar
+          </a>
+        </div>
+
+        <div class="chips-label">Búsquedas populares:</div>
+        <div class="chips">
+          <a href="catalogo.html?cat=musica" class="chip"><i class="ti ti-music"></i> DJ para boda</a>
+          <a href="catalogo.html?cat=catering" class="chip"><i class="ti ti-tools-kitchen-2"></i> Catering criollo</a>
+          <a href="catalogo.html?cat=fotografia" class="chip"><i class="ti ti-camera"></i> Fotógrafo</a>
+          <a href="catalogo.html?cat=animadores" class="chip"><i class="ti ti-confetti"></i> Show infantil</a>
+        </div>
+      </div>
+
+      <!-- RIGHT — floating provider cards -->
+      <div class="hero-right">
+        <div style="font-size:11px;color:var(--sub);text-align:center;letter-spacing:.05em;text-transform:uppercase;font-weight:600;margin-bottom:4px;">Disponibles ahora</div>
+
+        <a href="catalogo.html?cat=catering" class="pmc" style="position:relative;">
+          <div class="pmc-thumb t-a"><i class="ti ti-tools-kitchen-2"></i></div>
+          <div class="pmc-info">
+            <div class="pmc-name">Sabores del Perú</div>
+            <div class="pmc-cat">Catering · Surco</div>
+            <div class="pmc-bot">
+              <span class="pmc-stars">★ 4.9 (127)</span>
+              <span class="pmc-price">desde S/. 800</span>
+            </div>
+          </div>
+          <span class="pmc-avail">● Disponible</span>
+        </a>
+
+        <a href="catalogo.html?cat=musica" class="pmc" style="position:relative;">
+          <div class="pmc-thumb t-b"><i class="ti ti-music"></i></div>
+          <div class="pmc-info">
+            <div class="pmc-name">DJ Nexus Lima Pro</div>
+            <div class="pmc-cat">DJ & Sonido · Miraflores</div>
+            <div class="pmc-bot">
+              <span class="pmc-stars">★ 5.0 (89)</span>
+              <span class="pmc-price">desde S/. 350</span>
+            </div>
+          </div>
+          <span class="pmc-avail">● Disponible</span>
+        </a>
+
+        <a href="catalogo.html?cat=fotografia" class="pmc" style="position:relative;">
+          <div class="pmc-thumb t-c"><i class="ti ti-camera"></i></div>
+          <div class="pmc-info">
+            <div class="pmc-name">Lumina Fotografía</div>
+            <div class="pmc-cat">Fotografía · San Isidro</div>
+            <div class="pmc-bot">
+              <span class="pmc-stars">★ 4.8 (204)</span>
+              <span class="pmc-price">desde S/. 450</span>
+            </div>
+          </div>
+          <span class="pmc-avail">● Disponible</span>
+        </a>
+
+        <a href="catalogo.html" class="pmc-see">
+          Ver los +1,200 proveedores <i class="ti ti-arrow-right" style="font-size:13px;vertical-align:-1px;"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- MARQUEE -->
+    <div class="mq-wrap">
+      <div class="mq-inner">
+        <div class="mq-lbl">Servicios<br>disponibles</div>
+        <div class="mq-outer">
+          <div class="mq-track">
+            <div class="mq-item"><div class="mq-ico" style="background:rgba(168,85,247,.18);">C</div><span class="mq-nm">Catering</span></div>
+            <div class="mq-item"><div class="mq-ico" style="background:rgba(99,102,241,.18);">D</div><span class="mq-nm">DJ & Sonido</span></div>
+            <div class="mq-item"><div class="mq-ico" style="background:rgba(252,211,77,.18);">F</div><span class="mq-nm">Fotografía</span></div>
+            <div class="mq-item"><div class="mq-ico" style="background:rgba(168,85,247,.18);">L</div><span class="mq-nm">Locales</span></div>
+            <div class="mq-item"><div class="mq-ico" style="background:rgba(249,115,22,.18);">B</div><span class="mq-nm">Bar Móvil</span></div>
+            <div class="mq-item"><div class="mq-ico" style="background:rgba(99,102,241,.18);">D</div><span class="mq-nm">Decoración</span></div>
+            <div class="mq-item"><div class="mq-ico" style="background:rgba(252,211,77,.18);">S</div><span class="mq-nm">Show Infantil</span></div>
+            <div class="mq-item"><div class="mq-ico" style="background:rgba(168,85,247,.18);">V</div><span class="mq-nm">Video & Drones</span></div>
+            <div class="mq-item"><div class="mq-ico" style="background:rgba(168,85,247,.18);">C</div><span class="mq-nm">Catering</span></div>
+            <div class="mq-item"><div class="mq-ico" style="background:rgba(99,102,241,.18);">D</div><span class="mq-nm">DJ & Sonido</span></div>
+            <div class="mq-item"><div class="mq-ico" style="background:rgba(252,211,77,.18);">F</div><span class="mq-nm">Fotografía</span></div>
+            <div class="mq-item"><div class="mq-ico" style="background:rgba(168,85,247,.18);">L</div><span class="mq-nm">Locales</span></div>
+            <div class="mq-item"><div class="mq-ico" style="background:rgba(249,115,22,.18);">B</div><span class="mq-nm">Bar Móvil</span></div>
+            <div class="mq-item"><div class="mq-ico" style="background:rgba(99,102,241,.18);">D</div><span class="mq-nm">Decoración</span></div>
+            <div class="mq-item"><div class="mq-ico" style="background:rgba(252,211,77,.18);">S</div><span class="mq-nm">Show Infantil</span></div>
+            <div class="mq-item"><div class="mq-ico" style="background:rgba(168,85,247,.18);">V</div><span class="mq-nm">Video & Drones</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /hero-layer -->
+</section>
+
+<!-- ═══ HUB — JUMP PAD ═══ -->
+<section id="hub">
+  <div class="hub-inner">
+
+    <h2 class="hub-title">¿Qué necesitas para tu <span class="gt">próximo evento?</span></h2>
+    <p class="hub-sub">Elige una categoría y encuentra a los mejores proveedores verificados en Lima.</p>
+
+    <!-- Category grid — each card links to catalogo.html with preselected category -->
+    <div class="cat-grid">
+      <a href="catalogo.html?cat=musica" class="cat-card">
+        <div class="cat-ico i"><i class="ti ti-music"></i></div>
+        <div class="cat-name">Música & DJs</div>
+        <div class="cat-count">+95 proveedores</div>
+      </a>
+      <a href="catalogo.html?cat=catering" class="cat-card">
+        <div class="cat-ico p"><i class="ti ti-tools-kitchen-2"></i></div>
+        <div class="cat-name">Catering</div>
+        <div class="cat-count">+180 proveedores</div>
+      </a>
+      <a href="catalogo.html?cat=fotografia" class="cat-card">
+        <div class="cat-ico g"><i class="ti ti-camera"></i></div>
+        <div class="cat-name">Fotografía & Video</div>
+        <div class="cat-count">+140 proveedores</div>
+      </a>
+      <a href="catalogo.html?cat=locales" class="cat-card">
+        <div class="cat-ico o"><i class="ti ti-building"></i></div>
+        <div class="cat-name">Locales & Salones</div>
+        <div class="cat-count">+60 proveedores</div>
+      </a>
+      <a href="catalogo.html?cat=animadores" class="cat-card">
+        <div class="cat-ico p"><i class="ti ti-confetti"></i></div>
+        <div class="cat-name">Animadores</div>
+        <div class="cat-count">+70 proveedores</div>
+      </a>
+      <a href="catalogo.html?cat=decoracion" class="cat-card">
+        <div class="cat-ico i"><i class="ti ti-sparkles"></i></div>
+        <div class="cat-name">Decoración</div>
+        <div class="cat-count">+120 proveedores</div>
+      </a>
+      <a href="catalogo.html?cat=bar" class="cat-card">
+        <div class="cat-ico g"><i class="ti ti-glass-cocktail"></i></div>
+        <div class="cat-name">Bar Móvil</div>
+        <div class="cat-count">+45 proveedores</div>
+      </a>
+      <a href="catalogo.html?cat=pasteleria" class="cat-card">
+        <div class="cat-ico o"><i class="ti ti-cake"></i></div>
+        <div class="cat-name">Pastelería</div>
+        <div class="cat-count">+85 proveedores</div>
+      </a>
+    </div>
+
+    <!-- Dual CTA — two clear paths -->
+    <div class="dual-cta">
+      <a href="catalogo.html" class="dcta user">
+        <div class="dcta-icon"><i class="ti ti-search"></i></div>
+        <div class="dcta-text">
+          <h3>Busco un servicio para mi evento</h3>
+          <p>Explora +1,200 proveedores verificados, filtra por precio, ubicación y calificación.</p>
+        </div>
+        <i class="ti ti-arrow-right dcta-arrow"></i>
+      </a>
+      <a href="proveedores.html" class="dcta prov">
+        <div class="dcta-icon"><i class="ti ti-building-store"></i></div>
+        <div class="dcta-text">
+          <h3>Soy proveedor y quiero más clientes</h3>
+          <p>Digitaliza tu negocio, gestiona cotizaciones y llega a miles de organizadores de Lima.</p>
+        </div>
+        <i class="ti ti-arrow-right dcta-arrow"></i>
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<section id="why">
+  <div class="orb why-orb1"></div>
+  <div class="container">
+    <div style="text-align:center;margin-bottom:3rem;position:relative;z-index:1;">
+      <div class="sec-badge"><i class="ti ti-shield-check" style="font-size:12px;"></i> Por qué TodoEventos.pe</div>
+      <h2 class="sec-title">Organizar un evento en Lima<br><span class="gt">nunca fue tan simple</span></h2>
+      <p class="sec-sub" style="margin:0 auto;">Atrás quedaron las semanas de WhatsApp sin respuesta, los precios que cambian y el estrés de coordinar todo por separado.</p>
+    </div>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="wc-ico pu"><i class="ti ti-bolt"></i></div>
+        <h3 class="wc-h">Presupuesto en 30 segundos</h3>
+        <p class="wc-p">Nuestra IA entiende tu evento en lenguaje natural y genera un paquete real con proveedores disponibles al instante. Sin formularios, sin esperas.</p>
+      </div>
+      <div class="why-card">
+        <div class="wc-ico in"><i class="ti ti-shield-check"></i></div>
+        <h3 class="wc-h">Proveedores verificados</h3>
+        <p class="wc-p">Todos los proveedores pasan por un proceso de verificación. Precios fijos, reseñas reales y disponibilidad confirmada antes de que reserves.</p>
+      </div>
+      <div class="why-card">
+        <div class="wc-ico go"><i class="ti ti-currency-sol"></i></div>
+        <h3 class="wc-h">Paga con Yape o Plin</h3>
+        <p class="wc-p">Integración con las billeteras más usadas en Perú. Un clic para confirmar y pagar. Sin complicaciones con transferencias ni efectivo.</p>
+      </div>
+      <div class="why-card">
+        <div class="wc-ico or"><i class="ti ti-star"></i></div>
+        <h3 class="wc-h">Calificación 4.9 promedio</h3>
+        <p class="wc-p">Miles de organizadores en Lima ya vivieron la experiencia. Cada reseña es real, verificada y publicada tal cual — sin filtros.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ AI DEMO ═══ -->
+<section id="ai">
+  <div class="orb ai-orb1"></div>
+  <div class="orb ai-orb2"></div>
+  <div class="container">
+    <div class="ai-grid">
+      <div>
+        <div style="margin-bottom:.75rem;"><span class="sec-badge"><i class="ti ti-robot" style="font-size:12px;"></i> Asistente IA</span></div>
+        <h2 class="ai-h">Cuéntale qué quieres.<br>La IA <span class="gt">hace el resto.</span></h2>
+        <p class="ai-sub">No más formularios. Escribe en lenguaje natural — presupuesto, tipo de evento, cuántas personas — y recibe un paquete optimizado de servicios en segundos.</p>
+        <div class="ai-feats">
+          <div class="ai-f"><i class="ti ti-brain"></i><p>Entiende presupuesto, fecha, tipo de evento y cantidad de personas en una sola consulta.</p></div>
+          <div class="ai-f"><i class="ti ti-database"></i><p>Consulta disponibilidad y precios reales del marketplace en tiempo real.</p></div>
+          <div class="ai-f"><i class="ti ti-receipt"></i><p>Genera un paquete completo listo para reservar y pagar con un clic.</p></div>
+        </div>
+      </div>
+      <div class="chat-w">
+        <div class="chat-h">
+          <div class="chat-av"><i class="ti ti-robot" style="color:#fff;font-size:15px;"></i></div>
+          <div><div class="chat-name">Asistente IA — TodoEventos.pe</div><div class="chat-st"><span class="chat-dot"></span>En línea · responde al instante</div></div>
+        </div>
+        <div class="chat-body">
+          <div class="msg-b">¡Hola! Cuéntame qué evento quieres organizar y te armo el presupuesto ideal. 🎉</div>
+          <div class="msg-u">Tengo S/. 5,000 para el cumpleaños de mi hija de 5 años en San Borja, 40 personas, con show infantil y carritos de comida</div>
+          <div class="msg-b">¡Perfecto! Encontré <strong>3 paquetes disponibles</strong> para ese fin de semana. El más popular:
+            <div class="bgt">
+              <div class="bgt-r"><span>MagicShow Infantil (2h)</span><span>S/. 980</span></div>
+              <div class="bgt-r"><span>Carrito Anticuchos (40p)</span><span>S/. 1,200</span></div>
+              <div class="bgt-r"><span>Carrito de Helados</span><span>S/. 750</span></div>
+              <div class="bgt-r"><span>Decoración temática</span><span>S/. 650</span></div>
+              <div class="bgt-r"><span>Total · Te sobran S/. 1,420</span><span>S/. 3,580</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="chat-inp">
+          <input type="text" placeholder="Describe tu evento aquí..." id="demo-chat-input" onkeydown="if(event.key==='Enter') goDemoChat()">
+          <button onclick="goDemoChat()"><i class="ti ti-send" style="color:#fff;font-size:14px;"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CÓMO FUNCIONA ═══ -->
+<section id="how">
+  <div class="orb how-orb"></div>
+  <div class="container">
+    <div style="text-align:center;margin-bottom:3rem;position:relative;z-index:1;">
+      <div class="sec-badge">Cómo funciona</div>
+      <h2 class="sec-title">Contratar un servicio en <span class="gt">3 pasos</span></h2>
+      <p class="sec-sub" style="margin:0 auto;">Tan fácil como pedir un delivery. Sin llamadas ni negociaciones.</p>
+    </div>
+    <div class="steps-row">
+      <div class="step">
+        <div class="step-n">01</div>
+        <span class="step-ico"><i class="ti ti-search" style="color:var(--pu);"></i></span>
+        <h3>Busca o usa la IA</h3>
+        <p>Escribe qué necesitas o deja que la IA te arme el paquete completo según tu presupuesto y fecha.</p>
+      </div>
+      <div class="step">
+        <div class="step-n">02</div>
+        <span class="step-ico"><i class="ti ti-user-check" style="color:var(--gold);"></i></span>
+        <h3>Compara y elige</h3>
+        <p>Revisa perfiles con fotos reales, reseñas verificadas y precios fijos. Sin sorpresas ni tarifas ocultas.</p>
+      </div>
+      <div class="step">
+        <div class="step-n">03</div>
+        <span class="step-ico"><i class="ti ti-circle-check" style="color:#86efac;"></i></span>
+        <h3>Reserva y paga</h3>
+        <p>Confirma con Yape, Plin o tarjeta. Reserva garantizada al instante. Tu evento, asegurado.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TESTIMONIOS ═══ -->
+<section id="test">
+  <div class="orb test-orb1"></div>
+  <div class="orb test-orb2"></div>
+  <div class="container">
+    <div style="text-align:center;margin-bottom:3rem;position:relative;z-index:1;">
+      <div class="sec-badge"><i class="ti ti-quote" style="font-size:12px;"></i> Reseñas reales</div>
+      <h2 class="sec-title">Lo que dicen quienes ya <span class="gt">lo vivieron</span></h2>
+    </div>
+    <div class="test-grid">
+      <div class="tcard"><div class="qm">"</div><p class="ttxt">Encontré DJ, catering y fotógrafo para mi boda en una sola tarde. Antes me tomó meses buscar por separado.</p><div class="tstars">★★★★★</div><div class="tau"><div class="tav av1">MF</div><div><div class="tnm">María Fernández</div><div class="trl">Novia · San Isidro</div></div></div></div>
+      <div class="tcard"><div class="qm">"</div><p class="ttxt">Contraté show infantil y carritos para el cumpleaños de mi hija en 10 minutos. La IA me recomendó todo dentro de mi presupuesto.</p><div class="tstars">★★★★★</div><div class="tau"><div class="tav av2">RV</div><div><div class="tnm">Rosa Villanueva</div><div class="trl">Mamá · La Molina</div></div></div></div>
+      <div class="tcard"><div class="qm">"</div><p class="ttxt">Organicé el evento corporativo de 80 personas con 3 servicios distintos. Todo confirmado en el mismo día. Increíble.</p><div class="tstars">★★★★★</div><div class="tau"><div class="tav av3">JM</div><div><div class="tnm">Jorge Morales</div><div class="trl">RRHH · Miraflores</div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FINAL CTA ═══ -->
+<section id="cta-final">
+  <div class="container">
+    <div class="cta-box">
+      <div class="cta-orb1"></div>
+      <div class="cta-orb2"></div>
+      <span class="sec-badge" style="position:relative;z-index:1;"><i class="ti ti-rocket" style="font-size:12px;"></i> Lima, Perú · 2026</span>
+      <h2 class="cta-h">¿Listo para planificar tu <span class="gt">evento perfecto?</span></h2>
+      <p class="cta-sub">+1,200 proveedores verificados esperando tu solicitud.</p>
+      <div class="cta-btns">
+        <a href="catalogo.html" class="btn-main"><i class="ti ti-search"></i> Explorar el marketplace</a>
+        <a href="#hub" class="btn-ghost"><i class="ti ti-layout-grid"></i> Ver categorías</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+
+<!-- ═══ FOOTER ═══ -->
+<footer id="foot">
+  <div class="foot-inner">
+    <div class="foot-top">
+      <div>
+        <a href="index_14.html" class="flogo"><span class="lp">Todo</span><span class="lo">Eventos</span><span style="color:rgba(245,243,235,.3);font-weight:400;">.pe</span></a>
+        <p class="fdesc">El marketplace de servicios para eventos en Lima, Perú.</p>
+        <div class="pay-row">
+          <span class="payb yp">Yape</span>
+          <span class="payb pl">Plin</span>
+          <span class="payb">Visa</span>
+          <span class="payb">Mastercard</span>
+          <span class="payb">Culqi</span>
+        </div>
+      </div>
+      <div class="fcol">
+        <h5>Marketplace</h5>
+        <a href="catalogo.html">Ver todos los servicios</a>
+        <a href="catalogo.html?cat=musica">Música & DJs</a>
+        <a href="catalogo.html?cat=catering">Catering</a>
+        <a href="catalogo.html?cat=fotografia">Fotografía</a>
+      </div>
+      <div class="fcol">
+        <h5>Compañía</h5>
+        <a href="nosotros.html">Nosotros</a>
+        <a href="#">Blog</a>
+        <a href="#">Contacto</a>
+        <a href="proveedores.html">Para Proveedores</a>
+      </div>
+      <div class="fcol">
+        <h5>Legal</h5>
+        <a href="#">Términos y Condiciones</a>
+        <a href="#">Política de Privacidad</a>
+        <a href="#">Centro de Ayuda</a>
+      </div>
+    </div>
+    <div class="foot-bot">
+      <span class="fcopy">© 2026 TodoEventos.pe — Marketplace de Servicios para Eventos en el Perú.</span>
+      <div class="flinks">
+        <a href="#">Términos</a>
+        <a href="#">Privacidad</a>
+        <a href="#">Contacto</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* Video fade loop */
+(function(){
+  var v=document.getElementById('bv');
+  if(!v)return;
+  var fd=false;
+  function fi(ms){var s=null;(function st(t){if(!s)s=t;var p=Math.min((t-s)/ms,1);v.style.opacity=p;if(p<1)requestAnimationFrame(st);})(performance.now());}
+  function fo(ms,cb){var s=null,fr=parseFloat(v.style.opacity)||1;(function st(t){if(!s)s=t;var p=Math.min((t-s)/ms,1);v.style.opacity=fr*(1-p);if(p<1)requestAnimationFrame(st);else if(cb)cb();})(performance.now());}
+  v.addEventListener('canplay',function(){fi(700);});
+  v.addEventListener('timeupdate',function(){if(!fd&&v.duration&&v.currentTime>=v.duration-.7){fd=true;fo(500,function(){v.style.opacity=0;setTimeout(function(){v.currentTime=0;v.play().catch(function(){});fd=false;fi(700);},100);});}});
+  v.play().catch(function(){});
+})();
+
+/* Search → go to catalogo with query */
+function goSearch(){
+  var q=document.getElementById('hero-search').value.trim();
+  if(q) window.location.href='catalogo.html?q='+encodeURIComponent(q);
+  else window.location.href='catalogo.html';
+}
+function goDemoChat(){
+  var el=document.getElementById('demo-chat-input');
+  var q=el?el.value.trim():'';
+  if(q) window.location.href='catalogo.html?q='+encodeURIComponent(q);
+  else window.location.href='catalogo.html';
+}
+document.getElementById('search-link').addEventListener('click',function(e){
+  var q=document.getElementById('hero-search').value.trim();
+  if(q){e.preventDefault();window.location.href='catalogo.html?q='+encodeURIComponent(q);}
+});
+
+/* ─── Sesión: mostrar "Ingresar" o el menú de usuario según corresponda ─── */
+const SUPABASE_URL = 'https://vqnyaozauljtashpjfoo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxbnlhb3phdWxqdGFzaHBqZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDM0NzIsImV4cCI6MjA5OTI3OTQ3Mn0.0JT-UAQnSUygXPNjI69Sf3Rg3mv_NeTwwz9-7vnWcno';
+
+let sb = null;
+try {
+  // Lee la sesión de donde haya quedado guardada (localStorage si se
+  // marcó "Recordarme" al iniciar sesión, o sessionStorage si no).
+  const storageAdapter = {
+    getItem: (key) => localStorage.getItem(key) ?? sessionStorage.getItem(key),
+    setItem: (key, value) => {
+      const recordar = localStorage.getItem('te_remember') !== 'false';
+      if(recordar){
+        localStorage.setItem(key, value);
+        sessionStorage.removeItem(key);
+      } else {
+        sessionStorage.setItem(key, value);
+        localStorage.removeItem(key);
+      }
+    },
+    removeItem: (key) => {
+      localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
+    }
+  };
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { storage: storageAdapter }
+  });
+} catch(e) {
+  console.error('No se pudo inicializar Supabase:', e);
+}
+
+function toggleUserDropdown(){
+  document.getElementById('user-dropdown').classList.toggle('open');
+}
+// Cierra el menú si haces clic fuera de él
+document.addEventListener('click', function(e){
+  const menu = document.getElementById('user-menu');
+  if(menu && !menu.contains(e.target)){
+    document.getElementById('user-dropdown').classList.remove('open');
+  }
+});
+
+async function cerrarSesion(){
+  if(sb) await sb.auth.signOut();
+  window.location.href = 'index_14.html';
+}
+
+async function verificarSesionNav(){
+  if(!sb) return;
+  const { data } = await sb.auth.getSession();
+  if(!data.session) return; // no hay sesión: se queda el botón "Ingresar" tal como está
+
+  const usuario = data.session.user;
+  const { data: perfil } = await sb
+    .from('profiles')
+    .select('full_name, role, is_admin')
+    .eq('id', usuario.id)
+    .single();
+
+  const nombre = (perfil && perfil.full_name) ? perfil.full_name : usuario.email;
+  const rol = perfil ? perfil.role : 'cliente';
+
+  // El acceso al panel de admin solo aparece si la cuenta es administradora
+  if(perfil && perfil.is_admin){
+    const linkAdmin = document.getElementById('link-admin');
+    if(linkAdmin) linkAdmin.style.display = 'flex';
+  }
+  const inicial = nombre.trim().charAt(0).toUpperCase();
+
+  document.getElementById('btn-ingresar').style.display = 'none';
+  document.getElementById('user-menu').classList.add('show');
+  document.getElementById('user-avatar-btn').textContent = inicial;
+  document.getElementById('user-dropdown-name').textContent = nombre;
+
+  const destino = rol === 'proveedor' ? 'dashboard.html' : 'catalogo.html';
+  const textoLink = rol === 'proveedor' ? 'Mi dashboard' : 'Ir al marketplace';
+  document.getElementById('link-mi-espacio').href = destino;
+  document.getElementById('link-mi-espacio-texto').textContent = textoLink;
+}
+
+verificarSesionNav();
+</script>
+</body>
+</html>

@@ -1,0 +1,1984 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marketplace — TodoEventos.pe</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
+:root{--bg:hsl(260,87%,3%);--bg2:hsl(258,60%,6%);--bg3:hsl(256,40%,8%);--fg:hsl(40,6%,95%);--sub:hsl(40,6%,65%);--pu:#a855f7;--ind:#6366f1;--gold:#fcd34d;--or:#f97316;--border:rgba(255,255,255,0.07);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:var(--fg);overflow-x:hidden;padding-bottom:80px;}
+
+/* ── NAV ── */
+#nav{position:sticky;top:0;z-index:200;background:rgba(4,1,12,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.nav-i{display:flex;align-items:center;justify-content:space-between;padding:14px 2rem;max-width:1200px;margin:0 auto;gap:1rem;}
+.logo{font-size:17px;font-weight:700;text-decoration:none;flex-shrink:0;}
+.logo .lp{color:var(--pu);}.logo .lo{background:linear-gradient(to right,var(--pu),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}.logo .dot{color:rgba(245,243,235,.3);font-weight:400;}
+.nav-search{flex:1;max-width:480px;display:flex;align-items:center;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:10px;padding:8px 14px;gap:8px;}
+.nav-search i{color:var(--sub);font-size:16px;flex-shrink:0;}
+.nav-search input{flex:1;background:transparent;border:none;outline:none;font-family:'General Sans',sans-serif;font-size:14px;color:var(--fg);}
+.nav-search input::placeholder{color:rgba(245,243,235,.3);}
+.nav-end{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.nl-link{color:rgba(245,243,235,.7);text-decoration:none;font-size:13.5px;font-weight:500;padding:8px 12px;border-radius:8px;transition:all .18s;}
+.nl-link:hover{color:var(--fg);background:rgba(255,255,255,.06);}
+.btn-login{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--fg);padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;font-family:'General Sans',sans-serif;cursor:pointer;}
+.user-menu{position:relative;display:none;align-items:center;}
+.user-menu.show{display:flex;}
+.user-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--pu),var(--ind));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13.5px;cursor:pointer;border:none;font-family:'General Sans',sans-serif;}
+.user-dropdown{position:absolute;top:calc(100% + 10px);right:0;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:8px;min-width:190px;box-shadow:0 12px 30px rgba(0,0,0,.4);display:none;z-index:50;}
+.user-dropdown.open{display:block;}
+.user-dropdown-name{padding:8px 10px 10px;font-size:13px;font-weight:600;color:var(--fg);border-bottom:1px solid var(--border);margin-bottom:6px;}
+.user-dropdown a,.user-dropdown button{width:100%;text-align:left;display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--fg);font-size:13px;font-family:'General Sans',sans-serif;padding:9px 10px;border-radius:8px;cursor:pointer;text-decoration:none;}
+.user-dropdown a:hover,.user-dropdown button:hover{background:rgba(255,255,255,.06);}
+.user-dropdown .salir{color:#f87171;}
+.btn-prov{background:linear-gradient(135deg,#ea580c,#fbbf24);color:#1a0500;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;font-family:'General Sans',sans-serif;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 0 0 rgba(234,88,12,.45);}70%{box-shadow:0 0 0 10px rgba(234,88,12,0);}}
+.btn-prov{animation:pulse-glow 2.5s ease infinite;}
+
+/* ── CATEGORY BAR ── */
+#catbar{position:sticky;top:57px;z-index:100;background:rgba(4,1,12,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);}
+.catbar-inner{max-width:1200px;margin:0 auto;padding:0 2rem;display:flex;align-items:center;gap:0;overflow-x:auto;scrollbar-width:none;}
+.catbar-inner::-webkit-scrollbar{display:none;}
+.cat-tab{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 20px;cursor:pointer;border-bottom:2px solid transparent;flex-shrink:0;transition:all .2s;color:var(--sub);white-space:nowrap;}
+.cat-tab:hover{color:var(--fg);}
+.cat-tab.active{color:var(--pu);border-bottom-color:var(--pu);}
+.cat-tab-icon{font-size:22px;line-height:1;}
+.cat-tab-label{font-size:11.5px;font-weight:600;letter-spacing:.02em;}
+
+/* ── FILTER BAR ── */
+#filterbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 0;}
+.filter-inner{max-width:1200px;margin:0 auto;padding:0 2rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.filter-label{font-size:12.5px;font-weight:700;color:var(--sub);margin-right:4px;white-space:nowrap;}
+.f-select{background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--fg);padding:7px 14px;border-radius:8px;font-size:13px;font-family:'General Sans',sans-serif;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px;transition:border-color .2s;}
+.f-select:focus{border-color:rgba(168,85,247,.4);}
+.f-chip{background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--sub);padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.f-chip:hover,.f-chip.active{background:rgba(168,85,247,.12);border-color:rgba(168,85,247,.3);color:var(--pu);}
+.f-divider{width:1px;height:20px;background:var(--border);margin:0 4px;}
+.filter-results{margin-left:auto;font-size:13px;color:var(--sub);white-space:nowrap;}
+.filter-results span{color:var(--fg);font-weight:700;}
+
+/* ── MAIN LAYOUT ── */
+.main{max-width:1200px;margin:0 auto;padding:2rem;}
+
+/* RESULTS HEADER */
+.results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem;}
+.results-title{font-size:1.5rem;font-weight:700;}
+.results-sub{font-size:13px;color:var(--sub);margin-top:3px;}
+.sort-row{display:flex;align-items:center;gap:8px;}
+.sort-btn{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--sub);padding:7px 14px;border-radius:8px;font-size:12.5px;cursor:pointer;font-family:'General Sans',sans-serif;display:flex;align-items:center;gap:5px;transition:all .2s;}
+.sort-btn:hover,.sort-btn.active{background:rgba(168,85,247,.1);border-color:rgba(168,85,247,.25);color:var(--pu);}
+
+/* PROVIDER GRID */
+#prov-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;}
+.pcard{background:var(--bg3);border:1px solid var(--border);border-radius:18px;overflow:hidden;transition:transform .22s,border-color .22s;cursor:pointer;}
+.pcard:hover{transform:translateY(-4px);border-color:rgba(168,85,247,.3);}
+.pcard[data-hidden="true"]{display:none;}
+.pcard-img{height:185px;display:flex;align-items:center;justify-content:center;position:relative;}
+.pcard-img i{font-size:3.25rem;color:rgba(255,255,255,.75);}
+.ci-a{background:linear-gradient(135deg,#d97706,#ef4444);}
+.ci-b{background:linear-gradient(135deg,#2563eb,#06b6d4);}
+.ci-c{background:linear-gradient(135deg,#7c3aed,#ec4899);}
+.ci-d{background:linear-gradient(135deg,#059669,#0ea5e9);}
+.ci-e{background:linear-gradient(135deg,#9333ea,#f59e0b);}
+.ci-f{background:linear-gradient(135deg,#dc2626,#9333ea);}
+.ci-g{background:linear-gradient(135deg,#be185d,#f97316);}
+.ci-h{background:linear-gradient(135deg,#1d4ed8,#7c3aed);}
+.ci-i{background:linear-gradient(135deg,#047857,#0ea5e9);}
+.ci-j{background:linear-gradient(135deg,#92400e,#dc2626);}
+.ci-k{background:linear-gradient(135deg,#6d28d9,#0891b2);}
+.ci-l{background:linear-gradient(135deg,#065f46,#1d4ed8);}
+.pcard-vbdg{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px;}
+.pcard-price-tag{position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;}
+.pcard-fav{position:absolute;top:10px;right:10px;width:30px;height:30px;background:rgba(0,0,0,.5);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .18s;}
+.pcard-fav:hover{background:rgba(168,85,247,.3);}
+.pcard-fav i{font-size:14px;color:rgba(255,255,255,.7);}
+.pcard-body{padding:14px 16px;}
+.pcard-name{font-size:14px;font-weight:700;margin-bottom:5px;}
+.pcard-rat{display:flex;align-items:center;gap:4px;margin-bottom:5px;}
+.stars{color:#fbbf24;font-size:12px;letter-spacing:.5px;}
+.rn{font-size:12px;font-weight:700;}.rc{font-size:11.5px;color:var(--sub);}
+.pcard-loc{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--sub);margin-bottom:9px;}
+.ptags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;}
+.ptag{background:rgba(168,85,247,.1);color:var(--pu);border:1px solid rgba(168,85,247,.18);padding:2px 9px;border-radius:100px;font-size:10.5px;font-weight:600;}
+.ptag.i{background:rgba(99,102,241,.1);color:#818cf8;border-color:rgba(99,102,241,.18);}
+.pcard-btn{display:block;text-align:center;background:linear-gradient(135deg,rgba(124,58,237,.18),rgba(99,102,241,.16));border:1px solid rgba(168,85,247,.2);color:var(--fg);padding:9px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:'General Sans',sans-serif;transition:all .18s;}
+.pcard-btn:hover{background:rgba(168,85,247,.28);border-color:rgba(168,85,247,.42);}
+
+/* EMPTY STATE */
+#empty-state{display:none;text-align:center;padding:5rem 2rem;grid-column:1/-1;}
+#empty-state i{font-size:3.5rem;color:var(--sub);opacity:.4;margin-bottom:1rem;display:block;}
+#empty-state h3{font-size:1.25rem;font-weight:700;margin-bottom:.5rem;}
+#empty-state p{font-size:14px;color:var(--sub);}
+
+/* ── FLOATING CHATBOT ── */
+#chat-bubble{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;align-items:flex-end;gap:12px;}
+.chat-toggle{width:58px;height:58px;background:linear-gradient(135deg,#7c3aed,#6366f1);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 28px rgba(124,58,237,.5);transition:transform .2s,box-shadow .2s;}
+.chat-toggle:hover{transform:scale(1.08);box-shadow:0 8px 36px rgba(124,58,237,.65);}
+.chat-toggle i{font-size:24px;color:#fff;transition:all .2s;}
+.chat-online-dot{position:absolute;top:2px;right:2px;width:13px;height:13px;background:#22c55e;border-radius:50%;border:2px solid var(--bg);animation:pulse-green 2s ease-in-out infinite;}
+@keyframes pulse-green{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4);}50%{box-shadow:0 0 0 5px rgba(34,197,94,0);}}
+
+/* Chat panel */
+#chat-panel{width:360px;background:var(--bg3);border:1px solid rgba(168,85,247,.22);border-radius:22px;overflow:hidden;display:none;flex-direction:column;box-shadow:0 12px 50px rgba(0,0,0,.6),0 0 0 1px rgba(168,85,247,.08);}
+#chat-panel.open{display:flex;animation:slideUp .25s ease;}
+@keyframes slideUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.cp-header{background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(99,102,241,.15));border-bottom:1px solid rgba(168,85,247,.15);padding:14px 16px;display:flex;align-items:center;gap:10px;}
+.cp-av-wrap{position:relative;flex-shrink:0;}
+.cp-av{width:36px;height:36px;background:linear-gradient(135deg,#6366f1,#a855f7);border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.cp-av-dot{position:absolute;bottom:0;right:0;width:10px;height:10px;background:#22c55e;border-radius:50%;border:2px solid var(--bg3);}
+.cp-info{flex:1;}
+.cp-name{font-size:13.5px;font-weight:700;}
+.cp-status{font-size:11px;color:#86efac;display:flex;align-items:center;gap:4px;margin-top:1px;}
+.cp-status::before{content:'';width:5px;height:5px;background:#22c55e;border-radius:50%;display:inline-block;}
+.cp-actions{display:flex;gap:4px;}
+.cp-action-btn{background:transparent;border:none;color:var(--sub);cursor:pointer;padding:5px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all .18s;}
+.cp-action-btn:hover{background:rgba(255,255,255,.08);color:var(--fg);}
+.cp-msgs{flex:1;padding:14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:360px;min-height:200px;scroll-behavior:smooth;}
+.cp-msgs::-webkit-scrollbar{width:3px;}
+.cp-msgs::-webkit-scrollbar-track{background:transparent;}
+.cp-msgs::-webkit-scrollbar-thumb{background:rgba(168,85,247,.3);border-radius:10px;}
+/* Messages */
+.msg-wrap{display:flex;flex-direction:column;gap:3px;}
+.msg-wrap.user{align-items:flex-end;}
+.msg-bot{background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.15);border-radius:14px 14px 14px 4px;padding:10px 14px;font-size:13px;line-height:1.6;max-width:90%;color:var(--fg);}
+.msg-user{background:linear-gradient(135deg,rgba(124,58,237,.35),rgba(99,102,241,.3));border:1px solid rgba(99,102,241,.25);border-radius:14px 14px 4px 14px;padding:10px 14px;font-size:13px;line-height:1.6;max-width:90%;color:var(--fg);}
+.msg-time{font-size:10px;color:var(--sub);padding:0 4px;}
+/* ── Tarjetas del asistente: presupuestos y consultor ── */
+.msg-bot .chat-card{margin:2px 0;}
+.chat-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;margin-top:6px;}
+.cc-head{font-size:13.5px;font-weight:700;color:var(--fg);margin-bottom:8px;}
+.cc-sec{margin-bottom:9px;}
+.cc-sec:last-child{margin-bottom:0;}
+.cc-tag{display:inline-block;font-size:11px;font-weight:700;color:var(--gold);background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.2);padding:2px 9px;border-radius:100px;margin-bottom:5px;}
+.cc-list{margin:4px 0 0;padding-left:16px;font-size:12.5px;line-height:1.65;color:var(--sub);}
+.cc-list li{margin-bottom:3px;}
+.cc-list b{color:var(--fg);}
+.cc-follow{margin-top:8px;font-size:12.5px;color:var(--fg);background:rgba(168,85,247,.08);border-radius:8px;padding:8px 10px;}
+/* Tabla de presupuesto */
+.budget-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12px;}
+.budget-table th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--sub);padding:4px 6px;border-bottom:1px solid rgba(255,255,255,.1);}
+.budget-table td{padding:6px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:top;}
+.bt-cat{font-weight:600;color:var(--fg);white-space:nowrap;}
+.bt-prov{color:var(--sub);}
+.bt-star{color:var(--gold);font-size:11px;}
+.bt-price{text-align:right;font-weight:700;color:var(--fg);white-space:nowrap;}
+.budget-table tfoot td{border-bottom:none;padding-top:8px;}
+.bt-total-lbl{font-weight:700;color:var(--fg);}
+.bt-total{text-align:right;font-weight:800;color:var(--gold);font-size:14px;}
+.bt-resumen{font-size:11.5px;color:var(--sub);line-height:1.6;padding-bottom:6px;border-bottom:1px dashed rgba(255,255,255,.1);}
+.bt-resumen b{color:var(--fg);}
+.bt-balance{margin-top:8px;font-size:12px;font-weight:600;padding:7px 10px;border-radius:8px;}
+.bt-balance.ok{background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2);}
+.bt-balance.over{background:rgba(251,191,36,.1);color:var(--gold);border:1px solid rgba(251,191,36,.2);}
+.bt-cta{margin-top:9px;font-size:12px;color:var(--fg);}
+.thread-back{margin-top:8px;font-size:12px;color:var(--sub);background:rgba(99,102,241,.08);border-left:2px solid var(--ind);border-radius:0 8px 8px 0;padding:7px 10px;}
+.thread-back b{color:var(--fg);}
+/* Quick replies */
+.quick-replies{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 10px;}
+.qr{background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.2);color:var(--pu);padding:6px 13px;border-radius:100px;font-size:12px;cursor:pointer;transition:all .18s;font-family:'General Sans',sans-serif;}
+.qr:hover{background:rgba(168,85,247,.2);border-color:rgba(168,85,247,.4);}
+/* Input */
+.cp-input-wrap{padding:10px 12px;border-top:1px solid var(--border);background:rgba(0,0,0,.15);}
+.cp-input-row{display:flex;gap:8px;align-items:flex-end;}
+.cp-input{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:10px 13px;font-size:13px;color:var(--fg);font-family:'General Sans',sans-serif;outline:none;resize:none;max-height:100px;line-height:1.5;transition:border-color .2s;}
+.cp-input:focus{border-color:rgba(168,85,247,.4);}
+.cp-send{background:linear-gradient(135deg,#7c3aed,#6366f1);border:none;border-radius:10px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:opacity .2s;box-shadow:0 2px 10px rgba(124,58,237,.4);}
+.cp-send:hover{opacity:.85;}
+.cp-send:disabled{opacity:.4;cursor:not-allowed;}
+.cp-hint{font-size:10.5px;color:var(--sub);margin-top:6px;text-align:center;}
+/* Typing indicator */
+.typing-ind{display:flex;align-items:center;gap:5px;padding:10px 14px;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.12);border-radius:14px 14px 14px 4px;width:fit-content;}
+.typing-ind span{width:6px;height:6px;background:var(--pu);border-radius:50%;animation:typingBounce 1.2s ease infinite;}
+.typing-ind span:nth-child(2){animation-delay:.2s;}
+.typing-ind span:nth-child(3){animation-delay:.4s;}
+@keyframes typingBounce{0%,100%{opacity:.3;transform:translateY(0);}50%{opacity:1;transform:translateY(-5px);}}
+/* Error message */
+.msg-error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:14px;padding:10px 14px;font-size:12.5px;color:#fca5a5;max-width:90%;}
+/* No results */
+.no-results{display:none;text-align:center;padding:4rem 2rem;grid-column:1/-1;}
+.no-results i{font-size:3rem;color:rgba(255,255,255,.15);display:block;margin-bottom:1rem;}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  #prov-grid{grid-template-columns:repeat(2,1fr);}
+  .nav-search{display:none;}
+  .filter-inner{overflow-x:auto;flex-wrap:nowrap;}
+}
+@media(max-width:560px){
+  #prov-grid{grid-template-columns:1fr;}
+  .main{padding:1.25rem;}
+}
+/* ── MODAL: PERFIL PÚBLICO DEL PROVEEDOR ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(5px);z-index:3000;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.pm-box{background:var(--bg2);border:1px solid var(--border);border-radius:20px;width:100%;max-width:560px;max-height:88vh;overflow-y:auto;overflow-x:hidden;position:relative;animation:pmIn .2s ease;scrollbar-width:thin;scrollbar-color:rgba(168,85,247,.35) transparent;}
+.pm-box::-webkit-scrollbar{width:8px;}
+.pm-box::-webkit-scrollbar-track{background:transparent;}
+.pm-box::-webkit-scrollbar-thumb{background:rgba(168,85,247,.3);border-radius:100px;border:2px solid var(--bg2);}
+.pm-box::-webkit-scrollbar-thumb:hover{background:rgba(168,85,247,.5);}
+@keyframes pmIn{from{opacity:0;transform:translateY(14px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+.pm-close{position:absolute;top:14px;right:14px;width:34px;height:34px;background:rgba(13,10,20,.7);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.15);border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;font-size:15px;transition:all .16s;}
+.pm-close:hover{border-color:var(--pu);color:var(--pu);}
+.pm-banner{width:100%;height:150px;background:linear-gradient(135deg,rgba(168,85,247,.25),rgba(99,102,241,.2));overflow:hidden;position:relative;}
+.pm-banner::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 40%,rgba(13,10,20,.5) 78%,var(--bg2) 100%);pointer-events:none;}
+.pm-banner img{width:100%;height:100%;object-fit:cover;display:block;opacity:.85;}
+.pm-content{padding:0 24px 24px;}
+/* Solo el avatar se superpone al banner. El nombre y los datos van debajo,
+   sobre el fondo sólido, para que siempre se lean con claridad. */
+.pm-avatar-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:-34px;margin-bottom:14px;position:relative;z-index:1;}
+.pm-head{display:block;margin-bottom:18px;}
+.pm-avatar{width:76px;height:76px;border-radius:16px;object-fit:cover;border:4px solid var(--bg2);background:#1a1626;flex-shrink:0;display:block;}
+.pm-headinfo{min-width:0;}
+.pm-name{font-size:19px;font-weight:700;color:var(--fg);line-height:1.3;}
+.pm-meta{font-size:12.5px;color:var(--sub);margin-top:4px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.pm-rating{font-size:13px;font-weight:600;color:var(--fg);margin-top:7px;display:flex;align-items:center;gap:5px;}
+.pm-verified{background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.3);color:var(--pu);font-size:11px;font-weight:700;padding:5px 11px;border-radius:100px;white-space:nowrap;flex-shrink:0;}
+.pm-bio{font-size:13px;line-height:1.65;color:var(--sub);padding:14px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;margin-bottom:20px;}
+.pm-section-title{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--sub);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.pm-services{display:flex;flex-direction:column;gap:10px;margin-bottom:22px;}
+.pm-service{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;}
+.pm-service-name{font-size:13.5px;font-weight:600;color:var(--fg);}
+.pm-service-desc{font-size:12px;color:var(--sub);margin-top:2px;}
+.pm-service-price{font-size:14px;font-weight:800;color:var(--or);white-space:nowrap;}
+.pm-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:22px;}
+.pm-gallery img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;background:#1a1626;}
+.pm-cta{width:100%;background:linear-gradient(135deg,var(--pu),var(--ind));color:#fff;border:none;padding:14px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;transition:opacity .16s;}
+.pm-cta:hover{opacity:.9;}
+@media(max-width:520px){
+  .pm-gallery{grid-template-columns:repeat(2,1fr);}
+}
+/* ── SERVICIOS EXPANDIBLES DENTRO DEL MODAL ── */
+.pm-service{display:block;padding:0;overflow:hidden;transition:border-color .16s;}
+.pm-service:hover{border-color:rgba(168,85,247,.3);}
+.pm-service-main{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;}
+.pm-service-info{min-width:0;flex:1;}
+.pm-svc-chev{font-size:14px;color:var(--sub);transition:transform .2s;margin-left:4px;vertical-align:middle;}
+.pm-service.open .pm-svc-chev{transform:rotate(180deg);color:var(--pu);}
+.pm-svc-detail{display:none;padding:0 14px 14px;border-top:1px solid var(--border);}
+.pm-service.open .pm-svc-detail{display:block;animation:svcIn .18s ease;}
+@keyframes svcIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:translateY(0);}}
+.pm-svc-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0;}
+.pm-svc-gallery img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;background:#1a1626;}
+.pm-svc-nofotos{font-size:12px;color:var(--sub);margin:12px 0;}
+.pm-add-cart{width:100%;background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.35);color:var(--or);padding:10px;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-family:inherit;transition:all .16s;}
+.pm-add-cart:hover{background:var(--or);color:#1a0a02;}
+.pm-add-cart.added{background:rgba(74,222,128,.15);border-color:rgba(74,222,128,.4);color:#4ade80;}
+
+/* ── ICONO FLOTANTE DEL CARRITO ── */
+.cart-icon-btn{position:relative;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--fg);width:38px;height:38px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;transition:all .16s;}
+.cart-icon-btn:hover{border-color:var(--or);color:var(--or);}
+.cart-badge{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;background:var(--or);color:#1a0a02;border-radius:100px;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid var(--bg);transition:transform .18s;}
+.cart-badge.pop{transform:scale(1.35);}
+.cart-badge.empty{display:none;}
+
+/* ── PANEL LATERAL DEL CARRITO ── */
+.cart-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:4000;}
+.cart-overlay.open{display:block;}
+.cart-panel{position:absolute;top:0;right:0;height:100%;width:100%;max-width:420px;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;animation:cartIn .22s ease;}
+@keyframes cartIn{from{transform:translateX(100%);}to{transform:translateX(0);}}
+.cart-head{display:flex;align-items:center;justify-content:space-between;padding:20px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.cart-title{font-size:15px;font-weight:700;color:var(--fg);display:flex;align-items:center;gap:8px;}
+.cart-title i{color:var(--or);}
+.cart-close{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--sub);width:32px;height:32px;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.cart-close:hover{color:var(--fg);border-color:var(--pu);}
+
+.cart-view{display:none;flex-direction:column;flex:1;overflow-y:auto;padding:20px;}
+.cart-view.active{display:flex;}
+.cart-items{flex:1;display:flex;flex-direction:column;gap:10px;}
+.cart-item{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:13px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:11px;}
+.cart-item-name{font-size:13.5px;font-weight:600;color:var(--fg);}
+.cart-item-prov{font-size:11.5px;color:var(--sub);margin-top:3px;}
+.cart-item-price{font-size:13.5px;font-weight:800;color:var(--or);white-space:nowrap;}
+.cart-item-remove{background:transparent;border:none;color:var(--sub);cursor:pointer;font-size:14px;padding:2px;line-height:1;transition:color .16s;}
+.cart-item-remove:hover{color:#f87171;}
+.cart-empty{text-align:center;color:var(--sub);font-size:13px;padding:50px 0;}
+.cart-empty i{font-size:38px;opacity:.4;display:block;margin-bottom:12px;}
+
+.cart-foot{border-top:1px solid var(--border);padding-top:16px;margin-top:16px;flex-shrink:0;}
+.cart-total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.cart-total-lbl{font-size:14px;font-weight:600;color:var(--fg);}
+.cart-total-val{font-size:22px;font-weight:800;color:var(--or);}
+.cart-checkout-btn{width:100%;background:linear-gradient(135deg,var(--or),#fbbf24);color:#1a0a02;border:none;padding:14px;border-radius:11px;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;transition:opacity .16s;}
+.cart-checkout-btn:hover{opacity:.92;}
+.cart-checkout-btn:disabled{opacity:.6;cursor:not-allowed;}
+
+/* ── CHECKOUT ── */
+.cart-back{background:transparent;border:none;color:var(--sub);font-size:12.5px;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit;margin-bottom:16px;padding:0;}
+.cart-back:hover{color:var(--fg);}
+.ck-secure{font-size:11.5px;color:#4ade80;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);border-radius:8px;padding:8px 11px;display:flex;align-items:center;gap:6px;margin-bottom:18px;}
+.ck-field{margin-bottom:14px;flex:1;}
+.ck-field label{display:block;font-size:11.5px;color:var(--sub);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;}
+.ck-field input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:9px;padding:12px 13px;color:var(--fg);font-size:14px;font-family:inherit;letter-spacing:.02em;}
+.ck-field input:focus{outline:none;border-color:var(--or);}
+.ck-row{display:flex;gap:12px;}
+.ck-error{color:#f87171;font-size:12px;margin-bottom:12px;min-height:16px;}
+.ck-demo-note{font-size:11px;color:var(--sub);text-align:center;margin-top:12px;}
+.ck-spinner{width:15px;height:15px;border:2px solid rgba(26,10,2,.3);border-top-color:#1a0a02;border-radius:50%;animation:ckspin .6s linear infinite;}
+@keyframes ckspin{to{transform:rotate(360deg);}}
+
+/* ── ÉXITO ── */
+.ck-success{text-align:center;padding:30px 0;margin:auto 0;}
+.ck-success-ico{width:72px;height:72px;margin:0 auto 20px;border-radius:50%;background:rgba(74,222,128,.15);border:2px solid rgba(74,222,128,.4);display:flex;align-items:center;justify-content:center;color:#4ade80;font-size:36px;animation:successPop .35s ease;}
+@keyframes successPop{0%{transform:scale(0);}60%{transform:scale(1.12);}100%{transform:scale(1);}}
+.ck-success-title{font-size:19px;font-weight:800;color:var(--fg);margin-bottom:10px;}
+.ck-success-sub{font-size:13px;color:var(--sub);line-height:1.6;margin-bottom:20px;}
+.ck-success-detail{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:11px;padding:14px;font-size:12.5px;color:var(--sub);margin-bottom:22px;text-align:left;}
+.ck-success-detail b{color:var(--fg);}
+
+@media(max-width:520px){
+  .pm-svc-gallery{grid-template-columns:repeat(2,1fr);}
+}
+/* ── TARJETA: cuerpo clickable + botones separados ── */
+.pcard-clickable{cursor:pointer;}
+.pcard-body-top{padding:14px 16px 10px;}
+.pcard-actions{display:flex;gap:8px;padding:0 16px 16px;}
+.pcard-btn-outline{flex:1;background:transparent;border:1.5px solid var(--or);color:var(--or);padding:10px;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:'General Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .18s;}
+.pcard-btn-outline:hover{background:rgba(249,115,22,.12);}
+.pcard-btn-solid{flex:1;background:var(--or);border:1.5px solid var(--or);color:#1a0a02;padding:10px;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:'General Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .18s;}
+.pcard-btn-solid:hover{opacity:.88;}
+.pcard-btn-solid.added{background:#4ade80;border-color:#4ade80;}
+
+/* ── MODAL: DETALLE DEL SERVICIO DE LA TARJETA ── */
+.sd-box{background:var(--bg2);border:1px solid var(--border);border-radius:20px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;position:relative;animation:pmIn .2s ease;}
+.sd-box::-webkit-scrollbar{width:8px;}
+.sd-box::-webkit-scrollbar-thumb{background:rgba(168,85,247,.3);border-radius:100px;border:2px solid var(--bg2);}
+.sd-hero{height:130px;position:relative;display:flex;align-items:center;justify-content:center;}
+.sd-hero i{font-size:44px;color:rgba(255,255,255,.85);}
+.sd-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 50%,var(--bg2) 100%);}
+.sd-content{padding:0 24px 24px;}
+.sd-name{font-size:19px;font-weight:700;color:var(--fg);margin-bottom:4px;}
+.sd-meta{font-size:12.5px;color:var(--sub);display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.sd-price-box{display:flex;justify-content:space-between;align-items:center;background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.25);border-radius:12px;padding:14px;margin-bottom:20px;}
+.sd-price-lbl{font-size:12px;color:var(--sub);}
+.sd-price-val{font-size:20px;font-weight:800;color:var(--or);}
+.sd-block{margin-bottom:20px;}
+.sd-block-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--sub);margin-bottom:9px;display:flex;align-items:center;gap:6px;}
+.sd-block-title i{color:var(--pu);}
+.sd-text{font-size:13px;line-height:1.65;color:var(--sub);}
+.sd-list{list-style:none;padding:0;margin:0;}
+.sd-list li{font-size:12.5px;color:var(--sub);padding:7px 0 7px 24px;position:relative;line-height:1.5;}
+.sd-list li::before{content:'✓';position:absolute;left:0;top:7px;color:#4ade80;font-weight:800;}
+.sd-list.req li::before{content:'•';color:var(--or);font-size:16px;top:4px;}
+.sd-actions{display:flex;gap:10px;}
+.sd-btn-outline{flex:1;background:transparent;border:1.5px solid rgba(168,85,247,.4);color:var(--pu);padding:13px;border-radius:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .16s;}
+.sd-btn-outline:hover{background:rgba(168,85,247,.12);}
+.sd-btn-solid{flex:1;background:var(--or);border:none;color:#1a0a02;padding:13px;border-radius:11px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;transition:opacity .16s;}
+.sd-btn-solid:hover{opacity:.9;}
+.sd-btn-solid.added{background:#4ade80;}
+
+/* ── SOLICITUD DE DISPONIBILIDAD (carrito) ── */
+.rq-intro{font-size:12.5px;color:var(--sub);line-height:1.6;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.22);border-radius:10px;padding:12px;margin-bottom:18px;}
+.rq-providers{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:18px;}
+.rq-providers-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--sub);margin-bottom:8px;font-weight:700;}
+.rq-prov-chip{display:inline-block;background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.28);color:var(--or);font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:100px;margin:0 5px 5px 0;}
+.rq-field{margin-bottom:14px;}
+.rq-field label{display:block;font-size:11.5px;color:var(--sub);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;}
+.rq-field input,.rq-field select,.rq-field textarea{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:9px;padding:12px 13px;color:var(--fg);font-size:13.5px;font-family:inherit;}
+.rq-field input:focus,.rq-field select:focus,.rq-field textarea:focus{outline:none;border-color:var(--or);}
+.rq-field textarea{resize:vertical;}
+.rq-field input[type="date"]{color-scheme:dark;}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<!-- ═══ NAVBAR ═══ -->
+<header id="nav">
+  <div class="nav-i">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <a href="index_14.html" style="display:inline-flex;align-items:center;gap:5px;color:rgba(245,243,235,.45);text-decoration:none;font-size:13px;font-weight:500;transition:color .18s;flex-shrink:0;" onmouseover="this.style.color='var(--pu)'" onmouseout="this.style.color='rgba(245,243,235,.45)'">
+        <i class="ti ti-arrow-left" style="font-size:14px;"></i> Inicio
+      </a>
+      <span style="color:rgba(255,255,255,.12);font-size:18px;">|</span>
+      <span class="logo"><span class="lp">Todo</span><span class="lo">Eventos</span><span class="dot">.pe</span></span>
+    </div>
+    <div class="nav-search">
+      <i class="ti ti-search"></i>
+      <input type="text" id="nav-search-input" placeholder="Busca DJ, catering, fotógrafo, local…" oninput="handleNavSearch(this.value)">
+    </div>
+    <div class="nav-end">
+      <a href="nosotros.html" class="nl-link">Nosotros</a>
+      <button class="cart-icon-btn" onclick="openCart()" title="Mi presupuesto de evento">
+        <i class="ti ti-shopping-cart"></i>
+        <span class="cart-badge" id="cart-badge">0</span>
+      </button>
+      <a href="login.html?v=2" class="btn-login" id="btn-ingresar" style="text-decoration:none;display:inline-flex;align-items:center;">Ingresar</a>
+
+      <div class="user-menu" id="user-menu">
+        <button class="user-avatar" id="user-avatar-btn" onclick="toggleUserDropdown()"></button>
+        <div class="user-dropdown" id="user-dropdown">
+          <div class="user-dropdown-name" id="user-dropdown-name"></div>
+          <a href="#" id="link-mi-espacio"><i class="ti ti-layout-dashboard" style="font-size:15px;"></i> <span id="link-mi-espacio-texto">Ir al marketplace</span></a>
+          <a href="cuenta.html"><i class="ti ti-user-circle" style="font-size:15px;"></i> Mi cuenta</a>
+          <a href="admin.html" id="link-admin" style="display:none;"><i class="ti ti-shield-lock" style="font-size:15px;"></i> Panel de admin</a>
+          <button class="salir" onclick="cerrarSesion()"><i class="ti ti-logout-2" style="font-size:15px;"></i> Cerrar sesión</button>
+        </div>
+      </div>
+
+      <a href="proveedores.html" class="btn-prov"><i class="ti ti-building-store" style="font-size:13px;"></i> Para Proveedores</a>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ CATEGORY BAR ═══ -->
+<div id="catbar">
+  <div class="catbar-inner">
+    <div class="cat-tab active" onclick="setCategory('all',this)">
+      <span class="cat-tab-icon"><i class="ti ti-layout-grid"></i></span>
+      <span class="cat-tab-label">Todos</span>
+    </div>
+    <div class="cat-tab" onclick="setCategory('musica',this)">
+      <span class="cat-tab-icon"><i class="ti ti-music"></i></span>
+      <span class="cat-tab-label">Música & DJs</span>
+    </div>
+    <div class="cat-tab" onclick="setCategory('catering',this)">
+      <span class="cat-tab-icon"><i class="ti ti-tools-kitchen-2"></i></span>
+      <span class="cat-tab-label">Catering</span>
+    </div>
+    <div class="cat-tab" onclick="setCategory('fotografia',this)">
+      <span class="cat-tab-icon"><i class="ti ti-camera"></i></span>
+      <span class="cat-tab-label">Fotografía & Video</span>
+    </div>
+    <div class="cat-tab" onclick="setCategory('locales',this)">
+      <span class="cat-tab-icon"><i class="ti ti-building"></i></span>
+      <span class="cat-tab-label">Locales & Salones</span>
+    </div>
+    <div class="cat-tab" onclick="setCategory('animadores',this)">
+      <span class="cat-tab-icon"><i class="ti ti-confetti"></i></span>
+      <span class="cat-tab-label">Animadores</span>
+    </div>
+    <div class="cat-tab" onclick="setCategory('decoracion',this)">
+      <span class="cat-tab-icon"><i class="ti ti-sparkles"></i></span>
+      <span class="cat-tab-label">Decoración</span>
+    </div>
+    <div class="cat-tab" onclick="setCategory('bar',this)">
+      <span class="cat-tab-icon"><i class="ti ti-glass-cocktail"></i></span>
+      <span class="cat-tab-label">Bar Móvil</span>
+    </div>
+    <div class="cat-tab" onclick="setCategory('pasteleria',this)">
+      <span class="cat-tab-icon"><i class="ti ti-cake"></i></span>
+      <span class="cat-tab-label">Pastelería</span>
+    </div>
+    <div class="cat-tab" onclick="setCategory('transporte',this)">
+      <span class="cat-tab-icon"><i class="ti ti-bus"></i></span>
+      <span class="cat-tab-label">Transporte</span>
+    </div>
+    <div class="cat-tab" onclick="setCategory('seguridad',this)">
+      <span class="cat-tab-icon"><i class="ti ti-shield-check"></i></span>
+      <span class="cat-tab-label">Seguridad</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FILTER BAR ═══ -->
+<div id="filterbar">
+  <div class="filter-inner">
+    <span class="filter-label">Ordenar:</span>
+    <select class="f-select" id="sort-select" onchange="applyFilters()">
+      <option value="rating">Mejor calificados</option>
+      <option value="price-asc">Precio: menor a mayor</option>
+      <option value="price-desc">Precio: mayor a menor</option>
+      <option value="reviews">Más reseñas</option>
+    </select>
+    <div class="f-divider"></div>
+    <span class="filter-label">Calificación:</span>
+    <div class="f-chip" id="chip-all" onclick="setRating('all',this)">Todas</div>
+    <div class="f-chip" onclick="setRating('4',this)">4+ ★</div>
+    <div class="f-chip" onclick="setRating('4.5',this)">4.5+ ★</div>
+    <div class="f-chip" onclick="setRating('5',this)">Solo 5 ★</div>
+    <div class="f-divider"></div>
+    <span class="filter-label">Distrito:</span>
+    <select class="f-select" id="district-select" onchange="applyFilters()">
+      <option value="all">Todos Lima</option>
+      <option value="Miraflores">Miraflores</option>
+      <option value="San Isidro">San Isidro</option>
+      <option value="Surco">Surco</option>
+      <option value="La Molina">La Molina</option>
+      <option value="San Borja">San Borja</option>
+      <option value="Barranco">Barranco</option>
+      <option value="San Miguel">San Miguel</option>
+    </select>
+    <div class="filter-results" id="filter-results"><span id="count">12</span> proveedores</div>
+  </div>
+</div>
+
+
+<!-- ═══ BREADCRUMB ═══ -->
+<div style="background:var(--bg);border-bottom:1px solid var(--border);">
+  <div style="max-width:1200px;margin:0 auto;padding:10px 2rem;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sub);">
+    <a href="index_14.html" style="display:inline-flex;align-items:center;gap:5px;color:var(--sub);text-decoration:none;transition:color .18s;" onmouseover="this.style.color='var(--pu)'" onmouseout="this.style.color='var(--sub)'">
+      <i class="ti ti-home" style="font-size:14px;"></i> Inicio
+    </a>
+    <i class="ti ti-chevron-right" style="font-size:12px;opacity:.4;"></i>
+    <span style="color:var(--fg);font-weight:600;" id="breadcrumb-cat">Marketplace</span>
+  </div>
+</div>
+<!-- ═══ MAIN CONTENT ═══ -->
+<div class="main">
+  <div class="results-header">
+    <div>
+      <h1 class="results-title" id="results-title">Todos los servicios</h1>
+      <p class="results-sub" id="results-sub">Proveedores verificados disponibles en Lima</p>
+    </div>
+    <div class="sort-row">
+      <button class="sort-btn active" onclick="toggleSort('price-asc',this)"><i class="ti ti-sort-ascending" style="font-size:13px;"></i> Precio</button>
+      <button class="sort-btn" onclick="toggleSort('rating',this)"><i class="ti ti-star" style="font-size:13px;"></i> Mejor calificado</button>
+      <button class="sort-btn" onclick="toggleSort('reviews',this)"><i class="ti ti-message" style="font-size:13px;"></i> Más reseñas</button>
+    </div>
+  </div>
+
+  <div id="prov-grid">
+    <!-- Cards rendered by JS -->
+  </div>
+  <div class="no-results" id="no-results">
+    <i class="ti ti-search-off"></i>
+    <h3>Sin resultados para estos filtros</h3>
+    <p style="color:var(--sub);margin-top:.5rem;">Prueba cambiando la categoría o los filtros</p>
+  </div>
+</div>
+
+<!-- ═══ FLOATING CHATBOT ═══ -->
+<div id="chat-bubble">
+  <div id="chat-panel">
+    <div class="cp-header">
+      <div class="cp-av-wrap">
+        <div class="cp-av"><i class="ti ti-robot" style="color:#fff;font-size:17px;"></i></div>
+        <div class="cp-av-dot"></div>
+      </div>
+      <div class="cp-info">
+        <div class="cp-name">Asistente IA · TodoEventos</div>
+        <div class="cp-status">En línea · responde al instante</div>
+      </div>
+      <div class="cp-actions">
+        <button class="cp-action-btn" onclick="clearChat()" title="Nueva conversación"><i class="ti ti-refresh" style="font-size:15px;"></i></button>
+        <button class="cp-action-btn" onclick="toggleChat()" title="Cerrar"><i class="ti ti-x" style="font-size:15px;"></i></button>
+      </div>
+    </div>
+    <div class="cp-msgs" id="chat-msgs"></div>
+    <div class="quick-replies" id="quick-replies">
+      <span class="qr" onclick="sendQuick(this)">Quiero planificar una boda</span>
+      <span class="qr" onclick="sendQuick(this)">¿Cuánto cuesta un DJ?</span>
+      <span class="qr" onclick="sendQuick(this)">Cumpleaños para 40 niños</span>
+    </div>
+    <div class="cp-input-wrap">
+      <div class="cp-input-row">
+        <textarea class="cp-input" id="chat-input" rows="1" placeholder="Escribe tu consulta…" onkeydown="handleKey(event)"></textarea>
+        <button class="cp-send" id="send-btn" onclick="sendMsg()"><i class="ti ti-send" style="color:#fff;font-size:15px;"></i></button>
+      </div>
+      <div class="cp-hint">Asistente inteligente TodoEventos.pe</div>
+    </div>
+  </div>
+  <button class="chat-toggle" onclick="toggleChat()" style="position:relative;" id="chat-toggle-btn">
+    <i class="ti ti-robot" id="chat-toggle-icon"></i>
+    <span class="chat-online-dot"></span>
+  </button>
+</div>
+
+<script>
+// ─── DATA ───
+const providers = [
+  {id:1,name:"DJ Nexus Lima Pro",cat:"musica",price:350,rating:5.0,reviews:89,district:"Miraflores",tags:["DJ Premium","Luces LED"],img:"b",icon:"ti-music",badge:"🏆 Top Rated"},
+  {id:2,name:"Lima Sound & Light",cat:"musica",price:550,rating:4.8,reviews:61,district:"San Isidro",tags:["Sonido Pro","Iluminación"],img:"h",icon:"ti-speakerphone",badge:"✓ Verificado"},
+  {id:3,name:"Beat Masters Peru",cat:"musica",price:280,rating:4.7,reviews:45,district:"San Miguel",tags:["DJ","Karaoke"],img:"k",icon:"ti-music",badge:"✓ Verificado"},
+  {id:4,name:"Sabores del Perú Catering",cat:"catering",price:800,rating:4.9,reviews:127,district:"Surco",tags:["Catering Criollo","Buffet"],img:"a",icon:"ti-tools-kitchen-2",badge:"✓ Verificado"},
+  {id:5,name:"Eventos & Sabor Lima",cat:"catering",price:650,rating:4.8,reviews:88,district:"La Molina",tags:["Cocina Fusión","Menú ejecutivo"],img:"j",icon:"ti-tools-kitchen-2",badge:"✓ Verificado"},
+  {id:6,name:"Chef en Casa PE",cat:"catering",price:400,rating:4.6,reviews:52,district:"Miraflores",tags:["Catering íntimo","Menú personalizado"],img:"a",icon:"ti-tools-kitchen-2",badge:"Nuevo ✨"},
+  {id:7,name:"Lumina Fotografía",cat:"fotografia",price:450,rating:4.8,reviews:204,district:"San Isidro",tags:["Fotografía","Video 4K"],img:"c",icon:"ti-camera",badge:"✨ Destacado"},
+  {id:8,name:"Recuerdos Films Lima",cat:"fotografia",price:700,rating:5.0,reviews:38,district:"Miraflores",tags:["Cinematic","Drone 4K"],img:"c",icon:"ti-video",badge:"🏆 Top Rated"},
+  {id:9,name:"El Patio de Lima",cat:"locales",price:1200,rating:4.9,reviews:53,district:"La Molina",tags:["Local Premium","200 pers."],img:"d",icon:"ti-building",badge:"✓ Verificado"},
+  {id:10,name:"Salón Gran Miraflores",cat:"locales",price:950,rating:4.7,reviews:41,district:"Miraflores",tags:["Salón de fiestas","120 pers."],img:"i",icon:"ti-building",badge:"✓ Verificado"},
+  {id:11,name:"MagicShow Infantil",cat:"animadores",price:320,rating:4.9,reviews:112,district:"San Borja",tags:["Show Infantil","Animador"],img:"f",icon:"ti-confetti",badge:"✓ Verificado"},
+  {id:12,name:"Circo Arte Lima",cat:"animadores",price:480,rating:4.8,reviews:67,district:"Barranco",tags:["Acrobacia","Shows"],img:"f",icon:"ti-stars",badge:"Popular 🔥"},
+  {id:13,name:"Detalles & Floral Lima",cat:"decoracion",price:600,rating:4.7,reviews:79,district:"San Isidro",tags:["Decoración floral","Bodas"],img:"e",icon:"ti-sparkles",badge:"✓ Verificado"},
+  {id:14,name:"Eventos con Estilo",cat:"decoracion",price:380,rating:4.6,reviews:54,district:"Surco",tags:["Globología","Ambientación"],img:"e",icon:"ti-sparkles",badge:"Nuevo ✨"},
+  {id:15,name:"Coctails Lima Bar",cat:"bar",price:480,rating:4.8,reviews:76,district:"Barranco",tags:["Bar Móvil","Tragos Criollos"],img:"e",icon:"ti-glass-cocktail",badge:"Popular 🔥"},
+  {id:16,name:"Peru Drinks Bar",cat:"bar",price:350,rating:4.6,reviews:43,district:"Miraflores",tags:["Piscos","Coctelería"],img:"e",icon:"ti-glass-cocktail",badge:"✓ Verificado"},
+  {id:17,name:"Dulces Tentaciones Lima",cat:"pasteleria",price:280,rating:4.7,reviews:93,district:"Miraflores",tags:["Tortas temáticas","Cupcakes"],img:"g",icon:"ti-cake",badge:"✓ Verificado"},
+  {id:18,name:"Pastry Art Lima",cat:"pasteleria",price:420,rating:4.9,reviews:65,district:"San Isidro",tags:["Alta pastelería","Wedding Cake"],img:"g",icon:"ti-cake",badge:"🏆 Top Rated"},
+  {id:19,name:"Lima Transfer VIP",cat:"transporte",price:180,rating:4.8,reviews:120,district:"Miraflores",tags:["Transporte VIP","Minivans"],img:"l",icon:"ti-bus",badge:"✓ Verificado"},
+  {id:20,name:"Event Security Peru",cat:"seguridad",price:250,rating:4.7,reviews:88,district:"Surco",tags:["Personal de seguridad","Control de acceso"],img:"l",icon:"ti-shield-check",badge:"✓ Verificado"},
+];
+
+// ─── STATE ───
+let currentCat = 'all';
+let currentRating = 'all';
+let currentSort = 'rating';
+let currentDistrict = 'all';
+let searchQuery = '';
+
+const catNames = {all:'Todos los servicios',musica:'Música & DJs',catering:'Catering',fotografia:'Fotografía & Video',locales:'Locales & Salones',animadores:'Animadores',decoracion:'Decoración',bar:'Bar Móvil',pasteleria:'Pastelería',transporte:'Transporte',seguridad:'Seguridad'};
+
+// ─── RENDER ───
+function render() {
+  let data = [...providers];
+
+  // Filter category
+  if (currentCat !== 'all') data = data.filter(p => p.cat === currentCat);
+
+  // Filter rating
+  if (currentRating !== 'all') data = data.filter(p => p.rating >= parseFloat(currentRating));
+
+  // Filter district
+  const dist = document.getElementById('district-select').value;
+  if (dist !== 'all') data = data.filter(p => p.district === dist);
+
+  // Filter search
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    data = data.filter(p => p.name.toLowerCase().includes(q) || p.tags.some(t => t.toLowerCase().includes(q)) || p.district.toLowerCase().includes(q));
+  }
+
+  // Sort
+  const sort = document.getElementById('sort-select').value;
+  if (sort === 'price-asc') data.sort((a,b) => a.price - b.price);
+  else if (sort === 'price-desc') data.sort((a,b) => b.price - a.price);
+  else if (sort === 'rating') data.sort((a,b) => b.rating - a.rating);
+  else if (sort === 'reviews') data.sort((a,b) => b.reviews - a.reviews);
+
+  const grid = document.getElementById('prov-grid');
+  const noRes = document.getElementById('no-results');
+
+  grid.innerHTML = '';
+
+  if (data.length === 0) {
+    noRes.style.display = 'block';
+    document.getElementById('count').textContent = '0';
+    document.getElementById('results-title').textContent = catNames[currentCat] || 'Resultados';
+    document.getElementById('results-sub').textContent = 'Sin resultados — intenta con otros filtros';
+    return;
+  }
+
+  noRes.style.display = 'none';
+  document.getElementById('count').textContent = data.length;
+  document.getElementById('results-title').textContent = catNames[currentCat] || 'Resultados';
+  document.getElementById('results-sub').textContent = `${data.length} proveedor${data.length !== 1 ? 'es' : ''} verificado${data.length !== 1 ? 's' : ''} en Lima`;
+
+  data.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'pcard';
+    card.innerHTML = `
+      <div class="pcard-clickable" onclick="openServiceDetail(${p.id})">
+        <div class="pcard-img ci-${p.img}">
+          <i class="ti ${p.icon}"></i>
+          <span class="pcard-vbdg">${p.badge}</span>
+          <span class="pcard-price-tag">desde S/. ${p.price}</span>
+          <button class="pcard-fav" onclick="event.stopPropagation();"><i class="ti ti-heart"></i></button>
+        </div>
+        <div class="pcard-body-top">
+          <div class="pcard-name">${p.name}</div>
+          <div class="pcard-rat">
+            <span class="stars">${'★'.repeat(Math.floor(p.rating))}${p.rating % 1 ? '½' : ''}</span>
+            <span class="rn">${p.rating.toFixed(1)}</span>
+            <span class="rc">(${p.reviews} reseñas)</span>
+          </div>
+          <div class="pcard-loc"><i class="ti ti-map-pin" style="font-size:12px;"></i> ${p.district}, Lima</div>
+          <div class="ptags">${p.tags.map((t,i) => `<span class="ptag${i>0?' i':''}">${t}</span>`).join('')}</div>
+        </div>
+      </div>
+      <div class="pcard-actions">
+        <button class="pcard-btn-outline" onclick="openProvider(${p.id})"><i class="ti ti-user"></i> Ver Perfil</button>
+        <button class="pcard-btn-solid" onclick="quickHire(${p.id})"><i class="ti ti-shopping-cart-plus"></i> Contratar</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+// ─── FILTERS ───
+function setCategory(cat, el) {
+  currentCat = cat;
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const bcEl = document.getElementById('breadcrumb-cat');
+  if(bcEl) bcEl.textContent = cat === 'all' ? 'Marketplace' : (catNames[cat] || 'Marketplace');
+  // Update chatbot context
+  if (cat !== 'all') updateChatContext(cat);
+  render();
+}
+
+function setRating(val, el) {
+  currentRating = val;
+  document.querySelectorAll('.f-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function applyFilters() { render(); }
+
+function toggleSort(val, el) {
+  currentSort = val;
+  document.getElementById('sort-select').value = val;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function handleNavSearch(val) {
+  searchQuery = val;
+  render();
+}
+
+// ─── PERFIL PÚBLICO DEL PROVEEDOR ──────────────────────────────────────────
+// Clave compartida con Dashboard.html: si el proveedor editó su bio, precios
+// o fotos desde su panel privado, este marketplace lee esos mismos datos.
+const DASHBOARD_PERFIL_KEY = 'todoeventos_dashboard_perfil_v1';
+// El proveedor demo del catálogo que está conectado al Dashboard real.
+const DASHBOARD_PROVIDER_ID = 1;
+
+function loadDashboardPerfil(){
+  try {
+    const raw = localStorage.getItem(DASHBOARD_PERFIL_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e){ return null; }
+}
+
+function calcRatingFrom(resenas){
+  if(!Array.isArray(resenas) || resenas.length === 0) return null;
+  const suma = resenas.reduce((s,r) => s + (r.estrellas||0), 0);
+  return Math.round((suma/resenas.length)*10)/10;
+}
+
+// Aplica los datos reales del Dashboard sobre el proveedor correspondiente
+// del array `providers`. Así la TARJETA del grid y el MODAL de perfil siempre
+// muestran exactamente la misma información, sin desincronizarse.
+function syncProviderFromDashboard(){
+  const perfil = loadDashboardPerfil();
+  if(!perfil) return;
+  const p = providers.find(x => x.id === DASHBOARD_PROVIDER_ID);
+  if(!p) return;
+
+  if(perfil.nombre) p.name = perfil.nombre;
+  if(perfil.ubicacion) p.district = perfil.ubicacion.split(',')[0].trim();
+
+  // El precio "desde" es el servicio más barato que el proveedor publicó.
+  if(Array.isArray(perfil.servicios) && perfil.servicios.length){
+    const precios = perfil.servicios.map(s => Number(s.precio)).filter(n => !isNaN(n));
+    if(precios.length) p.price = Math.min(...precios);
+  }
+
+  // Rating y reseñas se calculan desde las reseñas reales, nunca son inventados.
+  const calc = calcRatingFrom(perfil.resenas);
+  if(calc !== null){
+    p.rating = calc;
+    p.reviews = perfil.resenas.length;
+  }
+}
+
+function openProvider(providerId) {
+  const p = providers.find(x => x.id === providerId);
+  if(!p) return;
+
+  // Si este proveedor está conectado al Dashboard, se usan sus datos reales.
+  const perfilReal = (p.id === DASHBOARD_PROVIDER_ID) ? loadDashboardPerfil() : null;
+
+  let nombre, categoria, ubicacion, bio, avatarUrl, bannerUrl, rating, reviews, servicios, galeria;
+
+  if(perfilReal){
+    nombre = perfilReal.nombre || p.name;
+    categoria = perfilReal.categoria || catNames[p.cat];
+    ubicacion = perfilReal.ubicacion || p.district + ', Lima';
+    bio = perfilReal.bio || 'Proveedor verificado en TodoEventos.pe.';
+    avatarUrl = perfilReal.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombre)}&background=a855f7&color=fff&size=200`;
+    bannerUrl = perfilReal.bannerUrl || '';
+    const calc = calcRatingFrom(perfilReal.resenas);
+    rating = calc !== null ? calc : p.rating;
+    reviews = Array.isArray(perfilReal.resenas) ? perfilReal.resenas.length : p.reviews;
+    servicios = (perfilReal.servicios || []).map(s => ({ nombre: s.nombre, precio: s.precio, descripcion: s.descripcion, imagenes: s.imagenes || [] }));
+    galeria = [];
+    (perfilReal.servicios || []).forEach(s => { (s.imagenes||[]).forEach(u => galeria.push(u)); });
+    if(Array.isArray(perfilReal.feed)) galeria = galeria.concat(perfilReal.feed);
+  } else {
+    // Fallback: no hay datos reales del dashboard para este proveedor, se arma
+    // un perfil consistente a partir de lo que ya tenemos en el marketplace.
+    nombre = p.name;
+    categoria = catNames[p.cat] || 'Servicio para eventos';
+    ubicacion = p.district + ', Lima';
+    bio = `${p.name} es un proveedor verificado de ${(catNames[p.cat]||'').toLowerCase()} en ${p.district}, con ${p.reviews} reseñas de clientes en TodoEventos.pe. ${p.tags ? 'Especialistas en: ' + p.tags.join(', ') + '.' : ''}`;
+    avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=a855f7&color=fff&size=200`;
+    bannerUrl = '';
+    rating = p.rating;
+    reviews = p.reviews;
+    servicios = [{ nombre: 'Servicio estándar', precio: p.price, descripcion: (p.tags||[]).join(' · ') || 'Consulta el detalle con el proveedor.' }];
+    galeria = [];
+  }
+
+  document.getElementById('pm-name').textContent = nombre;
+  document.getElementById('pm-categoria').textContent = categoria;
+  document.getElementById('pm-ubicacion').textContent = ubicacion;
+  document.getElementById('pm-rating').textContent = Number(rating).toFixed(1);
+  document.getElementById('pm-reviews').textContent = '(' + reviews + ' reseñas)';
+  document.getElementById('pm-bio').textContent = bio;
+  document.getElementById('pm-avatar-img').src = avatarUrl;
+  document.getElementById('pm-badge').textContent = p.badge || '✓ Verificado';
+
+  const bannerImg = document.getElementById('pm-banner-img');
+  bannerImg.src = bannerUrl || avatarUrl;
+  bannerImg.style.opacity = bannerUrl ? '.85' : '.25';
+
+  const svGrid = document.getElementById('pm-services');
+  // Guardamos los servicios del proveedor abierto para poder expandirlos y
+  // añadirlos al carrito sabiendo siempre a quién se le compra.
+  currentModalProvider = { id: p.id, nombre: nombre };
+  currentModalServicios = servicios;
+
+  svGrid.innerHTML = servicios.map((s, i) => {
+    const imgs = s.imagenes || [];
+    const galeriaHtml = imgs.length
+      ? `<div class="pm-svc-gallery">${imgs.slice(0,6).map(u => `<img src="${u}" alt="${s.nombre}">`).join('')}</div>`
+      : `<div class="pm-svc-nofotos">Este paquete aún no tiene fotos.</div>`;
+    return `
+    <div class="pm-service" id="pm-svc-${i}">
+      <div class="pm-service-main" onclick="toggleServiceDetail(${i})">
+        <div class="pm-service-info">
+          <div class="pm-service-name">${s.nombre} <i class="ti ti-chevron-down pm-svc-chev" id="pm-svc-chev-${i}"></i></div>
+          <div class="pm-service-desc">${s.descripcion || ''}</div>
+        </div>
+        <div class="pm-service-price">${money(s.precio)}</div>
+      </div>
+      <div class="pm-svc-detail" id="pm-svc-detail-${i}">
+        ${galeriaHtml}
+        <button class="pm-add-cart" onclick="event.stopPropagation(); addToCart(${i})">
+          <i class="ti ti-shopping-cart"></i> Añadir al carrito
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+
+  const galGrid = document.getElementById('pm-gallery');
+  galGrid.innerHTML = galeria.length
+    ? galeria.slice(0,9).map(u => `<img src="${u}" alt="Foto de ${nombre}">`).join('')
+    : '<div style="grid-column:1/-1;color:var(--sub);font-size:12.5px;">Este proveedor aún no ha subido fotos de su trabajo.</div>';
+
+  document.getElementById('provider-modal-overlay').dataset.providerName = nombre;
+  document.getElementById('provider-modal-overlay').classList.add('open');
+}
+
+function closeProviderModal(){
+  document.getElementById('provider-modal-overlay').classList.remove('open');
+}
+
+// ─── SERVICIOS EXPANDIBLES ─────────────────────────────────────────────────
+let currentModalProvider = null;   // { id, nombre } del proveedor abierto
+let currentModalServicios = [];    // sus servicios, para el carrito
+
+function toggleServiceDetail(i){
+  const el = document.getElementById('pm-svc-' + i);
+  if(el) el.classList.toggle('open');
+}
+
+// ─── CARRITO DE EVENTOS ────────────────────────────────────────────────────
+const CART_STORAGE_KEY = 'todoeventos_carrito_v1';
+
+function loadCart(){
+  try {
+    const raw = localStorage.getItem(CART_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e){ return []; }
+}
+
+function saveCart(){
+  try { localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart)); }
+  catch(e){ console.warn('No se pudo guardar el carrito', e); }
+}
+
+let cart = loadCart();
+
+function cartTotal(){
+  return cart.reduce((sum, item) => sum + Number(item.precio), 0);
+}
+
+function updateCartBadge(){
+  const badge = document.getElementById('cart-badge');
+  if(!badge) return;
+  badge.textContent = cart.length;
+  badge.classList.toggle('empty', cart.length === 0);
+  // pequeño "pop" al cambiar
+  badge.classList.add('pop');
+  setTimeout(() => badge.classList.remove('pop'), 180);
+}
+
+function addToCart(servicioIndex){
+  if(!currentModalProvider) return;
+  const s = currentModalServicios[servicioIndex];
+  if(!s) return;
+
+  // Evita duplicar exactamente el mismo servicio del mismo proveedor
+  const yaExiste = cart.some(it => it.proveedorId === currentModalProvider.id && it.servicio === s.nombre);
+  if(yaExiste){
+    addBotMsg(`<b>${s.nombre}</b> ya está en tu presupuesto. 🛒`);
+    if(!document.getElementById('chat-panel').classList.contains('open')) toggleChat();
+    return;
+  }
+
+  cart.push({
+    id: 'ci' + Date.now(),
+    proveedorId: currentModalProvider.id,
+    proveedor: currentModalProvider.nombre,
+    servicio: s.nombre,
+    precio: Number(s.precio)
+  });
+  saveCart();
+  updateCartBadge();
+
+  // Feedback visual en el botón
+  const btns = document.querySelectorAll('#pm-svc-' + servicioIndex + ' .pm-add-cart');
+  btns.forEach(b => {
+    b.classList.add('added');
+    b.innerHTML = '<i class="ti ti-check"></i> Añadido al carrito';
+    setTimeout(() => {
+      b.classList.remove('added');
+      b.innerHTML = '<i class="ti ti-shopping-cart"></i> Añadir al carrito';
+    }, 1600);
+  });
+}
+
+function removeFromCart(itemId){
+  cart = cart.filter(it => it.id !== itemId);
+  saveCart();
+  updateCartBadge();
+  renderCart();
+}
+
+function renderCart(){
+  const cont = document.getElementById('cart-items');
+  const foot = document.getElementById('cart-foot');
+  if(!cont) return;
+
+  if(cart.length === 0){
+    cont.innerHTML = '<div class="cart-empty"><i class="ti ti-shopping-cart-off"></i>Tu presupuesto está vacío.<br>Explora proveedores y añade sus paquetes.</div>';
+    if(foot) foot.style.display = 'none';
+    return;
+  }
+
+  if(foot) foot.style.display = 'block';
+  cont.innerHTML = cart.map(it => `
+    <div class="cart-item">
+      <div style="min-width:0;">
+        <div class="cart-item-name">${it.servicio}</div>
+        <div class="cart-item-prov">Por: ${it.proveedor}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+        <span class="cart-item-price">${money(it.precio)}</span>
+        <button class="cart-item-remove" onclick="removeFromCart('${it.id}')" title="Quitar"><i class="ti ti-x"></i></button>
+      </div>
+    </div>`).join('');
+
+  const total = cartTotal();
+  document.getElementById('cart-total').textContent = money(total);
+  const payText = document.getElementById('ck-pay-text');
+  if(payText) payText.textContent = 'Pagar ' + money(total);
+}
+
+function showCartView(view){
+  ['list','request','success'].forEach(v => {
+    document.getElementById('cart-view-' + v).classList.toggle('active', v === view);
+  });
+  const title = document.getElementById('cart-title');
+  if(view === 'list') title.innerHTML = '<i class="ti ti-shopping-cart"></i> Mi Presupuesto de Evento';
+  else if(view === 'request') title.innerHTML = '<i class="ti ti-calendar-check"></i> Solicitar disponibilidad';
+  else title.innerHTML = '<i class="ti ti-circle-check"></i> Solicitud enviada';
+}
+
+function openCart(){
+  renderCart();
+  showCartView('list');
+  document.getElementById('cart-overlay').classList.add('open');
+}
+
+function closeCart(){
+  document.getElementById('cart-overlay').classList.remove('open');
+}
+
+// ─── SOLICITUD DE DISPONIBILIDAD (anti-overbooking) ────────────────────────
+// En vez de cobrar de inmediato, se le pregunta a cada proveedor si tiene la
+// fecha libre. Solo cuando aceptan, el cliente coordina el pago.
+const REQUESTS_STORAGE_KEY = 'todoeventos_solicitudes_v1';
+
+function loadRequests(){
+  try {
+    const raw = localStorage.getItem(REQUESTS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e){ return []; }
+}
+
+function saveRequests(list){
+  try { localStorage.setItem(REQUESTS_STORAGE_KEY, JSON.stringify(list)); }
+  catch(e){ console.warn('No se pudo guardar la solicitud', e); }
+}
+
+function goToRequest(){
+  if(cart.length === 0) return;
+  document.getElementById('rq-error').textContent = '';
+
+  // Muestra a qué proveedores se enviará la solicitud
+  const proveedores = [...new Set(cart.map(it => it.proveedor))];
+  document.getElementById('rq-providers-list').innerHTML =
+    proveedores.map(p => `<span class="rq-prov-chip">${p}</span>`).join('');
+
+  // La fecha mínima es mañana
+  const manana = new Date();
+  manana.setDate(manana.getDate() + 1);
+  document.getElementById('rq-fecha').min = manana.toISOString().split('T')[0];
+
+  showCartView('request');
+}
+
+function backToCart(){
+  showCartView('list');
+}
+
+function sendAvailabilityRequest(){
+  const cliente = document.getElementById('rq-cliente').value.trim();
+  const fecha = document.getElementById('rq-fecha').value;
+  const tipo = document.getElementById('rq-tipo').value;
+  const mensaje = document.getElementById('rq-mensaje').value.trim();
+  const errEl = document.getElementById('rq-error');
+
+  if(!cliente){ errEl.textContent = 'Escribe tu nombre para que el proveedor sepa quién solicita.'; return; }
+  if(!fecha){ errEl.textContent = 'Elige la fecha de tu evento.'; return; }
+  const fechaSel = new Date(fecha + 'T00:00:00');
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  if(fechaSel <= hoy){ errEl.textContent = 'La fecha del evento debe ser posterior a hoy.'; return; }
+  errEl.textContent = '';
+
+  const btn = document.getElementById('rq-send-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="ck-spinner"></span> Enviando solicitud…';
+
+  const proveedoresSet = [...new Set(cart.map(it => it.proveedor))];
+  const totalEstimado = cartTotal();
+  const cantidadServicios = cart.length;
+
+  setTimeout(() => {
+    // La solicitud se divide POR PROVEEDOR: cada uno recibe solo sus servicios
+    const requests = loadRequests();
+    const grupoId = 'grp' + Date.now();
+
+    proveedoresSet.forEach(nombreProv => {
+      const susServicios = cart.filter(it => it.proveedor === nombreProv);
+      requests.push({
+        id: 'rq' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+        grupoId,
+        proveedorId: susServicios[0].proveedorId,
+        proveedor: nombreProv,
+        cliente,
+        fecha,
+        tipoEvento: tipo,
+        mensaje: mensaje || '(Sin mensaje adicional)',
+        servicios: susServicios.map(s => ({ nombre: s.servicio, precio: s.precio })),
+        total: susServicios.reduce((sum,s) => sum + s.precio, 0),
+        estado: 'pendiente',
+        creada: new Date().toISOString()
+      });
+    });
+    saveRequests(requests);
+
+    // Resumen de la solicitud
+    const fechaBonita = fechaSel.toLocaleDateString('es-PE', { day:'numeric', month:'long', year:'numeric' });
+    document.getElementById('ck-success-detail').innerHTML =
+      `<div style="margin-bottom:6px;">Evento: <b>${tipo}</b> el <b>${fechaBonita}</b></div>` +
+      `<div style="margin-bottom:6px;"><b>${cantidadServicios}</b> servicio${cantidadServicios!==1?'s':''} solicitado${cantidadServicios!==1?'s':''} a <b>${proveedoresSet.length}</b> proveedor${proveedoresSet.length!==1?'es':''}</div>` +
+      `<div style="margin-bottom:6px;">Proveedores: <b>${proveedoresSet.join(', ')}</b></div>` +
+      `<div>Presupuesto estimado: <b style="color:var(--or);">${money(totalEstimado)}</b></div>` +
+      `<div style="margin-top:10px;font-size:11.5px;opacity:.75;">Aún no se ha cobrado nada. Espera la confirmación de disponibilidad.</div>`;
+
+    cart = [];
+    saveCart();
+    updateCartBadge();
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-send"></i> Enviar Solicitud de Reserva';
+    document.getElementById('rq-cliente').value = '';
+    document.getElementById('rq-fecha').value = '';
+    document.getElementById('rq-mensaje').value = '';
+
+    showCartView('success');
+  }, 1400);
+}
+
+// ─── CONTRATAR RÁPIDO desde la tarjeta ─────────────────────────────────────
+function quickHire(providerId){
+  const p = providers.find(x => x.id === providerId);
+  if(!p) return;
+
+  const servicioNombre = 'Servicio base — ' + (catNames[p.cat] || 'Evento');
+  const yaExiste = cart.some(it => it.proveedorId === p.id && it.servicio === servicioNombre);
+  if(yaExiste){
+    addBotMsg(`El servicio base de <b>${p.name}</b> ya está en tu presupuesto. 🛒`);
+    if(!document.getElementById('chat-panel').classList.contains('open')) toggleChat();
+    return;
+  }
+
+  cart.push({
+    id: 'ci' + Date.now(),
+    proveedorId: p.id,
+    proveedor: p.name,
+    servicio: servicioNombre,
+    precio: Number(p.price)
+  });
+  saveCart();
+  updateCartBadge();
+
+  // Feedback visual en el botón que se presionó
+  if(typeof event !== 'undefined' && event && event.currentTarget){
+    const b = event.currentTarget;
+    const original = b.innerHTML;
+    b.classList.add('added');
+    b.innerHTML = '<i class="ti ti-check"></i> Añadido';
+    setTimeout(() => { b.classList.remove('added'); b.innerHTML = original; }, 1500);
+  }
+}
+
+// ─── MODAL: DETALLE DEL SERVICIO DE LA TARJETA ─────────────────────────────
+let currentDetailProviderId = null;
+
+// Contenido "redactado por el proveedor" para cada categoría de servicio.
+const serviceDetailContent = {
+  musica: {
+    desc: 'Servicio integral de música y sonido profesional para tu evento. Incluye DJ con experiencia leyendo la pista, equipo de audio calibrado para el tamaño de tu local, y coordinación previa del repertorio contigo.',
+    incluye: ['DJ profesional durante todo el evento','Equipo de sonido y consola','Micrófono inalámbrico para discursos','Iluminación básica de pista','Reunión previa para definir el repertorio'],
+    requisitos: ['Punto de energía estable (220v) cerca de la cabina','Área techada de mínimo 2x2m para el equipo','Acceso al local 2 horas antes para montaje']
+  },
+  catering: {
+    desc: 'Servicio de catering completo con cocina en sitio o servicio en frío, según tu evento. Menús adaptables a restricciones alimentarias y opciones vegetarianas disponibles.',
+    incluye: ['Menú personalizado según tu evento','Personal de cocina y servicio','Vajilla, cubertería y cristalería','Montaje y desmontaje de mesas de servicio','Degustación previa para bodas'],
+    requisitos: ['Confirmar número final de invitados 7 días antes','Acceso a agua y punto de energía','Espacio para montaje de cocina si aplica']
+  },
+  fotografia: {
+    desc: 'Cobertura fotográfica y audiovisual completa de tu evento. Entrega de material editado profesionalmente, con galería digital privada para compartir con tus invitados.',
+    incluye: ['Cobertura completa del evento','Fotografías editadas en alta resolución','Galería digital privada','Sesión previa de pareja (bodas)','Entrega en 15 días hábiles'],
+    requisitos: ['Confirmar cronograma del evento con anticipación','Permiso del local para uso de flash y drone','Un asistente puede requerir acceso al backstage']
+  },
+  locales: {
+    desc: 'Alquiler de local para eventos con capacidad y ambientación adaptable. Incluye mobiliario base y acceso a servicios esenciales para que tu celebración fluya sin contratiempos.',
+    incluye: ['Alquiler del local por la jornada','Mobiliario base (mesas y sillas)','Servicios de agua, luz y baños','Estacionamiento para invitados','Personal de limpieza post evento'],
+    requisitos: ['Reserva con al menos 30 días de anticipación','Depósito de garantía reembolsable','Respetar el horario límite de ruido del distrito']
+  },
+  default: {
+    desc: 'Servicio profesional para eventos, adaptado a las necesidades específicas de tu celebración. El proveedor coordinará contigo todos los detalles antes de la fecha.',
+    incluye: ['Servicio completo el día del evento','Coordinación previa con el cliente','Personal capacitado','Materiales y equipos incluidos'],
+    requisitos: ['Confirmar detalles con al menos 15 días de anticipación','Acceso al local para montaje previo']
+  }
+};
+
+function openServiceDetail(providerId){
+  const p = providers.find(x => x.id === providerId);
+  if(!p) return;
+  currentDetailProviderId = providerId;
+
+  const contenido = serviceDetailContent[p.cat] || serviceDetailContent.default;
+
+  document.getElementById('sd-name').textContent = p.name;
+  document.getElementById('sd-categoria').textContent = catNames[p.cat] || 'Servicio';
+  document.getElementById('sd-district').textContent = p.district + ', Lima';
+  document.getElementById('sd-rating').textContent = p.rating.toFixed(1) + ' (' + p.reviews + ')';
+  document.getElementById('sd-price').textContent = money(p.price);
+  document.getElementById('sd-badge').textContent = p.badge || '✓ Verificado';
+  document.getElementById('sd-desc').textContent = contenido.desc;
+  document.getElementById('sd-hero-icon').className = 'ti ' + p.icon;
+  document.getElementById('sd-hero').className = 'sd-hero ci-' + p.img;
+
+  document.getElementById('sd-incluye').innerHTML = contenido.incluye.map(x => `<li>${x}</li>`).join('');
+  document.getElementById('sd-requisitos').innerHTML = contenido.requisitos.map(x => `<li>${x}</li>`).join('');
+
+  const hireBtn = document.getElementById('sd-hire-btn');
+  hireBtn.classList.remove('added');
+  hireBtn.innerHTML = '<i class="ti ti-shopping-cart-plus"></i> Contratar';
+
+  document.getElementById('sd-overlay').classList.add('open');
+}
+
+function closeServiceDetail(){
+  document.getElementById('sd-overlay').classList.remove('open');
+}
+
+function openProviderFromDetail(){
+  const id = currentDetailProviderId;
+  closeServiceDetail();
+  if(id !== null) openProvider(id);
+}
+
+function hireFromDetail(){
+  if(currentDetailProviderId === null) return;
+  const p = providers.find(x => x.id === currentDetailProviderId);
+  const servicioNombre = 'Servicio base — ' + (catNames[p.cat] || 'Evento');
+  const yaExiste = cart.some(it => it.proveedorId === p.id && it.servicio === servicioNombre);
+
+  const btn = document.getElementById('sd-hire-btn');
+  if(yaExiste){
+    btn.innerHTML = '<i class="ti ti-check"></i> Ya está en tu carrito';
+    return;
+  }
+
+  cart.push({ id:'ci'+Date.now(), proveedorId:p.id, proveedor:p.name, servicio:servicioNombre, precio:Number(p.price) });
+  saveCart();
+  updateCartBadge();
+
+  btn.classList.add('added');
+  btn.innerHTML = '<i class="ti ti-check"></i> Añadido al carrito';
+}
+
+function contactProviderFromModal(){
+  const nombre = document.getElementById('provider-modal-overlay').dataset.providerName || 'este proveedor';
+  closeProviderModal();
+  if (!document.getElementById('chat-panel').classList.contains('open')) toggleChat();
+  setTimeout(() => {
+    addBotMsg(`¡Buena elección! Para reservar con <b>${nombre}</b>, indícame la fecha de tu evento y confirmo su disponibilidad. También puedo armarte un presupuesto completo si me cuentas más del evento. 🎉`);
+  }, 350);
+}
+
+// ─── ASISTENTE TODOEVENTOS — MOTOR DE REGLAS AVANZADO (Vanilla JS) ─────────
+// 100% offline. Gestor de contexto por estados, base de conocimiento de
+// consultor experto (parrilladas, baby showers, etc.), y presupuestos
+// renderizados como HTML estructurado. Sin dependencias externas.
+
+let chatOpen = false;
+let chatInitialized = false;
+let isLoading = false;
+
+// ── GESTOR DE ESTADOS Y CONTEXTO ──────────────────────────────────────────
+// currentContext dice en qué "modo" está la conversación:
+//   'idle'      → sin tema activo
+//   'quoting'   → armando un presupuesto de evento
+//   'consulting'→ pidiendo consejos/listas de planificación
+//   'faq'       → preguntas sueltas (pagos, confianza, cómo reservar)
+const ctx = {
+  currentContext: 'idle',
+  prevContext: null,
+  // datos del evento que se van recordando
+  eventType: null,
+  budget: null,
+  guests: null,
+  district: null,
+  date: null,
+  lastTopic: null,       // último tema tratado (para el "hilo conductor")
+  mentioned: new Set(),  // categorías ya comentadas
+  unclear: 0
+};
+
+function setContext(next) {
+  if (next !== ctx.currentContext) {
+    ctx.prevContext = ctx.currentContext;
+    ctx.currentContext = next;
+  }
+}
+
+const catLabelChat = {musica:'Música & DJs',catering:'Catering',fotografia:'Fotografía & Video',locales:'Locales & Salones',animadores:'Animadores',decoracion:'Decoración',bar:'Bar Móvil',pasteleria:'Pastelería',transporte:'Transporte',seguridad:'Seguridad'};
+
+// ── HELPERS DE MATCH SEGURO (límites de palabra) ──────────────────────────
+function hasWord(msg, phrase) {
+  const esc = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp('(^|[^a-záéíóúñ])' + esc + '($|[^a-záéíóúñ])', 'i').test(msg);
+}
+
+// ── DETECTORES ────────────────────────────────────────────────────────────
+const eventKeywords = {
+  boda: ['boda','matrimonio','casamiento','casarme','casarnos'],
+  cumpleanos_infantil: ['cumpleaños infantil','fiesta infantil','cumple de mi hijo','cumple de mi hija','cumpleaños de mi hijo','cumpleaños de mi hija'],
+  cumpleanos_adulto: ['cumpleaños','cumple','mi cumple'],
+  quinceanero: ['quinceañero','quinceañera','15 años','quince años'],
+  corporativo: ['corporativo','empresa','evento de trabajo','lanzamiento','conferencia'],
+  bautizo: ['bautizo','primera comunión','confirmación'],
+  graduacion: ['graduación','promoción','grado'],
+  parrillada: ['parrilla','parrillada','asado','barbacoa','bbq'],
+  babyshower: ['baby shower','babyshower','revelación de género','revelacion de genero']
+};
+const districtList = ['miraflores','san isidro','surco','la molina','san borja','barranco','san miguel','jesús maría','jesus maria','lince','pueblo libre','magdalena','chorrillos','callao'];
+
+function detectEvent(m){ for(const [t,ws] of Object.entries(eventKeywords)){ if(ws.some(w=>hasWord(m,w))) return t; } return null; }
+function detectDistrict(m){ return districtList.find(d=>hasWord(m,d))||null; }
+function detectBudget(m){
+  let x=m.match(/(\d{1,3}(?:[.,]\d{3})+|\d{4,6})/);
+  if(x){ let n=parseInt(x[1].replace(/[.,]/g,''),10); if(n>=100&&n<=500000) return n; }
+  x=m.match(/(\d+(?:\.\d+)?)\s*mil/); if(x) return Math.round(parseFloat(x[1])*1000);
+  return null;
+}
+function detectGuests(m){ let x=m.match(/(\d{1,4})\s*(personas|invitados|pax|niños|gente|asistentes|comensales)/); return x?parseInt(x[1],10):null; }
+function detectCats(m){
+  const map={
+    musica:['dj','djs','música','musica','sonido','banda','orquesta'],
+    catering:['catering','comida','buffet','banquete','menú','menu','cena','almuerzo','bocaditos'],
+    fotografia:['foto','fotos','fotografía','fotografia','fotógrafo','fotografo','video','filmación','dron','drone'],
+    locales:['local','locales','salón','salon','salones','quinta','terraza','jardín','jardin','recepción'],
+    animadores:['animador','animadores','show infantil','payaso','magia','mago'],
+    decoracion:['decoración','decoracion','globos','flores','centro de mesa','ambientación'],
+    bar:['bar','barra','tragos','coctel','cócteles','licor','bartender'],
+    pasteleria:['torta','tortas','pastel','pasteles','cupcake','postre','postres','repostería'],
+    transporte:['transporte','movilidad','bus','van','traslado','combi'],
+    seguridad:['seguridad','vigilancia','guardias']
+  };
+  const found=[]; for(const [c,ws] of Object.entries(map)){ if(ws.some(w=>hasWord(m,w))) found.push(c); } return found;
+}
+
+// ── ACCESO A LA BASE DE PROVEEDORES ───────────────────────────────────────
+function cheapestIn(cat,n=1){ return providers.filter(p=>p.cat===cat).sort((a,b)=>a.price-b.price).slice(0,n); }
+function bestRatedIn(cat,n=1){ return providers.filter(p=>p.cat===cat).sort((a,b)=>b.rating-a.rating||b.reviews-a.reviews).slice(0,n); }
+function inDistrict(d){ return providers.filter(p=>p.district.toLowerCase()===d); }
+function money(n){ return 'S/. '+n.toLocaleString('es-PE'); }
+
+// ── BASE DE CONOCIMIENTO DEL CONSULTOR EXPERTO ────────────────────────────
+// Respuestas ricas para preguntas abiertas de planificación. Cada entrada
+// devuelve HTML estructurado.
+const knowledgeBase = {
+  parrillada: {
+    triggers: ['parrilla','parrillada','asado','barbacoa','bbq'],
+    build: (guests) => {
+      const n = guests || 20;
+      const carneKg = (n * 0.4).toFixed(1); // 400 g por persona
+      const carbonKg = Math.max(3, Math.round(n * 0.5));
+      const bebidaL = (n * 1.5).toFixed(0);
+      return `
+        <div class="chat-card">
+          <div class="cc-head">🔥 Guía para tu parrillada${guests?` (${n} personas)`:''}</div>
+          <div class="cc-sec"><span class="cc-tag">🍖 Insumos (comida)</span>
+            <ul class="cc-list">
+              <li><b>Carnes:</b> ~${carneKg} kg en total (calcula 350–400 g por persona). Mezcla res, pollo, chorizo y anticuchos.</li>
+              <li><b>Guarniciones:</b> papa nativa, choclo, ensalada criolla, camote.</li>
+              <li><b>Cremas y salsas:</b> ají, chimichurri, huancaína, mostaza y kétchup.</li>
+              <li><b>Bebidas:</b> ~${bebidaL} L en total (gaseosa, agua, cerveza, chicha morada).</li>
+            </ul>
+          </div>
+          <div class="cc-sec"><span class="cc-tag">🛠️ Logística y fierros</span>
+            <ul class="cc-list">
+              <li>Parrilla + ~${carbonKg} kg de carbón + encendedor.</li>
+              <li>Herramientas: pinzas largas, trinchante, cuchillo, tabla.</li>
+              <li>Menaje: platos, cubiertos, vasos, servilletas, papel toalla.</li>
+            </ul>
+          </div>
+          <div class="cc-sec"><span class="cc-tag">🪑 Mobiliario y confort</span>
+            <ul class="cc-list">
+              <li>Mesas y sillas para ${n} personas.</li>
+              <li><b>Toldo o sombra</b> — clave si es de día por el sol de Lima.</li>
+              <li>Opcional: barra móvil, coolers con hielo, música.</li>
+            </ul>
+          </div>
+        </div>`;
+    },
+    followup: '¿Quieres que te muestre proveedores de <b>catering con parrilleros profesionales</b> o de <b>alquiler de mobiliario</b> en el marketplace? 🎯'
+  },
+  babyshower: {
+    triggers: ['baby shower','babyshower','revelación de género','revelacion de genero'],
+    build: (guests) => {
+      const n = guests || 25;
+      return `
+        <div class="chat-card">
+          <div class="cc-head">🍼 Guía para tu baby shower${guests?` (${n} personas)`:''}</div>
+          <div class="cc-sec"><span class="cc-tag">🎀 Ambiente y decoración</span>
+            <ul class="cc-list">
+              <li>Tema y paleta de colores (globos, backdrop para fotos, centros de mesa).</li>
+              <li>Mesa de dulces / candy bar temática.</li>
+            </ul>
+          </div>
+          <div class="cc-sec"><span class="cc-tag">🍰 Comida y bebida</span>
+            <ul class="cc-list">
+              <li>Bocaditos dulces y salados, torta temática, cupcakes.</li>
+              <li>Bebidas sin alcohol (limonada, refrescos, ponche de frutas).</li>
+            </ul>
+          </div>
+          <div class="cc-sec"><span class="cc-tag">🎲 Dinámica</span>
+            <ul class="cc-list">
+              <li>Juegos clásicos, animador/a, y detalles de recuerdo para invitados.</li>
+              <li>Rincón de fotos con marco temático.</li>
+            </ul>
+          </div>
+        </div>`;
+    },
+    followup: '¿Te muestro proveedores de <b>decoración</b>, <b>pastelería</b> o <b>catering de bocaditos</b> para tu baby shower? 🎯'
+  },
+  corporativo: {
+    triggers: ['corporativo','empresa','evento de trabajo','lanzamiento','conferencia'],
+    build: (guests) => {
+      const n = guests || 50;
+      return `
+        <div class="chat-card">
+          <div class="cc-head">💼 Guía para tu evento corporativo${guests?` (${n} personas)`:''}</div>
+          <div class="cc-sec"><span class="cc-tag">📍 Local y logística</span>
+            <ul class="cc-list">
+              <li>Salón o local con aforo para ${n} personas, proyector y sonido.</li>
+              <li>Transporte / estacionamiento para asistentes.</li>
+              <li>Personal: recepción, seguridad, coordinador.</li>
+            </ul>
+          </div>
+          <div class="cc-sec"><span class="cc-tag">🍽️ Catering</span>
+            <ul class="cc-list">
+              <li>Coffee break, almuerzo o cóctel según el horario.</li>
+              <li>Opciones vegetarianas y consideraciones de dieta.</li>
+            </ul>
+          </div>
+          <div class="cc-sec"><span class="cc-tag">🎥 Producción</span>
+            <ul class="cc-list">
+              <li>Fotografía / video del evento, iluminación, branding en pantallas.</li>
+            </ul>
+          </div>
+        </div>`;
+    },
+    followup: '¿Busco proveedores de <b>locales</b>, <b>catering corporativo</b> o <b>producción audiovisual</b> para ti? 🎯'
+  }
+};
+
+function findKnowledge(m) {
+  for (const [key, entry] of Object.entries(knowledgeBase)) {
+    if (entry.triggers.some(t => hasWord(m, t))) return { key, entry };
+  }
+  return null;
+}
+
+// ── PLANTILLAS DE PAQUETE POR EVENTO ──────────────────────────────────────
+const eventTemplates = {
+  boda:['locales','catering','musica','fotografia','decoracion'],
+  cumpleanos_infantil:['animadores','catering','decoracion','pasteleria'],
+  cumpleanos_adulto:['locales','catering','musica','bar'],
+  quinceanero:['locales','catering','musica','fotografia','decoracion'],
+  corporativo:['locales','catering','fotografia','seguridad'],
+  bautizo:['catering','pasteleria','decoracion'],
+  graduacion:['locales','catering','musica','fotografia'],
+  parrillada:['catering','bar','decoracion'],
+  babyshower:['decoracion','pasteleria','catering']
+};
+const eventNames = {boda:'tu boda',cumpleanos_infantil:'el cumpleaños infantil',cumpleanos_adulto:'tu cumpleaños',quinceanero:'el quinceañero',corporativo:'tu evento corporativo',bautizo:'el bautizo',graduacion:'la graduación',parrillada:'tu parrillada',babyshower:'tu baby shower'};
+
+// ── FORMATEADOR DE PRESUPUESTOS (HTML estructurado, no texto plano) ────────
+function renderBudget(eventType, budget, guests, district) {
+  const cats = eventTemplates[eventType] || ['catering','musica','decoracion'];
+  let rows = '', total = 0;
+  cats.forEach(cat => {
+    const pick = budget ? cheapestIn(cat,1)[0] : bestRatedIn(cat,1)[0];
+    if (pick) {
+      total += pick.price;
+      ctx.mentioned.add(cat);
+      rows += `<tr><td class="bt-cat">${catLabelChat[cat]}</td><td class="bt-prov">${pick.name} <span class="bt-star">★${pick.rating}</span></td><td class="bt-price">${money(pick.price)}</td></tr>`;
+    }
+  });
+
+  const evName = eventNames[eventType] || 'tu evento';
+  let resumen = [];
+  resumen.push(`<b>Evento:</b> ${evName.replace(/^(tu|el|la) /,'').replace(/^\w/,c=>c.toUpperCase())}`);
+  if (guests) resumen.push(`<b>Invitados:</b> ${guests}`);
+  if (district) resumen.push(`<b>Distrito:</b> ${district.replace(/^\w/,c=>c.toUpperCase())}`);
+  if (budget) resumen.push(`<b>Presupuesto:</b> ${money(budget)}`);
+
+  let balance = '';
+  if (budget) {
+    const diff = budget - total;
+    balance = diff >= 0
+      ? `<div class="bt-balance ok">✅ Te sobran ${money(diff)} de tu presupuesto</div>`
+      : `<div class="bt-balance over">⚠️ Excede tu presupuesto por ${money(Math.abs(diff))} — puedo ajustar a opciones más económicas</div>`;
+  }
+
+  return `
+    <div class="chat-card budget">
+      <div class="cc-head">🧾 Presupuesto para ${evName}</div>
+      <div class="bt-resumen">${resumen.join(' &nbsp;·&nbsp; ')}</div>
+      <table class="budget-table">
+        <thead><tr><th>Categoría</th><th>Proveedor</th><th>Costo</th></tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot><tr><td colspan="2" class="bt-total-lbl">Total estimado</td><td class="bt-total">${money(total)}</td></tr></tfoot>
+      </table>
+      ${balance}
+      <div class="bt-cta">¿Reservamos estos proveedores o ajustamos algún ítem? Puedes verlos en el <b>marketplace</b> 👆</div>
+    </div>`;
+}
+
+// ── UI DEL CHAT ───────────────────────────────────────────────────────────
+function toggleChat(){
+  chatOpen=!chatOpen;
+  const panel=document.getElementById('chat-panel');
+  const icon=document.getElementById('chat-toggle-icon');
+  if(chatOpen){
+    panel.classList.add('open'); icon.className='ti ti-x';
+    if(!chatInitialized){
+      chatInitialized=true;
+      setTimeout(()=>addBotMsg('¡Hola! 👋 Soy el <b>Asistente TodoEventos</b>, tu planificador de eventos. Cuéntame qué quieres celebrar (tipo, invitados, distrito y presupuesto) y te armo todo. También puedo darte <b>consejos de organización</b> — pruébame con "quiero hacer una parrillada". 🎉'),200);
+    }
+    setTimeout(scrollMsgs,150);
+  } else { panel.classList.remove('open'); icon.className='ti ti-robot'; }
+}
+
+function clearChat(){
+  ctx.currentContext='idle'; ctx.prevContext=null; ctx.eventType=null; ctx.budget=null;
+  ctx.guests=null; ctx.district=null; ctx.date=null; ctx.lastTopic=null; ctx.mentioned.clear(); ctx.unclear=0;
+  document.getElementById('chat-msgs').innerHTML='';
+  document.getElementById('quick-replies').style.display='flex';
+  setTimeout(()=>addBotMsg('Conversación reiniciada. ¡Hola de nuevo! ¿Qué evento organizamos? 🎉'),200);
+}
+
+function scrollMsgs(){ const m=document.getElementById('chat-msgs'); m.scrollTop=m.scrollHeight; }
+function now(){ return new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'}); }
+
+function addBotMsg(html,isError){
+  const msgs=document.getElementById('chat-msgs');
+  const wrap=document.createElement('div'); wrap.className='msg-wrap';
+  const bubble=document.createElement('div'); bubble.className=isError?'msg-error':'msg-bot';
+  // Permite **negrita** y HTML enriquecido (tablas/listas de las tarjetas)
+  bubble.innerHTML=html.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+  const time=document.createElement('div'); time.className='msg-time'; time.textContent=now();
+  wrap.appendChild(bubble); wrap.appendChild(time); msgs.appendChild(wrap); scrollMsgs();
+}
+function addTypingIndicator(){
+  const msgs=document.getElementById('chat-msgs');
+  const ind=document.createElement('div'); ind.className='typing-ind'; ind.id='typing-indicator';
+  ind.innerHTML='<span></span><span></span><span></span>'; msgs.appendChild(ind); scrollMsgs();
+}
+function removeTypingIndicator(){ const i=document.getElementById('typing-indicator'); if(i) i.remove(); }
+function addUserMsg(text){
+  const msgs=document.getElementById('chat-msgs');
+  const wrap=document.createElement('div'); wrap.className='msg-wrap user';
+  const bubble=document.createElement('div'); bubble.className='msg-user'; bubble.textContent=text;
+  const time=document.createElement('div'); time.className='msg-time'; time.textContent=now();
+  wrap.appendChild(bubble); wrap.appendChild(time); msgs.appendChild(wrap);
+  document.getElementById('quick-replies').style.display='none'; scrollMsgs();
+}
+
+// ── HILO CONDUCTOR: puente de vuelta al evento principal ───────────────────
+function threadBack() {
+  if (ctx.eventType && ctx.currentContext !== 'quoting') {
+    const evName = eventNames[ctx.eventType] || 'tu evento';
+    const loc = ctx.district ? ` en ${ctx.district.replace(/^\w/,c=>c.toUpperCase())}` : '';
+    return `<div class="thread-back">💡 Por cierto, ¿lo sumamos al presupuesto de <b>${evName}${loc}</b> que estábamos armando, o lo dejamos como extra?</div>`;
+  }
+  return '';
+}
+
+// ── MOTOR PRINCIPAL ────────────────────────────────────────────────────────
+function generateResponse(raw){
+  const m=raw.toLowerCase().trim();
+
+  // Actualizar memoria
+  const ev=detectEvent(m), dist=detectDistrict(m), bud=detectBudget(m), gue=detectGuests(m), cats=detectCats(m);
+  if(ev) ctx.eventType=ev;
+  if(dist) ctx.district=dist;
+  if(bud) ctx.budget=bud;
+  if(gue) ctx.guests=gue;
+
+  // Intenciones explícitas
+  const asksPrice=/cuánto|cuanto|precio|cobra|sale|costo|vale|tarifa/.test(m);
+  const asksBest=/mejor|recomien|top|cuál elijo|cual elijo|más barato|mas barato|económico|economico/.test(m);
+  const asksPayment=/pago|pagar|yape|plin|tarjeta|culqi|transferencia|efectivo/.test(m);
+  const asksCancel=/cancelar|cancelación|cancelacion|reembolso|devolución|devolucion/.test(m);
+  const asksTrust=/confiable|verificado|estafa|seguro|garantía|garantia/.test(m);
+  const asksReserve=/cómo reservo|como reservo|cómo contrato|como contrato|apartar|reservar/.test(m);
+  const asksProvider=/quiero ser proveedor|soy proveedor|registrar mi negocio|ofrecer mis servicios/.test(m);
+  const asksHelp=/qué puedes hacer|que puedes hacer|en qué ayudas|en que ayudas|para qué sirves/.test(m);
+  const isGreeting=/^(hola|buenas|buenos días|buenos dias|buenas tardes|buenas noches|hey|hi|qué tal|que tal)\b/.test(m);
+  const isThanks=/^(gracias|muchas gracias|genial|perfecto|excelente|buenísimo|ok|listo|dale)\b/.test(m)&&m.split(' ').length<6;
+  const isBye=/^(chau|adiós|adios|nos vemos|bye|hasta luego)\b/.test(m);
+
+  const hasIntent=asksPrice||asksBest||asksPayment||asksCancel||asksTrust||asksReserve||asksProvider||asksHelp||isGreeting||isThanks||isBye;
+  if(hasIntent||ev||bud||gue||dist||cats.length) ctx.unclear=0;
+
+  // ── PRIORIDAD 1: conversacional ──
+  if(isGreeting&&!cats.length&&!ev&&!bud){ setContext('idle'); return '¡Hola! 👋 Cuéntame qué evento quieres organizar, o pídeme consejos (tipo "ideas para una parrillada"). ¿En qué te ayudo?'; }
+  if(isThanks) return '¡De nada! 😊 ¿Seguimos con algo más — otro servicio, comparar proveedores, o ajustar el presupuesto?';
+  if(isBye) return '¡Hasta luego! Cuando quieras retomar, aquí estaré. Que tengas un eventazo. 🎉';
+  if(asksHelp) return 'Puedo: 1) <b>armar presupuestos</b> completos con proveedores reales, 2) darte <b>consejos de organización</b> (parrilladas, baby showers, corporativos), 3) recomendarte y comparar proveedores, y 4) explicarte pagos y reservas. ¿Por dónde empezamos?';
+
+  // ── PRIORIDAD 2: CONSULTOR EXPERTO (base de conocimiento) ──
+  const knowledge=findKnowledge(m);
+  const wantsAdvice=/idea|ideas|consejo|consejos|qué necesito|que necesito|qué compro|que compro|qué debería|que deberia|cómo organizo|como organizo|ayúdame a organizar|ayudame a organizar|lista de|qué llevo|que llevo/.test(m);
+  if(knowledge&&(wantsAdvice||hasWord(m,'parrilla')||hasWord(m,'parrillada')||hasWord(m,'baby shower'))){
+    setContext('consulting');
+    ctx.lastTopic=knowledge.key;
+    const card=knowledge.entry.build(ctx.guests);
+    const back=threadBack();
+    return card+`<div class="cc-follow">${knowledge.entry.followup}</div>`+back;
+  }
+
+  // ── PRIORIDAD 2.5: CÁLCULOS RÁPIDOS DE CONSULTOR (trago, bebida, comida) ──
+  // Estos ganan al re-armado de presupuesto: son preguntas de asesoría, no datos nuevos del evento.
+  const calcSubject = /(trago|alcohol|licor|cerveza|bebida|gaseosa|hielo)/.test(m) ? RegExp.$1 : null;
+  const asksCalc = /cómo calculo|como calculo|cuánto|cuanto|cuánta|cuanta/.test(m) && calcSubject
+                   || /^y (de |del |el )?(trago|alcohol|licor|cerveza|bebida|gaseosa|hielo)s?\??$/.test(m);
+  if(asksCalc && calcSubject){
+    setContext('consulting');
+    const n = detectGuests(m) || ctx.guests || 50;
+    let ans;
+    if(/trago|alcohol|licor|cerveza/.test(calcSubject)){
+      const tragos=n*3, cerveza=(n*1.5).toFixed(0), botellas=Math.ceil(n/8);
+      ans=`Para <b>${n} personas</b> en un evento de 4–5 h, la regla de oro:<ul class="cc-list"><li><b>~3 tragos por persona</b> → unos ${tragos} tragos en total.</li><li>Si es cerveza: ~${cerveza} L (una caja de 12 alcanza para ~15 personas).</li><li>Si es licor fuerte: ~${botellas} botellas de 750 ml + gaseosas/hielo para mezclar.</li></ul>Siempre suma un 10% extra por si acaso. 🍻`;
+    } else if(/gaseosa|bebida/.test(calcSubject)){
+      const litros=(n*1.5).toFixed(0);
+      ans=`Para <b>${n} personas</b> calcula <b>~1.5 L de bebida por persona</b> en un evento largo → unos ${litros} L en total (mezcla gaseosa, agua y refresco natural como chicha o limonada). 🥤`;
+    } else if(/hielo/.test(calcSubject)){
+      const kg=Math.ceil(n*0.5);
+      ans=`Para <b>${n} personas</b> calcula <b>~0.5 kg de hielo por persona</b> → unos ${kg} kg (más si hace calor o hay barra de tragos). 🧊`;
+    }
+    return ans + threadBack();
+  }
+
+  // ── PRIORIDAD 3: preguntas explícitas (ganan al paquete recordado) ──
+  if(asksPrice&&cats.length){
+    setContext('faq');
+    const cat=cats[0]; const cheap=cheapestIn(cat,1)[0]; const best=bestRatedIn(cat,1)[0]; ctx.mentioned.add(cat);
+    return `Para <b>${catLabelChat[cat]}</b> los precios van desde <b>${money(cheap.price)}</b> (${cheap.name}) hasta opciones premium. El mejor calificado es <b>${best.name}</b> (★${best.rating}, ${best.reviews} reseñas) desde ${money(best.price)}.`+threadBack();
+  }
+  if(asksPrice&&!cats.length&&!ev){ setContext('faq'); return '¿De qué servicio quieres el precio — música, catering, fotografía, local, decoración…? Dímelo y te doy el rango exacto.'; }
+  if(asksBest&&cats.length){
+    setContext('faq');
+    const cat=cats[0]; const b=bestRatedIn(cat,2); ctx.mentioned.add(cat);
+    return `En <b>${catLabelChat[cat]}</b> los top son <b>${b[0].name}</b> (★${b[0].rating}, desde ${money(b[0].price)})`+(b[1]?` y <b>${b[1].name}</b> (★${b[1].rating})`:'')+'. ¿Los ves en el marketplace?'+threadBack();
+  }
+  if(asksPayment){ setContext('faq'); return 'Aceptamos <b>Yape</b>, <b>Plin</b>, Visa/Mastercard y Culqi. Todo el cobro es seguro dentro de la plataforma — sin coordinar transferencias por fuera. 💳'; }
+  if(asksCancel){ setContext('faq'); return 'Cada proveedor tiene su política de cancelación visible en su perfil (usualmente reembolso completo cancelando con 7+ días de anticipación). Si algo falla, nuestro soporte media por ti.'; }
+  if(asksTrust){ setContext('faq'); return 'Todos los proveedores pasan verificación de identidad y antecedentes. Las reseñas solo las deja quien reservó de verdad — nada falso. 🛡️'; }
+  if(asksProvider){ setContext('faq'); return '¡Genial! Entra a la sección <b>"Para Proveedores"</b> del menú: creas tu perfil, fijas precios y recibes reservas gratis el primer mes.'; }
+  if(asksReserve&&!ev){ setContext('faq'); return 'Muy fácil: 1) eliges el proveedor, 2) revisas su disponibilidad para tu fecha, 3) confirmas y pagas con Yape/Plin/tarjeta. Queda garantizado al instante. 🎯'; }
+
+  // ── PRIORIDAD 4: armar PRESUPUESTO (solo si hay datos del evento este turno) ──
+  const eventInfoThisTurn = ev || (ctx.eventType && (bud||gue||dist));
+  if(ctx.eventType && eventInfoThisTurn){
+    setContext('quoting');
+    return renderBudget(ctx.eventType, ctx.budget, ctx.guests, ctx.district);
+  }
+
+  // ── PRIORIDAD 5: categoría suelta ──
+  if(cats.length){
+    setContext('faq');
+    const cat=cats[0]; const best=bestRatedIn(cat,1)[0]; const cheap=cheapestIn(cat,1)[0]; ctx.mentioned.add(cat);
+    if(best.name===cheap.name) return `En <b>${catLabelChat[cat]}</b> la mejor opción es <b>${best.name}</b> (★${best.rating}) desde ${money(best.price)}. ¿Qué evento organizas? Te armo el paquete completo.`;
+    return `Para <b>${catLabelChat[cat]}</b>: desde <b>${cheap.name}</b> a ${money(cheap.price)} hasta premium como <b>${best.name}</b> (★${best.rating}). ¿Qué evento organizas? Te armo el paquete completo.`;
+  }
+
+  // ── PRIORIDAD 6: distrito suelto ──
+  if(dist){
+    const list=inDistrict(dist); const nice=dist.replace(/^\w/,c=>c.toUpperCase());
+    if(list.length){ const s=list.slice(0,3).map(p=>`<b>${p.name}</b> (${catLabelChat[p.cat]}, ${money(p.price)})`).join(', '); return `En <b>${nice}</b> tenemos ${list.length} proveedores, por ejemplo: ${s}. ¿Buscas algo puntual ahí?`; }
+    return `Aún no tengo proveedores cargados específicamente en ${nice}, pero cubrimos toda Lima. ¿Qué servicio buscas?`;
+  }
+
+  // ── PRIORIDAD 7: solo presupuesto o invitados ──
+  if(bud&&!ctx.eventType) return `Anotado: <b>${money(bud)}</b> de presupuesto. ¿Para qué evento — boda, cumpleaños, corporativo, quinceañero? Así lo armo a tu medida.`;
+  if(gue&&!ctx.eventType) return `Entendido, ${gue} personas. ¿Qué tipo de evento es y con qué presupuesto? Con eso te recomiendo el paquete ideal.`;
+
+  // ── PRIORIDAD 8: qué es esto ──
+  if(/qué es todoeventos|que es todoeventos|de qué se trata|de que se trata/.test(m)) return 'TodoEventos.pe es el marketplace #1 de servicios para eventos en Lima: +1,200 proveedores verificados y un asistente que arma presupuestos en minutos. Todo con reseñas reales y pago seguro con Yape o Plin.';
+
+  // ── PRIORIDAD 9: fallback (protocolo de incertidumbre) ──
+  ctx.unclear=(ctx.unclear||0)+1;
+  if(ctx.unclear>=2) return 'Puedo ayudarte con: <b>presupuestos</b> de eventos, <b>consejos de organización</b> (parrillada, baby shower, corporativo), <b>precios</b> y recomendaciones de proveedores, o <b>pagos y reservas</b>. ¿Cuál te sirve? 🤔';
+  return 'Cuéntame un poco más: ¿qué evento organizas, cuántas personas, y tienes presupuesto o distrito en mente? También puedo darte ideas de organización si me dices el tipo de evento. 🎉';
+}
+
+// ── ENVÍO ──────────────────────────────────────────────────────────────────
+async function sendMsg(){
+  if(isLoading) return;
+  const input=document.getElementById('chat-input');
+  const msg=input.value.trim(); if(!msg) return;
+  input.value=''; input.style.height='auto';
+  addUserMsg(msg); setLoading(true);
+  await new Promise(r=>setTimeout(r,500+Math.random()*500));
+  const reply=generateResponse(msg);
+  removeTypingIndicator(); addBotMsg(reply); setLoading(false);
+}
+function setLoading(s){ isLoading=s; const b=document.getElementById('send-btn'); if(s){ b.disabled=true; addTypingIndicator(); } else { b.disabled=false; } }
+function handleKey(e){
+  if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMsg(); }
+  const ta=document.getElementById('chat-input'); ta.style.height='auto'; ta.style.height=Math.min(ta.scrollHeight,100)+'px';
+}
+async function sendQuick(el){
+  if(isLoading) return;
+  const msg=el.textContent;
+  if(!document.getElementById('chat-panel').classList.contains('open')) toggleChat();
+  await new Promise(r=>setTimeout(r,chatInitialized?150:900));
+  if(isLoading) return;
+  addUserMsg(msg); setLoading(true);
+  await new Promise(r=>setTimeout(r,500+Math.random()*500));
+  const reply=generateResponse(msg);
+  removeTypingIndicator(); addBotMsg(reply); setLoading(false);
+}
+function updateChatContext(cat){
+  if(chatOpen&&catLabelChat[cat]&&!ctx.mentioned.has(cat)){
+    ctx.mentioned.add(cat);
+    setTimeout(async()=>{
+      if(isLoading) return;
+      setLoading(true); await new Promise(r=>setTimeout(r,500));
+      const best=bestRatedIn(cat,1)[0]; const cheap=cheapestIn(cat,1)[0];
+      removeTypingIndicator();
+      addBotMsg(`Veo que exploras <b>${catLabelChat[cat]}</b> 🎯 El top es <b>${best.name}</b> (★${best.rating}) y el más económico <b>${cheap.name}</b> desde ${money(cheap.price)}. ¿Fecha o presupuesto en mente?`);
+      setLoading(false);
+    },500);
+  }
+}
+
+
+// ─── INIT ───
+
+// ─── READ URL PARAMS (from index_14.html links) ───
+(function(){
+  const p = new URLSearchParams(window.location.search);
+  const cat = p.get('cat');
+  const q   = p.get('q');
+  if(q) {
+    searchQuery = q;
+    const ni = document.getElementById('nav-search-input');
+    if(ni) ni.value = q;
+  }
+  if(cat && catNames[cat]) {
+    currentCat = cat;
+    // Highlight the correct tab
+    document.querySelectorAll('.cat-tab').forEach(t => {
+      const oc = t.getAttribute('onclick') || '';
+      if(oc.includes("'" + cat + "'")) t.classList.add('active');
+      else t.classList.remove('active');
+    });
+    const bcEl = document.getElementById('breadcrumb-cat');
+    if(bcEl && catNames[cat]) bcEl.textContent = catNames[cat];
+  }
+})();
+
+// Sincroniza con el Dashboard antes de pintar por primera vez, para que las
+// tarjetas y el modal muestren exactamente los mismos datos.
+syncProviderFromDashboard();
+render();
+updateCartBadge();
+
+// Tiempo real: si el proveedor edita su perfil en el Dashboard (otra pestaña)
+// y vuelve al marketplace, la información se actualiza sola.
+window.addEventListener('focus', () => {
+  syncProviderFromDashboard();
+  render();
+});
+window.addEventListener('storage', (e) => {
+  if(e.key === DASHBOARD_PERFIL_KEY){
+    syncProviderFromDashboard();
+    render();
+  }
+});
+
+/* ─── Sesión: mostrar "Ingresar" o el menú de usuario según corresponda ─── */
+const SUPABASE_URL = 'https://vqnyaozauljtashpjfoo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxbnlhb3phdWxqdGFzaHBqZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDM0NzIsImV4cCI6MjA5OTI3OTQ3Mn0.0JT-UAQnSUygXPNjI69Sf3Rg3mv_NeTwwz9-7vnWcno';
+
+let sb = null;
+try {
+  const storageAdapter = {
+    getItem: (key) => localStorage.getItem(key) ?? sessionStorage.getItem(key),
+    setItem: (key, value) => {
+      const recordar = localStorage.getItem('te_remember') !== 'false';
+      if(recordar){
+        localStorage.setItem(key, value);
+        sessionStorage.removeItem(key);
+      } else {
+        sessionStorage.setItem(key, value);
+        localStorage.removeItem(key);
+      }
+    },
+    removeItem: (key) => {
+      localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
+    }
+  };
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { storage: storageAdapter }
+  });
+} catch(e) {
+  console.error('No se pudo inicializar Supabase:', e);
+}
+
+function toggleUserDropdown(){
+  document.getElementById('user-dropdown').classList.toggle('open');
+}
+document.addEventListener('click', function(e){
+  const menu = document.getElementById('user-menu');
+  if(menu && !menu.contains(e.target)){
+    document.getElementById('user-dropdown').classList.remove('open');
+  }
+});
+
+async function cerrarSesion(){
+  if(sb) await sb.auth.signOut();
+  window.location.href = 'index_14.html';
+}
+
+async function verificarSesionNav(){
+  if(!sb) return;
+  const { data } = await sb.auth.getSession();
+  if(!data.session) return;
+
+  const usuario = data.session.user;
+  const { data: perfil } = await sb
+    .from('profiles')
+    .select('full_name, role, is_admin')
+    .eq('id', usuario.id)
+    .single();
+
+  const nombre = (perfil && perfil.full_name) ? perfil.full_name : usuario.email;
+  const rol = perfil ? perfil.role : 'cliente';
+
+  // El acceso al panel de admin solo aparece si la cuenta es administradora
+  if(perfil && perfil.is_admin){
+    const linkAdmin = document.getElementById('link-admin');
+    if(linkAdmin) linkAdmin.style.display = 'flex';
+  }
+  const inicial = nombre.trim().charAt(0).toUpperCase();
+
+  document.getElementById('btn-ingresar').style.display = 'none';
+  document.getElementById('user-menu').classList.add('show');
+  document.getElementById('user-avatar-btn').textContent = inicial;
+  document.getElementById('user-dropdown-name').textContent = nombre;
+
+  const destino = rol === 'proveedor' ? 'dashboard.html' : 'catalogo.html';
+  const textoLink = rol === 'proveedor' ? 'Mi dashboard' : 'Ir al marketplace';
+  document.getElementById('link-mi-espacio').href = destino;
+  document.getElementById('link-mi-espacio-texto').textContent = textoLink;
+}
+
+verificarSesionNav();
+</script>
+<!-- ─── MODAL: Perfil Público del Proveedor ─── -->
+<div class="modal-overlay" id="provider-modal-overlay" onclick="if(event.target===this) closeProviderModal()">
+  <div class="pm-box" id="pm-box">
+    <button class="pm-close" onclick="closeProviderModal()"><i class="ti ti-x"></i></button>
+
+    <div class="pm-banner"><img id="pm-banner-img" src="" alt="Portada"></div>
+
+    <div class="pm-content">
+      <div class="pm-avatar-row">
+        <img class="pm-avatar" id="pm-avatar-img" src="" alt="Avatar">
+        <span class="pm-verified" id="pm-badge">✓ Verificado</span>
+      </div>
+
+      <div class="pm-head">
+        <div class="pm-headinfo">
+          <div class="pm-name" id="pm-name">—</div>
+          <div class="pm-meta"><span id="pm-categoria">—</span> &middot; <i class="ti ti-map-pin" style="font-size:12px;"></i> <span id="pm-ubicacion">—</span></div>
+          <div class="pm-rating"><i class="ti ti-star-filled" style="color:var(--gold);"></i> <span id="pm-rating">—</span> <span id="pm-reviews" style="color:var(--sub);font-weight:400;"></span></div>
+        </div>
+      </div>
+
+      <div class="pm-bio" id="pm-bio">—</div>
+
+      <div class="pm-section-title"><i class="ti ti-box"></i> Servicios y paquetes</div>
+      <div class="pm-services" id="pm-services"></div>
+
+      <div class="pm-section-title"><i class="ti ti-photo"></i> Galería</div>
+      <div class="pm-gallery" id="pm-gallery"></div>
+
+      <button class="pm-cta" onclick="contactProviderFromModal()"><i class="ti ti-message-circle-2"></i> Contactar y reservar</button>
+    </div>
+  </div>
+</div>
+<!-- ─── CARRITO / PRESUPUESTO DE EVENTO ─── -->
+<div class="cart-overlay" id="cart-overlay" onclick="if(event.target===this) closeCart()">
+  <aside class="cart-panel" id="cart-panel">
+    <div class="cart-head">
+      <div class="cart-title" id="cart-title"><i class="ti ti-shopping-cart"></i> Mi Presupuesto de Evento</div>
+      <button class="cart-close" onclick="closeCart()"><i class="ti ti-x"></i></button>
+    </div>
+
+    <!-- Estado 1: lista del carrito -->
+    <div class="cart-view" id="cart-view-list">
+      <div class="cart-items" id="cart-items"></div>
+      <div class="cart-foot" id="cart-foot">
+        <div class="cart-total-row">
+          <span class="cart-total-lbl">Total estimado</span>
+          <span class="cart-total-val" id="cart-total">S/. 0</span>
+        </div>
+        <button class="cart-checkout-btn" id="cart-checkout-btn" onclick="goToRequest()">
+          <i class="ti ti-calendar-check"></i> Solicitar Disponibilidad de Fecha
+        </button>
+      </div>
+    </div>
+
+    <!-- Estado 2: solicitud de disponibilidad (anti-overbooking) -->
+    <div class="cart-view" id="cart-view-request">
+      <button class="cart-back" onclick="backToCart()"><i class="ti ti-arrow-left"></i> Volver al carrito</button>
+
+      <div class="rq-intro">
+        <b style="color:var(--fg);">Aún no se cobra nada.</b> Enviaremos tu solicitud a cada proveedor para que confirme si tiene tu fecha libre. Solo cuando acepten, coordinarás el pago.
+      </div>
+
+      <div class="rq-providers">
+        <div class="rq-providers-lbl">Se enviará a</div>
+        <div id="rq-providers-list"></div>
+      </div>
+
+      <div class="rq-field">
+        <label>Tu nombre</label>
+        <input type="text" id="rq-cliente" placeholder="¿Cómo te llamas?">
+      </div>
+      <div class="rq-field">
+        <label>Fecha del evento</label>
+        <input type="date" id="rq-fecha">
+      </div>
+      <div class="rq-field">
+        <label>Tipo de evento</label>
+        <select id="rq-tipo">
+          <option>Boda</option>
+          <option>Quinceañero</option>
+          <option>Cumpleaños</option>
+          <option>Corporativo</option>
+          <option>Bautizo</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="rq-field">
+        <label>Mensaje para los proveedores</label>
+        <textarea id="rq-mensaje" rows="3" placeholder="Cuéntales sobre tu evento: número de invitados, horario, detalles importantes…"></textarea>
+      </div>
+
+      <div class="ck-error" id="rq-error"></div>
+
+      <button class="cart-checkout-btn" id="rq-send-btn" onclick="sendAvailabilityRequest()">
+        <i class="ti ti-send"></i> Enviar Solicitud de Reserva
+      </button>
+    </div>
+
+    <!-- Estado 3: éxito -->
+    <div class="cart-view" id="cart-view-success">
+      <div class="ck-success">
+        <div class="ck-success-ico"><i class="ti ti-calendar-check"></i></div>
+        <div class="ck-success-title">¡Solicitud enviada con éxito! 🎉</div>
+        <div class="ck-success-sub">Los proveedores verificarán su agenda para la fecha elegida y te notificarán si están disponibles.</div>
+        <div class="ck-success-detail" id="ck-success-detail"></div>
+        <button class="cart-checkout-btn" onclick="closeCart()">Volver al marketplace</button>
+      </div>
+    </div>
+  </aside>
+</div>
+<!-- ─── MODAL: Detalle del Servicio de la tarjeta ─── -->
+<div class="modal-overlay" id="sd-overlay" onclick="if(event.target===this) closeServiceDetail()">
+  <div class="sd-box">
+    <button class="pm-close" onclick="closeServiceDetail()"><i class="ti ti-x"></i></button>
+    <div class="sd-hero" id="sd-hero"><i class="ti ti-music" id="sd-hero-icon"></i></div>
+    <div class="sd-content">
+      <div class="sd-name" id="sd-name">—</div>
+      <div class="sd-meta">
+        <span id="sd-categoria">—</span> &middot;
+        <i class="ti ti-map-pin" style="font-size:12px;"></i> <span id="sd-district">—</span> &middot;
+        <i class="ti ti-star-filled" style="font-size:12px;color:var(--gold);"></i> <span id="sd-rating">—</span>
+      </div>
+
+      <div class="sd-price-box">
+        <div>
+          <div class="sd-price-lbl">Servicio base desde</div>
+          <div class="sd-price-val" id="sd-price">S/. 0</div>
+        </div>
+        <span class="pm-verified" id="sd-badge">✓ Verificado</span>
+      </div>
+
+      <div class="sd-block">
+        <div class="sd-block-title"><i class="ti ti-file-description"></i> Descripción del servicio</div>
+        <div class="sd-text" id="sd-desc">—</div>
+      </div>
+
+      <div class="sd-block">
+        <div class="sd-block-title"><i class="ti ti-checklist"></i> Qué incluye el paquete</div>
+        <ul class="sd-list" id="sd-incluye"></ul>
+      </div>
+
+      <div class="sd-block">
+        <div class="sd-block-title"><i class="ti ti-alert-circle"></i> Requerimientos</div>
+        <ul class="sd-list req" id="sd-requisitos"></ul>
+      </div>
+
+      <div class="sd-actions">
+        <button class="sd-btn-outline" onclick="openProviderFromDetail()"><i class="ti ti-user"></i> Ver perfil completo</button>
+        <button class="sd-btn-solid" id="sd-hire-btn" onclick="hireFromDetail()"><i class="ti ti-shopping-cart-plus"></i> Contratar</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

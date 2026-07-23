@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acceso — TodoEventos.pe</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
+:root{
+  --bg:#0D0D0D; --card:#1A1A1A; --card2:#212121; --line:rgba(255,255,255,.08);
+  --fg:#F5F5F5; --sub:#9A9A9A; --gold:#FBBF24; --green:#4ade80; --red:#f87171;
+  /* Acento dinámico — por defecto (Cliente) usa la paleta morada del marketplace */
+  --ac:#a855f7; --ac-2:#6366f1; --ac-soft:rgba(168,85,247,.12); --ac-line:rgba(168,85,247,.30);
+  --ac-ink:#ffffff; --ac-glow:rgba(168,85,247,.35); --ac-shadow:rgba(99,102,241,.30);
+  --glow1:rgba(168,85,247,.14); --glow2:rgba(99,102,241,.10);
+}
+/* ── MODO CLIENTE: paleta morada/índigo (marketplace) ── */
+body.role-cliente{
+  --ac:#a855f7; --ac-2:#6366f1; --ac-soft:rgba(168,85,247,.12); --ac-line:rgba(168,85,247,.30);
+  --ac-ink:#ffffff; --ac-glow:rgba(168,85,247,.35); --ac-shadow:rgba(99,102,241,.30);
+  --glow1:rgba(168,85,247,.16); --glow2:rgba(99,102,241,.10);
+}
+/* ── MODO PROVEEDOR: paleta naranja/negro (dashboard) ── */
+body.role-proveedor{
+  --ac:#F97316; --ac-2:#FBBF24; --ac-soft:rgba(249,115,22,.12); --ac-line:rgba(249,115,22,.28);
+  --ac-ink:#1a0a02; --ac-glow:rgba(249,115,22,.35); --ac-shadow:rgba(249,115,22,.30);
+  --glow1:rgba(249,115,22,.14); --glow2:rgba(251,191,36,.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;transition:background .3s;}
+.glow{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;transition:background .4s;}
+.glow.g1{width:420px;height:420px;background:var(--glow1);top:-120px;right:-100px;}
+.glow.g2{width:360px;height:360px;background:var(--glow2);bottom:-120px;left:-100px;}
+
+.login-wrap{width:100%;max-width:420px;position:relative;z-index:1;}
+.logo{font-size:24px;font-weight:700;text-decoration:none;display:block;text-align:center;margin-bottom:8px;}
+.logo .lp{color:var(--ac);}
+.logo .lo{color:var(--ac-2);}
+.logo .dot{color:rgba(245,245,245,.35);font-weight:400;}
+.login-sub{text-align:center;color:var(--sub);font-size:13.5px;margin-bottom:26px;}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:30px;}
+
+.role-tabs{display:flex;gap:6px;background:var(--card2);border-radius:12px;padding:5px;margin-bottom:24px;}
+.role-tab{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--sub);cursor:pointer;border:none;background:transparent;font-family:inherit;transition:all .18s;}
+.role-tab i{font-size:17px;}
+.role-tab.active{background:var(--ac);color:var(--ac-ink);box-shadow:0 4px 14px var(--ac-glow);}
+
+.role-ctx{text-align:center;margin-bottom:20px;padding:12px;background:var(--card2);border:1px solid var(--line);border-radius:11px;}
+.role-ctx-title{font-size:13.5px;font-weight:600;color:var(--fg);}
+.role-ctx-desc{font-size:12px;color:var(--sub);margin-top:2px;}
+
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:12.5px;color:var(--sub);margin-bottom:7px;font-weight:500;}
+.input-wrap{position:relative;}
+.input-wrap i{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:18px;}
+.field input{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:12px 13px 12px 40px;color:var(--fg);font-size:14px;font-family:inherit;}
+.field input:focus{outline:none;border-color:var(--ac-line);}
+.field input::placeholder{color:rgba(154,154,154,.6);}
+.field-plain{margin-bottom:16px;}
+.field-plain label{display:block;font-size:12.5px;color:var(--sub);margin-bottom:7px;font-weight:500;}
+.field-plain input,.field-plain select,.field-plain textarea{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:11px 13px;color:var(--fg);font-size:13.5px;font-family:inherit;}
+.field-plain input:focus,.field-plain select:focus,.field-plain textarea:focus{outline:none;border-color:var(--ac-line);}
+.field-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.campos-proveedor-title{font-size:12.5px;font-weight:700;color:var(--ac);margin:18px 0 14px;padding-top:14px;border-top:1px dashed var(--line);display:flex;align-items:center;gap:6px;}
+
+.row-between{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;font-size:12.5px;}
+.remember{display:flex;align-items:center;gap:7px;color:var(--sub);cursor:pointer;}
+.remember input{accent-color:var(--ac);width:15px;height:15px;}
+.forgot{color:var(--ac);text-decoration:none;}
+.forgot:hover{text-decoration:underline;}
+
+.msg{border-radius:10px;padding:11px 13px;font-size:12.5px;margin-bottom:16px;display:none;align-items:center;gap:8px;}
+.msg.error{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--red);}
+.msg.loading{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);color:var(--green);}
+.msg.success{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);color:var(--green);}
+.msg.show{display:flex;}
+.spinner{width:14px;height:14px;border:2px solid rgba(74,222,128,.3);border-top-color:var(--green);border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.btn-login{width:100%;background:var(--ac);color:var(--ac-ink);border:none;padding:13px;border-radius:10px;font-size:14.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .16s,background .3s;}
+.btn-login:hover{opacity:.9;}
+.btn-login:disabled{opacity:.6;cursor:not-allowed;}
+
+.foot-note{text-align:center;font-size:12.5px;color:var(--sub);margin-top:20px;}
+.foot-note a{color:var(--ac);text-decoration:none;font-weight:600;}
+.back-home{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:18px;padding:12px;font-size:13.5px;font-weight:600;color:var(--sub);text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:12px;transition:all .18s;}
+.back-home:hover{color:var(--fg);border-color:var(--ac-line);background:var(--card2);}
+</style>
+</head>
+<body class="role-cliente">
+<div class="glow g1"></div>
+<div class="glow g2"></div>
+
+<div class="login-wrap">
+  <span class="logo"><span class="lp">Todo</span><span class="lo">Eventos</span><span class="dot">.pe</span></span>
+  <p class="login-sub">Bienvenido de vuelta 👋</p>
+
+  <div class="card">
+    <div id="vista-form">
+    <div class="role-tabs">
+      <button class="role-tab active" id="tab-cliente" onclick="switchRole('cliente')"><i class="ti ti-user"></i> Acceso Clientes</button>
+      <button class="role-tab" id="tab-proveedor" onclick="switchRole('proveedor')"><i class="ti ti-building-store"></i> Acceso Proveedores</button>
+    </div>
+
+    <div class="role-ctx">
+      <div class="role-ctx-title" id="ctx-title">Ingresa como Cliente</div>
+      <div class="role-ctx-desc" id="ctx-desc">Explora el marketplace y arma tu evento ideal.</div>
+    </div>
+
+    <div class="msg error" id="msg-error"><i class="ti ti-alert-circle"></i> <span id="err-text">Correo o contraseña incorrectos.</span></div>
+    <div class="msg loading" id="msg-loading"><span class="spinner"></span> <span id="load-text">Iniciando sesión…</span></div>
+    <div class="msg success" id="msg-success"><i class="ti ti-mail-check"></i> <span id="success-text"></span></div>
+
+    <div class="field" id="field-nombre" style="display:none;">
+      <label>Nombre completo</label>
+      <div class="input-wrap">
+        <i class="ti ti-user"></i>
+        <input type="text" id="nombre" placeholder="Ej. María Torres">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Correo electrónico</label>
+      <div class="input-wrap">
+        <i class="ti ti-mail"></i>
+        <input type="email" id="email" placeholder="tucorreo@ejemplo.com" autocomplete="username">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Contraseña</label>
+      <div class="input-wrap">
+        <i class="ti ti-lock"></i>
+        <input type="password" id="password" placeholder="********" autocomplete="current-password">
+      </div>
+    </div>
+
+    <div id="campos-proveedor" style="display:none;">
+      <div class="campos-proveedor-title"><i class="ti ti-building-store"></i> Información de tu negocio</div>
+
+      <div class="field-plain">
+        <label>Nombre del negocio</label>
+        <input type="text" id="prov-negocio" placeholder="Ej. DJ Nexus Producciones">
+      </div>
+
+      <div class="field-row2">
+        <div class="field-plain">
+          <label>Categoría del servicio</label>
+          <select id="prov-categoria">
+            <option value="DJ & Sonido">DJ &amp; Sonido</option>
+            <option value="Catering">Catering</option>
+            <option value="Fotografía & Video">Fotografía &amp; Video</option>
+            <option value="Locales & Salones">Locales &amp; Salones</option>
+            <option value="Animadores">Animadores</option>
+            <option value="Decoración">Decoración</option>
+            <option value="Bar Móvil">Bar Móvil</option>
+            <option value="Pastelería">Pastelería</option>
+            <option value="Transporte">Transporte</option>
+            <option value="Seguridad">Seguridad</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div class="field-plain">
+          <label>RUC o DNI</label>
+          <input type="text" id="prov-ruc" placeholder="Ej. 10456789123">
+        </div>
+      </div>
+
+      <div class="field-row2">
+        <div class="field-plain">
+          <label>Teléfono / WhatsApp</label>
+          <input type="tel" id="prov-telefono" placeholder="Ej. 987 654 321">
+        </div>
+        <div class="field-plain">
+          <label>Distrito donde operas</label>
+          <input type="text" id="prov-distrito" placeholder="Ej. Miraflores">
+        </div>
+      </div>
+
+      <div class="field-plain">
+        <label>Describe brevemente tu negocio</label>
+        <textarea id="prov-descripcion" rows="2" placeholder="¿Qué ofreces y qué te diferencia?"></textarea>
+      </div>
+
+      <div class="field-row2">
+        <div class="field-plain">
+          <label>Años de experiencia (opcional)</label>
+          <input type="number" id="prov-experiencia" min="0" placeholder="Ej. 5">
+        </div>
+        <div class="field-plain">
+          <label>Instagram / Web (opcional)</label>
+          <input type="text" id="prov-redes" placeholder="@tunegocio">
+        </div>
+      </div>
+
+      <div class="hint" style="font-size:11.5px;color:var(--sub);margin:-4px 0 16px;line-height:1.6;">
+        Revisaremos tu información antes de activar tu cuenta. Te avisaremos por correo cuando esté aprobada.
+      </div>
+    </div>
+
+    <div class="row-between" id="row-remember">
+      <label class="remember"><input type="checkbox" id="chk-recordar" checked> Recordarme</label>
+      <a href="#" class="forgot">¿Olvidaste tu contraseña?</a>
+    </div>
+
+    <button class="btn-login" id="btn-login" onclick="handleSubmit()"><i class="ti ti-login-2" id="btn-icon"></i> <span id="btn-text">Ingresar al marketplace</span></button>
+
+    <p class="foot-note" id="foot-note">¿Aún no tienes cuenta? <a href="#" onclick="toggleAuthMode();return false;">Regístrate gratis</a></p>
+    </div>
+
+    <!-- ─── Verificación por código (reemplaza el link de confirmación) ─── -->
+    <div id="vista-codigo" style="display:none;">
+      <div class="role-ctx" style="margin-bottom:20px;">
+        <div class="role-ctx-title"><i class="ti ti-mail-check" style="margin-right:6px;"></i> Revisa tu correo</div>
+        <div class="role-ctx-desc">Te enviamos un código de 6 dígitos a <b id="codigo-email-destino" style="color:var(--fg);"></b>. Ingrésalo para activar tu cuenta.</div>
+      </div>
+
+      <div class="msg error" id="msg-error-codigo"><i class="ti ti-alert-circle"></i> <span id="err-text-codigo"></span></div>
+      <div class="msg loading" id="msg-loading-codigo"><span class="spinner"></span> <span id="load-text-codigo">Verificando…</span></div>
+
+      <div class="field">
+        <label>Código de verificación</label>
+        <div class="input-wrap">
+          <i class="ti ti-key"></i>
+          <input type="text" id="codigo-input" placeholder="123456" maxlength="6" inputmode="numeric" style="letter-spacing:4px;font-weight:700;">
+        </div>
+      </div>
+
+      <button class="btn-login" id="btn-verificar-codigo" onclick="verificarCodigo()"><i class="ti ti-check"></i> Verificar código</button>
+
+      <p class="foot-note">¿No te llegó? <a href="#" onclick="reenviarCodigo();return false;">Reenviar código</a> &middot; <a href="#" onclick="volverALogin();return false;">Volver</a></p>
+    </div>
+  </div>
+
+  <a href="index_14.html" class="back-home"><i class="ti ti-arrow-left" style="font-size:14px;"></i> Volver al Inicio</a>
+</div>
+
+<script>
+// ─── Conexión a Supabase ───
+const SUPABASE_URL = 'https://vqnyaozauljtashpjfoo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxbnlhb3phdWxqdGFzaHBqZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDM0NzIsImV4cCI6MjA5OTI3OTQ3Mn0.0JT-UAQnSUygXPNjI69Sf3Rg3mv_NeTwwz9-7vnWcno';
+
+// Si esta librería no cargó (red lenta, bloqueador, etc.), NUNCA debe
+// romper el resto de la página (pestañas, botones). Por eso va en un
+// bloque protegido: si falla, "supabase" queda en null y el login/registro
+// mostrará un mensaje de error claro en vez de dejar todo congelado.
+let sb = null;
+try {
+  // "Recordarme": si está marcado, la sesión se guarda en localStorage
+  // (persiste hasta que cierres sesión). Si no, se guarda en sessionStorage
+  // (se borra sola al cerrar la pestaña/navegador). El indicador
+  // "te_remember" vive siempre en localStorage para que TODAS las páginas
+  // del sitio (index, cuenta, dashboard, etc.) sepan dónde buscar la sesión.
+  const storageAdapter = {
+    getItem: (key) => localStorage.getItem(key) ?? sessionStorage.getItem(key),
+    setItem: (key, value) => {
+      const recordar = localStorage.getItem('te_remember') !== 'false';
+      if(recordar){
+        localStorage.setItem(key, value);
+        sessionStorage.removeItem(key);
+      } else {
+        sessionStorage.setItem(key, value);
+        localStorage.removeItem(key);
+      }
+    },
+    removeItem: (key) => {
+      localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
+    }
+  };
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { storage: storageAdapter }
+  });
+} catch(e) {
+  console.error('No se pudo inicializar Supabase:', e);
+}
+
+const REDIRECT_MAP = { cliente: 'catalogo.html', proveedor: 'dashboard.html' };
+
+let currentRole = 'cliente';
+let authMode = 'login'; // 'login' | 'registro'
+
+const ROLE_UI = {
+  cliente: {
+    ctxTitle: 'Ingresa como Cliente',
+    ctxDesc: 'Explora el marketplace y arma tu evento ideal.',
+  },
+  proveedor: {
+    ctxTitle: 'Ingresa como Proveedor',
+    ctxDesc: 'Gestiona tu negocio desde el panel de herramientas.',
+  }
+};
+
+function switchRole(role){
+  currentRole = role;
+  // cambia la paleta de colores del body según el rol
+  document.body.classList.remove('role-cliente','role-proveedor');
+  document.body.classList.add('role-' + role);
+  document.getElementById('tab-cliente').classList.toggle('active', role === 'cliente');
+  document.getElementById('tab-proveedor').classList.toggle('active', role === 'proveedor');
+  updateUI();
+}
+
+function toggleAuthMode(){
+  authMode = (authMode === 'login') ? 'registro' : 'login';
+  updateUI();
+  hideMessages();
+}
+
+// Combina el rol (cliente/proveedor) y el modo (login/registro) para
+// dejar todos los textos de la pantalla correctos.
+function updateUI(){
+  const ui = ROLE_UI[currentRole];
+  document.getElementById('ctx-title').textContent = ui.ctxTitle;
+  document.getElementById('ctx-desc').textContent = ui.ctxDesc;
+
+  const esRegistro = authMode === 'registro';
+  document.getElementById('field-nombre').style.display = esRegistro ? 'block' : 'none';
+  document.getElementById('campos-proveedor').style.display = (esRegistro && currentRole === 'proveedor') ? 'block' : 'none';
+  document.getElementById('row-remember').style.display = esRegistro ? 'none' : 'flex';
+  document.getElementById('btn-icon').className = esRegistro ? 'ti ti-user-plus' : 'ti ti-login-2';
+
+  if(esRegistro){
+    document.getElementById('btn-text').textContent = currentRole === 'cliente'
+      ? 'Crear mi cuenta' : 'Crear cuenta de proveedor';
+    document.getElementById('foot-note').innerHTML =
+      '¿Ya tienes cuenta? <a href="#" onclick="toggleAuthMode();return false;">Inicia sesión</a>';
+  } else {
+    document.getElementById('btn-text').textContent = currentRole === 'cliente'
+      ? 'Ingresar al marketplace' : 'Ingresar al dashboard';
+    document.getElementById('foot-note').innerHTML = (currentRole === 'cliente')
+      ? '¿Aún no tienes cuenta? <a href="#" onclick="toggleAuthMode();return false;">Regístrate gratis</a>'
+      : '¿Quieres vender en TodoEventos? <a href="proveedores.html">Conoce los planes</a> · <a href="#" onclick="toggleAuthMode();return false;">o crea tu cuenta</a>';
+  }
+}
+
+function hideMessages(){
+  document.getElementById('msg-error').classList.remove('show');
+  document.getElementById('msg-loading').classList.remove('show');
+  document.getElementById('msg-success').classList.remove('show');
+}
+function showError(text){
+  hideMessages();
+  document.getElementById('err-text').textContent = text;
+  document.getElementById('msg-error').classList.add('show');
+}
+function showLoading(text){
+  hideMessages();
+  document.getElementById('load-text').textContent = text;
+  document.getElementById('msg-loading').classList.add('show');
+}
+function showSuccess(text){
+  hideMessages();
+  document.getElementById('success-text').textContent = text;
+  document.getElementById('msg-success').classList.add('show');
+}
+function setBusy(busy){
+  document.getElementById('btn-login').disabled = busy;
+}
+
+function handleSubmit(){
+  if(authMode === 'login') doLogin();
+  else doRegister();
+}
+
+async function doLogin(){
+  hideMessages();
+  if(!sb){
+    showError('No se pudo conectar con el servidor. Revisa tu conexión a internet y recarga la página.');
+    return;
+  }
+  const email = document.getElementById('email').value.trim().toLowerCase();
+  const pass = document.getElementById('password').value.trim();
+
+  if(!email || !pass){
+    showError('Completa tu correo y contraseña para continuar.');
+    return;
+  }
+
+  setBusy(true);
+  showLoading(currentRole === 'cliente' ? 'Iniciando sesión…' : 'Accediendo al dashboard…');
+
+  const recordar = document.getElementById('chk-recordar').checked;
+  localStorage.setItem('te_remember', recordar ? 'true' : 'false');
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+
+  if(error){
+    setBusy(false);
+    showError('Correo o contraseña incorrectos. Revisa los datos e intenta de nuevo.');
+    return;
+  }
+
+  // Buscamos el perfil para saber si es cliente o proveedor y redirigir bien
+  const { data: perfil, error: perfilError } = await sb
+    .from('profiles')
+    .select('role')
+    .eq('id', data.user.id)
+    .single();
+
+  if(perfilError || !perfil){
+    setBusy(false);
+    console.error('Error leyendo el perfil:', perfilError);
+    const detalle = perfilError ? (perfilError.message || JSON.stringify(perfilError)) : 'no se encontró la fila';
+    showError('No se pudo leer tu perfil: ' + detalle);
+    return;
+  }
+
+  if(perfil.role !== currentRole){
+    setBusy(false);
+    const tabName = perfil.role === 'cliente' ? 'Clientes' : 'Proveedores';
+    showError('Esa cuenta es de ' + perfil.role + '. Cambia a la pestaña "Acceso ' + tabName + '".');
+    return;
+  }
+
+  window.location.href = REDIRECT_MAP[perfil.role] || 'index_14.html';
+}
+
+async function doRegister(){
+  hideMessages();
+  if(!sb){
+    showError('No se pudo conectar con el servidor. Revisa tu conexión a internet y recarga la página.');
+    return;
+  }
+  const nombre = document.getElementById('nombre').value.trim();
+  const email = document.getElementById('email').value.trim().toLowerCase();
+  const pass = document.getElementById('password').value.trim();
+
+  if(!nombre || !email || !pass){
+    showError('Completa tu nombre, correo y contraseña para continuar.');
+    return;
+  }
+  if(pass.length < 6){
+    showError('Tu contraseña debe tener al menos 6 caracteres.');
+    return;
+  }
+
+  // Datos extra obligatorios solo si te registras como proveedor
+  let datosProveedor = null;
+  if(currentRole === 'proveedor'){
+    const negocio = document.getElementById('prov-negocio').value.trim();
+    const categoria = document.getElementById('prov-categoria').value;
+    const ruc = document.getElementById('prov-ruc').value.trim();
+    const telefono = document.getElementById('prov-telefono').value.trim();
+    const distrito = document.getElementById('prov-distrito').value.trim();
+    const descripcion = document.getElementById('prov-descripcion').value.trim();
+
+    if(!negocio || !ruc || !telefono || !distrito || !descripcion){
+      showError('Completa toda la información de tu negocio (nombre, RUC/DNI, teléfono, distrito y descripción).');
+      return;
+    }
+
+    datosProveedor = {
+      nombre_negocio: negocio,
+      categoria: categoria,
+      ruc_dni: ruc,
+      telefono: telefono,
+      distrito: distrito,
+      descripcion: descripcion,
+      anios_experiencia: document.getElementById('prov-experiencia').value
+        ? parseInt(document.getElementById('prov-experiencia').value, 10) : null,
+      redes_sitio: document.getElementById('prov-redes').value.trim()
+    };
+  }
+
+  setBusy(true);
+  showLoading('Creando tu cuenta…');
+
+  // Le pasamos nombre y rol como "metadata" del registro: la función
+  // automática de la base de datos (handle_new_user) los toma de aquí
+  // para crear tu fila en "profiles" sin que nosotros tengamos que
+  // hacerlo por separado (evita choques/duplicados).
+  const { data, error } = await sb.auth.signUp({
+    email,
+    password: pass,
+    options: {
+      data: {
+        full_name: nombre,
+        role: currentRole
+      }
+    }
+  });
+
+  setBusy(false);
+
+  if(error){
+    const msg = (error.message || '').toLowerCase().includes('already registered')
+      ? 'Ese correo ya tiene una cuenta. Inicia sesión en vez de registrarte.'
+      : 'No se pudo crear la cuenta: ' + error.message;
+    showError(msg);
+    return;
+  }
+
+  if(data.session){
+    // El proyecto no exige confirmar el correo: ya hay sesión activa,
+    // así que podemos registrar la solicitud de proveedor de una vez.
+    if(currentRole === 'proveedor' && data.user){
+      const { error: errSolicitud } = await sb.from('solicitudes_proveedor').insert({
+        user_id: data.user.id,
+        ...datosProveedor
+      });
+      if(errSolicitud) console.error('Error guardando la solicitud de proveedor:', errSolicitud);
+    }
+    localStorage.setItem('te_remember', 'true');
+    window.location.href = REDIRECT_MAP[currentRole] || 'index_14.html';
+    return;
+  }
+
+  // El proyecto exige confirmar el correo: guardamos todo temporalmente
+  // (en esta pestaña) y mostramos la pantalla para ingresar el código.
+  // La solicitud de proveedor se guarda DESPUÉS de verificar el código,
+  // porque hasta ese momento no existe una sesión activa todavía.
+  sessionStorage.setItem('te_pending_verification', JSON.stringify({
+    email, nombre, role: currentRole, datosProveedor
+  }));
+  mostrarPantallaCodigo(email);
+}
+
+/* ─── Pantalla de verificación por código ─── */
+function ocultarMensajesCodigo(){
+  document.getElementById('msg-error-codigo').classList.remove('show');
+  document.getElementById('msg-loading-codigo').classList.remove('show');
+}
+function showErrorCodigo(text){
+  ocultarMensajesCodigo();
+  document.getElementById('err-text-codigo').textContent = text;
+  document.getElementById('msg-error-codigo').classList.add('show');
+}
+function showLoadingCodigo(text){
+  ocultarMensajesCodigo();
+  document.getElementById('load-text-codigo').textContent = text;
+  document.getElementById('msg-loading-codigo').classList.add('show');
+}
+
+function mostrarPantallaCodigo(email){
+  document.getElementById('vista-form').style.display = 'none';
+  document.getElementById('vista-codigo').style.display = 'block';
+  document.getElementById('codigo-email-destino').textContent = email;
+  document.getElementById('codigo-input').value = '';
+  ocultarMensajesCodigo();
+}
+
+function volverALogin(){
+  sessionStorage.removeItem('te_pending_verification');
+  document.getElementById('vista-codigo').style.display = 'none';
+  document.getElementById('vista-form').style.display = 'block';
+  authMode = 'login';
+  updateUI();
+}
+
+async function verificarCodigo(){
+  ocultarMensajesCodigo();
+  const codigo = document.getElementById('codigo-input').value.trim();
+  if(!codigo || codigo.length < 6){
+    showErrorCodigo('Ingresa el código de 6 dígitos que te enviamos.');
+    return;
+  }
+
+  const raw = sessionStorage.getItem('te_pending_verification');
+  if(!raw){
+    showErrorCodigo('No encontramos tu registro pendiente. Vuelve a intentar el registro.');
+    return;
+  }
+  const pendiente = JSON.parse(raw);
+
+  document.getElementById('btn-verificar-codigo').disabled = true;
+  showLoadingCodigo('Verificando…');
+
+  const { data, error } = await sb.auth.verifyOtp({
+    email: pendiente.email,
+    token: codigo,
+    type: 'signup'
+  });
+
+  document.getElementById('btn-verificar-codigo').disabled = false;
+
+  if(error){
+    showErrorCodigo('Código incorrecto o vencido. Revísalo bien, o pide uno nuevo.');
+    return;
+  }
+
+  // Ahora sí hay sesión activa: si es proveedor, recién aquí guardamos su solicitud
+  if(pendiente.role === 'proveedor' && data.user){
+    const { error: errSolicitud } = await sb.from('solicitudes_proveedor').insert({
+      user_id: data.user.id,
+      ...pendiente.datosProveedor
+    });
+    if(errSolicitud) console.error('Error guardando la solicitud de proveedor:', errSolicitud);
+  }
+
+  sessionStorage.removeItem('te_pending_verification');
+  localStorage.setItem('te_remember', 'true');
+  window.location.href = REDIRECT_MAP[pendiente.role] || 'index_14.html';
+}
+
+async function reenviarCodigo(){
+  ocultarMensajesCodigo();
+  const raw = sessionStorage.getItem('te_pending_verification');
+  if(!raw){
+    showErrorCodigo('No encontramos tu registro pendiente. Vuelve a intentar el registro.');
+    return;
+  }
+  const pendiente = JSON.parse(raw);
+  showLoadingCodigo('Reenviando código…');
+
+  const { error } = await sb.auth.resend({ type: 'signup', email: pendiente.email });
+
+  if(error){
+    showErrorCodigo('No se pudo reenviar: ' + error.message);
+    return;
+  }
+  showLoadingCodigo('Código reenviado. Revisa tu correo (y la carpeta de spam).');
+}
+
+document.addEventListener('keydown', function(e){
+  if(e.key !== 'Enter') return;
+  const vistaCodigo = document.getElementById('vista-codigo');
+  if(vistaCodigo && vistaCodigo.style.display !== 'none'){
+    verificarCodigo();
+  } else {
+    handleSubmit();
+  }
+});
+
+// Si recargaste la página a medio verificar el código, retómalo donde quedó
+(function inicializarSegunPendiente(){
+  const raw = sessionStorage.getItem('te_pending_verification');
+  if(raw){
+    try {
+      const pendiente = JSON.parse(raw);
+      mostrarPantallaCodigo(pendiente.email);
+    } catch(e){ /* ignorar */ }
+  }
+})();
+
+updateUI();
+</script>
+</body>
+</html>
