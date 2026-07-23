@@ -235,7 +235,7 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
     </div>
   </div>
 
-  <a href="index_14.html" class="back-home"><i class="ti ti-arrow-left" style="font-size:14px;"></i> Volver al Inicio</a>
+  <a href="index.html" class="back-home"><i class="ti ti-arrow-left" style="font-size:14px;"></i> Volver al Inicio</a>
 </div>
 
 <script>
@@ -420,7 +420,7 @@ async function doLogin(){
     return;
   }
 
-  window.location.href = REDIRECT_MAP[perfil.role] || 'index_14.html';
+  window.location.href = REDIRECT_MAP[perfil.role] || 'index.html';
 }
 
 async function doRegister(){
@@ -513,7 +513,7 @@ async function doRegister(){
       }
     }
     localStorage.setItem('te_remember', 'true');
-    window.location.href = REDIRECT_MAP[currentRole] || 'index_14.html';
+    window.location.href = REDIRECT_MAP[currentRole] || 'index.html';
     return;
   }
 
@@ -605,7 +605,7 @@ async function verificarCodigo(){
 
   sessionStorage.removeItem('te_pending_verification');
   localStorage.setItem('te_remember', 'true');
-  window.location.href = REDIRECT_MAP[pendiente.role] || 'index_14.html';
+  window.location.href = REDIRECT_MAP[pendiente.role] || 'index.html';
 }
 
 async function reenviarCodigo(){
