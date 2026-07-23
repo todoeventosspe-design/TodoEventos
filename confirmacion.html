@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>¡Cuenta confirmada! — TodoEventos.pe</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
+:root{
+  --bg:#0D0D0D; --card:#1A1A1A; --card2:#212121; --line:rgba(255,255,255,.08);
+  --fg:#F5F5F5; --sub:#9A9A9A; --red:#f87171;
+  --ac:#a855f7; --ac-2:#6366f1; --ac-glow:rgba(168,85,247,.35);
+  --green:#4ade80; --green-soft:rgba(74,222,128,.12); --green-line:rgba(74,222,128,.30);
+  --glow1:rgba(168,85,247,.16); --glow2:rgba(99,102,241,.10);
+}
+/* ── Cliente: paleta morada/índigo (marketplace) ── */
+body.role-cliente{
+  --ac:#a855f7; --ac-2:#6366f1; --ac-glow:rgba(168,85,247,.35);
+  --glow1:rgba(168,85,247,.16); --glow2:rgba(99,102,241,.10);
+}
+/* ── Proveedor: paleta naranja/dorado (dashboard) ── */
+body.role-proveedor{
+  --ac:#F97316; --ac-2:#FBBF24; --ac-glow:rgba(249,115,22,.35);
+  --glow1:rgba(249,115,22,.14); --glow2:rgba(251,191,36,.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;}
+.glow{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;}
+.glow.g1{width:420px;height:420px;background:var(--glow1);top:-120px;right:-100px;}
+.glow.g2{width:360px;height:360px;background:var(--glow2);bottom:-120px;left:-100px;}
+
+.wrap{width:100%;max-width:440px;position:relative;z-index:1;text-align:center;}
+.logo{font-size:22px;font-weight:700;text-decoration:none;display:block;margin-bottom:34px;}
+.logo .lp{color:var(--ac);}
+.logo .lo{color:var(--ac-2);}
+.logo .dot{color:rgba(245,245,245,.35);font-weight:400;}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:38px 30px;}
+
+.check-badge{width:72px;height:72px;border-radius:50%;background:var(--green-soft);border:1px solid var(--green-line);display:flex;align-items:center;justify-content:center;margin:0 auto 22px;}
+.check-badge i{font-size:34px;color:var(--green);}
+
+h1{font-size:21px;font-weight:700;margin-bottom:10px;}
+.sub{font-size:14px;color:var(--sub);line-height:1.6;margin-bottom:6px;}
+.nombre{color:var(--fg);font-weight:600;}
+
+.estado{margin-top:20px;background:var(--card2);border:1px solid var(--line);border-radius:11px;padding:12px 14px;font-size:12.5px;color:var(--sub);display:none;align-items:center;justify-content:center;gap:8px;}
+.estado.show{display:flex;}
+.estado.error{color:var(--red);}
+.spinner{width:14px;height:14px;border:2px solid rgba(168,85,247,.25);border-top-color:var(--ac);border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:10px;font-size:14.5px;font-weight:700;text-decoration:none;font-family:inherit;cursor:pointer;border:none;margin-top:28px;transition:opacity .16s;}
+.btn:hover{opacity:.9;}
+.btn-primary{background:var(--ac);color:#fff;box-shadow:0 4px 14px var(--ac-glow);}
+.btn-secondary{background:var(--card2);color:var(--fg);border:1px solid var(--line);}
+</style>
+</head>
+<body>
+<div class="glow g1"></div>
+<div class="glow g2"></div>
+
+<div class="wrap">
+  <span class="logo"><span class="lp">Todo</span><span class="lo">Eventos</span><span class="dot">.pe</span></span>
+
+  <div class="card">
+    <div class="check-badge"><i class="ti ti-circle-check"></i></div>
+    <h1 id="titulo">¡Tu cuenta ha sido confirmada!</h1>
+    <p class="sub" id="subtitulo">Gracias por unirte a TodoEventos.pe. Ya puedes empezar a explorar la plataforma.</p>
+
+    <div class="estado" id="estado">
+      <span class="spinner"></span> <span id="estado-texto">Verificando tu cuenta…</span>
+    </div>
+
+    <a href="index_14.html" class="btn btn-primary"><i class="ti ti-home"></i> Ir al inicio</a>
+    <a href="login.html" class="btn btn-secondary" id="btn-secundario"><i class="ti ti-login-2"></i> Iniciar sesión</a>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://vqnyaozauljtashpjfoo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxbnlhb3phdWxqdGFzaHBqZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDM0NzIsImV4cCI6MjA5OTI3OTQ3Mn0.0JT-UAQnSUygXPNjI69Sf3Rg3mv_NeTwwz9-7vnWcno';
+
+let sb = null;
+try {
+  // Lee la sesión de donde haya quedado guardada (localStorage si se
+  // marcó "Recordarme" al iniciar sesión, o sessionStorage si no).
+  const storageAdapter = {
+    getItem: (key) => localStorage.getItem(key) ?? sessionStorage.getItem(key),
+    setItem: (key, value) => {
+      const recordar = localStorage.getItem('te_remember') !== 'false';
+      if(recordar){
+        localStorage.setItem(key, value);
+        sessionStorage.removeItem(key);
+      } else {
+        sessionStorage.setItem(key, value);
+        localStorage.removeItem(key);
+      }
+    },
+    removeItem: (key) => {
+      localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
+    }
+  };
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { storage: storageAdapter }
+  });
+} catch(e) {
+  console.error('No se pudo inicializar Supabase:', e);
+}
+
+function mostrarEstado(texto, esError){
+  const estado = document.getElementById('estado');
+  document.getElementById('estado-texto').textContent = texto;
+  estado.classList.toggle('error', !!esError);
+  estado.classList.add('show');
+}
+
+async function verificarSesion(){
+  if(!sb){
+    mostrarEstado('No se pudo conectar con el servidor para verificar tu cuenta.', true);
+    return;
+  }
+
+  // El SDK de Supabase detecta automáticamente el token que viene en la URL
+  // (#access_token=...) y crea la sesión. Aquí solo la leemos para
+  // personalizar el mensaje de bienvenida.
+  const { data, error } = await sb.auth.getSession();
+
+  if(error || !data.session){
+    // No había token en la URL, o no era válido: no es necesariamente un
+    // error grave (puede que alguien entre a esta página directamente).
+    document.getElementById('subtitulo').textContent =
+      'Ya puedes iniciar sesión con tu correo y contraseña.';
+    return;
+  }
+
+  const usuario = data.session.user;
+  const { data: perfil } = await sb
+    .from('profiles')
+    .select('full_name, role')
+    .eq('id', usuario.id)
+    .single();
+
+  if(perfil && perfil.role){
+    // Aplica la paleta de color (morado=cliente, naranja=proveedor),
+    // igual que en el login, para que se sienta parte del mismo flujo.
+    document.body.classList.add('role-' + perfil.role);
+  }
+
+  const mensajePorRol = {
+    cliente: 'Ya puedes explorar el marketplace y armar tu evento ideal.',
+    proveedor: 'Ya puedes gestionar tu negocio desde tu panel de herramientas.'
+  };
+
+  if(perfil && perfil.full_name){
+    const mensajeRol = mensajePorRol[perfil.role] || 'Tu cuenta ya está activa y lista para usarse.';
+    document.getElementById('subtitulo').innerHTML =
+      'Bienvenido/a, <span class="nombre">' + perfil.full_name + '</span>. ' + mensajeRol;
+  }
+
+  // Como ya tiene sesión activa, le damos acceso directo a su espacio
+  if(perfil && perfil.role){
+    const destino = perfil.role === 'proveedor' ? 'dashboard.html' : 'catalogo.html';
+    const btn = document.getElementById('btn-secundario');
+    btn.href = destino;
+    btn.innerHTML = '<i class="ti ti-arrow-right"></i> ' +
+      (perfil.role === 'proveedor' ? 'Ir a mi dashboard' : 'Ir al marketplace');
+  }
+}
+
+verificarSesion();
+</script>
+</body>
+</html>

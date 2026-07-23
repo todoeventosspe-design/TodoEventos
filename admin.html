@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de administrador — TodoEventos.pe</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
+:root{
+  --bg:#0D0D0D; --card:#1A1A1A; --card2:#212121; --line:rgba(255,255,255,.08);
+  --fg:#F5F5F5; --sub:#9A9A9A; --red:#f87171; --gold:#FBBF24;
+  --or:#F97316; --or-soft:rgba(249,115,22,.12); --or-line:rgba(249,115,22,.28);
+  --green:#4ade80; --green-soft:rgba(74,222,128,.12); --green-line:rgba(74,222,128,.3);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;padding:32px 20px 60px;}
+.wrap{max-width:900px;margin:0 auto;}
+
+.top-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.logo{font-size:20px;font-weight:700;text-decoration:none;}
+.logo .lp{color:var(--or);}
+.logo .lo{color:var(--gold);}
+.logo .dot{color:rgba(245,245,245,.35);font-weight:400;}
+.back-link{display:flex;align-items:center;gap:6px;color:var(--sub);text-decoration:none;font-size:13.5px;font-weight:600;}
+.back-link:hover{color:var(--fg);}
+h1{font-size:22px;font-weight:700;margin:22px 0 4px;}
+.sub{color:var(--sub);font-size:13.5px;margin-bottom:26px;}
+
+.tabs{display:flex;gap:6px;background:var(--card2);border-radius:12px;padding:5px;margin-bottom:22px;width:fit-content;}
+.tab{padding:9px 18px;border-radius:9px;font-size:13px;font-weight:600;color:var(--sub);cursor:pointer;border:none;background:transparent;font-family:inherit;}
+.tab.active{background:var(--or);color:#fff;}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-bottom:16px;}
+.card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px;}
+.card-neg{font-size:16px;font-weight:700;margin-bottom:3px;}
+.card-cat{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--or);background:var(--or-soft);padding:3px 10px;border-radius:100px;font-weight:600;}
+.card-fecha{font-size:11.5px;color:var(--sub);white-space:nowrap;}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;margin-bottom:14px;}
+.dato{font-size:13px;}
+.dato .k{color:var(--sub);font-size:11.5px;display:block;margin-bottom:2px;}
+.dato .v{font-weight:600;}
+.desc{background:var(--card2);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--fg);line-height:1.6;margin-bottom:16px;}
+
+.btns{display:flex;gap:10px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 18px;border-radius:9px;font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:inherit;}
+.btn-aprobar{background:var(--green);color:#052e16;}
+.btn-rechazar{background:transparent;border:1px solid rgba(248,113,113,.35);color:var(--red);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+
+.estado-tag{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;padding:4px 11px;border-radius:100px;font-weight:600;}
+.estado-tag.aprobado{background:var(--green-soft);color:var(--green);}
+.estado-tag.rechazado{background:rgba(248,113,113,.1);color:var(--red);}
+.motivo{font-size:12px;color:var(--red);margin-top:8px;}
+
+.vacio{text-align:center;padding:60px 20px;color:var(--sub);}
+.vacio i{font-size:38px;margin-bottom:12px;display:block;}
+
+.loading-screen{display:flex;align-items:center;justify-content:center;min-height:60vh;color:var(--sub);font-size:14px;gap:10px;}
+.spinner{width:16px;height:16px;border:2px solid rgba(249,115,22,.25);border-top-color:var(--or);border-radius:50%;animation:spin .6s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.contenido{display:none;}
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loading-screen">
+  <span class="spinner"></span> Verificando acceso…
+</div>
+
+<div class="wrap contenido" id="contenido">
+  <div class="top-row">
+    <span class="logo"><span class="lp">Todo</span><span class="lo">Eventos</span><span class="dot">.pe</span></span>
+    <a href="index_14.html" class="back-link"><i class="ti ti-arrow-left"></i> Volver al inicio</a>
+  </div>
+  <h1>Panel de administrador</h1>
+  <p class="sub">Solicitudes de proveedores que quieren unirse a la plataforma.</p>
+
+  <div class="tabs">
+    <button class="tab active" id="tab-pendientes" onclick="cambiarTab('pendiente')">Pendientes <span id="count-pendientes"></span></button>
+    <button class="tab" id="tab-aprobados" onclick="cambiarTab('aprobado')">Aprobados</button>
+    <button class="tab" id="tab-rechazados" onclick="cambiarTab('rechazado')">Rechazados</button>
+  </div>
+
+  <div id="lista-solicitudes"></div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://vqnyaozauljtashpjfoo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxbnlhb3phdWxqdGFzaHBqZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDM0NzIsImV4cCI6MjA5OTI3OTQ3Mn0.0JT-UAQnSUygXPNjI69Sf3Rg3mv_NeTwwz9-7vnWcno';
+
+let sb = null;
+try {
+  const storageAdapter = {
+    getItem: (key) => localStorage.getItem(key) ?? sessionStorage.getItem(key),
+    setItem: (key, value) => {
+      const recordar = localStorage.getItem('te_remember') !== 'false';
+      if(recordar){ localStorage.setItem(key, value); sessionStorage.removeItem(key); }
+      else { sessionStorage.setItem(key, value); localStorage.removeItem(key); }
+    },
+    removeItem: (key) => { localStorage.removeItem(key); sessionStorage.removeItem(key); }
+  };
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { storage: storageAdapter } });
+} catch(e) {
+  console.error('No se pudo inicializar Supabase:', e);
+}
+
+let todasLasSolicitudes = [];
+let tabActual = 'pendiente';
+
+async function init(){
+  if(!sb){
+    document.getElementById('loading-screen').textContent = 'No se pudo conectar con el servidor. Recarga la página.';
+    return;
+  }
+
+  const { data } = await sb.auth.getSession();
+  if(!data.session){
+    window.location.href = 'login.html';
+    return;
+  }
+
+  const { data: perfil, error } = await sb
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', data.session.user.id)
+    .single();
+
+  if(error || !perfil || !perfil.is_admin){
+    // No es admin: no tiene nada que hacer aquí
+    window.location.href = 'index_14.html';
+    return;
+  }
+
+  await cargarSolicitudes();
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('contenido').style.display = 'block';
+}
+
+async function cargarSolicitudes(){
+  const { data, error } = await sb
+    .from('solicitudes_proveedor')
+    .select('*, profiles(full_name, email)')
+    .order('created_at', { ascending: false });
+
+  if(error){
+    console.error(error);
+    return;
+  }
+  todasLasSolicitudes = data || [];
+  actualizarContador();
+  render();
+}
+
+function actualizarContador(){
+  const n = todasLasSolicitudes.filter(s => s.estado === 'pendiente').length;
+  document.getElementById('count-pendientes').textContent = n > 0 ? '(' + n + ')' : '';
+}
+
+function cambiarTab(tab){
+  tabActual = tab;
+  document.getElementById('tab-pendientes').classList.toggle('active', tab === 'pendiente');
+  document.getElementById('tab-aprobados').classList.toggle('active', tab === 'aprobado');
+  document.getElementById('tab-rechazados').classList.toggle('active', tab === 'rechazado');
+  render();
+}
+
+function render(){
+  const cont = document.getElementById('lista-solicitudes');
+  const filtradas = todasLasSolicitudes.filter(s => s.estado === tabActual);
+
+  if(filtradas.length === 0){
+    cont.innerHTML = `<div class="vacio"><i class="ti ti-inbox"></i>No hay solicitudes ${tabActual === 'pendiente' ? 'pendientes' : tabActual + 's'} por ahora.</div>`;
+    return;
+  }
+
+  cont.innerHTML = filtradas.map(s => {
+    const nombreDueno = s.profiles ? s.profiles.full_name : '—';
+    const correoDueno = s.profiles ? s.profiles.email : '—';
+    const fecha = new Date(s.created_at).toLocaleDateString('es-PE', { day:'numeric', month:'short', year:'numeric' });
+
+    const accionesHtml = s.estado === 'pendiente' ? `
+      <div class="btns">
+        <button class="btn btn-aprobar" onclick="aprobar(${s.id}, '${s.user_id}')"><i class="ti ti-check"></i> Aprobar</button>
+        <button class="btn btn-rechazar" onclick="rechazar(${s.id}, '${s.user_id}')"><i class="ti ti-x"></i> Rechazar</button>
+      </div>
+    ` : `
+      <span class="estado-tag ${s.estado}"><i class="ti ${s.estado === 'aprobado' ? 'ti-check' : 'ti-x'}"></i> ${s.estado === 'aprobado' ? 'Aprobado' : 'Rechazado'}</span>
+      ${s.motivo_rechazo ? `<div class="motivo">Motivo: ${s.motivo_rechazo}</div>` : ''}
+    `;
+
+    return `
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-neg">${s.nombre_negocio}</div>
+            <span class="card-cat">${s.categoria}</span>
+          </div>
+          <div class="card-fecha">Solicitado el ${fecha}</div>
+        </div>
+
+        <div class="grid2">
+          <div class="dato"><span class="k">Contacto</span><span class="v">${nombreDueno}</span></div>
+          <div class="dato"><span class="k">Correo</span><span class="v">${correoDueno}</span></div>
+          <div class="dato"><span class="k">RUC / DNI</span><span class="v">${s.ruc_dni}</span></div>
+          <div class="dato"><span class="k">Teléfono</span><span class="v">${s.telefono}</span></div>
+          <div class="dato"><span class="k">Distrito</span><span class="v">${s.distrito}</span></div>
+          <div class="dato"><span class="k">Experiencia</span><span class="v">${s.anios_experiencia ? s.anios_experiencia + ' años' : '—'}</span></div>
+          ${s.redes_sitio ? `<div class="dato"><span class="k">Redes / Web</span><span class="v">${s.redes_sitio}</span></div>` : ''}
+        </div>
+
+        <div class="desc">${s.descripcion}</div>
+
+        ${accionesHtml}
+      </div>
+    `;
+  }).join('');
+}
+
+async function aprobar(solicitudId, userId){
+  if(!confirm('¿Aprobar esta solicitud? El proveedor podrá acceder a su dashboard de inmediato.')) return;
+
+  const { error: e1 } = await sb.from('solicitudes_proveedor')
+    .update({ estado: 'aprobado', revisado_at: new Date().toISOString() })
+    .eq('id', solicitudId);
+  const { error: e2 } = await sb.from('profiles')
+    .update({ verification_status: 'aprobado' })
+    .eq('id', userId);
+
+  if(e1 || e2){
+    alert('Hubo un problema al aprobar. Intenta de nuevo.');
+    console.error(e1, e2);
+    return;
+  }
+  await cargarSolicitudes();
+}
+
+async function rechazar(solicitudId, userId){
+  const motivo = prompt('Motivo del rechazo (se guarda para referencia, pero por ahora no se le envía por correo al proveedor automáticamente):');
+  if(motivo === null) return; // canceló
+
+  const { error: e1 } = await sb.from('solicitudes_proveedor')
+    .update({ estado: 'rechazado', motivo_rechazo: motivo || null, revisado_at: new Date().toISOString() })
+    .eq('id', solicitudId);
+  const { error: e2 } = await sb.from('profiles')
+    .update({ verification_status: 'rechazado' })
+    .eq('id', userId);
+
+  if(e1 || e2){
+    alert('Hubo un problema al rechazar. Intenta de nuevo.');
+    console.error(e1, e2);
+    return;
+  }
+  await cargarSolicitudes();
+}
+
+init();
+</script>
+</body>
+</html>
