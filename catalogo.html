@@ -389,7 +389,7 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
 <header id="nav">
   <div class="nav-i">
     <div style="display:flex;align-items:center;gap:14px;">
-      <a href="index_14.html" style="display:inline-flex;align-items:center;gap:5px;color:rgba(245,243,235,.45);text-decoration:none;font-size:13px;font-weight:500;transition:color .18s;flex-shrink:0;" onmouseover="this.style.color='var(--pu)'" onmouseout="this.style.color='rgba(245,243,235,.45)'">
+      <a href="index.html" style="display:inline-flex;align-items:center;gap:5px;color:rgba(245,243,235,.45);text-decoration:none;font-size:13px;font-weight:500;transition:color .18s;flex-shrink:0;" onmouseover="this.style.color='var(--pu)'" onmouseout="this.style.color='rgba(245,243,235,.45)'">
         <i class="ti ti-arrow-left" style="font-size:14px;"></i> Inicio
       </a>
       <span style="color:rgba(255,255,255,.12);font-size:18px;">|</span>
@@ -509,7 +509,7 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
 <!-- ═══ BREADCRUMB ═══ -->
 <div style="background:var(--bg);border-bottom:1px solid var(--border);">
   <div style="max-width:1200px;margin:0 auto;padding:10px 2rem;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sub);">
-    <a href="index_14.html" style="display:inline-flex;align-items:center;gap:5px;color:var(--sub);text-decoration:none;transition:color .18s;" onmouseover="this.style.color='var(--pu)'" onmouseout="this.style.color='var(--sub)'">
+    <a href="index.html" style="display:inline-flex;align-items:center;gap:5px;color:var(--sub);text-decoration:none;transition:color .18s;" onmouseover="this.style.color='var(--pu)'" onmouseout="this.style.color='var(--sub)'">
       <i class="ti ti-home" style="font-size:14px;"></i> Inicio
     </a>
     <i class="ti ti-chevron-right" style="font-size:12px;opacity:.4;"></i>
@@ -1704,7 +1704,7 @@ function updateChatContext(cat){
 
 // ─── INIT ───
 
-// ─── READ URL PARAMS (from index_14.html links) ───
+// ─── READ URL PARAMS (from index.html links) ───
 (function(){
   const p = new URLSearchParams(window.location.search);
   const cat = p.get('cat');
@@ -1788,7 +1788,7 @@ document.addEventListener('click', function(e){
 
 async function cerrarSesion(){
   if(sb) await sb.auth.signOut();
-  window.location.href = 'index_14.html';
+  window.location.href = 'index.html';
 }
 
 async function verificarSesionNav(){
