@@ -317,6 +317,8 @@ const SUPABASE_URL = 'https://vqnyaozauljtashpjfoo.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxbnlhb3phdWxqdGFzaHBqZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDM0NzIsImV4cCI6MjA5OTI3OTQ3Mn0.0JT-UAQnSUygXPNjI69Sf3Rg3mv_NeTwwz9-7vnWcno';
 
 let sb = null;
+let usuarioActual = null;
+let perfilRowInicial = null; // fila cruda de "profiles", leida una sola vez al verificar acceso
 try {
   const storageAdapter = {
     getItem: (key) => localStorage.getItem(key) ?? sessionStorage.getItem(key),
@@ -356,7 +358,7 @@ async function verificarAccesoDashboard(){
   const usuario = data.session.user;
   const { data: perfil, error } = await sb
     .from('profiles')
-    .select('role, verification_status')
+    .select('role, verification_status, full_name, categoria, location, bio, avatar_url, banner_url, rating, reviews_count')
     .eq('id', usuario.id)
     .single();
 
@@ -383,6 +385,9 @@ async function verificarAccesoDashboard(){
   }
 
   // verification_status === 'aprobado': acceso normal, no se muestra el overlay
+  usuarioActual = usuario;
+  perfilRowInicial = perfil;
+  if(typeof onAccesoDashboardOk === 'function') onAccesoDashboardOk();
 }
 
 verificarAccesoDashboard();
@@ -966,6 +971,21 @@ verificarAccesoDashboard();
       <input type="number" id="service-precio" min="0" placeholder="0.00">
     </div>
     <div class="field">
+      <label>Categoría</label>
+      <select id="service-categoria">
+        <option value="musica">Música & DJs</option>
+        <option value="catering">Catering</option>
+        <option value="fotografia">Fotografía & Video</option>
+        <option value="locales">Locales & Salones</option>
+        <option value="animadores">Animadores</option>
+        <option value="decoracion">Decoración</option>
+        <option value="bar">Bar Móvil</option>
+        <option value="pasteleria">Pastelería</option>
+        <option value="transporte">Transporte</option>
+        <option value="seguridad">Seguridad</option>
+      </select>
+    </div>
+    <div class="field">
       <label>Descripción</label>
       <textarea id="service-descripcion" rows="3" placeholder="Breve descripción de lo que incluye"></textarea>
     </div>
@@ -997,6 +1017,13 @@ verificarAccesoDashboard();
 </div>
 
 <script>
+// Se dispara cuando verificarAccesoDashboard() (bloque anterior) confirma
+// sesion real + rol proveedor aprobado. Recien ahi cargamos perfil/servicios
+// reales de Supabase, porque antes no sabemos quien es el usuario.
+function onAccesoDashboardOk(){
+  initPerfilYPlantillas();
+}
+
 // ─── NAVEGACIÓN ENTRE VISTAS (vanilla JS) ───
 function hideAllViews(){
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -2196,122 +2223,57 @@ function renderHomeKPIs(){
   if(elCotiz) elCotiz.textContent = pendientes;
 }
 
-// ─── MI PERFIL PÚBLICO: vitrina comercial del proveedor ───
-const PERFIL_STORAGE_KEY = 'todoeventos_dashboard_perfil_v1';
-
-function loadPerfil(){
-  try {
-    const raw = localStorage.getItem(PERFIL_STORAGE_KEY);
-    if(raw){
-      const data = JSON.parse(raw);
-      // Auto-reparación: si quedó guardada la foto de avatar rota de una
-      // versión anterior, se reemplaza sola sin que el usuario haga nada.
-      if(data.avatarUrl && data.avatarUrl.includes('1571266752264')){
-        data.avatarUrl = 'https://ui-avatars.com/api/?name=DJ+Nexus&background=F97316&color=1a0a02&size=300&bold=true&font-size=0.4';
-      }
-      // Migración: los perfiles guardados antes de esta versión no tenían
-      // reseñas propias (el rating era un número fijo editable). Se les
-      // agrega un set de reseñas de ejemplo para que el cálculo funcione.
-      if(!Array.isArray(data.resenas)){
-        data.resenas = defaultResenas();
-      }
-      // Migración: las fotos ahora viven POR SERVICIO, ya no en una galería
-      // general del perfil. Cada servicio viejo (con "imagen" singular) pasa
-      // a tener un arreglo "imagenes"; si había una galería general, su
-      // primera foto se reparte entre los servicios que no tengan ninguna.
-      const galeriaVieja = Array.isArray(data.galeria) ? data.galeria.slice() : [];
-      if(Array.isArray(data.servicios)){
-        data.servicios.forEach(s => {
-          if(!Array.isArray(s.imagenes)){
-            s.imagenes = s.imagen ? [s.imagen] : (galeriaVieja.length ? [galeriaVieja.shift()] : []);
-          }
-          delete s.imagen;
-        });
-      }
-      delete data.galeria;
-      delete data.rating;
-      delete data.reviews;
-      // Migración: agrega el feed personal (hasta 5 fotos) si el perfil
-      // fue guardado antes de que esta sección existiera.
-      if(!Array.isArray(data.feed)){
-        data.feed = defaultFeed();
-      }
-      savePerfil(data);
-      return data;
-    }
-  } catch(e){ console.warn('No se pudo leer el perfil guardado', e); }
-  // Sin datos previos: perfil de ejemplo de DJ Nexus Lima, listo para lucirse
-  const seed = {
-    nombre: 'DJ Nexus Lima',
-    categoria: 'DJ & Sonido Profesional',
-    ubicacion: 'Miraflores, Lima',
-    bio: 'Más de 8 años poniendo el ritmo en las mejores bodas, quinceañeros y eventos corporativos de Lima. Combino equipos de sonido profesional con un ojo para leer a la pista y saber exactamente cuándo subir la energía. Cada evento tiene su propia historia — mi trabajo es ponerle la banda sonora correcta.',
-    avatarUrl: 'https://ui-avatars.com/api/?name=DJ+Nexus&background=F97316&color=1a0a02&size=300&bold=true&font-size=0.4',
-    bannerUrl: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&q=80',
-    servicios: [
-      { id:'sv1', nombre:'Paquete Boda Premium', precio:1800, descripcion:'DJ + sonido profesional por 6 horas, luces básicas y micrófono inalámbrico para discursos.', imagenes:[
-        'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80',
-        'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=500&q=80',
-        'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=500&q=80'
-      ] },
-      { id:'sv2', nombre:'Hora Extra de Luces', precio:250, descripcion:'Extiende el show con luces robóticas y efectos para pistas de baile más largas.', imagenes:[
-        'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=500&q=80',
-        'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&q=80'
-      ] }
-    ],
-    resenas: defaultResenas(),
-    feed: defaultFeed()
-  };
-  savePerfil(seed);
-  return seed;
-}
-
-// Reseñas de ejemplo: representan lo que dejarían los CLIENTES en el
-// marketplace. El proveedor no puede crearlas, editarlas ni borrarlas —
-// el rating y el conteo se calculan siempre a partir de esta lista.
-function defaultResenas(){
-  return [
-    { id:'r1', cliente:'María Fernández', estrellas:5, comentario:'Excelente DJ, leyó perfecto a la pista en nuestra boda. Súper recomendado.', fecha:'Nov 2026' },
-    { id:'r2', cliente:'Corp. Andina', estrellas:5, comentario:'Muy profesional, llegó puntual y el sonido fue impecable durante todo el evento corporativo.', fecha:'Nov 2026' },
-    { id:'r3', cliente:'Rosa Quispe', estrellas:5, comentario:'El ambiente que armó en el quinceañero fue justo lo que buscábamos. Gracias!', fecha:'Oct 2026' },
-    { id:'r4', cliente:'Jorge Ramos', estrellas:4, comentario:'Muy buen servicio, solo hubiera querido un poco más de variedad musical.', fecha:'Oct 2026' }
-  ];
-}
-
-// Feed personal: fotos del proveedor "detrás de cámaras", separadas de los
-// servicios — el objetivo es humanizar el perfil, no vender un paquete.
-function defaultFeed(){
-  return [
-    'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=500&q=80',
-    'https://images.unsplash.com/photo-1508973379184-7517410fb0bc?w=500&q=80',
-    'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&q=80'
-  ];
-}
-
-// El rating y el número de reseñas SIEMPRE se calculan desde la data real,
-// nunca son un número que el proveedor pueda escribir a mano.
-function calcularRatingDesdeResenas(){
-  const resenas = perfilData.resenas || [];
-  if(resenas.length === 0) return { rating: 0, count: 0 };
-  const suma = resenas.reduce((s, r) => s + r.estrellas, 0);
-  const promedio = Math.round((suma / resenas.length) * 10) / 10;
-  return { rating: promedio, count: resenas.length };
-}
-
-function savePerfil(data){
-  try { localStorage.setItem(PERFIL_STORAGE_KEY, JSON.stringify(data)); }
-  catch(e){ console.warn('No se pudo guardar el perfil', e); }
-}
-
-let perfilData = loadPerfil();
-
-// Ahora que perfilData ya existe, inicializamos las plantillas de cotización
-// (el nombre de negocio por defecto de una plantilla nueva toma el del perfil del proveedor).
-plantillas = loadPlantillas();
-renderCotPlantillaSelect();
-onTipoEventoChange(); // sugiere la plantilla correcta según el tipo de evento por defecto
+// ─── MI PERFIL PÚBLICO: vitrina comercial del proveedor (datos reales de Supabase) ───
+let perfilData = null;
 let perfilEditMode = false;
 let servicioEditingId = null;
+
+// El rating y el número de reseñas SIEMPRE se calculan por el trigger de
+// la base de datos a partir de la tabla "reviews" — nunca son un número
+// que el proveedor pueda escribir a mano.
+function calcularRatingDesdeResenas(){
+  return { rating: perfilData.ratingReal || 0, count: perfilData.reviews_count || 0 };
+}
+
+async function cargarPerfilDesdeSupabase(){
+  const p = perfilRowInicial;
+
+  const [{ data: servicios }, { data: resenas }, { data: feedFotos }] = await Promise.all([
+    sb.from('services').select('id, name, price, category, description, imagenes').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true }),
+    sb.from('reviews').select('id, rating, comment, created_at, client_name').eq('provider_id', usuarioActual.id).order('created_at', { ascending: false }),
+    sb.from('feed_photos').select('id, url').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true })
+  ]);
+
+  perfilData = {
+    nombre: p.full_name || '',
+    categoria: p.categoria || 'Servicios para eventos',
+    ubicacion: p.location || '',
+    bio: p.bio || '',
+    avatarUrl: p.avatar_url || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(p.full_name || 'TE') + '&background=F97316&color=1a0a02&size=300&bold=true'),
+    bannerUrl: p.banner_url || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&q=80',
+    ratingReal: p.rating || 0,
+    reviews_count: p.reviews_count || 0,
+    servicios: (servicios || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, categoria: s.category || 'musica', descripcion: s.description || '', imagenes: s.imagenes || [] })),
+    resenas: (resenas || []).map(r => ({
+      id: r.id, estrellas: r.rating, comentario: r.comment || '',
+      cliente: r.client_name || 'Cliente de TodoEventos',
+      fecha: new Date(r.created_at).toLocaleDateString('es-PE', { month:'short', year:'numeric' })
+    })),
+    feed: (feedFotos || []).map(f => ({ id: f.id, url: f.url }))
+  };
+}
+
+async function initPerfilYPlantillas(){
+  await cargarPerfilDesdeSupabase();
+
+  // Ahora que perfilData ya existe, inicializamos las plantillas de cotización
+  // (el nombre de negocio por defecto de una plantilla nueva toma el del perfil del proveedor).
+  plantillas = loadPlantillas();
+  renderCotPlantillaSelect();
+  onTipoEventoChange(); // sugiere la plantilla correcta según el tipo de evento por defecto
+
+  renderPerfil();
+}
 
 function renderPerfil(){
   document.getElementById('perfil-nombre').textContent = perfilData.nombre;
@@ -2375,9 +2337,9 @@ function renderFeedGrid(){
   if(!grid) return;
   const feed = perfilData.feed || [];
   let html = '';
-  feed.forEach((url, i) => {
+  feed.forEach((f, i) => {
     html += `<div class="gallery-item">
-      <img src="${url}" alt="Foto ${i+1}">
+      <img src="${f.url}" alt="Foto ${i+1}">
       ${perfilEditMode ? `<button class="gallery-remove" onclick="removeFeedFoto(${i})"><i class="ti ti-x"></i></button>` : ''}
     </div>`;
   });
@@ -2394,7 +2356,7 @@ function renderFeedGrid(){
   if(countEl) countEl.textContent = '(' + feed.length + '/' + FEED_MAX + ')';
 }
 
-function addFeedFoto(){
+async function addFeedFoto(){
   if(!perfilData.feed) perfilData.feed = [];
   if(perfilData.feed.length >= FEED_MAX){
     alert('Ya tienes ' + FEED_MAX + ' fotos en tu feed personal, que es el máximo permitido. Elimina alguna para agregar una nueva.');
@@ -2402,14 +2364,20 @@ function addFeedFoto(){
   }
   const url = prompt('Pega la URL de la nueva foto para tu feed personal:', '');
   if(!url) return;
-  perfilData.feed.push(url.trim());
-  savePerfil(perfilData);
+
+  const { data, error } = await sb.from('feed_photos').insert({ provider_id: usuarioActual.id, url: url.trim() }).select('id, url').single();
+  if(error){ alert('No se pudo guardar la foto: ' + error.message); return; }
+
+  perfilData.feed.push(data);
   renderFeedGrid();
 }
 
-function removeFeedFoto(index){
+async function removeFeedFoto(index){
+  const foto = perfilData.feed[index];
+  const { error } = await sb.from('feed_photos').delete().eq('id', foto.id);
+  if(error){ alert('No se pudo eliminar la foto: ' + error.message); return; }
+
   perfilData.feed.splice(index, 1);
-  savePerfil(perfilData);
   renderFeedGrid();
 }
 
@@ -2477,7 +2445,7 @@ function applyEditModeUI(){
   btn.querySelector('i').className = perfilEditMode ? 'ti ti-x' : 'ti ti-settings';
 }
 
-function saveProfileChanges(){
+async function saveProfileChanges(){
   const categoria = document.getElementById('perfil-categoria-edit').value.trim();
   const ubicacion = document.getElementById('perfil-ubicacion-edit').value.trim();
   const bio = document.getElementById('perfil-bio-edit').value.trim();
@@ -2487,11 +2455,17 @@ function saveProfileChanges(){
     return;
   }
 
+  const { error } = await sb.from('profiles').update({
+    categoria, location: ubicacion, bio: bio || perfilData.bio,
+    avatar_url: perfilData.avatarUrl, banner_url: perfilData.bannerUrl
+  }).eq('id', usuarioActual.id);
+
+  if(error){ alert('No se pudo guardar el perfil: ' + error.message); return; }
+
   perfilData.categoria = categoria;
   perfilData.ubicacion = ubicacion;
   perfilData.bio = bio || perfilData.bio;
 
-  savePerfil(perfilData);
   perfilEditMode = false;
   applyEditModeUI();
 
@@ -2533,6 +2507,7 @@ function openServiceModal(id){
   document.getElementById('service-modal-title').textContent = existing ? 'Editar servicio' : 'Añadir nuevo servicio';
   document.getElementById('service-nombre').value = existing ? existing.nombre : '';
   document.getElementById('service-precio').value = existing ? existing.precio : '';
+  document.getElementById('service-categoria').value = existing ? (existing.categoria || 'musica') : 'musica';
   document.getElementById('service-descripcion').value = existing ? existing.descripcion : '';
   document.getElementById('service-delete-btn').style.display = existing ? 'flex' : 'none';
 
@@ -2582,9 +2557,10 @@ function removeServiceModalImage(index){
   renderServiceModalImages();
 }
 
-function saveService(){
+async function saveService(){
   const nombre = document.getElementById('service-nombre').value.trim();
   const precio = parseFloat(document.getElementById('service-precio').value);
+  const categoria = document.getElementById('service-categoria').value;
   const descripcion = document.getElementById('service-descripcion').value.trim();
 
   if(!nombre || isNaN(precio) || precio < 0){
@@ -2595,21 +2571,34 @@ function saveService(){
   const imagenes = servicioImagenesDraft.slice();
 
   if(servicioEditingId){
+    const { error } = await sb.from('services').update({
+      name: nombre, price: precio, category: categoria, description: descripcion, imagenes,
+      image_url: imagenes[0] || null
+    }).eq('id', servicioEditingId).eq('provider_id', usuarioActual.id);
+    if(error){ alert('No se pudo guardar el servicio: ' + error.message); return; }
+
     const idx = perfilData.servicios.findIndex(s => s.id === servicioEditingId);
-    if(idx >= 0) perfilData.servicios[idx] = { ...perfilData.servicios[idx], nombre, precio, descripcion, imagenes };
+    if(idx >= 0) perfilData.servicios[idx] = { ...perfilData.servicios[idx], nombre, precio, categoria, descripcion, imagenes };
   } else {
-    perfilData.servicios.push({ id: 'sv' + Date.now(), nombre, precio, descripcion, imagenes });
+    const { data, error } = await sb.from('services').insert({
+      provider_id: usuarioActual.id, name: nombre, price: precio, category: categoria, description: descripcion,
+      imagenes, image_url: imagenes[0] || null, active: true
+    }).select('id').single();
+    if(error){ alert('No se pudo crear el servicio: ' + error.message); return; }
+
+    perfilData.servicios.push({ id: data.id, nombre, precio, categoria, descripcion, imagenes });
   }
 
-  savePerfil(perfilData);
   closeServiceModal();
   renderServiciosGrid();
 }
 
-function deleteService(){
+async function deleteService(){
   if(!servicioEditingId) return;
+  const { error } = await sb.from('services').delete().eq('id', servicioEditingId).eq('provider_id', usuarioActual.id);
+  if(error){ alert('No se pudo eliminar el servicio: ' + error.message); return; }
+
   perfilData.servicios = perfilData.servicios.filter(s => s.id !== servicioEditingId);
-  savePerfil(perfilData);
   closeServiceModal();
   renderServiciosGrid();
 }

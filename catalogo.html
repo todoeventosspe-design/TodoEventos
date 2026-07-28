@@ -588,28 +588,56 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
 
 <script>
 // ─── DATA ───
-const providers = [
-  {id:1,name:"DJ Nexus Lima Pro",cat:"musica",price:350,rating:5.0,reviews:89,district:"Miraflores",tags:["DJ Premium","Luces LED"],img:"b",icon:"ti-music",badge:"🏆 Top Rated"},
-  {id:2,name:"Lima Sound & Light",cat:"musica",price:550,rating:4.8,reviews:61,district:"San Isidro",tags:["Sonido Pro","Iluminación"],img:"h",icon:"ti-speakerphone",badge:"✓ Verificado"},
-  {id:3,name:"Beat Masters Peru",cat:"musica",price:280,rating:4.7,reviews:45,district:"San Miguel",tags:["DJ","Karaoke"],img:"k",icon:"ti-music",badge:"✓ Verificado"},
-  {id:4,name:"Sabores del Perú Catering",cat:"catering",price:800,rating:4.9,reviews:127,district:"Surco",tags:["Catering Criollo","Buffet"],img:"a",icon:"ti-tools-kitchen-2",badge:"✓ Verificado"},
-  {id:5,name:"Eventos & Sabor Lima",cat:"catering",price:650,rating:4.8,reviews:88,district:"La Molina",tags:["Cocina Fusión","Menú ejecutivo"],img:"j",icon:"ti-tools-kitchen-2",badge:"✓ Verificado"},
-  {id:6,name:"Chef en Casa PE",cat:"catering",price:400,rating:4.6,reviews:52,district:"Miraflores",tags:["Catering íntimo","Menú personalizado"],img:"a",icon:"ti-tools-kitchen-2",badge:"Nuevo ✨"},
-  {id:7,name:"Lumina Fotografía",cat:"fotografia",price:450,rating:4.8,reviews:204,district:"San Isidro",tags:["Fotografía","Video 4K"],img:"c",icon:"ti-camera",badge:"✨ Destacado"},
-  {id:8,name:"Recuerdos Films Lima",cat:"fotografia",price:700,rating:5.0,reviews:38,district:"Miraflores",tags:["Cinematic","Drone 4K"],img:"c",icon:"ti-video",badge:"🏆 Top Rated"},
-  {id:9,name:"El Patio de Lima",cat:"locales",price:1200,rating:4.9,reviews:53,district:"La Molina",tags:["Local Premium","200 pers."],img:"d",icon:"ti-building",badge:"✓ Verificado"},
-  {id:10,name:"Salón Gran Miraflores",cat:"locales",price:950,rating:4.7,reviews:41,district:"Miraflores",tags:["Salón de fiestas","120 pers."],img:"i",icon:"ti-building",badge:"✓ Verificado"},
-  {id:11,name:"MagicShow Infantil",cat:"animadores",price:320,rating:4.9,reviews:112,district:"San Borja",tags:["Show Infantil","Animador"],img:"f",icon:"ti-confetti",badge:"✓ Verificado"},
-  {id:12,name:"Circo Arte Lima",cat:"animadores",price:480,rating:4.8,reviews:67,district:"Barranco",tags:["Acrobacia","Shows"],img:"f",icon:"ti-stars",badge:"Popular 🔥"},
-  {id:13,name:"Detalles & Floral Lima",cat:"decoracion",price:600,rating:4.7,reviews:79,district:"San Isidro",tags:["Decoración floral","Bodas"],img:"e",icon:"ti-sparkles",badge:"✓ Verificado"},
-  {id:14,name:"Eventos con Estilo",cat:"decoracion",price:380,rating:4.6,reviews:54,district:"Surco",tags:["Globología","Ambientación"],img:"e",icon:"ti-sparkles",badge:"Nuevo ✨"},
-  {id:15,name:"Coctails Lima Bar",cat:"bar",price:480,rating:4.8,reviews:76,district:"Barranco",tags:["Bar Móvil","Tragos Criollos"],img:"e",icon:"ti-glass-cocktail",badge:"Popular 🔥"},
-  {id:16,name:"Peru Drinks Bar",cat:"bar",price:350,rating:4.6,reviews:43,district:"Miraflores",tags:["Piscos","Coctelería"],img:"e",icon:"ti-glass-cocktail",badge:"✓ Verificado"},
-  {id:17,name:"Dulces Tentaciones Lima",cat:"pasteleria",price:280,rating:4.7,reviews:93,district:"Miraflores",tags:["Tortas temáticas","Cupcakes"],img:"g",icon:"ti-cake",badge:"✓ Verificado"},
-  {id:18,name:"Pastry Art Lima",cat:"pasteleria",price:420,rating:4.9,reviews:65,district:"San Isidro",tags:["Alta pastelería","Wedding Cake"],img:"g",icon:"ti-cake",badge:"🏆 Top Rated"},
-  {id:19,name:"Lima Transfer VIP",cat:"transporte",price:180,rating:4.8,reviews:120,district:"Miraflores",tags:["Transporte VIP","Minivans"],img:"l",icon:"ti-bus",badge:"✓ Verificado"},
-  {id:20,name:"Event Security Peru",cat:"seguridad",price:250,rating:4.7,reviews:88,district:"Surco",tags:["Personal de seguridad","Control de acceso"],img:"l",icon:"ti-shield-check",badge:"✓ Verificado"},
-];
+// Datos reales de Supabase (tablas "services" + "profiles"). Se llenan en
+// cargarProvidersReales(), al inicio. Empieza vacio hasta que la consulta
+// resuelva, por eso render() se vuelve a llamar cuando termina de cargar.
+let providers = [];
+
+const CAT_ICON = {
+  musica:'ti-music', catering:'ti-tools-kitchen-2', fotografia:'ti-camera', locales:'ti-building',
+  animadores:'ti-confetti', decoracion:'ti-sparkles', bar:'ti-glass-cocktail', pasteleria:'ti-cake',
+  transporte:'ti-bus', seguridad:'ti-shield-check'
+};
+const CAT_IMG = {
+  musica:'b', catering:'a', fotografia:'c', locales:'d', animadores:'f',
+  decoracion:'e', bar:'e', pasteleria:'g', transporte:'l', seguridad:'l'
+};
+
+function badgeParaRating(rating){
+  if(rating >= 4.8) return '🏆 Top Rated';
+  if(rating >= 4.5) return '✓ Verificado';
+  return 'Nuevo ✨';
+}
+
+async function cargarProvidersReales(){
+  if(!sb) return;
+  const { data, error } = await sb
+    .from('services')
+    .select('id, name, description, price, category, image_url, provider_id, profiles!services_provider_id_fkey(full_name, location, rating, reviews_count)')
+    .eq('active', true);
+
+  if(error){ console.error('Error cargando el catálogo:', error); return; }
+
+  providers = (data || [])
+    .filter(s => s.profiles) // por si el perfil del proveedor ya no existe
+    .map(s => ({
+      id: s.id,
+      providerId: s.provider_id,
+      name: s.name,
+      cat: s.category || 'musica',
+      price: Number(s.price) || 0,
+      rating: Number(s.profiles.rating) || 5,
+      reviews: s.profiles.reviews_count || 0,
+      district: (s.profiles.location || 'Lima').split(',')[0].trim(),
+      tags: [],
+      img: CAT_IMG[s.category] || 'a',
+      icon: CAT_ICON[s.category] || 'ti-star',
+      badge: badgeParaRating(Number(s.profiles.rating) || 5),
+      desc: s.description || ''
+    }));
+
+  render();
+}
 
 // ─── STATE ───
 let currentCat = 'all';
@@ -688,7 +716,7 @@ function render() {
         </div>
       </div>
       <div class="pcard-actions">
-        <button class="pcard-btn-outline" onclick="openProvider(${p.id})"><i class="ti ti-user"></i> Ver Perfil</button>
+        <button class="pcard-btn-outline" onclick="openProvider('${p.providerId}')"><i class="ti ti-user"></i> Ver Perfil</button>
         <button class="pcard-btn-solid" onclick="quickHire(${p.id})"><i class="ti ti-shopping-cart-plus"></i> Contratar</button>
       </div>`;
     grid.appendChild(card);
@@ -729,89 +757,32 @@ function handleNavSearch(val) {
   render();
 }
 
-// ─── PERFIL PÚBLICO DEL PROVEEDOR ──────────────────────────────────────────
-// Clave compartida con Dashboard.html: si el proveedor editó su bio, precios
-// o fotos desde su panel privado, este marketplace lee esos mismos datos.
-const DASHBOARD_PERFIL_KEY = 'todoeventos_dashboard_perfil_v1';
-// El proveedor demo del catálogo que está conectado al Dashboard real.
-const DASHBOARD_PROVIDER_ID = 1;
+// ─── PERFIL PÚBLICO DEL PROVEEDOR (datos reales de Supabase) ──────────────
+async function openProvider(providerId) {
+  if(!sb || !providerId) return;
 
-function loadDashboardPerfil(){
-  try {
-    const raw = localStorage.getItem(DASHBOARD_PERFIL_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch(e){ return null; }
-}
+  const [{ data: perfilReal }, { data: serviciosReal }, { data: feedReal }] = await Promise.all([
+    sb.from('profiles').select('full_name, categoria, location, bio, avatar_url, banner_url, rating, reviews_count').eq('id', providerId).single(),
+    sb.from('services').select('name, price, description, imagenes').eq('provider_id', providerId).eq('active', true),
+    sb.from('feed_photos').select('url').eq('provider_id', providerId)
+  ]);
 
-function calcRatingFrom(resenas){
-  if(!Array.isArray(resenas) || resenas.length === 0) return null;
-  const suma = resenas.reduce((s,r) => s + (r.estrellas||0), 0);
-  return Math.round((suma/resenas.length)*10)/10;
-}
+  if(!perfilReal) return;
 
-// Aplica los datos reales del Dashboard sobre el proveedor correspondiente
-// del array `providers`. Así la TARJETA del grid y el MODAL de perfil siempre
-// muestran exactamente la misma información, sin desincronizarse.
-function syncProviderFromDashboard(){
-  const perfil = loadDashboardPerfil();
-  if(!perfil) return;
-  const p = providers.find(x => x.id === DASHBOARD_PROVIDER_ID);
-  if(!p) return;
+  const nombre = perfilReal.full_name || 'Proveedor';
+  const categoria = perfilReal.categoria || 'Servicios para eventos';
+  const ubicacion = perfilReal.location || 'Lima';
+  const bio = perfilReal.bio || `${nombre} es un proveedor verificado en TodoEventos.pe.`;
+  const avatarUrl = perfilReal.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombre)}&background=a855f7&color=fff&size=200`;
+  const bannerUrl = perfilReal.banner_url || '';
+  const rating = Number(perfilReal.rating) || 5;
+  const reviews = perfilReal.reviews_count || 0;
+  const servicios = (serviciosReal || []).map(s => ({ nombre: s.name, precio: s.price, descripcion: s.description, imagenes: s.imagenes || [] }));
+  let galeria = [];
+  servicios.forEach(s => { (s.imagenes||[]).forEach(u => galeria.push(u)); });
+  galeria = galeria.concat((feedReal || []).map(f => f.url));
 
-  if(perfil.nombre) p.name = perfil.nombre;
-  if(perfil.ubicacion) p.district = perfil.ubicacion.split(',')[0].trim();
-
-  // El precio "desde" es el servicio más barato que el proveedor publicó.
-  if(Array.isArray(perfil.servicios) && perfil.servicios.length){
-    const precios = perfil.servicios.map(s => Number(s.precio)).filter(n => !isNaN(n));
-    if(precios.length) p.price = Math.min(...precios);
-  }
-
-  // Rating y reseñas se calculan desde las reseñas reales, nunca son inventados.
-  const calc = calcRatingFrom(perfil.resenas);
-  if(calc !== null){
-    p.rating = calc;
-    p.reviews = perfil.resenas.length;
-  }
-}
-
-function openProvider(providerId) {
-  const p = providers.find(x => x.id === providerId);
-  if(!p) return;
-
-  // Si este proveedor está conectado al Dashboard, se usan sus datos reales.
-  const perfilReal = (p.id === DASHBOARD_PROVIDER_ID) ? loadDashboardPerfil() : null;
-
-  let nombre, categoria, ubicacion, bio, avatarUrl, bannerUrl, rating, reviews, servicios, galeria;
-
-  if(perfilReal){
-    nombre = perfilReal.nombre || p.name;
-    categoria = perfilReal.categoria || catNames[p.cat];
-    ubicacion = perfilReal.ubicacion || p.district + ', Lima';
-    bio = perfilReal.bio || 'Proveedor verificado en TodoEventos.pe.';
-    avatarUrl = perfilReal.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombre)}&background=a855f7&color=fff&size=200`;
-    bannerUrl = perfilReal.bannerUrl || '';
-    const calc = calcRatingFrom(perfilReal.resenas);
-    rating = calc !== null ? calc : p.rating;
-    reviews = Array.isArray(perfilReal.resenas) ? perfilReal.resenas.length : p.reviews;
-    servicios = (perfilReal.servicios || []).map(s => ({ nombre: s.nombre, precio: s.precio, descripcion: s.descripcion, imagenes: s.imagenes || [] }));
-    galeria = [];
-    (perfilReal.servicios || []).forEach(s => { (s.imagenes||[]).forEach(u => galeria.push(u)); });
-    if(Array.isArray(perfilReal.feed)) galeria = galeria.concat(perfilReal.feed);
-  } else {
-    // Fallback: no hay datos reales del dashboard para este proveedor, se arma
-    // un perfil consistente a partir de lo que ya tenemos en el marketplace.
-    nombre = p.name;
-    categoria = catNames[p.cat] || 'Servicio para eventos';
-    ubicacion = p.district + ', Lima';
-    bio = `${p.name} es un proveedor verificado de ${(catNames[p.cat]||'').toLowerCase()} en ${p.district}, con ${p.reviews} reseñas de clientes en TodoEventos.pe. ${p.tags ? 'Especialistas en: ' + p.tags.join(', ') + '.' : ''}`;
-    avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=a855f7&color=fff&size=200`;
-    bannerUrl = '';
-    rating = p.rating;
-    reviews = p.reviews;
-    servicios = [{ nombre: 'Servicio estándar', precio: p.price, descripcion: (p.tags||[]).join(' · ') || 'Consulta el detalle con el proveedor.' }];
-    galeria = [];
-  }
+  const p = { id: providerId, badge: badgeParaRating(rating) };
 
   document.getElementById('pm-name').textContent = nombre;
   document.getElementById('pm-categoria').textContent = categoria;
@@ -1172,10 +1143,13 @@ const serviceDetailContent = {
   }
 };
 
+let currentDetailRealProviderId = null; // UUID real del proveedor (para "Ver perfil" y reseñas)
+
 function openServiceDetail(providerId){
   const p = providers.find(x => x.id === providerId);
   if(!p) return;
   currentDetailProviderId = providerId;
+  currentDetailRealProviderId = p.providerId || p.id;
 
   const contenido = serviceDetailContent[p.cat] || serviceDetailContent.default;
 
@@ -1274,7 +1248,7 @@ function cerrarTodasLasResenas(){
 }
 
 function openProviderFromDetail(){
-  const id = currentDetailProviderId;
+  const id = currentDetailRealProviderId;
   closeServiceDetail();
   if(id !== null) openProvider(id);
 }
@@ -1806,23 +1780,15 @@ function updateChatContext(cat){
   }
 })();
 
-// Sincroniza con el Dashboard antes de pintar por primera vez, para que las
-// tarjetas y el modal muestren exactamente los mismos datos.
-syncProviderFromDashboard();
+// Carga real de Supabase antes de pintar por primera vez.
+cargarProvidersReales();
 render();
 updateCartBadge();
 
-// Tiempo real: si el proveedor edita su perfil en el Dashboard (otra pestaña)
-// y vuelve al marketplace, la información se actualiza sola.
+// Si el proveedor edita su perfil/servicios en el Dashboard y el cliente
+// vuelve a esta pestaña, recarga los datos reales.
 window.addEventListener('focus', () => {
-  syncProviderFromDashboard();
-  render();
-});
-window.addEventListener('storage', (e) => {
-  if(e.key === DASHBOARD_PERFIL_KEY){
-    syncProviderFromDashboard();
-    render();
-  }
+  cargarProvidersReales();
 });
 
 /* ─── Sesión: mostrar "Ingresar" o el menú de usuario según corresponda ─── */

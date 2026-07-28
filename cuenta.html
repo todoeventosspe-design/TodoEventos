@@ -519,6 +519,7 @@ async function guardarResena(){
     request_id: resenaActual.requestId,
     client_id: usuarioActual.id,
     provider_id: resenaActual.providerId,
+    client_name: document.getElementById('nombre-display').textContent || 'Cliente de TodoEventos',
     rating: estrellasElegidas,
     comment: document.getElementById('resena-comentario').value.trim() || null
   }, { onConflict: 'request_id' });
