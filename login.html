@@ -243,11 +243,6 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
 const SUPABASE_URL = 'https://vqnyaozauljtashpjfoo.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxbnlhb3phdWxqdGFzaHBqZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDM0NzIsImV4cCI6MjA5OTI3OTQ3Mn0.0JT-UAQnSUygXPNjI69Sf3Rg3mv_NeTwwz9-7vnWcno';
 
-// ─── Conexión a Resend (envío de correo de confirmación al proveedor) ───
-// ⚠️ TODO: en producción esto debería vivir en un backend, no en el HTML
-// (El envío de correos ya NO usa una key aquí — vive protegida en una
-// Edge Function de Supabase. Ver función enviarCorreoConfirmacion() más abajo.)
-
 // Si esta librería no cargó (red lenta, bloqueador, etc.), NUNCA debe
 // romper el resto de la página (pestañas, botones). Por eso va en un
 // bloque protegido: si falla, "supabase" queda en null y el login/registro
@@ -638,10 +633,21 @@ document.addEventListener('keydown', function(e){
   }
 });
 
+// Si recargaste la página a medio verificar el código, retómalo donde quedó
+(function inicializarSegunPendiente(){
+  const raw = sessionStorage.getItem('te_pending_verification');
+  if(raw){
+    try {
+      const pendiente = JSON.parse(raw);
+      mostrarPantallaCodigo(pendiente.email);
+    } catch(e){ /* ignorar */ }
+  }
+})();
+
 /**
- * 📧 Envía el correo de confirmación al proveedor recién registrado.
- * En vez de llamar a Resend directamente (lo que expondría la API key
- * en el navegador), le pide el favor a una Edge Function de Supabase
+ * Envía el correo de confirmación al proveedor recién registrado.
+ * En vez de llamar a Resend directamente (expondría la API key en el
+ * navegador), le pide el favor a una Edge Function de Supabase
  * (enviar-correo-proveedor) que vive en el servidor y guarda la key
  * en secreto. El navegador nunca ve la key real.
  */
@@ -659,28 +665,17 @@ async function enviarCorreoConfirmacion(email, nombre, nombreNegocio){
 
     if(!respuesta.ok){
       const err = await respuesta.json().catch(() => ({}));
-      console.error('❌ Error enviando correo (Edge Function):', err);
+      console.error('Error enviando correo (Edge Function):', err);
       return false;
     }
 
-    console.log('✅ Correo de confirmación enviado exitosamente');
+    console.log('Correo de confirmación enviado exitosamente');
     return true;
   } catch(e){
-    console.error('❌ Error al intentar enviar correo:', e);
+    console.error('Error al intentar enviar correo:', e);
     return false;
   }
 }
-
-// Si recargaste la página a medio verificar el código, retómalo donde quedó
-(function inicializarSegunPendiente(){
-  const raw = sessionStorage.getItem('te_pending_verification');
-  if(raw){
-    try {
-      const pendiente = JSON.parse(raw);
-      mostrarPantallaCodigo(pendiente.email);
-    } catch(e){ /* ignorar */ }
-  }
-})();
 
 // Si llegamos desde un botón tipo "Registrarme gratis" con parámetros en
 // la URL (ej. login.html?modo=registro&rol=proveedor), abrimos directo

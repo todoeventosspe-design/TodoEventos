@@ -1,0 +1,2805 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Proveedor — TodoEventos.pe</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
+:root{
+  --bg:#0D0D0D; --card:#1A1A1A; --card2:#212121; --line:rgba(255,255,255,.08);
+  --or:#F97316; --or-soft:rgba(249,115,22,.12); --or-line:rgba(249,115,22,.28);
+  --fg:#F5F5F5; --sub:#9A9A9A; --gold:#FBBF24; --green:#4ade80; --red:#f87171;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;}
+.app{display:flex;min-height:100vh;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:250px;background:var(--card);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:20px 16px;position:sticky;top:0;height:100vh;flex-shrink:0;}
+.logo{font-size:19px;font-weight:700;text-decoration:none;padding:6px 8px 20px;display:block;}
+.logo .lp{color:var(--or);}
+.logo .lo{color:var(--gold);}
+.logo .dot{color:rgba(245,245,245,.35);font-weight:400;}
+.side-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--sub);padding:12px 8px 8px;font-weight:600;}
+.side-item{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:10px;color:var(--sub);font-size:14px;font-weight:500;cursor:pointer;border:none;background:transparent;width:100%;text-align:left;font-family:inherit;transition:all .16s;text-decoration:none;}
+.side-item i{font-size:19px;width:20px;text-align:center;}
+.side-item:hover{background:var(--card2);color:var(--fg);}
+.side-item.active{background:var(--or-soft);color:var(--or);border:1px solid var(--or-line);}
+.side-spacer{flex:1;}
+.side-cta{display:flex;align-items:center;gap:11px;padding:12px;border-radius:10px;background:var(--or);color:#1a0a02;font-size:13.5px;font-weight:700;cursor:pointer;text-decoration:none;transition:opacity .16s;}
+.side-cta:hover{opacity:.9;}
+.side-cta i{font-size:18px;}
+.side-item.logout{color:var(--red);}
+.side-item.logout:hover{background:rgba(248,113,113,.1);color:var(--red);}
+.side-user{display:flex;align-items:center;gap:10px;padding:12px 8px 4px;margin-top:12px;border-top:1px solid var(--line);}
+.side-avatar{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--or),var(--gold));display:flex;align-items:center;justify-content:center;font-weight:700;color:#1a0a02;font-size:14px;flex-shrink:0;}
+.side-uname{font-size:13px;font-weight:600;}
+.side-urole{font-size:11px;color:var(--sub);}
+
+/* ── MAIN ── */
+.main{flex:1;padding:32px 40px;overflow-y:auto;}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
+.greeting h1{font-size:24px;font-weight:700;}
+.greeting p{font-size:13.5px;color:var(--sub);margin-top:3px;}
+.top-badge{display:inline-flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);padding:8px 15px;border-radius:100px;font-size:12.5px;color:var(--sub);}
+.top-badge .dot-live{width:8px;height:8px;border-radius:50%;background:var(--green);}
+
+/* ── KPI STRIP ── */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;}
+.kpi-ico{width:38px;height:38px;border-radius:10px;background:var(--or-soft);display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+.kpi-ico i{color:var(--or);font-size:20px;}
+.kpi-val{font-size:24px;font-weight:700;}
+.kpi-lbl{font-size:12px;color:var(--sub);margin-top:2px;}
+.kpi-trend{font-size:11.5px;font-weight:600;margin-top:6px;}
+.kpi-trend.up{color:var(--green);}
+.kpi-trend.down{color:var(--red);}
+
+/* ── TOOLS GRID ── */
+.section-title{font-size:16px;font-weight:700;margin-bottom:4px;}
+.section-sub{font-size:13px;color:var(--sub);margin-bottom:18px;}
+.tools-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+.tool-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;cursor:pointer;transition:all .2s;text-align:left;font-family:inherit;color:inherit;}
+.tool-card:hover{border-color:var(--or-line);background:var(--card2);transform:translateY(-3px);}
+.tool-ico{width:52px;height:52px;border-radius:13px;background:var(--or-soft);display:flex;align-items:center;justify-content:center;margin-bottom:16px;transition:all .2s;}
+.tool-ico i{color:var(--or);font-size:26px;}
+.tool-card:hover .tool-ico{background:var(--or);}
+.tool-card:hover .tool-ico i{color:#1a0a02;}
+.tool-title{font-size:16px;font-weight:700;margin-bottom:6px;}
+.tool-desc{font-size:13px;color:var(--sub);line-height:1.55;}
+.tool-arrow{margin-top:14px;font-size:13px;color:var(--or);font-weight:600;display:flex;align-items:center;gap:5px;opacity:0;transition:opacity .2s;}
+.tool-card:hover .tool-arrow{opacity:1;}
+
+/* ── INTERNAL VIEWS ── */
+.view{display:none;}
+.view.active{display:block;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.back-btn{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);color:var(--fg);padding:10px 18px;border-radius:10px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:24px;transition:all .16s;}
+.back-btn:hover{border-color:var(--or-line);color:var(--or);}
+.view-head{display:flex;align-items:center;gap:14px;margin-bottom:24px;}
+.view-ico{width:46px;height:46px;border-radius:12px;background:var(--or-soft);display:flex;align-items:center;justify-content:center;}
+.view-ico i{color:var(--or);font-size:24px;}
+.view-h{font-size:20px;font-weight:700;}
+.view-sub{font-size:13px;color:var(--sub);}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;margin-bottom:18px;}
+.panel-title{font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.panel-title i{color:var(--or);}
+
+/* form elements (fake/simulated) */
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:12px;color:var(--sub);margin-bottom:6px;font-weight:500;}
+.field input,.field select,.field textarea{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:9px;padding:11px 13px;color:var(--fg);font-size:13.5px;font-family:inherit;}
+.field input[type="date"],.field input[type="time"]{color-scheme:dark;cursor:pointer;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--or-line);}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.row3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px;}
+.btn-or{background:var(--or);color:#1a0a02;border:none;padding:11px 20px;border-radius:9px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:7px;transition:opacity .16s;}
+.btn-or:hover{opacity:.9;}
+.btn-ghost{background:var(--card2);color:var(--fg);border:1px solid var(--line);padding:11px 18px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;}
+.btn-outline-or{background:transparent;color:var(--or);border:2px solid var(--or);padding:10px 18px;border-radius:9px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .18s;}
+.btn-outline-or:hover{background:var(--or);color:#1a0a02;}
+.btn-remove-item{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);color:var(--red);width:30px;height:30px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .16s;}
+.btn-remove-item:hover{background:rgba(248,113,113,.22);}
+
+/* tables */
+.tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.tbl th{text-align:left;padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--sub);border-bottom:1px solid var(--line);font-weight:600;}
+.tbl td{padding:12px;border-bottom:1px solid var(--line);}
+.tbl tr:last-child td{border-bottom:none;}
+.pill{display:inline-block;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;}
+.pill.green{background:rgba(74,222,128,.12);color:var(--green);}
+.pill.gold{background:rgba(251,191,36,.12);color:var(--gold);}
+.pill.or{background:var(--or-soft);color:var(--or);}
+.pill.red{background:rgba(248,113,113,.12);color:var(--red);}
+.money{font-weight:700;}
+.money.pos{color:var(--green);}
+.money.neg{color:var(--red);}
+
+/* calendar */
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.cal-nav{display:flex;gap:8px;}
+.cal-nav button{width:34px;height:34px;border-radius:9px;background:var(--card2);border:1px solid var(--line);color:var(--fg);cursor:pointer;font-size:16px;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+.cal-dow{text-align:center;font-size:11px;color:var(--sub);font-weight:600;padding:6px 0;text-transform:uppercase;}
+.cal-day{aspect-ratio:1;background:var(--card2);border:1px solid var(--line);border-radius:9px;padding:7px;font-size:12.5px;position:relative;cursor:pointer;transition:all .14s;}
+.cal-day:hover{border-color:var(--or-line);}
+.cal-day.empty{background:transparent;border:none;cursor:default;}
+.cal-day.has-event{border-color:var(--or-line);}
+.cal-day.past{background:#131313;border-color:rgba(255,255,255,.04);filter:grayscale(.55);opacity:.5;}
+.cal-day.past:hover{border-color:rgba(255,255,255,.04);}
+.cal-day.past .cal-num{color:var(--sub);}
+.cal-day.past .cal-ev{opacity:.65;}
+.cal-day.today{border-color:var(--or);box-shadow:0 0 0 1px var(--or);}
+.cal-day .cal-num{font-weight:600;}
+.cal-day.today .cal-num{color:var(--or);}
+.cal-ev{position:absolute;bottom:5px;left:5px;right:5px;font-size:9.5px;background:var(--or);color:#1a0a02;border-radius:5px;padding:2px 4px;font-weight:600;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.cal-ev.gold{background:var(--gold);}
+
+/* ── MODAL DE EVENTO ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:2000;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;width:100%;max-width:380px;animation:modalIn .18s ease;}
+@keyframes modalIn{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.modal-title{font-size:16px;font-weight:700;}
+.modal-close{background:var(--card2);border:1px solid var(--line);color:var(--sub);width:30px;height:30px;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.modal-close:hover{color:var(--fg);border-color:var(--or-line);}
+.modal-date{font-size:12.5px;color:var(--sub);margin-bottom:18px;}
+.modal-actions{display:flex;gap:10px;margin-top:6px;}
+.btn-danger{background:rgba(248,113,113,.12);color:var(--red);border:1px solid rgba(248,113,113,.3);padding:11px 16px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .16s;}
+.btn-danger:hover{background:rgba(248,113,113,.2);}
+
+/* KPI mini for analytics */
+.bars{display:flex;align-items:flex-end;gap:12px;height:180px;padding-top:20px;}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end;}
+.bar{width:100%;background:linear-gradient(to top,var(--or),var(--gold));border-radius:6px 6px 0 0;min-height:8px;transition:height .4s;}
+.bar-lbl{font-size:11px;color:var(--sub);}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;}
+.stat{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:16px;}
+.stat-val{font-size:22px;font-weight:700;}
+.stat-lbl{font-size:12px;color:var(--sub);margin-top:3px;}
+
+/* inventory bars */
+.inv-item{display:flex;align-items:center;gap:14px;padding:12px 8px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:8px;transition:background .14s;}
+.inv-item:hover{background:var(--card2);}
+.inv-item:last-child{border-bottom:none;}
+.inv-name{flex:1;font-size:13.5px;font-weight:500;}
+.inv-track{width:140px;height:8px;background:var(--card2);border-radius:100px;overflow:hidden;}
+.inv-fill{height:100%;border-radius:100px;}
+.inv-count{font-size:12.5px;color:var(--sub);width:70px;text-align:right;}
+
+/* CRM cards */
+.crm-row{display:flex;align-items:center;gap:14px;padding:14px;background:var(--card2);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;cursor:pointer;transition:border-color .16s;}
+.crm-row:hover{border-color:var(--or-line);}
+.crm-avatar{width:42px;height:42px;border-radius:11px;background:var(--or-soft);display:flex;align-items:center;justify-content:center;color:var(--or);font-weight:700;flex-shrink:0;}
+.crm-info{flex:1;}
+.crm-name{font-size:14px;font-weight:600;}
+.crm-meta{font-size:12px;color:var(--sub);margin-top:2px;}
+
+.add-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+
+@media(max-width:1000px){
+  .kpi-row{grid-template-columns:repeat(2,1fr);}
+  .tools-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:720px){
+  .sidebar{display:none;}
+  .main{padding:20px;}
+  .tools-grid,.kpi-row{grid-template-columns:1fr;}
+  .row2,.row3{grid-template-columns:1fr;}
+}
+/* ── MI PERFIL PÚBLICO ── */
+.profile-wrap{max-width:900px;}
+.profile-banner{position:relative;width:100%;height:200px;border-radius:16px;overflow:hidden;background:var(--card);margin-bottom:0;}
+.profile-banner img{width:100%;height:100%;object-fit:cover;display:block;opacity:.85;}
+.btn-change-img{position:absolute;background:rgba(13,13,13,.75);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.15);color:var(--fg);border-radius:9px;font-size:12.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit;transition:all .16s;}
+.btn-change-img:hover{border-color:var(--or-line);color:var(--or);}
+.btn-change-img.banner{bottom:12px;right:12px;padding:8px 14px;}
+.btn-change-img.avatar{bottom:2px;right:2px;width:30px;height:30px;padding:0;justify-content:center;border-radius:50%;}
+.profile-head{display:flex;align-items:flex-end;gap:18px;padding:0 8px;margin-top:-46px;margin-bottom:20px;flex-wrap:wrap;}
+.profile-avatar-wrap{position:relative;flex-shrink:0;}
+.profile-avatar{width:92px;height:92px;border-radius:18px;object-fit:cover;border:4px solid var(--bg);background:var(--card2);display:block;}
+.profile-verified{position:absolute;bottom:2px;left:68px;width:24px;height:24px;background:var(--or);border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid var(--bg);color:#1a0a02;font-size:13px;}
+.profile-headinfo{flex:1;min-width:200px;padding-bottom:4px;}
+.profile-name{font-size:21px;font-weight:700;}
+.profile-meta{font-size:13px;color:var(--sub);margin-top:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.profile-rating{font-size:13px;color:var(--fg);margin-top:6px;font-weight:600;display:flex;align-items:center;gap:5px;}
+.profile-rating span:last-child{color:var(--sub);font-weight:400;}
+.btn-edit-profile-float{position:absolute;top:14px;right:14px;background:var(--or);border:none;color:#1a0a02;padding:11px 18px;border-radius:10px;font-size:13.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:inherit;transition:all .16s;box-shadow:0 4px 14px rgba(0,0,0,.35);z-index:5;}
+.btn-edit-profile-float:hover{opacity:.9;transform:translateY(-1px);}
+.btn-edit-profile-float.editing{background:var(--card2);color:var(--fg);border:1px solid var(--or-line);}
+
+.reviews-list{display:flex;flex-direction:column;gap:12px;}
+.review-card{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px;}
+.review-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.review-cliente{font-size:13.5px;font-weight:700;}
+.review-stars{color:var(--gold);font-size:12.5px;letter-spacing:1px;}
+.review-fecha{font-size:11.5px;color:var(--sub);}
+.review-comentario{font-size:13px;color:var(--sub);line-height:1.6;}
+.profile-bio{font-size:13.5px;line-height:1.7;color:var(--sub);}
+.profile-bio-edit{width:100%;background:var(--card2);border:1px solid var(--or-line);border-radius:10px;padding:12px;color:var(--fg);font-size:13.5px;line-height:1.6;font-family:inherit;resize:vertical;}
+.profile-edit-input{background:var(--card2);border:1px solid var(--or-line);border-radius:8px;padding:8px 11px;color:var(--fg);font-size:13px;font-family:inherit;}
+.profile-edit-input.name{font-size:18px;font-weight:700;width:100%;max-width:320px;margin-bottom:4px;}
+.profile-edit-input.small{width:100px;}
+.profile-meta-edit{display:flex;gap:8px;flex-wrap:wrap;margin-top:3px;}
+.profile-rating-edit{display:flex;gap:8px;margin-top:6px;}
+
+.profile-tabs{display:flex;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:5px;margin:20px 0 18px;width:fit-content;}
+.profile-tab{background:transparent;border:none;color:var(--sub);padding:10px 18px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px;transition:all .16s;}
+.profile-tab.active{background:var(--or);color:#1a0a02;}
+.profile-panel{display:none;}
+.profile-panel.active{display:block;}
+
+.services-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+.service-card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:default;transition:border-color .16s;}
+.service-card.editable{cursor:pointer;}
+.service-card.editable:hover{border-color:var(--or-line);}
+.service-img{width:100%;height:130px;object-fit:cover;display:block;background:var(--card2);}
+.service-body{padding:14px;}
+.service-name{font-size:14.5px;font-weight:700;}
+.service-desc{font-size:12.5px;color:var(--sub);margin-top:5px;line-height:1.5;}
+.service-price{font-size:15px;font-weight:800;color:var(--or);margin-top:10px;}
+
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.gallery-item{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:1;background:var(--card2);}
+.gallery-item img{width:100%;height:100%;object-fit:cover;display:block;}
+.gallery-remove{position:absolute;top:6px;right:6px;width:26px;height:26px;background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.2);border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;}
+.gallery-add{display:flex;align-items:center;justify-content:center;border:2px dashed var(--line);border-radius:12px;aspect-ratio:1;cursor:pointer;color:var(--sub);font-size:13px;flex-direction:column;gap:6px;transition:all .16s;}
+.gallery-add:hover{border-color:var(--or-line);color:var(--or);}
+
+.service-img-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px;}
+.service-img-item{position:relative;border-radius:9px;overflow:hidden;aspect-ratio:1;background:var(--card2);}
+.service-img-item img{width:100%;height:100%;object-fit:cover;display:block;}
+.service-img-item .gallery-remove{width:20px;height:20px;top:3px;right:3px;font-size:10px;}
+.service-img-add{display:flex;align-items:center;justify-content:center;border:2px dashed var(--line);border-radius:9px;aspect-ratio:1;cursor:pointer;color:var(--sub);font-size:20px;transition:all .16s;}
+.service-img-add:hover{border-color:var(--or-line);color:var(--or);}
+
+@media(max-width:640px){
+  .services-grid{grid-template-columns:1fr;}
+  .gallery-grid{grid-template-columns:repeat(2,1fr);}
+}
+/* ── SOLICITUDES / REQUESTS ── */
+.req-badge{background:#ef4444;color:#fff;font-size:10.5px;font-weight:800;min-width:19px;height:19px;border-radius:100px;display:inline-flex;align-items:center;justify-content:center;padding:0 5px;margin-left:auto;}
+.req-badge.empty{display:none;}
+
+.req-list{display:flex;flex-direction:column;gap:14px;}
+.req-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;transition:border-color .16s;}
+.req-card.pendiente{border-left:3px solid var(--gold);}
+.req-card.aceptada{border-left:3px solid var(--green);opacity:.85;}
+.req-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap;}
+.req-cliente{font-size:15px;font-weight:700;color:var(--fg);}
+.req-tipo{font-size:12px;color:var(--sub);margin-top:2px;}
+.req-fecha-box{background:var(--or-soft);border:1px solid var(--or-line);border-radius:10px;padding:8px 13px;text-align:center;flex-shrink:0;}
+.req-fecha-dia{font-size:17px;font-weight:800;color:var(--or);line-height:1;}
+.req-fecha-mes{font-size:10px;text-transform:uppercase;color:var(--sub);letter-spacing:.05em;margin-top:3px;}
+.req-servicios{background:var(--card2);border-radius:10px;padding:12px;margin-bottom:12px;}
+.req-svc-row{display:flex;justify-content:space-between;font-size:12.5px;padding:4px 0;color:var(--sub);}
+.req-svc-row b{color:var(--fg);font-weight:600;}
+.req-svc-total{display:flex;justify-content:space-between;font-size:13px;font-weight:700;padding-top:8px;margin-top:6px;border-top:1px solid var(--line);color:var(--fg);}
+.req-svc-total span:last-child{color:var(--or);}
+.req-msg{font-size:12.5px;color:var(--sub);line-height:1.6;font-style:italic;padding:10px 12px;background:rgba(255,255,255,.02);border-left:2px solid var(--line);border-radius:0 8px 8px 0;margin-bottom:14px;}
+.req-actions{display:flex;gap:10px;}
+.req-btn-accept{flex:1;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.35);color:var(--green);padding:11px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .16s;}
+.req-btn-accept:hover{background:var(--green);color:#0a1f0f;}
+.req-btn-reject{flex:1;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--red);padding:11px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .16s;}
+.req-btn-reject:hover{background:var(--red);color:#2a0a0a;}
+.req-accepted-note{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.28);color:var(--green);border-radius:9px;padding:11px;font-size:12.5px;display:flex;align-items:center;gap:8px;}
+.req-empty{text-align:center;padding:60px 20px;color:var(--sub);}
+.req-empty i{font-size:44px;opacity:.35;display:block;margin-bottom:14px;}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<!-- ═══ CANDADO DE ACCESO: bloquea el dashboard si no hay sesión, si no eres
+     proveedor, o si tu cuenta aún no fue aprobada ═══ -->
+<div id="verif-overlay" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:99999;align-items:center;justify-content:center;padding:24px;">
+  <div style="max-width:440px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:34px 30px;text-align:center;">
+    <div id="verif-icon" style="width:64px;height:64px;border-radius:50%;background:var(--or-soft);border:1px solid var(--or-line);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+      <i class="ti ti-clock-hour-4" style="font-size:30px;color:var(--or);"></i>
+    </div>
+    <h2 id="verif-titulo" style="font-size:19px;font-weight:700;margin-bottom:10px;">Tu cuenta está en revisión</h2>
+    <p id="verif-texto" style="font-size:13.5px;color:var(--sub);line-height:1.7;margin-bottom:22px;">
+      Estamos revisando la información de tu negocio. Te avisaremos por correo apenas tu cuenta quede aprobada — normalmente toma menos de 48 horas.
+    </p>
+    <button onclick="window.location.href='index_14.html'" style="background:var(--or);color:#fff;border:none;padding:12px 24px;border-radius:10px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;">
+      Volver al inicio
+    </button>
+  </div>
+</div>
+
+<script>
+/* ─── Candado de acceso: se ejecuta ANTES que el resto del dashboard ─── */
+const SUPABASE_URL = 'https://vqnyaozauljtashpjfoo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxbnlhb3phdWxqdGFzaHBqZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDM0NzIsImV4cCI6MjA5OTI3OTQ3Mn0.0JT-UAQnSUygXPNjI69Sf3Rg3mv_NeTwwz9-7vnWcno';
+
+let sb = null;
+try {
+  const storageAdapter = {
+    getItem: (key) => localStorage.getItem(key) ?? sessionStorage.getItem(key),
+    setItem: (key, value) => {
+      const recordar = localStorage.getItem('te_remember') !== 'false';
+      if(recordar){ localStorage.setItem(key, value); sessionStorage.removeItem(key); }
+      else { sessionStorage.setItem(key, value); localStorage.removeItem(key); }
+    },
+    removeItem: (key) => { localStorage.removeItem(key); sessionStorage.removeItem(key); }
+  };
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { storage: storageAdapter } });
+} catch(e) {
+  console.error('No se pudo inicializar Supabase:', e);
+}
+
+function mostrarCandado(icono, titulo, texto){
+  document.getElementById('verif-icon').innerHTML = '<i class="ti ' + icono + '" style="font-size:30px;color:var(--or);"></i>';
+  document.getElementById('verif-titulo').textContent = titulo;
+  document.getElementById('verif-texto').textContent = texto;
+  document.getElementById('verif-overlay').style.display = 'flex';
+}
+
+async function verificarAccesoDashboard(){
+  if(!sb){
+    // Si Supabase no cargó, no bloqueamos el acceso (evita dejar a todos
+    // afuera por un problema de red) pero avisamos en consola.
+    console.warn('No se pudo verificar la sesión: Supabase no disponible.');
+    return;
+  }
+
+  const { data } = await sb.auth.getSession();
+  if(!data.session){
+    window.location.href = 'login.html';
+    return;
+  }
+
+  const usuario = data.session.user;
+  const { data: perfil, error } = await sb
+    .from('profiles')
+    .select('role, verification_status')
+    .eq('id', usuario.id)
+    .single();
+
+  if(error || !perfil){
+    mostrarCandado('ti-alert-circle', 'No se pudo cargar tu cuenta', 'Ocurrió un problema al verificar tu perfil. Intenta recargar la página o contacta soporte.');
+    return;
+  }
+
+  if(perfil.role !== 'proveedor'){
+    window.location.href = 'catalogo.html';
+    return;
+  }
+
+  if(perfil.verification_status === 'pendiente'){
+    mostrarCandado('ti-clock-hour-4', 'Tu cuenta está en revisión',
+      'Estamos revisando la información de tu negocio. Te avisaremos por correo apenas tu cuenta quede aprobada — normalmente toma menos de 48 horas.');
+    return;
+  }
+
+  if(perfil.verification_status === 'rechazado'){
+    mostrarCandado('ti-x', 'Tu solicitud no fue aprobada',
+      'Revisa el correo que te enviamos con el motivo. Si crees que fue un error, contáctanos para resolverlo.');
+    return;
+  }
+
+  // verification_status === 'aprobado': acceso normal, no se muestra el overlay
+}
+
+verificarAccesoDashboard();
+</script>
+
+<div class="app">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar">
+    <span class="logo"><span class="lp">Todo</span><span class="lo">Eventos</span><span class="dot">.pe</span></span>
+
+    <div class="side-label">Panel</div>
+    <button class="side-item" onclick="openTool('perfil')"><i class="ti ti-id-badge-2"></i> Mi Perfil</button>
+    <button class="side-item active" id="nav-home" onclick="goHome()"><i class="ti ti-layout-dashboard"></i> Inicio</button>
+    <button class="side-item" onclick="openTool('solicitudes')"><i class="ti ti-inbox"></i> Solicitudes <span class="req-badge" id="req-badge">0</span></button>
+
+    <div class="side-label">Herramientas</div>
+    <button class="side-item" onclick="openTool('agenda')"><i class="ti ti-calendar-event"></i> Agenda</button>
+    <button class="side-item" onclick="openTool('cotizador')"><i class="ti ti-file-invoice"></i> Cotizador</button>
+    <button class="side-item" onclick="openTool('caja')"><i class="ti ti-cash"></i> Control de Caja</button>
+    <button class="side-item" onclick="openTool('crm')"><i class="ti ti-users"></i> CRM Clientes</button>
+    <button class="side-item" onclick="openTool('inventario')"><i class="ti ti-package"></i> Inventario</button>
+    <button class="side-item" onclick="openTool('analytics')"><i class="ti ti-chart-bar"></i> Analytics</button>
+
+    <div class="side-spacer"></div>
+
+    <a href="catalogo.html" class="side-item"><i class="ti ti-layout-grid"></i> Ver Catálogo</a>
+    <a href="login.html" class="side-item logout"><i class="ti ti-logout"></i> Cerrar Sesión</a>
+
+    <div class="side-user" onclick="openTool('perfil')" style="cursor:pointer;" title="Ver mi perfil público">
+      <div class="side-avatar">DJ</div>
+      <div>
+        <div class="side-uname" id="sidebar-nombre">DJ Nexus Lima</div>
+        <div class="side-urole" id="sidebar-rol">Plan Pro · Miraflores</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN ═══ -->
+  <main class="main">
+
+    <!-- ─── HOME (grid de herramientas) ─── -->
+    <section class="view active" id="view-home">
+      <div class="topbar">
+        <div class="greeting">
+          <h1>¡Hola, DJ Nexus! 👋</h1>
+          <p>Este es el resumen de tu negocio hoy.</p>
+        </div>
+        <div class="top-badge"><span class="dot-live"></span> Perfil activo y visible</div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-row">
+        <div class="kpi">
+          <div class="kpi-ico"><i class="ti ti-calendar-check"></i></div>
+          <div class="kpi-val" id="home-kpi-eventos">7</div>
+          <div class="kpi-lbl">Eventos este mes</div>
+          <div class="kpi-trend up"><i class="ti ti-trending-up"></i> +2 vs. mes pasado</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-ico"><i class="ti ti-cash"></i></div>
+          <div class="kpi-val" id="home-kpi-ingresos">S/. 8,400</div>
+          <div class="kpi-lbl">Ingresos del mes</div>
+          <div class="kpi-trend up"><i class="ti ti-trending-up"></i> +18%</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-ico"><i class="ti ti-message-2"></i></div>
+          <div class="kpi-val" id="home-kpi-cotizaciones">12</div>
+          <div class="kpi-lbl">Cotizaciones pendientes</div>
+          <div class="kpi-trend down"><i class="ti ti-clock"></i> 3 por responder</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-ico"><i class="ti ti-star"></i></div>
+          <div class="kpi-val">5.0</div>
+          <div class="kpi-lbl">Calificación (89 reseñas)</div>
+          <div class="kpi-trend up"><i class="ti ti-award"></i> Top 5 en tu categoría</div>
+        </div>
+      </div>
+
+      <div class="section-title">Tus herramientas</div>
+      <div class="section-sub">Todo lo que necesitas para gestionar tu negocio en un solo lugar.</div>
+
+      <div class="tools-grid">
+        <button class="tool-card" onclick="openTool('agenda')">
+          <div class="tool-ico"><i class="ti ti-calendar-event"></i></div>
+          <div class="tool-title">Agenda Inteligente</div>
+          <div class="tool-desc">Sincroniza tus eventos y evita cruces de fechas automáticamente.</div>
+          <div class="tool-arrow">Abrir <i class="ti ti-arrow-right"></i></div>
+        </button>
+        <button class="tool-card" onclick="openTool('cotizador')">
+          <div class="tool-ico"><i class="ti ti-file-invoice"></i></div>
+          <div class="tool-title">Cotizador Rápido</div>
+          <div class="tool-desc">Genera presupuestos profesionales en segundos y envíalos al cliente.</div>
+          <div class="tool-arrow">Abrir <i class="ti ti-arrow-right"></i></div>
+        </button>
+        <button class="tool-card" onclick="openTool('caja')">
+          <div class="tool-ico"><i class="ti ti-cash"></i></div>
+          <div class="tool-title">Control de Caja</div>
+          <div class="tool-desc">Registra ingresos y gastos para saber cuánto ganas de verdad.</div>
+          <div class="tool-arrow">Abrir <i class="ti ti-arrow-right"></i></div>
+        </button>
+        <button class="tool-card" onclick="openTool('crm')">
+          <div class="tool-ico"><i class="ti ti-users"></i></div>
+          <div class="tool-title">CRM de Clientes</div>
+          <div class="tool-desc">Guarda el historial y da seguimiento a cada cliente sin perder detalle.</div>
+          <div class="tool-arrow">Abrir <i class="ti ti-arrow-right"></i></div>
+        </button>
+        <button class="tool-card" onclick="openTool('inventario')">
+          <div class="tool-ico"><i class="ti ti-package"></i></div>
+          <div class="tool-title">Control de Inventario</div>
+          <div class="tool-desc">Controla tus equipos e insumos y evita quedarte sin stock.</div>
+          <div class="tool-arrow">Abrir <i class="ti ti-arrow-right"></i></div>
+        </button>
+        <button class="tool-card" onclick="openTool('analytics')">
+          <div class="tool-ico"><i class="ti ti-chart-bar"></i></div>
+          <div class="tool-title">Analytics & Reportes</div>
+          <div class="tool-desc">Métricas de ventas, temporadas altas y tu crecimiento mes a mes.</div>
+          <div class="tool-arrow">Abrir <i class="ti ti-arrow-right"></i></div>
+        </button>
+      </div>
+    </section>
+
+    <!-- ─── AGENDA ─── -->
+    <section class="view" id="view-agenda">
+      <button class="back-btn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Volver al Inicio del Dashboard</button>
+      <div class="view-head">
+        <div class="view-ico"><i class="ti ti-calendar-event"></i></div>
+        <div><div class="view-h">Agenda Inteligente</div><div class="view-sub" id="agenda-sub">Cargando…</div></div>
+      </div>
+      <div class="panel">
+        <div class="cal-head">
+          <div class="panel-title" style="margin:0;" id="cal-month-title"><i class="ti ti-calendar"></i> —</div>
+          <div class="cal-nav"><button onclick="calChangeMonth(-1)">‹</button><button onclick="calChangeMonth(1)">›</button></div>
+        </div>
+        <div class="cal-grid" id="calendar"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title"><i class="ti ti-list"></i> Próximos eventos</div>
+        <table class="tbl">
+          <thead><tr><th>Fecha</th><th>Cliente</th><th>Evento</th><th>Distrito</th><th>Estado</th></tr></thead>
+          <tbody id="agenda-proximos-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ─── MODAL: Crear / Editar / Eliminar evento de la agenda ─── -->
+    <div class="modal-overlay" id="event-modal-overlay" onclick="if(event.target===this) closeEventModal()">
+      <div class="modal-box">
+        <div class="modal-head">
+          <div class="modal-title" id="modal-title">Nuevo evento</div>
+          <button class="modal-close" onclick="closeEventModal()"><i class="ti ti-x"></i></button>
+        </div>
+        <div class="modal-date" id="modal-date">—</div>
+
+        <div class="field">
+          <label>Tipo de evento</label>
+          <select id="modal-tipo">
+            <option value="Boda">Boda</option>
+            <option value="Corporativo">Corporativo</option>
+            <option value="Cumpleaños">Cumpleaños</option>
+            <option value="Quinceañero">Quinceañero</option>
+            <option value="Bautizo">Bautizo</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Nombre del cliente</label>
+          <input type="text" id="modal-cliente" placeholder="Ej. María Fernández">
+        </div>
+        <div class="row2">
+          <div class="field"><label>Hora</label><input type="time" id="modal-hora" value="18:00" onclick="if(this.showPicker) this.showPicker();"></div>
+          <div class="field"><label>Distrito</label><input type="text" id="modal-distrito" placeholder="Ej. Miraflores"></div>
+        </div>
+        <div class="field">
+          <label>Estado</label>
+          <select id="modal-estado">
+            <option value="Confirmado">Confirmado</option>
+            <option value="Pendiente pago">Pendiente pago</option>
+          </select>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-or" style="flex:1;justify-content:center;" onclick="saveEvent()"><i class="ti ti-check"></i> Guardar</button>
+          <button class="btn-danger" id="modal-delete-btn" style="display:none;" onclick="deleteEvent()"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── PLANTILLAS DE COTIZACIÓN (gestor: lista + editor) ─── -->
+    <div class="modal-overlay" id="plantilla-modal-overlay" onclick="if(event.target===this) closePlantillaModal()">
+      <div class="modal-box" style="max-width:500px;max-height:86vh;overflow-y:auto;">
+
+        <!-- Vista LISTA: todas las plantillas guardadas -->
+        <div id="plantilla-view-lista">
+          <div class="modal-head">
+            <div class="modal-title"><i class="ti ti-file-invoice" style="color:var(--or);margin-right:6px;"></i> Plantillas de cotización</div>
+            <button class="modal-close" onclick="closePlantillaModal()"><i class="ti ti-x"></i></button>
+          </div>
+          <div class="modal-date">Crea una plantilla distinta por tipo de evento (boda, corporativo, etc.). Al cotizar, se sugiere automáticamente la que corresponda.</div>
+
+          <div id="plantilla-lista-cards"></div>
+
+          <div class="modal-actions">
+            <button class="btn-or" style="flex:1;justify-content:center;" onclick="openPlantillaEditor(null)"><i class="ti ti-plus"></i> Nueva plantilla</button>
+          </div>
+        </div>
+
+        <!-- Vista EDITOR: crear / editar una plantilla -->
+        <div id="plantilla-view-editor" style="display:none;">
+          <div class="modal-head">
+            <div class="modal-title"><i class="ti ti-edit" style="color:var(--or);margin-right:6px;"></i> <span id="plantilla-editor-titulo">Nueva plantilla</span></div>
+            <button class="modal-close" onclick="closePlantillaModal()"><i class="ti ti-x"></i></button>
+          </div>
+
+          <input type="hidden" id="pl-id">
+          <div class="row2">
+            <div class="field"><label>Nombre de la plantilla</label><input type="text" id="pl-nombre" placeholder="Ej. Bodas premium"></div>
+            <div class="field">
+              <label>Se usa para</label>
+              <select id="pl-ocasion">
+                <option value="General">General (todas las ocasiones)</option>
+                <option value="Boda">Boda</option>
+                <option value="Quinceañero">Quinceañero</option>
+                <option value="Corporativo">Corporativo</option>
+                <option value="Cumpleaños">Cumpleaños</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="panel-title" style="margin-top:4px;"><i class="ti ti-building-store"></i> Encabezado</div>
+          <div class="field"><label>Nombre de tu negocio (aparece en el PDF)</label><input type="text" id="pl-negocio" placeholder="Ej. DJ Nexus Producciones"></div>
+          <div class="row2">
+            <div class="field"><label>Color de acento</label><input type="color" id="pl-color" value="#F97316" style="height:42px;padding:4px;cursor:pointer;"></div>
+            <div class="field"><label>Validez de la cotización (días)</label><input type="number" id="pl-validez" value="15" min="1"></div>
+          </div>
+
+          <div class="panel-title"><i class="ti ti-address-book"></i> Datos de contacto</div>
+          <div class="row2">
+            <div class="field"><label>Teléfono / WhatsApp</label><input type="tel" id="pl-telefono" placeholder="Ej. 987 654 321"></div>
+            <div class="field"><label>Correo de contacto</label><input type="email" id="pl-correo" placeholder="contacto@negocio.com"></div>
+          </div>
+          <div class="field"><label>Datos de pago (Yape / Plin / cuenta)</label><input type="text" id="pl-pago" placeholder="Ej. Yape: 987 654 321 — BCP: 193-1234567-0-12"></div>
+
+          <div class="panel-title"><i class="ti ti-message-2"></i> Mensajes de la cotización</div>
+          <div class="field"><label>Mensaje de introducción (opcional)</label><textarea id="pl-intro" rows="2" placeholder="Ej. Gracias por confiar en nosotros para tu evento. Aquí tienes el detalle de tu cotización:"></textarea></div>
+          <div class="field"><label>Términos y condiciones / pie de página</label><textarea id="pl-terminos" rows="3" placeholder="Ej. Cotización válida por 15 días. Se requiere 50% de adelanto para reservar la fecha."></textarea></div>
+
+          <div class="modal-actions">
+            <button class="btn-ghost" onclick="backToPlantillaLista()"><i class="ti ti-arrow-left"></i></button>
+            <button class="btn-or" style="flex:1;justify-content:center;" onclick="savePlantilla()"><i class="ti ti-check"></i> Guardar plantilla</button>
+            <button class="btn-danger" id="pl-delete-btn" style="display:none;" onclick="deletePlantilla()"><i class="ti ti-trash"></i></button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ─── COTIZADOR ─── -->
+    <section class="view" id="view-cotizador">
+      <button class="back-btn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Volver al Inicio del Dashboard</button>
+      <div class="view-head">
+        <div class="view-ico"><i class="ti ti-file-invoice"></i></div>
+        <div><div class="view-h">Cotizador Rápido</div><div class="view-sub">Arma un presupuesto y envíalo al cliente</div></div>
+        <button class="btn-ghost" style="margin-left:auto;" onclick="openPlantillaLista()"><i class="ti ti-layout-grid"></i> Plantillas de cotización</button>
+      </div>
+      <div class="panel">
+        <div class="panel-title"><i class="ti ti-user"></i> Datos del cliente y evento</div>
+        <div class="row2">
+          <div class="field"><label>Cliente</label><input type="text" id="cot-cliente" placeholder="Nombre del cliente"></div>
+          <div class="field"><label>Tipo de evento</label><select id="cot-tipo" onchange="onTipoEventoChange()"><option>Boda</option><option>Quinceañero</option><option>Corporativo</option><option>Cumpleaños</option></select></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Teléfono del cliente</label><input type="tel" id="cot-telefono" placeholder="Ej. 987 654 321"></div>
+          <div class="field"><label>Correo del cliente</label><input type="email" id="cot-correo" placeholder="cliente@correo.com"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Distrito</label><input type="text" id="cot-distrito" placeholder="Ej. Miraflores"></div>
+          <div class="field"><label>Lugar del evento</label><input type="text" id="cot-lugar" placeholder="Ej. Local Los Jardines, Av. La Molina 123"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Fecha</label><input type="date" id="cot-fecha" onclick="if(this.showPicker) this.showPicker();"></div>
+          <div class="field"><label>N° de invitados</label><input type="number" id="cot-invitados" placeholder="120"></div>
+        </div>
+        <div class="field"><label>Especificaciones adicionales</label><textarea id="cot-notas" rows="2" placeholder="Ej. Requiere generador propio, ingreso por puerta lateral, horario de armado 2h antes…"></textarea></div>
+        <div class="field" style="margin-bottom:0;">
+          <label><i class="ti ti-file-invoice" style="font-size:12px;"></i> Plantilla a usar en el PDF</label>
+          <select id="cot-plantilla"></select>
+          <div style="font-size:11.5px;color:var(--sub);margin-top:6px;">Se sugiere sola según el tipo de evento. Puedes cambiarla o <a href="#" onclick="openPlantillaLista();return false;" style="color:var(--or);font-weight:600;">crear una nueva</a>.</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title"><i class="ti ti-list-details"></i> Ítems del presupuesto</div>
+        <table class="tbl">
+          <thead><tr><th>Servicio</th><th>Cantidad</th><th>Precio unit.</th><th>Subtotal</th><th></th></tr></thead>
+          <tbody id="cot-items-tbody">
+            <tr><td>DJ + Sonido profesional (5h)</td><td>1</td><td>S/. 1,200</td><td class="money">S/. 1,200</td><td><button class="btn-remove-item" onclick="removeCotizadorItem(this)" title="Quitar ítem"><i class="ti ti-trash"></i></button></td></tr>
+            <tr><td>Luces y ambientación</td><td>1</td><td>S/. 450</td><td class="money">S/. 450</td><td><button class="btn-remove-item" onclick="removeCotizadorItem(this)" title="Quitar ítem"><i class="ti ti-trash"></i></button></td></tr>
+            <tr><td>Hora extra</td><td>2</td><td>S/. 150</td><td class="money">S/. 300</td><td><button class="btn-remove-item" onclick="removeCotizadorItem(this)" title="Quitar ítem"><i class="ti ti-trash"></i></button></td></tr>
+          </tbody>
+        </table>
+        <div class="row3" style="margin-top:16px;">
+          <div class="field" style="margin:0;"><input type="text" id="new-item-nombre" placeholder="Nuevo servicio…"></div>
+          <div class="field" style="margin:0;"><input type="text" id="new-item-cant" placeholder="Cant."></div>
+          <div class="field" style="margin:0;"><input type="text" id="new-item-precio" placeholder="Precio S/."></div>
+        </div>
+        <div class="add-row">
+          <button class="btn-ghost" onclick="addCotizadorItem()"><i class="ti ti-plus"></i> Agregar ítem</button>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--line);">
+          <div style="font-size:15px;font-weight:700;">Total estimado</div>
+          <div style="font-size:22px;font-weight:700;color:var(--or);" id="cot-total">S/. 1,950</div>
+        </div>
+        <div class="add-row">
+          <button class="btn-outline-or" onclick="exportCotizacionPDF()">📥 Descargar PDF</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── CAJA ─── -->
+    <section class="view" id="view-caja">
+      <button class="back-btn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Volver al Inicio del Dashboard</button>
+      <div class="view-head">
+        <div class="view-ico"><i class="ti ti-cash"></i></div>
+        <div><div class="view-h">Control de Caja</div><div class="view-sub" id="caja-sub">Ingresos y gastos</div></div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat"><div class="stat-val" id="kpi-ingresos" style="color:#22C55E;">S/. 0</div><div class="stat-lbl">Ingresos</div></div>
+        <div class="stat"><div class="stat-val" id="kpi-gastos" style="color:#EF4444;">S/. 0</div><div class="stat-lbl">Gastos</div></div>
+        <div class="stat"><div class="stat-val" id="kpi-neto" style="color:#F97316;">S/. 0</div><div class="stat-lbl">Ganancia neta</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title"><i class="ti ti-receipt"></i> Movimientos recientes</div>
+        <table class="tbl">
+          <thead><tr><th>Fecha</th><th>Concepto</th><th>Tipo</th><th>Monto</th><th></th></tr></thead>
+          <tbody id="caja-tbody"></tbody>
+        </table>
+        <div class="add-row">
+          <button class="btn-or" onclick="openCajaModal('Ingreso')"><i class="ti ti-plus"></i> Registrar ingreso</button>
+          <button class="btn-ghost" onclick="openCajaModal('Gasto')"><i class="ti ti-minus"></i> Registrar gasto</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── MODAL: Registrar movimiento de caja ─── -->
+    <div class="modal-overlay" id="caja-modal-overlay" onclick="if(event.target===this) closeCajaModal()">
+      <div class="modal-box">
+        <div class="modal-head">
+          <div class="modal-title" id="caja-modal-title">Registrar ingreso</div>
+          <button class="modal-close" onclick="closeCajaModal()"><i class="ti ti-x"></i></button>
+        </div>
+        <div class="modal-date" id="caja-modal-date">—</div>
+
+        <div class="field">
+          <label>Concepto</label>
+          <input type="text" id="caja-concepto" placeholder="Ej. Adelanto boda Sofía R.">
+        </div>
+        <div class="field">
+          <label>Monto S/.</label>
+          <input type="number" id="caja-monto" placeholder="0.00" min="0" step="0.01">
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-or" style="flex:1;justify-content:center;" onclick="saveCajaMovimiento()"><i class="ti ti-check"></i> Guardar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── CRM ─── -->
+    <section class="view" id="view-crm">
+      <button class="back-btn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Volver al Inicio del Dashboard</button>
+      <div class="view-head">
+        <div class="view-ico"><i class="ti ti-users"></i></div>
+        <div><div class="view-h">CRM de Clientes</div><div class="view-sub" id="crm-sub">Historial y seguimiento de tus clientes</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title"><i class="ti ti-address-book"></i> Tus clientes</div>
+        <div id="crm-list"></div>
+        <div class="add-row"><button class="btn-or" onclick="openCrmModal()"><i class="ti ti-user-plus"></i> Agregar cliente</button></div>
+      </div>
+    </section>
+
+    <!-- ─── MODAL: Crear / Editar / Eliminar cliente del CRM ─── -->
+    <div class="modal-overlay" id="crm-modal-overlay" onclick="if(event.target===this) closeCrmModal()">
+      <div class="modal-box">
+        <div class="modal-head">
+          <div class="modal-title" id="crm-modal-title">Agregar cliente</div>
+          <button class="modal-close" onclick="closeCrmModal()"><i class="ti ti-x"></i></button>
+        </div>
+        <div class="modal-date" id="crm-modal-badge-preview">—</div>
+
+        <div class="field">
+          <label>Nombre del cliente</label>
+          <input type="text" id="crm-nombre" placeholder="Ej. Sofía Ramírez">
+        </div>
+        <div class="field">
+          <label>Tipo de evento</label>
+          <select id="crm-tipo">
+            <option>Boda</option>
+            <option>Corporativo</option>
+            <option>Cumpleaños</option>
+            <option>Quinceañero</option>
+            <option>Bautizo</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>N° de eventos contratados</label>
+          <input type="number" id="crm-eventos" min="0" value="1" oninput="updateCrmBadgePreview()">
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-or" style="flex:1;justify-content:center;" onclick="saveCrmCliente()"><i class="ti ti-check"></i> Guardar</button>
+          <button class="btn-danger" id="crm-delete-btn" style="display:none;" onclick="deleteCrmCliente()"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── INVENTARIO ─── -->
+    <section class="view" id="view-inventario">
+      <button class="back-btn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Volver al Inicio del Dashboard</button>
+      <div class="view-head">
+        <div class="view-ico"><i class="ti ti-package"></i></div>
+        <div><div class="view-h">Control de Inventario</div><div class="view-sub" id="inv-sub">Tus equipos e insumos disponibles</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title"><i class="ti ti-speakerphone"></i> Equipos</div>
+        <div id="inv-list"></div>
+        <div class="add-row"><button class="btn-or" onclick="openInvModal()"><i class="ti ti-plus"></i> Agregar equipo</button></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title"><i class="ti ti-alert-triangle" style="color:var(--gold);"></i> Alerta de stock</div>
+        <div class="tool-desc" id="inv-alert">Todo en orden.</div>
+      </div>
+    </section>
+
+    <!-- ─── MODAL: Crear / Editar / Eliminar equipo del inventario ─── -->
+    <div class="modal-overlay" id="inv-modal-overlay" onclick="if(event.target===this) closeInvModal()">
+      <div class="modal-box">
+        <div class="modal-head">
+          <div class="modal-title" id="inv-modal-title">Agregar equipo</div>
+          <button class="modal-close" onclick="closeInvModal()"><i class="ti ti-x"></i></button>
+        </div>
+        <div class="modal-date" id="inv-modal-preview">—</div>
+
+        <div class="field">
+          <label>Nombre del equipo</label>
+          <input type="text" id="inv-nombre" placeholder="Ej. Trípodes de luces">
+        </div>
+        <div class="row2">
+          <div class="field"><label>Disponibles</label><input type="number" id="inv-cantidad" min="0" value="1" oninput="updateInvPreview()"></div>
+          <div class="field"><label>Total</label><input type="number" id="inv-total" min="1" value="1" oninput="updateInvPreview()"></div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-or" style="flex:1;justify-content:center;" onclick="saveInvItem()"><i class="ti ti-check"></i> Guardar</button>
+          <button class="btn-danger" id="inv-delete-btn" style="display:none;" onclick="deleteInvItem()"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── ANALYTICS ─── -->
+    <section class="view" id="view-analytics">
+      <button class="back-btn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Volver al Inicio del Dashboard</button>
+      <div class="view-head">
+        <div class="view-ico"><i class="ti ti-chart-bar"></i></div>
+        <div><div class="view-h">Analytics & Reportes</div><div class="view-sub" id="an-sub">Tu desempeño real, calculado de tu Caja y Agenda</div></div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat"><div class="stat-val" id="an-ingresos">S/. 0</div><div class="stat-lbl">Ingresos totales</div></div>
+        <div class="stat"><div class="stat-val" id="an-eventos">0</div><div class="stat-lbl">Eventos en agenda</div></div>
+        <div class="stat"><div class="stat-val" id="an-ticket">S/. 0</div><div class="stat-lbl">Ticket promedio</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title"><i class="ti ti-chart-column"></i> Ingresos por mes</div>
+        <div class="bars" id="an-bars"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title"><i class="ti ti-bulb"></i> Insight</div>
+        <div class="tool-desc" id="an-insight">Aún no hay suficientes datos para un insight.</div>
+      </div>
+    </section>
+
+    <!-- ─── MI PERFIL PÚBLICO ─── -->
+    <!-- ─── SOLICITUDES / REQUESTS ─── -->
+    <section class="view" id="view-solicitudes">
+      <button class="back-btn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Volver al Inicio del Dashboard</button>
+      <div class="view-head">
+        <div class="view-ico"><i class="ti ti-inbox"></i></div>
+        <div><div class="view-h">Solicitudes de Reserva</div><div class="view-sub" id="req-sub">Clientes que quieren contratarte</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title"><i class="ti ti-calendar-question"></i> Verifica tu agenda antes de aceptar</div>
+        <div class="tool-desc" style="margin-bottom:18px;">Cada solicitud te pide confirmar si tienes la fecha libre. Aceptar reserva tu día; rechazar libera el espacio.</div>
+        <div class="req-list" id="req-list"></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-perfil">
+      <button class="back-btn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Volver al Inicio del Dashboard</button>
+
+      <div class="profile-wrap">
+        <!-- Banner + avatar -->
+        <div class="profile-banner" id="perfil-banner-wrap">
+          <img id="perfil-banner-img" src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&q=80" alt="Portada">
+          <button class="btn-change-img banner" id="perfil-banner-btn" style="display:none;" onclick="changeProfileImage('banner')"><i class="ti ti-camera"></i> Cambiar portada</button>
+          <button class="btn-edit-profile-float" id="btn-edit-profile" onclick="toggleProfileEdit()"><i class="ti ti-settings"></i> <span id="btn-edit-profile-text">Editar Perfil</span></button>
+        </div>
+
+        <div class="profile-head">
+          <div class="profile-avatar-wrap">
+            <img id="perfil-avatar-img" class="profile-avatar" src="https://ui-avatars.com/api/?name=DJ+Nexus&background=F97316&color=1a0a02&size=300&bold=true&font-size=0.4" alt="Avatar">
+            <div class="profile-verified" title="Proveedor verificado"><i class="ti ti-rosette-discount-check-filled"></i></div>
+            <button class="btn-change-img avatar" id="perfil-avatar-btn" style="display:none;" onclick="changeProfileImage('avatar')"><i class="ti ti-camera"></i></button>
+          </div>
+          <div class="profile-headinfo">
+            <div class="profile-name" id="perfil-nombre">DJ Nexus Lima</div>
+
+            <div class="profile-meta" id="perfil-meta-view"><span id="perfil-categoria">DJ &amp; Sonido Profesional</span> &middot; <i class="ti ti-map-pin" style="font-size:13px;"></i> <span id="perfil-ubicacion">Miraflores, Lima</span></div>
+            <div class="profile-meta-edit" id="perfil-meta-edit" style="display:none;">
+              <input type="text" class="profile-edit-input" id="perfil-categoria-edit" placeholder="Categoría (ej. DJ & Sonido Profesional)">
+              <input type="text" class="profile-edit-input" id="perfil-ubicacion-edit" placeholder="Ubicación (ej. Miraflores, Lima)">
+            </div>
+
+            <div class="profile-rating" id="perfil-rating-view" title="Calculado automáticamente según las reseñas de tus clientes"><i class="ti ti-star-filled" style="color:var(--gold);"></i> <span id="perfil-rating">—</span> <span id="perfil-reviews">(0 reseñas)</span></div>
+          </div>
+        </div>
+
+        <!-- Biografía -->
+        <div class="panel">
+          <div class="panel-title"><i class="ti ti-quote"></i> Sobre mí</div>
+          <div class="profile-bio" id="perfil-bio-view">Más de 8 años poniendo el ritmo en las mejores bodas, quinceañeros y eventos corporativos de Lima. Combino equipos de sonido profesional con un ojo para leer a la pista y saber exactamente cuándo subir la energía. Cada evento tiene su propia historia — mi trabajo es ponerle la banda sonora correcta.</div>
+          <textarea class="profile-bio-edit" id="perfil-bio-edit" style="display:none;" rows="4"></textarea>
+        </div>
+
+        <!-- Feed personal: humaniza al proveedor, separado de los servicios -->
+        <div class="panel">
+          <div class="panel-title"><i class="ti ti-camera"></i> Un poco más sobre mí <span id="feed-count" style="color:var(--sub);font-weight:400;font-size:12px;"></span></div>
+          <div class="tool-desc" style="margin-bottom:12px;">Fotos personales para que tus clientes te conozcan más allá del trabajo.</div>
+          <div class="gallery-grid" id="perfil-feed-grid"></div>
+        </div>
+
+        <!-- Pestañas internas -->
+        <div class="profile-tabs">
+          <button class="profile-tab active" id="ptab-servicios" onclick="switchProfileTab('servicios')"><i class="ti ti-box"></i> Mis Servicios</button>
+          <button class="profile-tab" id="ptab-resenas" onclick="switchProfileTab('resenas')"><i class="ti ti-star"></i> Reseñas <span id="ptab-resenas-count"></span></button>
+        </div>
+
+        <!-- Servicios -->
+        <div class="profile-panel active" id="ppanel-servicios">
+          <div class="tool-desc" style="margin-bottom:14px;">Haz clic en un servicio para ver sus fotos.</div>
+          <div class="services-grid" id="perfil-servicios-grid"></div>
+          <button class="btn-or" id="btn-add-servicio" style="display:none;margin-top:16px;" onclick="openServiceModal()"><i class="ti ti-plus"></i> Añadir nuevo servicio</button>
+        </div>
+
+        <!-- Reseñas: solo lectura, las genera el mercado, no el proveedor -->
+        <div class="profile-panel" id="ppanel-resenas">
+          <div class="reviews-list" id="perfil-resenas-list"></div>
+        </div>
+
+        <div class="add-row" id="perfil-save-row" style="display:none;margin-top:22px;">
+          <button class="btn-or" onclick="saveProfileChanges()"><i class="ti ti-device-floppy"></i> Guardar Cambios</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ─── MODAL: Crear / Editar / Eliminar servicio del perfil ─── -->
+<div class="modal-overlay" id="service-modal-overlay" onclick="if(event.target===this) closeServiceModal()">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title" id="service-modal-title">Añadir nuevo servicio</div>
+      <button class="modal-close" onclick="closeServiceModal()"><i class="ti ti-x"></i></button>
+    </div>
+
+    <div class="field">
+      <label>Nombre del servicio</label>
+      <input type="text" id="service-nombre" placeholder="Ej. Paquete Boda Premium">
+    </div>
+    <div class="field">
+      <label>Precio S/.</label>
+      <input type="number" id="service-precio" min="0" placeholder="0.00">
+    </div>
+    <div class="field">
+      <label>Descripción</label>
+      <textarea id="service-descripcion" rows="3" placeholder="Breve descripción de lo que incluye"></textarea>
+    </div>
+
+    <div class="field">
+      <label>Fotos de este servicio <span id="service-img-count" style="color:var(--sub);font-weight:400;"></span></label>
+      <div class="service-img-grid" id="service-img-grid"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-or" style="flex:1;justify-content:center;" onclick="saveService()"><i class="ti ti-check"></i> Guardar</button>
+      <button class="btn-danger" id="service-delete-btn" style="display:none;" onclick="deleteService()"><i class="ti ti-trash"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── VISOR DE SERVICIO: solo lectura, muestra las fotos de ese servicio ─── -->
+<div class="modal-overlay" id="service-viewer-overlay" onclick="if(event.target===this) closeServiceViewer()">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-head">
+      <div class="modal-title" id="viewer-nombre">Servicio</div>
+      <button class="modal-close" onclick="closeServiceViewer()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-date" id="viewer-precio">—</div>
+    <div class="profile-bio" id="viewer-descripcion" style="margin-bottom:16px;"></div>
+    <div class="panel-title" style="font-size:12.5px;"><i class="ti ti-photo"></i> Fotos de este servicio</div>
+    <div class="gallery-grid" id="viewer-img-grid"></div>
+  </div>
+</div>
+
+<script>
+// ─── NAVEGACIÓN ENTRE VISTAS (vanilla JS) ───
+function hideAllViews(){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+}
+function clearActiveNav(){
+  document.querySelectorAll('.side-item').forEach(b => b.classList.remove('active'));
+}
+
+function goHome(){
+  hideAllViews();
+  document.getElementById('view-home').classList.add('active');
+  clearActiveNav();
+  document.getElementById('nav-home').classList.add('active');
+  renderHomeKPIs();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function openTool(tool){
+  hideAllViews();
+  const view = document.getElementById('view-' + tool);
+  if(view) view.classList.add('active');
+  clearActiveNav();
+  // marca el item del sidebar correspondiente
+  document.querySelectorAll('.side-item').forEach(b => {
+    const oc = b.getAttribute('onclick') || '';
+    if(oc.includes("'" + tool + "'")) b.classList.add('active');
+  });
+  if(tool === 'agenda') renderAgenda();
+  if(tool === 'caja') renderCaja();
+  if(tool === 'crm') renderCrm();
+  if(tool === 'inventario') renderInventario();
+  if(tool === 'analytics') renderAnalytics();
+  if(tool === 'perfil') renderPerfil();
+  if(tool === 'solicitudes') renderSolicitudes();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// ─── AGENDA: CALENDARIO DINÁMICO CONECTADO A TIEMPO REAL ───
+const AGENDA_STORAGE_KEY = 'todoeventos_dashboard_agenda_events_v1';
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DOWS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+const today = new Date();
+today.setHours(0,0,0,0);
+let calYear = today.getFullYear();
+let calMonth = today.getMonth(); // 0-indexado, arranca en el mes real actual
+let selectedDateStr = null;
+
+function pad2(n){ return n < 10 ? '0'+n : ''+n; }
+function dateKey(y,m,d){ return y + '-' + pad2(m+1) + '-' + pad2(d); }
+
+function loadAgendaEvents(){
+  try {
+    const raw = localStorage.getItem(AGENDA_STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  } catch(e){ console.warn('No se pudo leer la agenda guardada', e); }
+  // Sin datos previos: sembramos 4 eventos de ejemplo realistas para el mes actual
+  const daysInCurrentMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const clamp = (d) => Math.min(d, daysInCurrentMonth);
+  const seed = [
+    { id:'s1', date: dateKey(calYear, calMonth, clamp(today.getDate()+2)),  tipo:'Boda',        cliente:'María Fernández', hora:'18:00', distrito:'Miraflores', estado:'Confirmado' },
+    { id:'s2', date: dateKey(calYear, calMonth, clamp(today.getDate()+6)),  tipo:'Corporativo', cliente:'Corp. Andina',    hora:'12:00', distrito:'San Isidro', estado:'Confirmado' },
+    { id:'s3', date: dateKey(calYear, calMonth, clamp(today.getDate()+13)), tipo:'Quinceañero',  cliente:'Rosa Quispe',     hora:'16:00', distrito:'Surco', estado:'Pendiente pago' },
+    { id:'s4', date: dateKey(calYear, calMonth, clamp(today.getDate()+21)), tipo:'Cumpleaños',   cliente:'Jorge Ramos',     hora:'15:00', distrito:'San Borja', estado:'Confirmado' }
+  ];
+  saveAgendaEvents(seed);
+  return seed;
+}
+
+function saveAgendaEvents(events){
+  try { localStorage.setItem(AGENDA_STORAGE_KEY, JSON.stringify(events)); }
+  catch(e){ console.warn('No se pudo guardar la agenda', e); }
+}
+
+let agendaEvents = loadAgendaEvents();
+
+function eventColorClass(tipo){
+  return (tipo === 'Quinceañero' || tipo === 'Bautizo') ? 'gold' : '';
+}
+
+function renderAgendaHeader(){
+  const monthLabel = MESES[calMonth] + ' ' + calYear;
+  document.getElementById('cal-month-title').innerHTML = '<i class="ti ti-calendar"></i> ' + monthLabel;
+  const count = agendaEvents.filter(e => {
+    const [y,m] = e.date.split('-').map(Number);
+    return y === calYear && (m-1) === calMonth;
+  }).length;
+  document.getElementById('agenda-sub').textContent = monthLabel + ' · ' + count + (count===1 ? ' evento confirmado' : ' eventos confirmados');
+}
+
+function buildCalendar(){
+  const grid = document.getElementById('calendar');
+  let html = DOWS.map(d => `<div class="cal-dow">${d}</div>`).join('');
+
+  const firstDow = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+
+  for(let i=0;i<firstDow;i++) html += `<div class="cal-day empty"></div>`;
+
+  for(let d=1; d<=daysInMonth; d++){
+    const key = dateKey(calYear, calMonth, d);
+    const ev = agendaEvents.find(e => e.date === key);
+    const cellDate = new Date(calYear, calMonth, d);
+    const isPast = cellDate < today;
+    const isToday = cellDate.getTime() === today.getTime();
+    let classes = 'cal-day';
+    if(ev) classes += ' has-event';
+    if(isPast) classes += ' past';
+    if(isToday) classes += ' today';
+    html += `<div class="${classes}" onclick="openEventModal('${key}')">
+      <span class="cal-num">${d}</span>
+      ${ev ? `<div class="cal-ev ${eventColorClass(ev.tipo)}">${ev.tipo} · ${ev.cliente.split(' ')[0]}</div>` : ''}
+    </div>`;
+  }
+
+  grid.innerHTML = html;
+}
+
+function renderAgenda(){
+  renderAgendaHeader();
+  buildCalendar();
+  renderProximosEventos();
+}
+
+function calChangeMonth(delta){
+  calMonth += delta;
+  if(calMonth > 11){ calMonth = 0; calYear++; }
+  if(calMonth < 0){ calMonth = 11; calYear--; }
+  renderAgenda();
+}
+
+// ─── TABLA "PRÓXIMOS EVENTOS": 100% dinámica, ordenada por fecha ───
+function renderProximosEventos(){
+  const tbody = document.getElementById('agenda-proximos-tbody');
+  if(!tbody) return;
+
+  const proximos = agendaEvents
+    .filter(e => new Date(e.date + 'T00:00:00') >= today)
+    .sort((a,b) => a.date.localeCompare(b.date));
+
+  if(proximos.length === 0){
+    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--sub);text-align:center;padding:18px;">No tienes próximos eventos. Haz clic en un día del calendario para agendar uno.</td></tr>';
+    return;
+  }
+
+  let html = '';
+  proximos.forEach(e => {
+    const [y,m,d] = e.date.split('-').map(Number);
+    const dow = DOWS[new Date(y, m-1, d).getDay()];
+    const fechaCorta = dow + ' ' + d + ' ' + MESES[m-1].slice(0,3);
+    const pillClass = e.estado === 'Confirmado' ? 'green' : 'gold';
+    html += `<tr style="cursor:pointer;" onclick="openEventModal('${e.date}')">
+      <td>${fechaCorta}</td>
+      <td>${e.cliente}</td>
+      <td>${e.tipo}</td>
+      <td>${e.distrito || '—'}</td>
+      <td><span class="pill ${pillClass}">${e.estado || 'Confirmado'}</span></td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+// ─── MODAL DE EVENTO: crear / editar / eliminar ───
+function openEventModal(dateStr){
+  selectedDateStr = dateStr;
+  const existing = agendaEvents.find(e => e.date === dateStr);
+  const [y,m,d] = dateStr.split('-').map(Number);
+  const niceDate = d + ' de ' + MESES[m-1] + ' ' + y;
+
+  document.getElementById('modal-date').textContent = niceDate;
+  document.getElementById('modal-title').textContent = existing ? 'Editar evento' : 'Nuevo evento';
+  document.getElementById('modal-tipo').value = existing ? existing.tipo : 'Boda';
+  document.getElementById('modal-cliente').value = existing ? existing.cliente : '';
+  document.getElementById('modal-hora').value = existing ? existing.hora : '18:00';
+  document.getElementById('modal-distrito').value = existing ? (existing.distrito || '') : '';
+  document.getElementById('modal-estado').value = existing ? (existing.estado || 'Confirmado') : 'Confirmado';
+  document.getElementById('modal-delete-btn').style.display = existing ? 'flex' : 'none';
+
+  document.getElementById('event-modal-overlay').classList.add('open');
+}
+
+function closeEventModal(){
+  document.getElementById('event-modal-overlay').classList.remove('open');
+  selectedDateStr = null;
+}
+
+function saveEvent(){
+  const tipo = document.getElementById('modal-tipo').value;
+  const cliente = document.getElementById('modal-cliente').value.trim();
+  const hora = document.getElementById('modal-hora').value;
+  const distrito = document.getElementById('modal-distrito').value.trim();
+  const estado = document.getElementById('modal-estado').value;
+
+  if(!cliente){
+    alert('Escribe el nombre del cliente para guardar el evento.');
+    return;
+  }
+
+  const idx = agendaEvents.findIndex(e => e.date === selectedDateStr);
+  const eventData = { id: (idx>=0 ? agendaEvents[idx].id : 'e'+Date.now()), date: selectedDateStr, tipo, cliente, hora, distrito, estado };
+
+  if(idx >= 0) agendaEvents[idx] = eventData;
+  else agendaEvents.push(eventData);
+
+  saveAgendaEvents(agendaEvents);
+  closeEventModal();
+  renderAgenda();
+  renderHomeKPIs();
+}
+
+function deleteEvent(){
+  agendaEvents = agendaEvents.filter(e => e.date !== selectedDateStr);
+  saveAgendaEvents(agendaEvents);
+  closeEventModal();
+  renderAgenda();
+  renderHomeKPIs();
+}
+
+// ─── PLANTILLAS DE COTIZACIÓN: varias plantillas por ocasión, persistentes por proveedor ───
+const PLANTILLAS_STORAGE_KEY = 'todoeventos_dashboard_plantillas_v2';
+const PLANTILLA_STORAGE_KEY_OLD = 'todoeventos_dashboard_plantilla_v1'; // formato anterior, de una sola plantilla
+const OCASIONES = ['General','Boda','Quinceañero','Corporativo','Cumpleaños'];
+
+function nombreNegocioPorDefecto(){
+  return (typeof perfilData !== 'undefined' && perfilData && perfilData.nombre) ? perfilData.nombre : 'Mi Negocio';
+}
+
+function plantillaVacia(){
+  return {
+    id: 'tpl_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+    nombre: 'General',
+    ocasion: 'General',
+    negocio: nombreNegocioPorDefecto(),
+    color: '#F97316',
+    validez: 15,
+    telefono: '',
+    correo: '',
+    pago: '',
+    intro: '',
+    terminos: 'Cotización sujeta a disponibilidad de fecha. Se requiere un adelanto para confirmar la reserva.'
+  };
+}
+
+// Carga la lista de plantillas, migrando el formato antiguo (una sola plantilla) si existiera.
+function loadPlantillas(){
+  try{
+    const raw = localStorage.getItem(PLANTILLAS_STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(Array.isArray(parsed) && parsed.length) return parsed;
+    }
+  }catch(e){
+    console.error('No se pudieron leer las plantillas guardadas:', e);
+  }
+
+  // Migración desde la versión anterior (una sola plantilla, sin ocasión)
+  try{
+    const rawOld = localStorage.getItem(PLANTILLA_STORAGE_KEY_OLD);
+    if(rawOld){
+      const old = JSON.parse(rawOld);
+      const migrada = Object.assign(plantillaVacia(), old, { id:'tpl_migrada', nombre:'General', ocasion:'General' });
+      return [migrada];
+    }
+  }catch(e){ /* ignorar y usar plantilla por defecto */ }
+
+  return [plantillaVacia()];
+}
+
+function savePlantillasToStorage(arr){
+  try{ localStorage.setItem(PLANTILLAS_STORAGE_KEY, JSON.stringify(arr)); }
+  catch(e){ console.error('No se pudieron guardar las plantillas:', e); }
+}
+
+let plantillas = []; // se inicializa más abajo, una vez que perfilData ya existe
+
+function findPlantillaPorOcasion(ocasion){
+  return plantillas.find(p => p.ocasion === ocasion)
+      || plantillas.find(p => p.ocasion === 'General')
+      || plantillas[0];
+}
+
+function findPlantillaPorId(id){
+  return plantillas.find(p => p.id === id) || findPlantillaPorOcasion('General');
+}
+
+// Refresca el <select> de plantilla dentro del Cotizador con la lista actual
+function renderCotPlantillaSelect(preferirId){
+  const sel = document.getElementById('cot-plantilla');
+  if(!sel) return;
+  const idPrevio = preferirId || sel.value;
+  sel.innerHTML = plantillas.map(p =>
+    `<option value="${p.id}">${p.nombre} — ${p.ocasion}</option>`
+  ).join('');
+  if(plantillas.some(p => p.id === idPrevio)){
+    sel.value = idPrevio;
+  }
+}
+
+// Al cambiar el tipo de evento en el cotizador, sugiere automáticamente la plantilla asociada
+function onTipoEventoChange(){
+  const tipo = document.getElementById('cot-tipo').value;
+  const sugerida = findPlantillaPorOcasion(tipo);
+  if(sugerida) document.getElementById('cot-plantilla').value = sugerida.id;
+}
+
+// ── Modal: vista de lista ──
+function renderPlantillaLista(){
+  const cont = document.getElementById('plantilla-lista-cards');
+  cont.innerHTML = plantillas.map(p => `
+    <div style="background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;">
+      <div style="width:10px;height:10px;border-radius:50%;background:${p.color};flex-shrink:0;"></div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:700;">${p.nombre}</div>
+        <div style="font-size:12px;color:var(--sub);">Se usa para: ${p.ocasion}</div>
+      </div>
+      <button class="btn-ghost" style="padding:8px 12px;" onclick="openPlantillaEditor('${p.id}')" title="Editar"><i class="ti ti-edit"></i></button>
+    </div>
+  `).join('');
+}
+
+function openPlantillaLista(){
+  renderPlantillaLista();
+  document.getElementById('plantilla-view-editor').style.display = 'none';
+  document.getElementById('plantilla-view-lista').style.display = 'block';
+  document.getElementById('plantilla-modal-overlay').classList.add('open');
+}
+
+function backToPlantillaLista(){
+  renderPlantillaLista();
+  document.getElementById('plantilla-view-editor').style.display = 'none';
+  document.getElementById('plantilla-view-lista').style.display = 'block';
+}
+
+function closePlantillaModal(){
+  document.getElementById('plantilla-modal-overlay').classList.remove('open');
+}
+
+// ── Modal: vista de editor (crear o editar una plantilla) ──
+function openPlantillaEditor(id){
+  const esNueva = !id;
+  const p = esNueva ? plantillaVacia() : findPlantillaPorId(id);
+
+  document.getElementById('plantilla-editor-titulo').textContent = esNueva ? 'Nueva plantilla' : 'Editar plantilla';
+  document.getElementById('pl-id').value = esNueva ? '' : p.id;
+  document.getElementById('pl-nombre').value = esNueva ? '' : p.nombre;
+  document.getElementById('pl-ocasion').value = p.ocasion || 'General';
+  document.getElementById('pl-negocio').value = p.negocio || '';
+  document.getElementById('pl-color').value = p.color || '#F97316';
+  document.getElementById('pl-validez').value = p.validez || 15;
+  document.getElementById('pl-telefono').value = p.telefono || '';
+  document.getElementById('pl-correo').value = p.correo || '';
+  document.getElementById('pl-pago').value = p.pago || '';
+  document.getElementById('pl-intro').value = p.intro || '';
+  document.getElementById('pl-terminos').value = p.terminos || '';
+
+  // Solo se puede borrar una plantilla existente si no es la única que queda
+  const delBtn = document.getElementById('pl-delete-btn');
+  delBtn.style.display = (!esNueva && plantillas.length > 1) ? 'flex' : 'none';
+
+  document.getElementById('plantilla-view-lista').style.display = 'none';
+  document.getElementById('plantilla-view-editor').style.display = 'block';
+  document.getElementById('plantilla-modal-overlay').classList.add('open');
+}
+
+function savePlantilla(){
+  const nombre = document.getElementById('pl-nombre').value.trim();
+  const negocio = document.getElementById('pl-negocio').value.trim();
+  if(!nombre){
+    alert('Ponle un nombre a la plantilla (Ej. "Bodas", "Corporativo VIP") para identificarla en la lista.');
+    return;
+  }
+  if(!negocio){
+    alert('Ponle un nombre a tu negocio para que aparezca en el PDF.');
+    return;
+  }
+
+  const idExistente = document.getElementById('pl-id').value;
+  const data = {
+    id: idExistente || plantillaVacia().id,
+    nombre: nombre,
+    ocasion: document.getElementById('pl-ocasion').value,
+    negocio: negocio,
+    color: document.getElementById('pl-color').value || '#F97316',
+    validez: parseInt(document.getElementById('pl-validez').value, 10) || 15,
+    telefono: document.getElementById('pl-telefono').value.trim(),
+    correo: document.getElementById('pl-correo').value.trim(),
+    pago: document.getElementById('pl-pago').value.trim(),
+    intro: document.getElementById('pl-intro').value.trim(),
+    terminos: document.getElementById('pl-terminos').value.trim()
+  };
+
+  const idx = plantillas.findIndex(p => p.id === data.id);
+  if(idx >= 0) plantillas[idx] = data;
+  else plantillas.push(data);
+
+  savePlantillasToStorage(plantillas);
+  renderCotPlantillaSelect(data.id);
+  backToPlantillaLista();
+}
+
+function deletePlantilla(){
+  const id = document.getElementById('pl-id').value;
+  if(!id) return;
+  if(plantillas.length <= 1){
+    alert('Debe quedar al menos una plantilla guardada.');
+    return;
+  }
+  const p = findPlantillaPorId(id);
+  if(!confirm('¿Eliminar la plantilla "' + p.nombre + '"? Esta acción no se puede deshacer.')) return;
+
+  plantillas = plantillas.filter(x => x.id !== id);
+  savePlantillasToStorage(plantillas);
+  renderCotPlantillaSelect();
+  backToPlantillaLista();
+}
+
+// ─── COTIZADOR: gestión de ítems y exportación a PDF ───
+function parseMoneyValue(str){
+  if(typeof str === 'number') return str;
+  const cleaned = String(str)
+    .replace(/S\/\.?/gi, '')   // quita el prefijo "S/." o "S/"
+    .replace(/[^\d.,-]/g, '')  // deja solo dígitos, comas, puntos y signo
+    .replace(/,/g, '');        // quita las comas de miles
+  return parseFloat(cleaned) || 0;
+}
+
+function fmtMoneyCot(n){
+  return 'S/. ' + Number(n).toLocaleString('es-PE', { maximumFractionDigits: 2 });
+}
+
+function recalcCotizadorTotal(){
+  const rows = document.querySelectorAll('#cot-items-tbody tr');
+  let total = 0;
+  rows.forEach(r => {
+    const cell = r.querySelector('td.money');
+    if(cell) total += parseMoneyValue(cell.textContent);
+  });
+  document.getElementById('cot-total').textContent = fmtMoneyCot(total);
+}
+
+function addCotizadorItem(){
+  const nombreEl = document.getElementById('new-item-nombre');
+  const cantEl = document.getElementById('new-item-cant');
+  const precioEl = document.getElementById('new-item-precio');
+  const nombre = nombreEl.value.trim();
+  const cant = parseFloat(cantEl.value) || 1;
+  const precio = parseMoneyValue(precioEl.value);
+
+  if(!nombre || precio <= 0){
+    alert('Escribe el nombre del servicio y un precio válido para agregarlo.');
+    return;
+  }
+
+  const subtotal = cant * precio;
+  const tbody = document.getElementById('cot-items-tbody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${nombre}</td><td>${cant}</td><td>${fmtMoneyCot(precio)}</td><td class="money">${fmtMoneyCot(subtotal)}</td><td><button class="btn-remove-item" onclick="removeCotizadorItem(this)" title="Quitar ítem"><i class="ti ti-trash"></i></button></td>`;
+  tbody.appendChild(tr);
+
+  nombreEl.value = ''; cantEl.value = ''; precioEl.value = '';
+  recalcCotizadorTotal();
+}
+
+function removeCotizadorItem(btn){
+  const tbody = document.getElementById('cot-items-tbody');
+  if(tbody.querySelectorAll('tr').length <= 1){
+    alert('Debe quedar al menos un ítem en el presupuesto.');
+    return;
+  }
+  const row = btn.closest('tr');
+  if(row) row.remove();
+  recalcCotizadorTotal();
+}
+
+// jsPDF acepta hex en versiones recientes, pero para máxima compatibilidad
+// convertimos siempre a RGB antes de llamar a los métodos de color.
+function hexToRgbArr(hex){
+  let h = (hex || '#000000').replace('#', '');
+  if(h.length === 3) h = h.split('').map(c => c + c).join('');
+  const num = parseInt(h, 16);
+  if(isNaN(num)) return [0, 0, 0];
+  return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
+}
+function setTC(doc, hex){ const [r,g,b] = hexToRgbArr(hex); doc.setTextColor(r,g,b); }
+function setFC(doc, hex){ const [r,g,b] = hexToRgbArr(hex); doc.setFillColor(r,g,b); }
+function setDC(doc, hex){ const [r,g,b] = hexToRgbArr(hex); doc.setDrawColor(r,g,b); }
+
+function exportCotizacionPDF(){
+  const rows = document.querySelectorAll('#cot-items-tbody tr');
+  if(rows.length === 0){
+    alert('Agrega al menos un ítem al presupuesto antes de descargar el PDF.');
+    return;
+  }
+  const jsPDFLib = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : (typeof jsPDF !== 'undefined' ? jsPDF : null);
+  if(!jsPDFLib){
+    alert('No se pudo cargar el generador de PDF. Revisa tu conexión a internet e intenta de nuevo.');
+    return;
+  }
+
+  const cliente = (document.getElementById('cot-cliente').value || 'Cliente').trim();
+  const tipoEvento = document.getElementById('cot-tipo').value;
+  const fechaInput = document.getElementById('cot-fecha').value;
+  const invitados = document.getElementById('cot-invitados').value || '—';
+  const telefono = document.getElementById('cot-telefono').value.trim() || '—';
+  const correo = document.getElementById('cot-correo').value.trim() || '—';
+  const distrito = document.getElementById('cot-distrito').value.trim() || '—';
+  const lugar = document.getElementById('cot-lugar').value.trim() || 'Por confirmar';
+  const notas = document.getElementById('cot-notas').value.trim();
+
+  // Datos de la plantilla guardada por el proveedor (nombre, color, contacto, términos…)
+  const plSelId = document.getElementById('cot-plantilla').value;
+  const pl = findPlantillaPorId(plSelId);
+  const acento = pl.color || '#F97316';
+
+  const fechaEvento = fechaInput
+    ? new Date(fechaInput + 'T00:00:00').toLocaleDateString('es-PE', { day:'numeric', month:'long', year:'numeric' })
+    : 'Por confirmar';
+
+  const hoy = new Date();
+  const fechaHoy = hoy.toLocaleDateString('es-PE', { day:'2-digit', month:'2-digit', year:'numeric' });
+  const numCotizacion = 'COT-' + hoy.getFullYear() + '-' + String(Math.floor(Math.random()*900)+100);
+
+  // Datos reales de la tabla en pantalla
+  const items = Array.from(rows).map(r => {
+    const tds = r.querySelectorAll('td');
+    return {
+      servicio: tds[0] ? tds[0].textContent.trim() : '',
+      cant: tds[1] ? tds[1].textContent.trim() : '',
+      precioU: tds[2] ? tds[2].textContent.trim() : '',
+      subtotal: tds[3] ? tds[3].textContent.trim() : ''
+    };
+  });
+  const totalTexto = document.getElementById('cot-total').textContent;
+
+  // ── Generación nativa con jsPDF: se dibuja directamente (texto/líneas/rectángulos),
+  // sin capturar pantalla, así que nunca puede salir en blanco por temas del navegador. ──
+  const doc = new jsPDFLib({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const marginX = 15;
+  const contentW = pageW - marginX * 2;
+  let y = 18;
+
+  function checkPageBreak(alturaNecesaria){
+    if(y + alturaNecesaria > pageH - 20){
+      doc.addPage();
+      y = 18;
+      return true;
+    }
+    return false;
+  }
+
+  // Encabezado
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(17);
+  setTC(doc, '#1a1a1a');
+  doc.text(pl.negocio, marginX, y);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  setTC(doc, '#777777');
+  doc.text('Vía TodoEventos.pe · Marketplace de servicios para eventos, Lima', marginX, y + 5);
+  let contactoY = y + 5;
+  if(pl.telefono){ contactoY += 4.2; doc.text('Tel/WhatsApp: ' + pl.telefono, marginX, contactoY); }
+  if(pl.correo){ contactoY += 4.2; doc.text('Correo: ' + pl.correo, marginX, contactoY); }
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  setTC(doc, '#777777');
+  doc.text('Fecha de emisión: ' + fechaHoy, pageW - marginX, y, { align: 'right' });
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9.5);
+  setTC(doc, acento);
+  doc.text(numCotizacion, pageW - marginX, y + 5, { align: 'right' });
+
+  y = Math.max(contactoY, y + 5) + 4;
+  setDC(doc, acento);
+  doc.setLineWidth(0.8);
+  doc.line(marginX, y, pageW - marginX, y);
+  y += 8;
+
+  // Introducción opcional
+  if(pl.intro){
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    setTC(doc, '#444444');
+    const introLines = doc.splitTextToSize(pl.intro, contentW);
+    doc.text(introLines, marginX, y);
+    y += introLines.length * 4.6 + 4;
+  }
+
+  // Datos del cliente / evento (grid de 2 columnas)
+  function campo(label, valor, x, colW){
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    setTC(doc, '#999999');
+    doc.text(label.toUpperCase(), x, y);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10.5);
+    setTC(doc, '#1a1a1a');
+    const lines = doc.splitTextToSize(valor, colW);
+    doc.text(lines, x, y + 4.6);
+    return lines.length;
+  }
+
+  const colW = contentW / 2 - 4;
+  const col2X = marginX + contentW / 2 + 4;
+  let filasAlt;
+
+  filasAlt = campo('Cliente', cliente, marginX, colW);
+  campo('Tipo de evento', tipoEvento, col2X, colW);
+  y += Math.max(filasAlt, 1) * 4.6 + 6;
+
+  filasAlt = campo('Teléfono', telefono, marginX, colW);
+  campo('Correo', correo, col2X, colW);
+  y += Math.max(filasAlt, 1) * 4.6 + 6;
+
+  filasAlt = campo('Distrito', distrito, marginX, colW);
+  campo('Lugar del evento', lugar, col2X, colW);
+  y += Math.max(filasAlt, 1) * 4.6 + 6;
+
+  filasAlt = campo('Fecha del evento', fechaEvento, marginX, colW);
+  campo('N° de invitados', String(invitados), col2X, colW);
+  y += Math.max(filasAlt, 1) * 4.6 + 6;
+
+  if(notas){
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    setTC(doc, '#999999');
+    doc.text('ESPECIFICACIONES ADICIONALES', marginX, y);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    setTC(doc, '#444444');
+    const notasLines = doc.splitTextToSize(notas, contentW);
+    doc.text(notasLines, marginX, y + 4.6);
+    y += 4.6 + notasLines.length * 4.4 + 6;
+  }
+
+  y += 2;
+
+  // Tabla de ítems
+  const colX = { servicio: marginX, cant: marginX + contentW * 0.55, precio: marginX + contentW * 0.72, subtotal: pageW - marginX };
+  function drawTableHeader(){
+    setFC(doc, '#f7f7f7');
+    doc.rect(marginX, y - 5, contentW, 8, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    setTC(doc, '#666666');
+    doc.text('SERVICIO', colX.servicio + 2, y);
+    doc.text('CANT.', colX.cant, y);
+    doc.text('PRECIO UNIT.', colX.precio, y);
+    doc.text('SUBTOTAL', colX.subtotal - 2, y, { align: 'right' });
+    y += 6;
+    setDC(doc, '#e0e0e0');
+    doc.setLineWidth(0.3);
+  }
+
+  checkPageBreak(20);
+  drawTableHeader();
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  items.forEach(it => {
+    const nombreLines = doc.splitTextToSize(it.servicio, (colX.cant - colX.servicio) - 4);
+    const filaAlto = Math.max(nombreLines.length * 4.4, 7);
+    checkPageBreak(filaAlto + 4);
+    setTC(doc, '#1a1a1a');
+    doc.text(nombreLines, colX.servicio + 2, y);
+    doc.text(it.cant, colX.cant, y);
+    doc.text(it.precioU, colX.precio, y);
+    doc.setFont('helvetica', 'bold');
+    doc.text(it.subtotal, colX.subtotal - 2, y, { align: 'right' });
+    doc.setFont('helvetica', 'normal');
+    y += filaAlto;
+    setDC(doc, '#e5e5e5');
+    doc.line(marginX, y - 2, pageW - marginX, y - 2);
+    y += 4;
+  });
+
+  // Total general
+  checkPageBreak(20);
+  y += 4;
+  const boxW = 70, boxH = 12;
+  setFC(doc, '#1a1a1a');
+  doc.roundedRect(pageW - marginX - boxW, y - 8, boxW, boxH, 2, 2, 'F');
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9.5);
+  setTC(doc, '#ffffff');
+  doc.text('Total general', pageW - marginX - boxW + 6, y - 1);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  setTC(doc, acento);
+  doc.text(totalTexto, pageW - marginX - 6, y - 1, { align: 'right' });
+  y += 12;
+
+  // Datos de pago
+  if(pl.pago){
+    checkPageBreak(16);
+    const pagoLines = doc.splitTextToSize('Datos de pago: ' + pl.pago, contentW - 12);
+    const pagoBoxH = pagoLines.length * 4.4 + 6;
+    setFC(doc, '#f7f7f7');
+    doc.roundedRect(marginX, y, contentW, pagoBoxH, 2, 2, 'F');
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    setTC(doc, '#444444');
+    doc.text(pagoLines, marginX + 6, y + 5.5);
+    y += pagoBoxH + 8;
+  }
+
+  // Pie de página / términos
+  checkPageBreak(20);
+  y += 4;
+  setDC(doc, '#e5e5e5');
+  doc.setLineWidth(0.3);
+  doc.line(marginX, y, pageW - marginX, y);
+  y += 6;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  setTC(doc, '#999999');
+  const pieTexto = (pl.terminos ? pl.terminos + '  ' : '') +
+    'Cotización generada por ' + pl.negocio + ' vía TodoEventos.pe · Válida por ' + pl.validez + ' días desde su emisión.';
+  const pieLines = doc.splitTextToSize(pieTexto, contentW);
+  doc.text(pieLines, pageW / 2, y, { align: 'center' });
+
+  const nombreArchivo = 'Cotizacion_' + (pl.negocio || 'TodoEventos').replace(/[^a-zA-Z0-9]+/g,'_') + '_' + (cliente.replace(/[^a-zA-Z0-9]+/g,'_') || 'Cliente') + '.pdf';
+  doc.save(nombreArchivo);
+}
+
+// ─── CONTROL DE CAJA: persistencia, KPIs, modal y tabla dinámica ───
+const CAJA_STORAGE_KEY = 'todoeventos_dashboard_caja_v1';
+const MESES3 = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+function fechaCortaHoy(){
+  const d = new Date();
+  return d.getDate() + ' ' + MESES3[d.getMonth()];
+}
+
+function fechaCortaOffset(diasOffset){
+  const d = new Date(today);
+  d.setDate(d.getDate() + diasOffset);
+  return d.getDate() + ' ' + MESES3[d.getMonth()];
+}
+
+function loadCajaMovimientos(){
+  try {
+    const raw = localStorage.getItem(CAJA_STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  } catch(e){ console.warn('No se pudo leer la caja guardada', e); }
+  // Sin datos previos: cargamos los 5 movimientos de la maqueta original,
+  // con fechas relativas a hoy (igual que la Agenda) para que "Ingresos del
+  // mes" en Inicio muestre datos reales desde el primer momento.
+  const seed = [
+    { id:'c1', fecha: fechaCortaOffset(-4), concepto:'Boda María F. — DJ + sonido', tipo:'Ingreso', monto:1950 },
+    { id:'c2', fecha: fechaCortaOffset(-1), concepto:'Compra de cableado XLR',       tipo:'Gasto',   monto:320  },
+    { id:'c3', fecha: fechaCortaOffset(3),  concepto:'Evento Corp. Andina',          tipo:'Ingreso', monto:2400 },
+    { id:'c4', fecha: fechaCortaOffset(6),  concepto:'Mantenimiento parlantes',      tipo:'Gasto',   monto:480  },
+    { id:'c5', fecha: fechaCortaOffset(9),  concepto:'Adelanto quinceañero Rosa Q.', tipo:'Ingreso', monto:800  }
+  ];
+  saveCajaMovimientos(seed);
+  return seed;
+}
+
+function saveCajaMovimientos(movs){
+  try { localStorage.setItem(CAJA_STORAGE_KEY, JSON.stringify(movs)); }
+  catch(e){ console.warn('No se pudo guardar la caja', e); }
+}
+
+let cajaMovimientos = loadCajaMovimientos();
+let cajaModalTipo = 'Ingreso';
+
+function fmtMoneyCaja(n){
+  return 'S/. ' + Number(n).toLocaleString('es-PE', { maximumFractionDigits: 2 });
+}
+
+function recalcCajaKPIs(){
+  let ingresos = 0, gastos = 0;
+  cajaMovimientos.forEach(m => {
+    if(m.tipo === 'Ingreso') ingresos += m.monto;
+    else gastos += m.monto;
+  });
+  const neto = ingresos - gastos;
+  document.getElementById('kpi-ingresos').textContent = fmtMoneyCaja(ingresos);
+  document.getElementById('kpi-gastos').textContent = fmtMoneyCaja(gastos);
+  document.getElementById('kpi-neto').textContent = fmtMoneyCaja(neto);
+  const subEl = document.getElementById('caja-sub');
+  if(subEl) subEl.textContent = cajaMovimientos.length + (cajaMovimientos.length === 1 ? ' movimiento registrado' : ' movimientos registrados');
+}
+
+function renderCajaTable(){
+  const tbody = document.getElementById('caja-tbody');
+  let html = '';
+  cajaMovimientos.forEach(m => {
+    const pillClass = m.tipo === 'Ingreso' ? 'green' : 'red';
+    const moneyClass = m.tipo === 'Ingreso' ? 'pos' : 'neg';
+    const sign = m.tipo === 'Ingreso' ? '+' : '−';
+    html += `<tr>
+      <td>${m.fecha}</td>
+      <td>${m.concepto}</td>
+      <td><span class="pill ${pillClass}">${m.tipo}</span></td>
+      <td class="money ${moneyClass}">${sign} ${fmtMoneyCaja(m.monto)}</td>
+      <td><button class="btn-remove-item" onclick="removeCajaMovimiento('${m.id}')" title="Eliminar movimiento"><i class="ti ti-x"></i></button></td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+function renderCaja(){
+  renderCajaTable();
+  recalcCajaKPIs();
+}
+
+function openCajaModal(tipo){
+  cajaModalTipo = tipo;
+  document.getElementById('caja-modal-title').textContent = tipo === 'Ingreso' ? 'Registrar ingreso' : 'Registrar gasto';
+  document.getElementById('caja-modal-date').textContent = fechaCortaHoy();
+  document.getElementById('caja-concepto').value = '';
+  document.getElementById('caja-monto').value = '';
+  document.getElementById('caja-modal-overlay').classList.add('open');
+}
+
+function closeCajaModal(){
+  document.getElementById('caja-modal-overlay').classList.remove('open');
+}
+
+function saveCajaMovimiento(){
+  const concepto = document.getElementById('caja-concepto').value.trim();
+  const monto = parseFloat(document.getElementById('caja-monto').value);
+
+  if(!concepto || !monto || monto <= 0){
+    alert('Escribe un concepto y un monto válido para registrar el movimiento.');
+    return;
+  }
+
+  const nuevo = {
+    id: 'c' + Date.now(),
+    fecha: fechaCortaHoy(),
+    concepto,
+    tipo: cajaModalTipo,
+    monto
+  };
+  cajaMovimientos.unshift(nuevo);
+  saveCajaMovimientos(cajaMovimientos);
+  closeCajaModal();
+  renderCaja();
+  renderHomeKPIs();
+}
+
+function removeCajaMovimiento(id){
+  cajaMovimientos = cajaMovimientos.filter(m => m.id !== id);
+  saveCajaMovimientos(cajaMovimientos);
+  renderCaja();
+  renderHomeKPIs();
+}
+
+// ─── CRM DE CLIENTES: persistencia, badges automáticos y modal ───
+const CRM_STORAGE_KEY = 'todoeventos_dashboard_crm_v1';
+
+function loadCrmClientes(){
+  try {
+    const raw = localStorage.getItem(CRM_STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  } catch(e){ console.warn('No se pudo leer el CRM guardado', e); }
+  // Sin datos previos: cargamos los 4 clientes de la maqueta original
+  const seed = [
+    { id:'p1', nombre:'María Fernández',     tipo:'Boda',         eventos:3, estado:'Última vez: Nov 2026' },
+    { id:'p2', nombre:'Corporación Andina',  tipo:'Corporativo',  eventos:5, estado:'Última vez: Nov 2026' },
+    { id:'p3', nombre:'Rosa Quispe',         tipo:'Quinceañero',  eventos:1, estado:'Cotización enviada'   },
+    { id:'p4', nombre:'Jorge Ramos',         tipo:'Cumpleaños',   eventos:2, estado:'Última vez: Oct 2026' }
+  ];
+  saveCrmClientes(seed);
+  return seed;
+}
+
+function saveCrmClientes(list){
+  try { localStorage.setItem(CRM_STORAGE_KEY, JSON.stringify(list)); }
+  catch(e){ console.warn('No se pudo guardar el CRM', e); }
+}
+
+let crmClientes = loadCrmClientes();
+let crmEditingId = null;
+
+function crmIniciales(nombre){
+  const parts = nombre.trim().split(/\s+/).filter(Boolean);
+  let ini = '';
+  if(parts[0]) ini += parts[0][0];
+  if(parts[1]) ini += parts[1][0];
+  else if(parts[0] && parts[0].length > 1) ini += parts[0][1];
+  return ini.toUpperCase();
+}
+
+// Regla de negocio: la etiqueta se calcula sola según el número de eventos,
+// nunca se elige a mano.
+function crmBadge(eventos){
+  if(eventos >= 3) return { text:'Cliente VIP', cls:'green', hex:'#4ade80' };
+  if(eventos === 2) return { text:'Recurrente', cls:'or', hex:'#F97316' };
+  return { text:'Seguimiento', cls:'gold', hex:'#FBBF24' };
+}
+
+function renderCrmList(){
+  const list = document.getElementById('crm-list');
+  let html = '';
+  crmClientes.forEach(c => {
+    const badge = crmBadge(c.eventos);
+    const ini = crmIniciales(c.nombre);
+    html += `<div class="crm-row" onclick="openCrmModal('${c.id}')">
+      <div class="crm-avatar">${ini}</div>
+      <div class="crm-info"><div class="crm-name">${c.nombre}</div><div class="crm-meta">${c.tipo} · ${c.eventos} evento${c.eventos===1?'':'s'} · ${c.estado}</div></div>
+      <span class="pill ${badge.cls}">${badge.text}</span>
+    </div>`;
+  });
+  list.innerHTML = html;
+}
+
+function renderCrmSub(){
+  const sub = document.getElementById('crm-sub');
+  if(sub) sub.textContent = crmClientes.length + (crmClientes.length === 1 ? ' cliente registrado' : ' clientes registrados');
+}
+
+function renderCrm(){
+  renderCrmList();
+  renderCrmSub();
+}
+
+function updateCrmBadgePreview(){
+  const eventos = parseInt(document.getElementById('crm-eventos').value) || 0;
+  const badge = crmBadge(eventos);
+  document.getElementById('crm-modal-badge-preview').innerHTML =
+    'Etiqueta resultante: <b style="color:' + badge.hex + ';">' + badge.text + '</b>';
+}
+
+function openCrmModal(id){
+  crmEditingId = id || null;
+  const existing = id ? crmClientes.find(c => c.id === id) : null;
+
+  document.getElementById('crm-modal-title').textContent = existing ? 'Editar cliente' : 'Agregar cliente';
+  document.getElementById('crm-nombre').value = existing ? existing.nombre : '';
+  document.getElementById('crm-tipo').value = existing ? existing.tipo : 'Boda';
+  document.getElementById('crm-eventos').value = existing ? existing.eventos : 1;
+  document.getElementById('crm-delete-btn').style.display = existing ? 'flex' : 'none';
+  updateCrmBadgePreview();
+
+  document.getElementById('crm-modal-overlay').classList.add('open');
+}
+
+function closeCrmModal(){
+  document.getElementById('crm-modal-overlay').classList.remove('open');
+  crmEditingId = null;
+}
+
+function saveCrmCliente(){
+  const nombre = document.getElementById('crm-nombre').value.trim();
+  const tipo = document.getElementById('crm-tipo').value;
+  const eventos = parseInt(document.getElementById('crm-eventos').value) || 0;
+
+  if(!nombre){
+    alert('Escribe el nombre del cliente para guardarlo.');
+    return;
+  }
+
+  // El estado de última interacción también se recalcula solo según los eventos
+  const hoyCorta = fechaCortaHoy(); // ej. "16 Nov"
+  const mesAbrev = hoyCorta.split(' ')[1];
+  const estado = eventos >= 2 ? ('Última vez: ' + mesAbrev + ' ' + new Date().getFullYear()) : 'Cotización enviada';
+
+  if(crmEditingId){
+    const idx = crmClientes.findIndex(c => c.id === crmEditingId);
+    if(idx >= 0) crmClientes[idx] = { ...crmClientes[idx], nombre, tipo, eventos, estado };
+  } else {
+    crmClientes.push({ id: 'p' + Date.now(), nombre, tipo, eventos, estado });
+  }
+
+  saveCrmClientes(crmClientes);
+  closeCrmModal();
+  renderCrm();
+  renderHomeKPIs();
+}
+
+function deleteCrmCliente(){
+  if(!crmEditingId) return;
+  crmClientes = crmClientes.filter(c => c.id !== crmEditingId);
+  saveCrmClientes(crmClientes);
+  closeCrmModal();
+  renderCrm();
+  renderHomeKPIs();
+}
+
+// ─── CONTROL DE INVENTARIO: persistencia, semáforo de stock y modal ───
+const INV_STORAGE_KEY = 'todoeventos_dashboard_inventario_v1';
+
+function loadInvItems(){
+  try {
+    const raw = localStorage.getItem(INV_STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  } catch(e){ console.warn('No se pudo leer el inventario guardado', e); }
+  // Sin datos previos: cargamos los 5 equipos de la maqueta original
+  const seed = [
+    { id:'i1', nombre:'Parlantes JBL (activos)',    disponible:4,  total:4  },
+    { id:'i2', nombre:'Consola / mixer',             disponible:2,  total:2  },
+    { id:'i3', nombre:'Luces LED / robóticas',       disponible:6,  total:10 },
+    { id:'i4', nombre:'Micrófonos inalámbricos',     disponible:1,  total:4  },
+    { id:'i5', nombre:'Cables XLR',                  disponible:16, total:20 }
+  ];
+  saveInvItems(seed);
+  return seed;
+}
+
+function saveInvItems(list){
+  try { localStorage.setItem(INV_STORAGE_KEY, JSON.stringify(list)); }
+  catch(e){ console.warn('No se pudo guardar el inventario', e); }
+}
+
+let invItems = loadInvItems();
+let invEditingId = null;
+
+// Semáforo de stock: verde ≥70%, dorado ≥30%, rojo por debajo (crítico)
+function invEstado(disponible, total){
+  const ratio = total > 0 ? disponible / total : 0;
+  if(ratio >= 0.7) return { color:'var(--green)', label: disponible + ' / ' + total + ' OK', critical:false };
+  if(ratio >= 0.3) return { color:'var(--gold)', label: disponible + ' / ' + total, critical:false };
+  return { color:'var(--red)', label: disponible + ' / ' + total + ' ⚠', critical:true };
+}
+
+function renderInvList(){
+  const list = document.getElementById('inv-list');
+  let html = '';
+  invItems.forEach(it => {
+    const ratio = it.total > 0 ? Math.min(100, (it.disponible / it.total) * 100) : 0;
+    const estado = invEstado(it.disponible, it.total);
+    html += `<div class="inv-item" onclick="openInvModal('${it.id}')">
+      <div class="inv-name">${it.nombre}</div>
+      <div class="inv-track"><div class="inv-fill" style="width:${ratio}%;background:${estado.color};"></div></div>
+      <div class="inv-count">${estado.label}</div>
+    </div>`;
+  });
+  list.innerHTML = html;
+}
+
+function renderInvAlert(){
+  const alertEl = document.getElementById('inv-alert');
+  const criticos = invItems.filter(it => invEstado(it.disponible, it.total).critical);
+  if(criticos.length === 0){
+    alertEl.innerHTML = '✅ Todo tu inventario está en niveles saludables. Ningún equipo requiere reposición urgente.';
+    return;
+  }
+  const nombres = criticos.map(it => `<b style="color:var(--fg);">${it.nombre}</b> (${it.disponible} de ${it.total})`).join(', ');
+  alertEl.innerHTML = (criticos.length === 1 ? 'El equipo ' : 'Los equipos ') + nombres +
+    (criticos.length === 1 ? ' está' : ' están') + ' bajo stock. Considera reponerlos antes de tu próximo evento.';
+}
+
+function renderInvSub(){
+  const sub = document.getElementById('inv-sub');
+  if(sub) sub.textContent = invItems.length + (invItems.length === 1 ? ' equipo registrado' : ' equipos registrados');
+}
+
+function renderInventario(){
+  renderInvList();
+  renderInvAlert();
+  renderInvSub();
+}
+
+function updateInvPreview(){
+  const disp = parseInt(document.getElementById('inv-cantidad').value) || 0;
+  const tot = parseInt(document.getElementById('inv-total').value) || 1;
+  const estado = invEstado(disp, tot);
+  document.getElementById('inv-modal-preview').innerHTML =
+    'Nivel: <b style="color:' + estado.color + ';">' + Math.round((disp / Math.max(tot,1)) * 100) + '%</b>';
+}
+
+function openInvModal(id){
+  invEditingId = id || null;
+  const existing = id ? invItems.find(it => it.id === id) : null;
+
+  document.getElementById('inv-modal-title').textContent = existing ? 'Editar equipo' : 'Agregar equipo';
+  document.getElementById('inv-nombre').value = existing ? existing.nombre : '';
+  document.getElementById('inv-cantidad').value = existing ? existing.disponible : 1;
+  document.getElementById('inv-total').value = existing ? existing.total : 1;
+  document.getElementById('inv-delete-btn').style.display = existing ? 'flex' : 'none';
+  updateInvPreview();
+
+  document.getElementById('inv-modal-overlay').classList.add('open');
+}
+
+function closeInvModal(){
+  document.getElementById('inv-modal-overlay').classList.remove('open');
+  invEditingId = null;
+}
+
+function saveInvItem(){
+  const nombre = document.getElementById('inv-nombre').value.trim();
+  const disponible = parseInt(document.getElementById('inv-cantidad').value);
+  const total = parseInt(document.getElementById('inv-total').value);
+
+  if(!nombre || isNaN(disponible) || isNaN(total) || total <= 0 || disponible < 0){
+    alert('Escribe un nombre y cantidades válidas (el total debe ser mayor a 0).');
+    return;
+  }
+  if(disponible > total){
+    alert('La cantidad disponible no puede ser mayor al total.');
+    return;
+  }
+
+  if(invEditingId){
+    const idx = invItems.findIndex(it => it.id === invEditingId);
+    if(idx >= 0) invItems[idx] = { ...invItems[idx], nombre, disponible, total };
+  } else {
+    invItems.push({ id: 'i' + Date.now(), nombre, disponible, total });
+  }
+
+  saveInvItems(invItems);
+  closeInvModal();
+  renderInventario();
+}
+
+function deleteInvItem(){
+  if(!invEditingId) return;
+  invItems = invItems.filter(it => it.id !== invEditingId);
+  saveInvItems(invItems);
+  closeInvModal();
+  renderInventario();
+}
+
+// ─── ANALYTICS & REPORTES: calculado en vivo desde Caja y Agenda ───
+// No hay datos falsos aquí: todo se deriva de cajaMovimientos y agendaEvents,
+// que son los mismos arreglos reales que usan Control de Caja y la Agenda.
+function renderAnalytics(){
+  const ingresosMovs = cajaMovimientos.filter(m => m.tipo === 'Ingreso');
+  const totalIngresos = ingresosMovs.reduce((sum,m) => sum + m.monto, 0);
+  const ticketProm = ingresosMovs.length > 0 ? totalIngresos / ingresosMovs.length : 0;
+
+  document.getElementById('an-ingresos').textContent = fmtMoneyCaja(totalIngresos);
+  document.getElementById('an-eventos').textContent = agendaEvents.length;
+  document.getElementById('an-ticket').textContent = fmtMoneyCaja(ticketProm);
+
+  // Agrupar ingresos por mes, a partir de la fecha corta "D Mmm" de cada movimiento
+  const ordenMeses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const porMes = {};
+  ingresosMovs.forEach(m => {
+    const partes = m.fecha.split(' ');
+    const mes = partes[1] || partes[0];
+    porMes[mes] = (porMes[mes] || 0) + m.monto;
+  });
+
+  const mesesConDatos = Object.keys(porMes).sort((a,b) => ordenMeses.indexOf(a) - ordenMeses.indexOf(b));
+  const maxValor = Math.max(1, ...mesesConDatos.map(m => porMes[m]));
+
+  const barsEl = document.getElementById('an-bars');
+  if(mesesConDatos.length === 0){
+    barsEl.innerHTML = '<div style="color:var(--sub);font-size:13px;padding:20px 0;">Aún no hay ingresos registrados en Caja.</div>';
+  } else {
+    let barsHtml = '';
+    mesesConDatos.forEach(mes => {
+      const alturaPct = Math.round((porMes[mes] / maxValor) * 100);
+      barsHtml += `<div class="bar-col"><div class="bar" style="height:${Math.max(alturaPct,6)}%;" title="${fmtMoneyCaja(porMes[mes])}"></div><div class="bar-lbl">${mes}</div></div>`;
+    });
+    barsEl.innerHTML = barsHtml;
+  }
+
+  // Insight dinámico basado en los datos reales, no un texto fijo
+  const insightEl = document.getElementById('an-insight');
+  if(mesesConDatos.length === 0){
+    insightEl.innerHTML = 'Registra tus primeros ingresos en <b style="color:var(--fg);">Control de Caja</b> para empezar a ver estadísticas reales aquí.';
+  } else if(mesesConDatos.length === 1){
+    insightEl.innerHTML = 'Todos tus ingresos registrados están concentrados en <b style="color:var(--fg);">' + mesesConDatos[0] + '</b>. Registra movimientos en otros meses para ver comparativas.';
+  } else {
+    const mejorMes = mesesConDatos.reduce((a,b) => porMes[a] >= porMes[b] ? a : b);
+    insightEl.innerHTML = '<b style="color:var(--fg);">' + mejorMes + '</b> es tu mejor mes hasta ahora, con ' + fmtMoneyCaja(porMes[mejorMes]) + ' en ingresos. Sigue así.';
+  }
+
+  const subEl = document.getElementById('an-sub');
+  if(subEl) subEl.textContent = 'Basado en ' + cajaMovimientos.length + ' movimientos de caja y ' + agendaEvents.length + ' eventos en tu agenda';
+}
+
+// ─── KPIs DE INICIO: se recalculan con datos reales de Agenda, Caja y CRM ───
+// Se llama al cargar la página y cada vez que algo cambia en cualquier
+// herramienta, para que "Inicio" nunca muestre información desactualizada.
+function renderHomeKPIs(){
+  // Eventos este mes → cuenta real desde la Agenda
+  const eventosDelMes = agendaEvents.filter(e => {
+    const [y,m] = e.date.split('-').map(Number);
+    return y === today.getFullYear() && (m-1) === today.getMonth();
+  }).length;
+  const elEventos = document.getElementById('home-kpi-eventos');
+  if(elEventos) elEventos.textContent = eventosDelMes;
+
+  // Ingresos del mes → suma real desde Control de Caja (mismo mes que "hoy")
+  const mesAbrevHoy = fechaCortaHoy().split(' ')[1];
+  const ingresosDelMes = cajaMovimientos
+    .filter(m => m.tipo === 'Ingreso' && m.fecha.split(' ')[1] === mesAbrevHoy)
+    .reduce((s,m) => s + m.monto, 0);
+  const elIngresos = document.getElementById('home-kpi-ingresos');
+  if(elIngresos) elIngresos.textContent = fmtMoneyCaja(ingresosDelMes);
+
+  // Cotizaciones pendientes → clientes del CRM en estado "Seguimiento"
+  // (cotización enviada, todavía sin cerrar)
+  const pendientes = crmClientes.filter(c => crmBadge(c.eventos).text === 'Seguimiento').length;
+  const elCotiz = document.getElementById('home-kpi-cotizaciones');
+  if(elCotiz) elCotiz.textContent = pendientes;
+}
+
+// ─── MI PERFIL PÚBLICO: vitrina comercial del proveedor ───
+const PERFIL_STORAGE_KEY = 'todoeventos_dashboard_perfil_v1';
+
+function loadPerfil(){
+  try {
+    const raw = localStorage.getItem(PERFIL_STORAGE_KEY);
+    if(raw){
+      const data = JSON.parse(raw);
+      // Auto-reparación: si quedó guardada la foto de avatar rota de una
+      // versión anterior, se reemplaza sola sin que el usuario haga nada.
+      if(data.avatarUrl && data.avatarUrl.includes('1571266752264')){
+        data.avatarUrl = 'https://ui-avatars.com/api/?name=DJ+Nexus&background=F97316&color=1a0a02&size=300&bold=true&font-size=0.4';
+      }
+      // Migración: los perfiles guardados antes de esta versión no tenían
+      // reseñas propias (el rating era un número fijo editable). Se les
+      // agrega un set de reseñas de ejemplo para que el cálculo funcione.
+      if(!Array.isArray(data.resenas)){
+        data.resenas = defaultResenas();
+      }
+      // Migración: las fotos ahora viven POR SERVICIO, ya no en una galería
+      // general del perfil. Cada servicio viejo (con "imagen" singular) pasa
+      // a tener un arreglo "imagenes"; si había una galería general, su
+      // primera foto se reparte entre los servicios que no tengan ninguna.
+      const galeriaVieja = Array.isArray(data.galeria) ? data.galeria.slice() : [];
+      if(Array.isArray(data.servicios)){
+        data.servicios.forEach(s => {
+          if(!Array.isArray(s.imagenes)){
+            s.imagenes = s.imagen ? [s.imagen] : (galeriaVieja.length ? [galeriaVieja.shift()] : []);
+          }
+          delete s.imagen;
+        });
+      }
+      delete data.galeria;
+      delete data.rating;
+      delete data.reviews;
+      // Migración: agrega el feed personal (hasta 5 fotos) si el perfil
+      // fue guardado antes de que esta sección existiera.
+      if(!Array.isArray(data.feed)){
+        data.feed = defaultFeed();
+      }
+      savePerfil(data);
+      return data;
+    }
+  } catch(e){ console.warn('No se pudo leer el perfil guardado', e); }
+  // Sin datos previos: perfil de ejemplo de DJ Nexus Lima, listo para lucirse
+  const seed = {
+    nombre: 'DJ Nexus Lima',
+    categoria: 'DJ & Sonido Profesional',
+    ubicacion: 'Miraflores, Lima',
+    bio: 'Más de 8 años poniendo el ritmo en las mejores bodas, quinceañeros y eventos corporativos de Lima. Combino equipos de sonido profesional con un ojo para leer a la pista y saber exactamente cuándo subir la energía. Cada evento tiene su propia historia — mi trabajo es ponerle la banda sonora correcta.',
+    avatarUrl: 'https://ui-avatars.com/api/?name=DJ+Nexus&background=F97316&color=1a0a02&size=300&bold=true&font-size=0.4',
+    bannerUrl: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&q=80',
+    servicios: [
+      { id:'sv1', nombre:'Paquete Boda Premium', precio:1800, descripcion:'DJ + sonido profesional por 6 horas, luces básicas y micrófono inalámbrico para discursos.', imagenes:[
+        'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80',
+        'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=500&q=80',
+        'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=500&q=80'
+      ] },
+      { id:'sv2', nombre:'Hora Extra de Luces', precio:250, descripcion:'Extiende el show con luces robóticas y efectos para pistas de baile más largas.', imagenes:[
+        'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=500&q=80',
+        'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&q=80'
+      ] }
+    ],
+    resenas: defaultResenas(),
+    feed: defaultFeed()
+  };
+  savePerfil(seed);
+  return seed;
+}
+
+// Reseñas de ejemplo: representan lo que dejarían los CLIENTES en el
+// marketplace. El proveedor no puede crearlas, editarlas ni borrarlas —
+// el rating y el conteo se calculan siempre a partir de esta lista.
+function defaultResenas(){
+  return [
+    { id:'r1', cliente:'María Fernández', estrellas:5, comentario:'Excelente DJ, leyó perfecto a la pista en nuestra boda. Súper recomendado.', fecha:'Nov 2026' },
+    { id:'r2', cliente:'Corp. Andina', estrellas:5, comentario:'Muy profesional, llegó puntual y el sonido fue impecable durante todo el evento corporativo.', fecha:'Nov 2026' },
+    { id:'r3', cliente:'Rosa Quispe', estrellas:5, comentario:'El ambiente que armó en el quinceañero fue justo lo que buscábamos. Gracias!', fecha:'Oct 2026' },
+    { id:'r4', cliente:'Jorge Ramos', estrellas:4, comentario:'Muy buen servicio, solo hubiera querido un poco más de variedad musical.', fecha:'Oct 2026' }
+  ];
+}
+
+// Feed personal: fotos del proveedor "detrás de cámaras", separadas de los
+// servicios — el objetivo es humanizar el perfil, no vender un paquete.
+function defaultFeed(){
+  return [
+    'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=500&q=80',
+    'https://images.unsplash.com/photo-1508973379184-7517410fb0bc?w=500&q=80',
+    'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&q=80'
+  ];
+}
+
+// El rating y el número de reseñas SIEMPRE se calculan desde la data real,
+// nunca son un número que el proveedor pueda escribir a mano.
+function calcularRatingDesdeResenas(){
+  const resenas = perfilData.resenas || [];
+  if(resenas.length === 0) return { rating: 0, count: 0 };
+  const suma = resenas.reduce((s, r) => s + r.estrellas, 0);
+  const promedio = Math.round((suma / resenas.length) * 10) / 10;
+  return { rating: promedio, count: resenas.length };
+}
+
+function savePerfil(data){
+  try { localStorage.setItem(PERFIL_STORAGE_KEY, JSON.stringify(data)); }
+  catch(e){ console.warn('No se pudo guardar el perfil', e); }
+}
+
+let perfilData = loadPerfil();
+
+// Ahora que perfilData ya existe, inicializamos las plantillas de cotización
+// (el nombre de negocio por defecto de una plantilla nueva toma el del perfil del proveedor).
+plantillas = loadPlantillas();
+renderCotPlantillaSelect();
+onTipoEventoChange(); // sugiere la plantilla correcta según el tipo de evento por defecto
+let perfilEditMode = false;
+let servicioEditingId = null;
+
+function renderPerfil(){
+  document.getElementById('perfil-nombre').textContent = perfilData.nombre;
+  document.getElementById('perfil-categoria').textContent = perfilData.categoria;
+  document.getElementById('perfil-categoria-edit').value = perfilData.categoria;
+  document.getElementById('perfil-ubicacion').textContent = perfilData.ubicacion;
+  document.getElementById('perfil-ubicacion-edit').value = perfilData.ubicacion;
+
+  // El rating y el conteo de reseñas SIEMPRE se calculan desde perfilData.resenas
+  const { rating, count } = calcularRatingDesdeResenas();
+  document.getElementById('perfil-rating').textContent = count > 0 ? rating : '—';
+  document.getElementById('perfil-reviews').textContent = '(' + count + (count === 1 ? ' reseña)' : ' reseñas)');
+
+  document.getElementById('perfil-bio-view').textContent = perfilData.bio;
+  document.getElementById('perfil-bio-edit').value = perfilData.bio;
+  document.getElementById('perfil-avatar-img').src = perfilData.avatarUrl;
+  document.getElementById('perfil-banner-img').src = perfilData.bannerUrl;
+  // Mantiene el sidebar (nombre y ubicación) consistente con el perfil
+  const sbNombre = document.getElementById('sidebar-nombre');
+  const sbRol = document.getElementById('sidebar-rol');
+  if(sbNombre) sbNombre.textContent = perfilData.nombre;
+  if(sbRol) sbRol.textContent = 'Plan Pro · ' + perfilData.ubicacion.split(',')[0];
+  renderServiciosGrid();
+  renderFeedGrid();
+  renderResenasTab();
+}
+
+// Reseñas: solo lectura. El mercado (los clientes) las genera, el proveedor no.
+function renderResenasTab(){
+  const cont = document.getElementById('perfil-resenas-list');
+  if(!cont) return;
+  const resenas = perfilData.resenas || [];
+  const countEl = document.getElementById('ptab-resenas-count');
+  if(countEl) countEl.textContent = '(' + resenas.length + ')';
+
+  if(resenas.length === 0){
+    cont.innerHTML = '<div style="color:var(--sub);font-size:13px;">Aún no tienes reseñas. Aparecerán aquí cuando tus clientes califiquen tu servicio.</div>';
+    return;
+  }
+
+  let html = '';
+  resenas.forEach(r => {
+    const estrellas = '★'.repeat(r.estrellas) + '☆'.repeat(5 - r.estrellas);
+    html += `<div class="review-card">
+      <div class="review-head">
+        <span class="review-cliente">${r.cliente}</span>
+        <span class="review-fecha">${r.fecha}</span>
+      </div>
+      <div class="review-stars">${estrellas}</div>
+      <div class="review-comentario">${r.comentario}</div>
+    </div>`;
+  });
+  cont.innerHTML = html;
+}
+
+// ─── FEED PERSONAL: hasta 5 fotos, separadas de los servicios ───
+const FEED_MAX = 5;
+
+function renderFeedGrid(){
+  const grid = document.getElementById('perfil-feed-grid');
+  if(!grid) return;
+  const feed = perfilData.feed || [];
+  let html = '';
+  feed.forEach((url, i) => {
+    html += `<div class="gallery-item">
+      <img src="${url}" alt="Foto ${i+1}">
+      ${perfilEditMode ? `<button class="gallery-remove" onclick="removeFeedFoto(${i})"><i class="ti ti-x"></i></button>` : ''}
+    </div>`;
+  });
+  if(perfilEditMode){
+    if(feed.length < FEED_MAX){
+      html += `<div class="gallery-add" onclick="addFeedFoto()"><i class="ti ti-plus" style="font-size:20px;"></i> Agregar foto</div>`;
+    } else {
+      html += `<div class="gallery-add" style="cursor:not-allowed;opacity:.6;" title="Límite de ${FEED_MAX} fotos alcanzado"><i class="ti ti-lock" style="font-size:18px;"></i> Límite alcanzado</div>`;
+    }
+  }
+  grid.innerHTML = html || '<div style="color:var(--sub);font-size:13px;">Aún no has agregado fotos personales.</div>';
+
+  const countEl = document.getElementById('feed-count');
+  if(countEl) countEl.textContent = '(' + feed.length + '/' + FEED_MAX + ')';
+}
+
+function addFeedFoto(){
+  if(!perfilData.feed) perfilData.feed = [];
+  if(perfilData.feed.length >= FEED_MAX){
+    alert('Ya tienes ' + FEED_MAX + ' fotos en tu feed personal, que es el máximo permitido. Elimina alguna para agregar una nueva.');
+    return;
+  }
+  const url = prompt('Pega la URL de la nueva foto para tu feed personal:', '');
+  if(!url) return;
+  perfilData.feed.push(url.trim());
+  savePerfil(perfilData);
+  renderFeedGrid();
+}
+
+function removeFeedFoto(index){
+  perfilData.feed.splice(index, 1);
+  savePerfil(perfilData);
+  renderFeedGrid();
+}
+
+function renderServiciosGrid(){
+  const grid = document.getElementById('perfil-servicios-grid');
+  let html = '';
+  perfilData.servicios.forEach(s => {
+    const imgs = s.imagenes || [];
+    const thumb = imgs[0] || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(s.nombre) + '&background=212121&color=9A9A9A&size=400';
+    const clickFn = perfilEditMode ? `openServiceModal('${s.id}')` : `openServiceViewer('${s.id}')`;
+    html += `<div class="service-card editable" onclick="${clickFn}">
+      <img class="service-img" src="${thumb}" alt="${s.nombre}">
+      <div class="service-body">
+        <div class="service-name">${s.nombre}</div>
+        <div class="service-desc">${s.descripcion}</div>
+        <div class="service-price">S/. ${Number(s.precio).toLocaleString('es-PE')}</div>
+        <div style="font-size:11px;color:var(--sub);margin-top:8px;"><i class="ti ti-photo" style="font-size:12px;"></i> ${imgs.length} foto${imgs.length===1?'':'s'}</div>
+      </div>
+    </div>`;
+  });
+  grid.innerHTML = html || '<div style="color:var(--sub);font-size:13px;">Aún no has agregado servicios.</div>';
+}
+
+function switchProfileTab(tab){
+  document.getElementById('ptab-servicios').classList.toggle('active', tab === 'servicios');
+  document.getElementById('ptab-resenas').classList.toggle('active', tab === 'resenas');
+  document.getElementById('ppanel-servicios').classList.toggle('active', tab === 'servicios');
+  document.getElementById('ppanel-resenas').classList.toggle('active', tab === 'resenas');
+}
+
+// ─── MODO EDICIÓN ───
+// Editable: categoría, ubicación, bio, avatar, banner, servicios, galería.
+// NO editable: nombre del proveedor, calificación y reseñas — el nombre es
+// fijo y el rating/reseñas los define el mercado (los clientes), no el proveedor.
+function toggleProfileEdit(){
+  perfilEditMode = !perfilEditMode;
+  applyEditModeUI();
+  if(!perfilEditMode){
+    // Si sales sin guardar (Cancelar), los campos vuelven a su último valor guardado
+    resetEditInputsFromData();
+  }
+  renderServiciosGrid();
+  renderFeedGrid();
+}
+
+function resetEditInputsFromData(){
+  document.getElementById('perfil-categoria-edit').value = perfilData.categoria;
+  document.getElementById('perfil-ubicacion-edit').value = perfilData.ubicacion;
+  document.getElementById('perfil-bio-edit').value = perfilData.bio;
+}
+
+function applyEditModeUI(){
+  document.getElementById('perfil-meta-view').style.display = perfilEditMode ? 'none' : 'flex';
+  document.getElementById('perfil-meta-edit').style.display = perfilEditMode ? 'flex' : 'none';
+  document.getElementById('perfil-bio-view').style.display = perfilEditMode ? 'none' : 'block';
+  document.getElementById('perfil-bio-edit').style.display = perfilEditMode ? 'block' : 'none';
+  document.getElementById('perfil-banner-btn').style.display = perfilEditMode ? 'flex' : 'none';
+  document.getElementById('perfil-avatar-btn').style.display = perfilEditMode ? 'flex' : 'none';
+  document.getElementById('btn-add-servicio').style.display = perfilEditMode ? 'inline-flex' : 'none';
+  document.getElementById('perfil-save-row').style.display = perfilEditMode ? 'flex' : 'none';
+
+  const btn = document.getElementById('btn-edit-profile');
+  btn.classList.toggle('editing', perfilEditMode);
+  document.getElementById('btn-edit-profile-text').textContent = perfilEditMode ? 'Cancelar' : 'Editar Perfil';
+  btn.querySelector('i').className = perfilEditMode ? 'ti ti-x' : 'ti ti-settings';
+}
+
+function saveProfileChanges(){
+  const categoria = document.getElementById('perfil-categoria-edit').value.trim();
+  const ubicacion = document.getElementById('perfil-ubicacion-edit').value.trim();
+  const bio = document.getElementById('perfil-bio-edit').value.trim();
+
+  if(!categoria || !ubicacion){
+    alert('La categoría y la ubicación no pueden quedar vacías.');
+    return;
+  }
+
+  perfilData.categoria = categoria;
+  perfilData.ubicacion = ubicacion;
+  perfilData.bio = bio || perfilData.bio;
+
+  savePerfil(perfilData);
+  perfilEditMode = false;
+  applyEditModeUI();
+
+  document.getElementById('perfil-categoria').textContent = perfilData.categoria;
+  document.getElementById('perfil-ubicacion').textContent = perfilData.ubicacion;
+  document.getElementById('perfil-bio-view').textContent = perfilData.bio;
+
+  const sbNombre = document.getElementById('sidebar-nombre');
+  const sbRol = document.getElementById('sidebar-rol');
+  if(sbNombre) sbNombre.textContent = perfilData.nombre;
+  if(sbRol) sbRol.textContent = 'Plan Pro · ' + perfilData.ubicacion.split(',')[0];
+
+  renderServiciosGrid();
+  renderFeedGrid();
+}
+
+// Simulación de "cambiar imagen": pide una URL y actualiza la vista previa.
+// Se guarda de forma definitiva recién al presionar "Guardar Cambios".
+function changeProfileImage(target){
+  const url = prompt(target === 'avatar' ? 'Pega la URL de tu nueva foto de perfil:' : 'Pega la URL de tu nueva imagen de portada:', '');
+  if(!url) return;
+  if(target === 'avatar'){
+    perfilData.avatarUrl = url.trim();
+    document.getElementById('perfil-avatar-img').src = perfilData.avatarUrl;
+  } else {
+    perfilData.bannerUrl = url.trim();
+    document.getElementById('perfil-banner-img').src = perfilData.bannerUrl;
+  }
+}
+
+// ─── MODAL DE SERVICIO: crear / editar / eliminar ───
+const SERVICIO_IMG_MAX = 20;
+let servicioImagenesDraft = [];
+
+function openServiceModal(id){
+  servicioEditingId = id || null;
+  const existing = id ? perfilData.servicios.find(s => s.id === id) : null;
+
+  document.getElementById('service-modal-title').textContent = existing ? 'Editar servicio' : 'Añadir nuevo servicio';
+  document.getElementById('service-nombre').value = existing ? existing.nombre : '';
+  document.getElementById('service-precio').value = existing ? existing.precio : '';
+  document.getElementById('service-descripcion').value = existing ? existing.descripcion : '';
+  document.getElementById('service-delete-btn').style.display = existing ? 'flex' : 'none';
+
+  servicioImagenesDraft = existing && Array.isArray(existing.imagenes) ? existing.imagenes.slice() : [];
+  renderServiceModalImages();
+
+  document.getElementById('service-modal-overlay').classList.add('open');
+}
+
+function closeServiceModal(){
+  document.getElementById('service-modal-overlay').classList.remove('open');
+  servicioEditingId = null;
+  servicioImagenesDraft = [];
+}
+
+function renderServiceModalImages(){
+  const grid = document.getElementById('service-img-grid');
+  let html = '';
+  servicioImagenesDraft.forEach((url, i) => {
+    html += `<div class="service-img-item">
+      <img src="${url}" alt="Foto ${i+1}">
+      <button class="gallery-remove" onclick="removeServiceModalImage(${i})"><i class="ti ti-x"></i></button>
+    </div>`;
+  });
+  if(servicioImagenesDraft.length < SERVICIO_IMG_MAX){
+    html += `<div class="service-img-add" onclick="addServiceModalImage()" title="Agregar foto"><i class="ti ti-plus"></i></div>`;
+  }
+  grid.innerHTML = html;
+
+  const countEl = document.getElementById('service-img-count');
+  if(countEl) countEl.textContent = '(' + servicioImagenesDraft.length + '/' + SERVICIO_IMG_MAX + ')';
+}
+
+function addServiceModalImage(){
+  if(servicioImagenesDraft.length >= SERVICIO_IMG_MAX){
+    alert('Ya tienes ' + SERVICIO_IMG_MAX + ' fotos en este servicio, que es el máximo permitido.');
+    return;
+  }
+  const url = prompt('Pega la URL de la foto para este servicio:', '');
+  if(!url) return;
+  servicioImagenesDraft.push(url.trim());
+  renderServiceModalImages();
+}
+
+function removeServiceModalImage(index){
+  servicioImagenesDraft.splice(index, 1);
+  renderServiceModalImages();
+}
+
+function saveService(){
+  const nombre = document.getElementById('service-nombre').value.trim();
+  const precio = parseFloat(document.getElementById('service-precio').value);
+  const descripcion = document.getElementById('service-descripcion').value.trim();
+
+  if(!nombre || isNaN(precio) || precio < 0){
+    alert('Escribe un nombre y un precio válido para el servicio.');
+    return;
+  }
+
+  const imagenes = servicioImagenesDraft.slice();
+
+  if(servicioEditingId){
+    const idx = perfilData.servicios.findIndex(s => s.id === servicioEditingId);
+    if(idx >= 0) perfilData.servicios[idx] = { ...perfilData.servicios[idx], nombre, precio, descripcion, imagenes };
+  } else {
+    perfilData.servicios.push({ id: 'sv' + Date.now(), nombre, precio, descripcion, imagenes });
+  }
+
+  savePerfil(perfilData);
+  closeServiceModal();
+  renderServiciosGrid();
+}
+
+function deleteService(){
+  if(!servicioEditingId) return;
+  perfilData.servicios = perfilData.servicios.filter(s => s.id !== servicioEditingId);
+  savePerfil(perfilData);
+  closeServiceModal();
+  renderServiciosGrid();
+}
+
+// ─── VISOR DE SERVICIO: solo lectura, para ver las fotos de un servicio ───
+function openServiceViewer(id){
+  const s = perfilData.servicios.find(sv => sv.id === id);
+  if(!s) return;
+
+  document.getElementById('viewer-nombre').textContent = s.nombre;
+  document.getElementById('viewer-precio').textContent = 'S/. ' + Number(s.precio).toLocaleString('es-PE');
+  document.getElementById('viewer-descripcion').textContent = s.descripcion;
+
+  const imgs = s.imagenes || [];
+  const grid = document.getElementById('viewer-img-grid');
+  grid.innerHTML = imgs.length
+    ? imgs.map((url, i) => `<div class="gallery-item"><img src="${url}" alt="Foto ${i+1}"></div>`).join('')
+    : '<div style="color:var(--sub);font-size:13px;grid-column:1/-1;">Este servicio todavía no tiene fotos.</div>';
+
+  document.getElementById('service-viewer-overlay').classList.add('open');
+}
+
+function closeServiceViewer(){
+  document.getElementById('service-viewer-overlay').classList.remove('open');
+}
+
+// ─── SOLICITUDES DE RESERVA (anti-overbooking) ─────────────────────────────
+// Comparte la misma clave que catalogo.html: cuando un cliente pide fecha
+// desde el marketplace, la solicitud aparece aquí, dividida por proveedor.
+const REQUESTS_STORAGE_KEY = 'todoeventos_solicitudes_v1';
+// El proveedor que está usando este dashboard (el demo del marketplace).
+const MI_PROVEEDOR_ID = 1;
+
+function loadSolicitudes(){
+  try {
+    const raw = localStorage.getItem(REQUESTS_STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  } catch(e){ console.warn('No se pudieron leer las solicitudes', e); }
+  // Primera vez: dejamos una solicitud de prueba para que la sección se vea viva
+  const seed = [{
+    id: 'rq_demo_1',
+    grupoId: 'grp_demo',
+    proveedorId: MI_PROVEEDOR_ID,
+    proveedor: 'DJ Nexus Lima',
+    cliente: 'Carlos Mendoza',
+    fecha: '2026-12-12',
+    tipoEvento: 'Boda',
+    mensaje: 'Hola! Somos unos 120 invitados, la recepción empieza a las 7pm en un local en San Isidro. Nos gustaría música variada, sobre todo salsa y cumbia para la fiesta. ¿Tienes libre esa fecha?',
+    servicios: [{ nombre:'Paquete Boda Premium', precio:1800 }],
+    total: 1800,
+    estado: 'pendiente',
+    creada: new Date().toISOString()
+  }];
+  saveSolicitudes(seed);
+  return seed;
+}
+
+function saveSolicitudes(list){
+  try { localStorage.setItem(REQUESTS_STORAGE_KEY, JSON.stringify(list)); }
+  catch(e){ console.warn('No se pudieron guardar las solicitudes', e); }
+}
+
+let solicitudes = loadSolicitudes();
+
+// Solo veo las solicitudes dirigidas a MÍ, no las de otros proveedores.
+function misSolicitudes(){
+  return solicitudes.filter(r => r.proveedorId === MI_PROVEEDOR_ID);
+}
+
+function updateReqBadge(){
+  const badge = document.getElementById('req-badge');
+  if(!badge) return;
+  const pendientes = misSolicitudes().filter(r => r.estado === 'pendiente').length;
+  badge.textContent = pendientes;
+  badge.classList.toggle('empty', pendientes === 0);
+}
+
+function fmtFechaSolicitud(fechaStr){
+  const meses3 = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const d = new Date(fechaStr + 'T00:00:00');
+  return { dia: d.getDate(), mes: meses3[d.getMonth()], anio: d.getFullYear() };
+}
+
+function renderSolicitudes(){
+  // Releemos por si el cliente envió una solicitud nueva desde el marketplace
+  solicitudes = loadSolicitudes();
+  const cont = document.getElementById('req-list');
+  if(!cont) return;
+
+  const mias = misSolicitudes().filter(r => r.estado !== 'rechazada');
+  const pendientes = mias.filter(r => r.estado === 'pendiente').length;
+
+  const sub = document.getElementById('req-sub');
+  if(sub) sub.textContent = pendientes > 0
+    ? pendientes + (pendientes === 1 ? ' solicitud pendiente de respuesta' : ' solicitudes pendientes de respuesta')
+    : 'No tienes solicitudes pendientes';
+
+  if(mias.length === 0){
+    cont.innerHTML = '<div class="req-empty"><i class="ti ti-inbox-off"></i>No tienes solicitudes por ahora.<br>Cuando un cliente pida tu fecha desde el marketplace, aparecerá aquí.</div>';
+    updateReqBadge();
+    return;
+  }
+
+  // Pendientes primero
+  mias.sort((a,b) => (a.estado === 'pendiente' ? -1 : 1) - (b.estado === 'pendiente' ? -1 : 1));
+
+  cont.innerHTML = mias.map(r => {
+    const f = fmtFechaSolicitud(r.fecha);
+    const serviciosHtml = r.servicios.map(s =>
+      `<div class="req-svc-row"><b>${s.nombre}</b><span>${fmtMoneyCaja(s.precio)}</span></div>`
+    ).join('');
+
+    const acciones = r.estado === 'pendiente'
+      ? `<div class="req-actions">
+           <button class="req-btn-accept" onclick="aceptarSolicitud('${r.id}')"><i class="ti ti-check"></i> Aceptar Fecha</button>
+           <button class="req-btn-reject" onclick="rechazarSolicitud('${r.id}')"><i class="ti ti-x"></i> Fecha Ocupada</button>
+         </div>`
+      : `<div class="req-accepted-note"><i class="ti ti-circle-check"></i> Fecha aceptada. Se notificó a ${r.cliente} para proceder con el contrato.</div>`;
+
+    return `<div class="req-card ${r.estado}">
+      <div class="req-head">
+        <div>
+          <div class="req-cliente">${r.cliente}</div>
+          <div class="req-tipo">${r.tipoEvento}</div>
+        </div>
+        <div class="req-fecha-box">
+          <div class="req-fecha-dia">${f.dia}</div>
+          <div class="req-fecha-mes">${f.mes} ${f.anio}</div>
+        </div>
+      </div>
+      <div class="req-servicios">
+        ${serviciosHtml}
+        <div class="req-svc-total"><span>Total estimado</span><span>${fmtMoneyCaja(r.total)}</span></div>
+      </div>
+      <div class="req-msg">"${r.mensaje}"</div>
+      ${acciones}
+    </div>`;
+  }).join('');
+
+  updateReqBadge();
+}
+
+function aceptarSolicitud(id){
+  const r = solicitudes.find(x => x.id === id);
+  if(!r) return;
+
+  // Verificación anti-overbooking: ¿ya hay un evento agendado ese día?
+  const yaOcupado = agendaEvents.some(e => e.date === r.fecha);
+  if(yaOcupado){
+    const seguir = confirm('⚠️ Ya tienes un evento agendado el ' + r.fecha + '.\n\n¿Aceptar de todos modos? Podrías generar un cruce de reservas.');
+    if(!seguir) return;
+  }
+
+  r.estado = 'aceptada';
+  saveSolicitudes(solicitudes);
+
+  // Al aceptar, la fecha se bloquea automáticamente en la agenda del proveedor.
+  const existe = agendaEvents.some(e => e.date === r.fecha);
+  if(!existe){
+    agendaEvents.push({
+      id: 'e' + Date.now(),
+      date: r.fecha,
+      tipo: r.tipoEvento,
+      cliente: r.cliente,
+      hora: '18:00',
+      distrito: '',
+      estado: 'Pendiente pago'
+    });
+    saveAgendaEvents(agendaEvents);
+  }
+
+  alert('✅ Fecha aceptada.\n\nSe envió una alerta a ' + r.cliente + ' informando que estás disponible y listo para proceder con el contrato.\n\nLa fecha quedó bloqueada en tu agenda.');
+
+  renderSolicitudes();
+  renderHomeKPIs();
+}
+
+function rechazarSolicitud(id){
+  const r = solicitudes.find(x => x.id === id);
+  if(!r) return;
+  if(!confirm('¿Rechazar la solicitud de ' + r.cliente + '?\n\nSe le notificará que no tienes esa fecha disponible.')) return;
+
+  r.estado = 'rechazada';
+  saveSolicitudes(solicitudes);
+  renderSolicitudes();
+}
+
+// Primer cálculo al cargar la página, ya que "Inicio" es la vista por defecto.
+renderHomeKPIs();
+updateReqBadge();
+</script>
+</body>
+</html>

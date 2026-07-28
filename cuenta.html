@@ -218,7 +218,7 @@ async function init(){
   const { data } = await sb.auth.getSession();
   if(!data.session){
     // No hay sesión activa: no tiene caso mostrar esta página
-    window.location.href = 'login_1.html';
+    window.location.href = 'login.html';
     return;
   }
 
@@ -352,7 +352,7 @@ async function cambiarPassword(){
 
 async function cerrarSesion(){
   if(sb) await sb.auth.signOut();
-  window.location.href = 'index.html';
+  window.location.href = 'index_14.html';
 }
 
 init();

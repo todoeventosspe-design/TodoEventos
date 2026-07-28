@@ -220,7 +220,7 @@ section{position:relative;overflow:hidden;}
 <header id="nav">
   <div class="nav-i">
     <div style="display:flex;align-items:center;gap:14px;">
-      <a href="index.html" class="btn-back"><i class="ti ti-arrow-left" style="font-size:14px;"></i> Inicio</a>
+      <a href="index_14.html" class="btn-back"><i class="ti ti-arrow-left" style="font-size:14px;"></i> Inicio</a>
       <span class="logo"><span class="lp">Todo</span><span class="lo">Eventos</span><span class="dot">.pe</span></span>
     </div>
     <nav class="nav-links">
@@ -231,7 +231,7 @@ section{position:relative;overflow:hidden;}
       <a href="nosotros.html" class="nl">Nosotros</a>
     </nav>
     <div style="display:flex;align-items:center;gap:10px;">
-      <a href="login_1.html" class="nl" id="btn-ingresar" style="text-decoration:none;">Ingresar</a>
+      <a href="login.html" class="nl" id="btn-ingresar" style="text-decoration:none;">Ingresar</a>
 
       <div class="user-menu" id="user-menu">
         <button class="user-avatar" id="user-avatar-btn" onclick="toggleUserDropdown()"></button>
@@ -244,7 +244,7 @@ section{position:relative;overflow:hidden;}
         </div>
       </div>
 
-      <a href="login_1.html?modo=registro&rol=proveedor" class="btn-reg-pro" style="text-decoration:none;display:inline-flex;align-items:center;">Registro gratuito</a>
+      <button class="btn-reg-pro" onclick="document.getElementById('reg').scrollIntoView({behavior:'smooth'})">Registro gratuito</button>
     </div>
   </div>
 </header>
@@ -392,8 +392,9 @@ section{position:relative;overflow:hidden;}
     <span class="badge" style="position:relative;z-index:1;"><i class="ti ti-rocket" style="font-size:12px;"></i> Empieza hoy — Es gratis</span>
     <h2 class="reg-h">Tu negocio en la plataforma<br><span class="gt">en menos de 15 minutos</span></h2>
     <p class="reg-sub">Sin tarjeta de crédito. Sin compromiso. Cancela cuando quieras.</p>
-    <div class="reg-form" style="justify-content:center;">
-      <a href="login_1.html?modo=registro&rol=proveedor" class="reg-btn" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">Registrarme gratis <i class="ti ti-arrow-right"></i></a>
+    <div class="reg-form">
+      <input class="reg-input" type="email" id="reg-email" placeholder="Tu correo electrónico">
+      <button class="reg-btn" onclick="submitReg()">Registrarme gratis <i class="ti ti-arrow-right"></i></button>
     </div>
     <p class="reg-note" id="reg-note">Ya somos +1,200 proveedores · Primeras 3 cotizaciones gratis · Sin permanencia</p>
   </div>
@@ -403,7 +404,7 @@ section{position:relative;overflow:hidden;}
 <footer id="foot"><div class="container">
   <div class="foot-top">
     <div>
-      <a href="index.html" class="flogo"><span class="lp">Todo</span><span class="lo">Eventos</span><span style="color:rgba(245,243,235,.28);font-weight:400;">.pe</span></a>
+      <a href="index_14.html" class="flogo"><span class="lp">Todo</span><span class="lo">Eventos</span><span style="color:rgba(245,243,235,.28);font-weight:400;">.pe</span></a>
       <p class="fdesc">La plataforma que digitaliza y hace crecer los negocios de eventos en Lima.</p>
     </div>
     <div class="fcol"><h5>Plataforma</h5><a href="#feats">Herramientas</a><a href="#planes">Planes y Precios</a><a href="catalogo.html">Marketplace</a></div>
@@ -411,11 +412,27 @@ section{position:relative;overflow:hidden;}
   </div>
   <div class="foot-bot">
     <span class="fcopy">© 2026 TodoEventos.pe — Plataforma para Proveedores</span>
-    <div class="flinks"><a href="index.html">← Volver al Marketplace</a></div>
+    <div class="flinks"><a href="index_14.html">← Volver al Marketplace</a></div>
   </div>
 </div></footer>
 
 <script>
+function submitReg() {
+  const input = document.getElementById('reg-email');
+  const note = document.getElementById('reg-note');
+  const email = (input.value || '').trim();
+  const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!valid) {
+    note.textContent = '⚠️ Ingresa un correo electrónico válido para continuar.';
+    note.style.color = '#fbbf24';
+    input.focus();
+    return;
+  }
+  note.textContent = '✅ ¡Gracias! Te contactaremos a ' + email + ' para completar tu registro.';
+  note.style.color = '#4ade80';
+  input.value = '';
+  input.disabled = true;
+}
 
 /* ─── Sesión: mostrar "Ingresar" o el menú de usuario según corresponda ─── */
 const SUPABASE_URL = 'https://vqnyaozauljtashpjfoo.supabase.co';
@@ -459,7 +476,7 @@ document.addEventListener('click', function(e){
 
 async function cerrarSesion(){
   if(sb) await sb.auth.signOut();
-  window.location.href = 'index.html';
+  window.location.href = 'index_14.html';
 }
 
 async function verificarSesionNav(){
