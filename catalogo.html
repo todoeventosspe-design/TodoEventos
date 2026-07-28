@@ -368,6 +368,15 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
 .sd-btn-solid{flex:1;background:var(--or);border:none;color:#1a0a02;padding:13px;border-radius:11px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;transition:opacity .16s;}
 .sd-btn-solid:hover{opacity:.9;}
 .sd-btn-solid.added{background:#4ade80;}
+.sd-btn-ver-resenas{width:100%;background:transparent;border:1px solid var(--border);color:var(--pu);padding:10px;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:5px;}
+.sd-btn-ver-resenas:hover{background:rgba(168,85,247,.08);}
+.sd-resenas-vacio{font-size:12.5px;color:var(--sub);text-align:center;padding:10px 0;}
+.resena-card{border-bottom:1px solid var(--border);padding:12px 0;}
+.resena-card:last-child{border-bottom:none;}
+.resena-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+.resena-card-stars{color:var(--gold);font-size:13px;letter-spacing:1px;}
+.resena-card-fecha{font-size:11px;color:var(--sub);}
+.resena-card-texto{font-size:13px;color:var(--sub);line-height:1.55;}
 
 /* ── SOLICITUD DE DISPONIBILIDAD (carrito) ── */
 .rq-intro{font-size:12.5px;color:var(--sub);line-height:1.6;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.22);border-radius:10px;padding:12px;margin-bottom:18px;}
@@ -1188,10 +1197,80 @@ function openServiceDetail(providerId){
   hireBtn.innerHTML = '<i class="ti ti-shopping-cart-plus"></i> Contratar';
 
   document.getElementById('sd-overlay').classList.add('open');
+  cargarResenasPreview(p.providerId || p.id);
 }
 
 function closeServiceDetail(){
   document.getElementById('sd-overlay').classList.remove('open');
+}
+
+/* ─── Reseñas de la comunidad (tabla real "reviews" en Supabase) ───
+   Nota: mientras el catálogo siga usando el array de datos de muestra
+   "providers" en vez de la tabla real "services"/"profiles", el id que
+   llega aquí no es un UUID real, así que no habrá reseñas que mostrar.
+   En cuanto el catálogo se conecte a datos reales, esto funciona solo. */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+async function fetchResenas(providerId){
+  if(!sb || typeof providerId !== 'string' || !UUID_RE.test(providerId)) return [];
+  const { data, error } = await sb
+    .from('reviews')
+    .select('rating, comment, created_at')
+    .eq('provider_id', providerId)
+    .order('created_at', { ascending: false });
+  if(error){ console.error('Error cargando reseñas:', error); return []; }
+  return data || [];
+}
+
+function resenaCardHTML(r){
+  const fecha = new Date(r.created_at).toLocaleDateString('es-PE', { day:'numeric', month:'short', year:'numeric' });
+  const estrellas = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+  return `<div class="resena-card">
+    <div class="resena-card-top">
+      <span class="resena-card-stars">${estrellas}</span>
+      <span class="resena-card-fecha">${fecha}</span>
+    </div>
+    ${r.comment ? `<div class="resena-card-texto">${r.comment}</div>` : ''}
+  </div>`;
+}
+
+let resenasProviderActual = null;
+
+async function cargarResenasPreview(providerId){
+  resenasProviderActual = providerId;
+  const cont = document.getElementById('sd-resenas-preview');
+  const btnVerTodas = document.getElementById('sd-ver-todas-resenas');
+  cont.innerHTML = '<div class="sd-resenas-vacio">Cargando reseñas…</div>';
+  btnVerTodas.style.display = 'none';
+
+  const resenas = await fetchResenas(providerId);
+
+  if(resenas.length === 0){
+    cont.innerHTML = '<div class="sd-resenas-vacio">Este proveedor todavía no tiene reseñas.</div>';
+    return;
+  }
+
+  cont.innerHTML = resenas.slice(0, 2).map(resenaCardHTML).join('');
+  if(resenas.length > 2){
+    btnVerTodas.innerHTML = `Ver las ${resenas.length} reseñas <i class="ti ti-chevron-right" style="font-size:13px;"></i>`;
+    btnVerTodas.style.display = 'flex';
+  }
+}
+
+async function abrirTodasLasResenas(){
+  if(!resenasProviderActual) return;
+  const cont = document.getElementById('resenas-lista-completa');
+  cont.innerHTML = '<div class="sd-resenas-vacio">Cargando…</div>';
+  document.getElementById('resenas-overlay').classList.add('open');
+
+  const resenas = await fetchResenas(resenasProviderActual);
+  cont.innerHTML = resenas.length
+    ? resenas.map(resenaCardHTML).join('')
+    : '<div class="sd-resenas-vacio">Este proveedor todavía no tiene reseñas.</div>';
+}
+
+function cerrarTodasLasResenas(){
+  document.getElementById('resenas-overlay').classList.remove('open');
 }
 
 function openProviderFromDetail(){
@@ -1973,10 +2052,29 @@ verificarSesionNav();
         <ul class="sd-list req" id="sd-requisitos"></ul>
       </div>
 
+      <div class="sd-block">
+        <div class="sd-block-title"><i class="ti ti-message-star"></i> Reseñas de la comunidad</div>
+        <div id="sd-resenas-preview"><div class="sd-resenas-vacio">Cargando reseñas…</div></div>
+        <button class="sd-btn-ver-resenas" id="sd-ver-todas-resenas" onclick="abrirTodasLasResenas()" style="display:none;">Ver todas las reseñas <i class="ti ti-chevron-right" style="font-size:13px;"></i></button>
+      </div>
+
       <div class="sd-actions">
         <button class="sd-btn-outline" onclick="openProviderFromDetail()"><i class="ti ti-user"></i> Ver perfil completo</button>
         <button class="sd-btn-solid" id="sd-hire-btn" onclick="hireFromDetail()"><i class="ti ti-shopping-cart-plus"></i> Contratar</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: todas las reseñas de un proveedor -->
+<div class="modal-overlay" id="resenas-overlay" onclick="if(event.target===this) cerrarTodasLasResenas()">
+  <div class="sd-box" style="max-width:460px;">
+    <div class="sd-content" style="padding:24px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <div class="sd-block-title" style="margin:0;"><i class="ti ti-message-star"></i> Todas las reseñas</div>
+        <button onclick="cerrarTodasLasResenas()" style="background:none;border:none;color:var(--sub);font-size:20px;cursor:pointer;line-height:1;">&times;</button>
+      </div>
+      <div id="resenas-lista-completa"></div>
     </div>
   </div>
 </div>

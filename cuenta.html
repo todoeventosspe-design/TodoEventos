@@ -66,6 +66,29 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
 .spinner{width:16px;height:16px;border:2px solid rgba(168,85,247,.25);border-top-color:var(--ac);border-radius:50%;animation:spin .6s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .contenido{display:none;}
+
+/* ── Servicios contratados / reseñas ── */
+.contratado-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);}
+.contratado-item:last-child{border-bottom:none;}
+.contratado-info h4{font-size:14px;font-weight:600;margin-bottom:3px;}
+.contratado-info .sub{font-size:12px;color:var(--sub);}
+.contratado-vacio{font-size:13px;color:var(--sub);text-align:center;padding:12px 0;}
+.btn-resena{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:9px;font-size:12.5px;font-weight:700;border:1px solid var(--ac);color:var(--ac);background:transparent;cursor:pointer;font-family:inherit;white-space:nowrap;}
+.btn-resena:hover{background:var(--ac-soft);}
+.resena-hecha{display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--gold);font-weight:600;white-space:nowrap;}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(5px);z-index:3000;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal-resena{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px;max-width:420px;width:100%;}
+.modal-resena h3{font-size:16px;font-weight:700;margin-bottom:4px;}
+.modal-resena .sub{font-size:12.5px;color:var(--sub);margin-bottom:18px;}
+.stars-input{display:flex;gap:6px;margin-bottom:18px;justify-content:center;}
+.stars-input i{font-size:32px;color:var(--line);cursor:pointer;transition:color .12s;}
+.stars-input i.active{color:var(--gold);}
+.modal-resena textarea{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:11px 13px;color:var(--fg);font-size:13.5px;font-family:inherit;resize:vertical;margin-bottom:16px;}
+.modal-resena textarea:focus{outline:none;border-color:var(--ac);}
+.modal-resena-btns{display:flex;gap:10px;}
+.btn-cancelar{flex:1;background:var(--card2);border:1px solid var(--line);color:var(--fg);}
 </style>
 </head>
 <body>
@@ -129,6 +152,12 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
     <div class="readonly-row"><span class="k">Reseñas recibidas</span><span class="v" id="stat-reviews">—</span></div>
   </div>
 
+  <!-- Servicios contratados (solo clientes): dejar reseña a proveedores -->
+  <div class="card" id="card-contratados" style="display:none;">
+    <div class="card-title"><i class="ti ti-shopping-bag"></i> Servicios contratados</div>
+    <div id="lista-contratados"><div class="contratado-vacio">Cargando…</div></div>
+  </div>
+
   <!-- Cambiar contraseña -->
   <div class="card">
     <div class="card-title"><i class="ti ti-lock"></i> Cambiar contraseña</div>
@@ -164,6 +193,27 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
     <button class="btn btn-danger-outline" onclick="cerrarSesion()" style="width:100%;">
       <i class="ti ti-logout-2"></i> Cerrar sesión
     </button>
+  </div>
+</div>
+
+<!-- Modal: dejar / editar reseña -->
+<div class="modal-overlay" id="modal-resena">
+  <div class="modal-resena">
+    <h3 id="resena-titulo">Reseña tu experiencia</h3>
+    <div class="sub" id="resena-sub"></div>
+    <div class="stars-input" id="stars-input">
+      <i class="ti ti-star" data-val="1"></i>
+      <i class="ti ti-star" data-val="2"></i>
+      <i class="ti ti-star" data-val="3"></i>
+      <i class="ti ti-star" data-val="4"></i>
+      <i class="ti ti-star" data-val="5"></i>
+    </div>
+    <textarea id="resena-comentario" rows="4" placeholder="Cuéntale a la comunidad cómo te fue (opcional)…"></textarea>
+    <div class="msg" id="msg-resena"></div>
+    <div class="modal-resena-btns">
+      <button class="btn btn-cancelar" onclick="cerrarModalResena()">Cancelar</button>
+      <button class="btn btn-primary" id="btn-guardar-resena" onclick="guardarResena()">Publicar reseña</button>
+    </div>
   </div>
 </div>
 
@@ -266,6 +316,8 @@ async function init(){
   } else {
     linkVolver.href = 'catalogo.html';
     linkVolver.innerHTML = '<i class="ti ti-arrow-left"></i> Volver al marketplace';
+    document.getElementById('card-contratados').style.display = 'block';
+    cargarContratados();
   }
 
   if(perfil.is_admin){
@@ -353,6 +405,133 @@ async function cambiarPassword(){
 async function cerrarSesion(){
   if(sb) await sb.auth.signOut();
   window.location.href = 'index.html';
+}
+
+/* ─── Servicios contratados + reseñas ─── */
+let resenaActual = null; // { requestId, providerId, providerNombre, servicioNombre, ratingExistente, comentarioExistente }
+let estrellasElegidas = 0;
+
+async function cargarContratados(){
+  const cont = document.getElementById('lista-contratados');
+
+  const { data: solicitudes, error } = await sb
+    .from('requests')
+    .select('id, event_date, provider_id, service_id, services(name), profiles!requests_provider_id_fkey(full_name)')
+    .eq('client_id', usuarioActual.id)
+    .eq('status', 'aceptada')
+    .order('event_date', { ascending: false });
+
+  if(error){
+    cont.innerHTML = '<div class="contratado-vacio">No se pudo cargar tu historial.</div>';
+    console.error(error);
+    return;
+  }
+
+  if(!solicitudes || solicitudes.length === 0){
+    cont.innerHTML = '<div class="contratado-vacio">Aún no has contratado ningún servicio.</div>';
+    return;
+  }
+
+  const { data: resenas } = await sb
+    .from('reviews')
+    .select('request_id, rating, comment')
+    .eq('client_id', usuarioActual.id);
+
+  const resenasPorSolicitud = {};
+  (resenas || []).forEach(r => { resenasPorSolicitud[r.request_id] = r; });
+
+  cont.innerHTML = '';
+  solicitudes.forEach(s => {
+    const nombreServicio = s.services?.name || 'Servicio';
+    const nombreProveedor = s.profiles?.full_name || 'Proveedor';
+    const fecha = s.event_date ? new Date(s.event_date + 'T00:00:00').toLocaleDateString('es-PE', { day:'numeric', month:'short', year:'numeric' }) : '';
+    const yaReseno = resenasPorSolicitud[s.id];
+
+    const item = document.createElement('div');
+    item.className = 'contratado-item';
+    item.innerHTML = `
+      <div class="contratado-info">
+        <h4>${nombreServicio}</h4>
+        <div class="sub">${nombreProveedor} · ${fecha}</div>
+      </div>
+    `;
+
+    if(yaReseno){
+      const badge = document.createElement('div');
+      badge.className = 'resena-hecha';
+      badge.innerHTML = `<i class="ti ti-star-filled"></i> ${yaReseno.rating}/5 · <a href="#" style="color:var(--ac);text-decoration:none;">Editar</a>`;
+      badge.querySelector('a').onclick = (e) => {
+        e.preventDefault();
+        abrirModalResena(s.id, s.provider_id, nombreProveedor, nombreServicio, yaReseno.rating, yaReseno.comment);
+      };
+      item.appendChild(badge);
+    } else {
+      const btn = document.createElement('button');
+      btn.className = 'btn-resena';
+      btn.innerHTML = '<i class="ti ti-star"></i> Dejar reseña';
+      btn.onclick = () => abrirModalResena(s.id, s.provider_id, nombreProveedor, nombreServicio, 0, '');
+      item.appendChild(btn);
+    }
+
+    cont.appendChild(item);
+  });
+}
+
+function abrirModalResena(requestId, providerId, providerNombre, servicioNombre, ratingExistente, comentarioExistente){
+  resenaActual = { requestId, providerId, providerNombre, servicioNombre };
+  document.getElementById('resena-titulo').textContent = ratingExistente ? 'Edita tu reseña' : 'Reseña tu experiencia';
+  document.getElementById('resena-sub').textContent = `${servicioNombre} · ${providerNombre}`;
+  document.getElementById('resena-comentario').value = comentarioExistente || '';
+  document.getElementById('msg-resena').classList.remove('show');
+  pintarEstrellas(ratingExistente || 0);
+  document.getElementById('modal-resena').classList.add('open');
+}
+
+function cerrarModalResena(){
+  document.getElementById('modal-resena').classList.remove('open');
+  resenaActual = null;
+}
+
+function pintarEstrellas(valor){
+  estrellasElegidas = valor;
+  document.querySelectorAll('#stars-input i').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.val, 10) <= valor);
+  });
+}
+
+document.getElementById('stars-input').addEventListener('click', (e) => {
+  const estrella = e.target.closest('i[data-val]');
+  if(!estrella) return;
+  pintarEstrellas(parseInt(estrella.dataset.val, 10));
+});
+
+async function guardarResena(){
+  if(!resenaActual) return;
+  if(estrellasElegidas < 1){
+    mostrarMsg('msg-resena', 'Elige de 1 a 5 estrellas.', true);
+    return;
+  }
+
+  const btn = document.getElementById('btn-guardar-resena');
+  btn.disabled = true;
+
+  const { error } = await sb.from('reviews').upsert({
+    request_id: resenaActual.requestId,
+    client_id: usuarioActual.id,
+    provider_id: resenaActual.providerId,
+    rating: estrellasElegidas,
+    comment: document.getElementById('resena-comentario').value.trim() || null
+  }, { onConflict: 'request_id' });
+
+  btn.disabled = false;
+
+  if(error){
+    mostrarMsg('msg-resena', 'No se pudo guardar: ' + error.message, true);
+    return;
+  }
+
+  cerrarModalResena();
+  cargarContratados();
 }
 
 init();
