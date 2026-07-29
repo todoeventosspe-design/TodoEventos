@@ -1714,29 +1714,8 @@ function updateChatContext(cat){
   }
 })();
 
-// Carga real de Supabase antes de pintar por primera vez.
-cargarProvidersReales();
 render();
 updateCartBadge();
-
-// Si el proveedor edita su perfil/servicios en el Dashboard y el cliente
-// vuelve a esta pestaña, recarga los datos reales.
-window.addEventListener('focus', () => {
-  cargarProvidersReales();
-});
-
-// Tiempo real: si un proveedor lanza, edita, despublica o borra un servicio,
-// el catálogo se actualiza solo sin que el cliente recargue la página.
-if(sb){
-  sb.channel('catalogo-servicios')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'services' }, () => {
-      cargarProvidersReales();
-    })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
-      cargarProvidersReales();
-    })
-    .subscribe();
-}
 
 /* ─── Sesión: mostrar "Ingresar" o el menú de usuario según corresponda ─── */
 const SUPABASE_URL = 'https://vqnyaozauljtashpjfoo.supabase.co';
@@ -1825,6 +1804,29 @@ async function verificarSesionNav(){
 }
 
 verificarSesionNav();
+
+// Carga real de Supabase (debe ir despues de que "sb" ya este inicializado
+// arriba; moverla antes revienta con "Cannot access sb before initialization").
+cargarProvidersReales();
+
+// Si el proveedor edita su perfil/servicios en el Dashboard y el cliente
+// vuelve a esta pestaña, recarga los datos reales.
+window.addEventListener('focus', () => {
+  cargarProvidersReales();
+});
+
+// Tiempo real: si un proveedor lanza, edita, despublica o borra un servicio,
+// el catálogo se actualiza solo sin que el cliente recargue la página.
+if(sb){
+  sb.channel('catalogo-servicios')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'services' }, () => {
+      cargarProvidersReales();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+      cargarProvidersReales();
+    })
+    .subscribe();
+}
 
 /* ═══════════════════════════════════════════════════════════════════════
    RESERVA DIRECTA CON CALENDARIO DE DISPONIBILIDAD
