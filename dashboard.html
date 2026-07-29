@@ -433,7 +433,7 @@ verificarAccesoDashboard();
     <section class="view active" id="view-home">
       <div class="topbar">
         <div class="greeting">
-          <h1>¡Hola, DJ Nexus! 👋</h1>
+          <h1 id="home-greeting-nombre">¡Hola! 👋</h1>
           <p>Este es el resumen de tu negocio hoy.</p>
         </div>
         <div class="top-badge"><span class="dot-live"></span> Perfil activo y visible</div>
@@ -461,9 +461,9 @@ verificarAccesoDashboard();
         </div>
         <div class="kpi">
           <div class="kpi-ico"><i class="ti ti-star"></i></div>
-          <div class="kpi-val">5.0</div>
-          <div class="kpi-lbl">Calificación (89 reseñas)</div>
-          <div class="kpi-trend up"><i class="ti ti-award"></i> Top 5 en tu categoría</div>
+          <div class="kpi-val" id="home-kpi-rating">—</div>
+          <div class="kpi-lbl" id="home-kpi-rating-lbl">Calificación (0 reseñas)</div>
+          <div class="kpi-trend up" id="home-kpi-rating-trend" style="display:none;"><i class="ti ti-award"></i> Buen ritmo de reseñas</div>
         </div>
       </div>
 
@@ -2277,6 +2277,17 @@ async function initPerfilYPlantillas(){
 
 function renderPerfil(){
   document.getElementById('perfil-nombre').textContent = perfilData.nombre;
+  const primerNombre = (perfilData.nombre || '').split(' ')[0] || 'de vuelta';
+  const greetEl = document.getElementById('home-greeting-nombre');
+  if(greetEl) greetEl.textContent = '¡Hola, ' + primerNombre + '! 👋';
+
+  const { rating: homeRating, count: homeCount } = calcularRatingDesdeResenas();
+  const kpiRatingEl = document.getElementById('home-kpi-rating');
+  const kpiRatingLbl = document.getElementById('home-kpi-rating-lbl');
+  const kpiRatingTrend = document.getElementById('home-kpi-rating-trend');
+  if(kpiRatingEl) kpiRatingEl.textContent = homeCount > 0 ? homeRating.toFixed(1) : '—';
+  if(kpiRatingLbl) kpiRatingLbl.textContent = 'Calificación (' + homeCount + (homeCount === 1 ? ' reseña)' : ' reseñas)');
+  if(kpiRatingTrend) kpiRatingTrend.style.display = homeCount >= 5 ? 'flex' : 'none';
   document.getElementById('perfil-categoria').textContent = perfilData.categoria;
   document.getElementById('perfil-categoria-edit').value = perfilData.categoria;
   document.getElementById('perfil-ubicacion').textContent = perfilData.ubicacion;
