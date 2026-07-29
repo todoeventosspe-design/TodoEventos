@@ -682,9 +682,6 @@ verificarAccesoDashboard();
         <table class="tbl">
           <thead><tr><th>Servicio</th><th>Cantidad</th><th>Precio unit.</th><th>Subtotal</th><th></th></tr></thead>
           <tbody id="cot-items-tbody">
-            <tr><td>DJ + Sonido profesional (5h)</td><td>1</td><td>S/. 1,200</td><td class="money">S/. 1,200</td><td><button class="btn-remove-item" onclick="removeCotizadorItem(this)" title="Quitar ítem"><i class="ti ti-trash"></i></button></td></tr>
-            <tr><td>Luces y ambientación</td><td>1</td><td>S/. 450</td><td class="money">S/. 450</td><td><button class="btn-remove-item" onclick="removeCotizadorItem(this)" title="Quitar ítem"><i class="ti ti-trash"></i></button></td></tr>
-            <tr><td>Hora extra</td><td>2</td><td>S/. 150</td><td class="money">S/. 300</td><td><button class="btn-remove-item" onclick="removeCotizadorItem(this)" title="Quitar ítem"><i class="ti ti-trash"></i></button></td></tr>
           </tbody>
         </table>
         <div class="row3" style="margin-top:16px;">
@@ -697,7 +694,7 @@ verificarAccesoDashboard();
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--line);">
           <div style="font-size:15px;font-weight:700;">Total estimado</div>
-          <div style="font-size:22px;font-weight:700;color:var(--or);" id="cot-total">S/. 1,950</div>
+          <div style="font-size:22px;font-weight:700;color:var(--or);" id="cot-total">S/. 0</div>
         </div>
         <div class="add-row">
           <button class="btn-outline-or" onclick="exportCotizacionPDF()">📥 Descargar PDF</button>
@@ -889,7 +886,7 @@ verificarAccesoDashboard();
       <div class="profile-wrap">
         <!-- Banner + avatar -->
         <div class="profile-banner" id="perfil-banner-wrap">
-          <img id="perfil-banner-img" src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&q=80" alt="Portada">
+          <img id="perfil-banner-img" src="" alt="Portada" style="display:none;">
           <button class="btn-change-img banner" id="perfil-banner-btn" style="display:none;" onclick="changeProfileImage('banner')"><i class="ti ti-camera"></i> Cambiar portada</button>
           <button class="btn-edit-profile-float" id="btn-edit-profile" onclick="toggleProfileEdit()"><i class="ti ti-settings"></i> <span id="btn-edit-profile-text">Editar Perfil</span></button>
         </div>
@@ -1022,6 +1019,16 @@ verificarAccesoDashboard();
 // reales de Supabase, porque antes no sabemos quien es el usuario.
 function onAccesoDashboardOk(){
   initPerfilYPlantillas();
+
+  // Recien ahora sabemos quien eres: recargamos los modulos locales que
+  // dependen de tu cuenta (antes de esto solo tenian arreglos vacios,
+  // para no crashear mientras se confirmaba la sesion).
+  agendaEvents = loadAgendaEvents();
+  cajaMovimientos = loadCajaMovimientos();
+  crmClientes = loadCrmClientes();
+  invItems = loadInvItems();
+  solicitudes = loadSolicitudes();
+  renderHomeKPIs();
 }
 
 // ─── NAVEGACIÓN ENTRE VISTAS (vanilla JS) ───
@@ -2212,7 +2219,7 @@ async function cargarPerfilDesdeSupabase(){
     ubicacion: p.location || '',
     bio: p.bio || '',
     avatarUrl: p.avatar_url || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(p.full_name || 'TE') + '&background=F97316&color=1a0a02&size=300&bold=true'),
-    bannerUrl: p.banner_url || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&q=80',
+    bannerUrl: p.banner_url || '',
     ratingReal: p.rating || 0,
     reviews_count: p.reviews_count || 0,
     servicios: (servicios || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, categoria: s.category || 'musica', descripcion: s.description || '', imagenes: s.imagenes || [] })),
@@ -2263,7 +2270,9 @@ function renderPerfil(){
   document.getElementById('perfil-bio-view').textContent = perfilData.bio;
   document.getElementById('perfil-bio-edit').value = perfilData.bio;
   document.getElementById('perfil-avatar-img').src = perfilData.avatarUrl;
-  document.getElementById('perfil-banner-img').src = perfilData.bannerUrl;
+  const bannerImgEl = document.getElementById('perfil-banner-img');
+  bannerImgEl.src = perfilData.bannerUrl || '';
+  bannerImgEl.style.display = perfilData.bannerUrl ? 'block' : 'none';
   // Mantiene el sidebar (nombre y ubicación) consistente con el perfil
   const sbNombre = document.getElementById('sidebar-nombre');
   const sbRol = document.getElementById('sidebar-rol');
@@ -2465,7 +2474,9 @@ function changeProfileImage(target){
     document.getElementById('perfil-avatar-img').src = perfilData.avatarUrl;
   } else {
     perfilData.bannerUrl = url.trim();
-    document.getElementById('perfil-banner-img').src = perfilData.bannerUrl;
+    const bannerImgEl = document.getElementById('perfil-banner-img');
+    bannerImgEl.src = perfilData.bannerUrl;
+    bannerImgEl.style.display = 'block';
   }
 }
 
