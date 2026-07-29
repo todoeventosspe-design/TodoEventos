@@ -1065,34 +1065,6 @@ function quickHire(providerId){
 let currentDetailProviderId = null;
 
 // Contenido "redactado por el proveedor" para cada categoría de servicio.
-const serviceDetailContent = {
-  musica: {
-    desc: 'Servicio integral de música y sonido profesional para tu evento. Incluye DJ con experiencia leyendo la pista, equipo de audio calibrado para el tamaño de tu local, y coordinación previa del repertorio contigo.',
-    incluye: ['DJ profesional durante todo el evento','Equipo de sonido y consola','Micrófono inalámbrico para discursos','Iluminación básica de pista','Reunión previa para definir el repertorio'],
-    requisitos: ['Punto de energía estable (220v) cerca de la cabina','Área techada de mínimo 2x2m para el equipo','Acceso al local 2 horas antes para montaje']
-  },
-  catering: {
-    desc: 'Servicio de catering completo con cocina en sitio o servicio en frío, según tu evento. Menús adaptables a restricciones alimentarias y opciones vegetarianas disponibles.',
-    incluye: ['Menú personalizado según tu evento','Personal de cocina y servicio','Vajilla, cubertería y cristalería','Montaje y desmontaje de mesas de servicio','Degustación previa para bodas'],
-    requisitos: ['Confirmar número final de invitados 7 días antes','Acceso a agua y punto de energía','Espacio para montaje de cocina si aplica']
-  },
-  fotografia: {
-    desc: 'Cobertura fotográfica y audiovisual completa de tu evento. Entrega de material editado profesionalmente, con galería digital privada para compartir con tus invitados.',
-    incluye: ['Cobertura completa del evento','Fotografías editadas en alta resolución','Galería digital privada','Sesión previa de pareja (bodas)','Entrega en 15 días hábiles'],
-    requisitos: ['Confirmar cronograma del evento con anticipación','Permiso del local para uso de flash y drone','Un asistente puede requerir acceso al backstage']
-  },
-  locales: {
-    desc: 'Alquiler de local para eventos con capacidad y ambientación adaptable. Incluye mobiliario base y acceso a servicios esenciales para que tu celebración fluya sin contratiempos.',
-    incluye: ['Alquiler del local por la jornada','Mobiliario base (mesas y sillas)','Servicios de agua, luz y baños','Estacionamiento para invitados','Personal de limpieza post evento'],
-    requisitos: ['Reserva con al menos 30 días de anticipación','Depósito de garantía reembolsable','Respetar el horario límite de ruido del distrito']
-  },
-  default: {
-    desc: 'Servicio profesional para eventos, adaptado a las necesidades específicas de tu celebración. El proveedor coordinará contigo todos los detalles antes de la fecha.',
-    incluye: ['Servicio completo el día del evento','Coordinación previa con el cliente','Personal capacitado','Materiales y equipos incluidos'],
-    requisitos: ['Confirmar detalles con al menos 15 días de anticipación','Acceso al local para montaje previo']
-  }
-};
-
 let currentDetailRealProviderId = null; // UUID real del proveedor (para "Ver perfil" y reseñas)
 
 function openServiceDetail(providerId){
@@ -1101,20 +1073,21 @@ function openServiceDetail(providerId){
   currentDetailProviderId = providerId;
   currentDetailRealProviderId = p.providerId || p.id;
 
-  const contenido = serviceDetailContent[p.cat] || serviceDetailContent.default;
-
   document.getElementById('sd-name').textContent = p.name;
   document.getElementById('sd-categoria').textContent = catNames[p.cat] || 'Servicio';
   document.getElementById('sd-district').textContent = p.district + ', Lima';
   document.getElementById('sd-rating').textContent = p.rating.toFixed(1) + ' (' + p.reviews + ')';
   document.getElementById('sd-price').textContent = money(p.price);
   document.getElementById('sd-badge').textContent = p.badge || '✓ Verificado';
-  document.getElementById('sd-desc').textContent = contenido.desc;
+  // Descripción real que el proveedor escribió al crear el servicio (no un texto genérico por categoría)
+  document.getElementById('sd-desc').textContent = p.desc || 'Este proveedor todavía no agregó una descripción para este servicio.';
   document.getElementById('sd-hero-icon').className = 'ti ' + p.icon;
   document.getElementById('sd-hero').className = 'sd-hero ci-' + p.img;
 
-  document.getElementById('sd-incluye').innerHTML = contenido.incluye.map(x => `<li>${x}</li>`).join('');
-  document.getElementById('sd-requisitos').innerHTML = contenido.requisitos.map(x => `<li>${x}</li>`).join('');
+  // "Qué incluye" y "Requerimientos" no existen como datos reales del
+  // proveedor todavía, así que se ocultan en vez de inventar contenido.
+  document.getElementById('sd-incluye').closest('.sd-block').style.display = 'none';
+  document.getElementById('sd-requisitos').closest('.sd-block').style.display = 'none';
 
   const hireBtn = document.getElementById('sd-hire-btn');
   hireBtn.classList.remove('added');
