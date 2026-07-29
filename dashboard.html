@@ -557,9 +557,14 @@ verificarAccesoDashboard();
           <input type="text" id="modal-cliente" placeholder="Ej. María Fernández">
         </div>
         <div class="row2">
-          <div class="field"><label>Hora</label><input type="time" id="modal-hora" value="18:00" onclick="if(this.showPicker) this.showPicker();"></div>
-          <div class="field"><label>Distrito</label><input type="text" id="modal-distrito" placeholder="Ej. Miraflores"></div>
+          <div class="field"><label>Hora inicio</label><input type="time" id="modal-hora" value="18:00" onclick="if(this.showPicker) this.showPicker();"></div>
+          <div class="field"><label>Hora fin</label><input type="time" id="modal-hora-fin" value="23:00" onclick="if(this.showPicker) this.showPicker();"></div>
         </div>
+        <div class="field">
+          <label>Distrito</label>
+          <input type="text" id="modal-distrito" placeholder="Ej. Miraflores">
+        </div>
+        <div class="tool-desc" style="margin:-6px 0 14px;font-size:11.5px;">Este bloque se mostrará como <b>ocupado</b> en tu calendario público, sin revelar el nombre del cliente ni el local.</div>
         <div class="field">
           <label>Estado</label>
           <select id="modal-estado">
@@ -1065,18 +1070,21 @@ document.getElementById('file-picker-hidden').addEventListener('change', async f
   callback(data.publicUrl);
 });
 
-function onAccesoDashboardOk(){
+async function onAccesoDashboardOk(){
   initPerfilYPlantillas();
 
-  // Recien ahora sabemos quien eres: recargamos los modulos locales que
-  // dependen de tu cuenta (antes de esto solo tenian arreglos vacios,
-  // para no crashear mientras se confirmaba la sesion).
-  agendaEvents = loadAgendaEvents();
+  // Recien ahora sabemos quien eres: recargamos los modulos que dependen de
+  // tu cuenta (antes de esto solo tenian arreglos vacios, para no crashear
+  // mientras se confirmaba la sesion).
   cajaMovimientos = loadCajaMovimientos();
   crmClientes = loadCrmClientes();
   invItems = loadInvItems();
-  solicitudes = loadSolicitudes();
+
+  // Agenda y reservas viven en Supabase, no en localStorage
+  [agendaEvents, solicitudes] = await Promise.all([loadAgendaEvents(), loadSolicitudes()]);
+
   renderHomeKPIs();
+  renderAgenda();
 }
 
 // ─── NAVEGACIÓN ENTRE VISTAS (vanilla JS) ───
@@ -1117,8 +1125,7 @@ function openTool(tool){
 }
 
 // ─── AGENDA: CALENDARIO DINÁMICO CONECTADO A TIEMPO REAL ───
-const AGENDA_STORAGE_KEY = 'todoeventos_dashboard_agenda_events_v1';
-const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const MESES =['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const DOWS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
 const today = new Date();
@@ -1130,17 +1137,28 @@ let selectedDateStr = null;
 function pad2(n){ return n < 10 ? '0'+n : ''+n; }
 function dateKey(y,m,d){ return y + '-' + pad2(m+1) + '-' + pad2(d); }
 
-function loadAgendaEvents(){
-  try {
-    const raw = localStorage.getItem(AGENDA_STORAGE_KEY + '_' + usuarioActual.id);
-    if(raw) return JSON.parse(raw);
-  } catch(e){ console.warn('No se pudo leer la agenda guardada', e); }
-  return []; // cuenta nueva: sin eventos todavia
-}
+// La agenda vive en Supabase (no en localStorage): es la fuente de verdad de
+// tu disponibilidad, y el marketplace la lee para saber cuando estas ocupado.
+async function loadAgendaEvents(){
+  const { data, error } = await sb
+    .from('agenda')
+    .select('id, event_date, type, client_name, start_time, end_time, district, status, request_id')
+    .eq('provider_id', usuarioActual.id)
+    .order('event_date', { ascending: true });
 
-function saveAgendaEvents(events){
-  try { localStorage.setItem(AGENDA_STORAGE_KEY + '_' + usuarioActual.id, JSON.stringify(events)); }
-  catch(e){ console.warn('No se pudo guardar la agenda', e); }
+  if(error){ console.warn('No se pudo leer la agenda', error); return []; }
+
+  return (data || []).map(e => ({
+    id: e.id,
+    date: e.event_date,
+    tipo: e.type,
+    cliente: e.client_name || '',
+    hora: (e.start_time || '').slice(0,5),
+    horaFin: (e.end_time || '').slice(0,5),
+    distrito: e.district || '',
+    estado: e.status || 'Confirmado',
+    requestId: e.request_id
+  }));
 }
 
 let agendaEvents = []; // se carga real en onAccesoDashboardOk, una vez sabemos quien eres
@@ -1242,7 +1260,8 @@ function openEventModal(dateStr){
   document.getElementById('modal-title').textContent = existing ? 'Editar evento' : 'Nuevo evento';
   document.getElementById('modal-tipo').value = existing ? existing.tipo : 'Boda';
   document.getElementById('modal-cliente').value = existing ? existing.cliente : '';
-  document.getElementById('modal-hora').value = existing ? existing.hora : '18:00';
+  document.getElementById('modal-hora').value = existing ? (existing.hora || '18:00') : '18:00';
+  document.getElementById('modal-hora-fin').value = existing ? (existing.horaFin || '23:00') : '23:00';
   document.getElementById('modal-distrito').value = existing ? (existing.distrito || '') : '';
   document.getElementById('modal-estado').value = existing ? (existing.estado || 'Confirmado') : 'Confirmado';
   document.getElementById('modal-delete-btn').style.display = existing ? 'flex' : 'none';
@@ -1255,10 +1274,11 @@ function closeEventModal(){
   selectedDateStr = null;
 }
 
-function saveEvent(){
+async function saveEvent(){
   const tipo = document.getElementById('modal-tipo').value;
   const cliente = document.getElementById('modal-cliente').value.trim();
   const hora = document.getElementById('modal-hora').value;
+  const horaFin = document.getElementById('modal-hora-fin').value;
   const distrito = document.getElementById('modal-distrito').value.trim();
   const estado = document.getElementById('modal-estado').value;
 
@@ -1266,22 +1286,53 @@ function saveEvent(){
     alert('Escribe el nombre del cliente para guardar el evento.');
     return;
   }
+  if(horaFin && hora && horaFin <= hora){
+    alert('La hora de fin debe ser posterior a la hora de inicio.');
+    return;
+  }
 
-  const idx = agendaEvents.findIndex(e => e.date === selectedDateStr);
-  const eventData = { id: (idx>=0 ? agendaEvents[idx].id : 'e'+Date.now()), date: selectedDateStr, tipo, cliente, hora, distrito, estado };
+  const fila = {
+    provider_id: usuarioActual.id,
+    title: tipo + ' — ' + cliente,
+    event_date: selectedDateStr,
+    type: tipo,
+    client_name: cliente,
+    start_time: hora || null,
+    end_time: horaFin || null,
+    district: distrito || null,
+    status: estado
+  };
 
-  if(idx >= 0) agendaEvents[idx] = eventData;
-  else agendaEvents.push(eventData);
+  const existente = agendaEvents.find(e => e.date === selectedDateStr);
 
-  saveAgendaEvents(agendaEvents);
+  const { error } = existente
+    ? await sb.from('agenda').update(fila).eq('id', existente.id).eq('provider_id', usuarioActual.id)
+    : await sb.from('agenda').insert(fila);
+
+  if(error){ alert('No se pudo guardar el evento: ' + error.message); return; }
+
+  agendaEvents = await loadAgendaEvents();
   closeEventModal();
   renderAgenda();
   renderHomeKPIs();
 }
 
-function deleteEvent(){
-  agendaEvents = agendaEvents.filter(e => e.date !== selectedDateStr);
-  saveAgendaEvents(agendaEvents);
+async function deleteEvent(){
+  const existente = agendaEvents.find(e => e.date === selectedDateStr);
+  if(!existente) return;
+
+  // Si el bloque vino de una reserva del marketplace, borrarlo dejaria la
+  // fecha libre sin avisarle al cliente. En ese caso hay que cancelar la
+  // reserva desde "Solicitudes", no borrar el bloque a mano.
+  if(existente.requestId){
+    alert('Este bloque viene de una reserva de un cliente. Para liberarlo, cancela la reserva desde la sección "Solicitudes".');
+    return;
+  }
+
+  const { error } = await sb.from('agenda').delete().eq('id', existente.id).eq('provider_id', usuarioActual.id);
+  if(error){ alert('No se pudo eliminar el evento: ' + error.message); return; }
+
+  agendaEvents = await loadAgendaEvents();
   closeEventModal();
   renderAgenda();
   renderHomeKPIs();
@@ -2256,7 +2307,7 @@ async function cargarPerfilDesdeSupabase(){
   const p = perfilRowInicial;
 
   const [{ data: servicios }, { data: resenas }, { data: comentarios }, { data: feedFotos }] = await Promise.all([
-    sb.from('services').select('id, name, price, category, description, imagenes').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true }),
+    sb.from('services').select('id, name, price, category, description, imagenes, active').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true }),
     sb.from('reviews').select('id, service_id, rating, comment, created_at, client_name').eq('provider_id', usuarioActual.id).order('created_at', { ascending: false }),
     sb.from('comentarios_perfil').select('id, comment, created_at, client_name').eq('provider_id', usuarioActual.id).order('created_at', { ascending: false }),
     sb.from('feed_photos').select('id, url').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true })
@@ -2283,7 +2334,7 @@ async function cargarPerfilDesdeSupabase(){
     bannerUrl: p.banner_url || '',
     ratingReal: p.rating || 0,
     reviews_count: p.reviews_count || 0,
-    servicios: (servicios || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, categoria: s.category || 'musica', descripcion: s.description || '', imagenes: s.imagenes || [] })),
+    servicios: (servicios || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, categoria: s.category || 'musica', descripcion: s.description || '', imagenes: s.imagenes || [], activo: s.active === true })),
     resenasPorServicio,
     // "Comentarios" del perfil: sobre el proveedor como persona/negocio,
     // distintos de las reseñas de un servicio puntual.
@@ -2431,17 +2482,52 @@ function renderServiciosGrid(){
     const imgs = s.imagenes || [];
     const thumb = imgs[0] || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(s.nombre) + '&background=212121&color=9A9A9A&size=400';
     const clickFn = perfilEditMode ? `openServiceModal(${s.id})` : `openServiceViewer(${s.id})`;
+    const estadoBadge = s.activo
+      ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;color:var(--green);background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);padding:3px 9px;border-radius:100px;"><i class="ti ti-broadcast" style="font-size:11px;"></i> En el mercado</span>`
+      : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;color:var(--sub);background:rgba(255,255,255,.05);border:1px solid var(--line);padding:3px 9px;border-radius:100px;"><i class="ti ti-eye-off" style="font-size:11px;"></i> Borrador</span>`;
+    const btnLanzar = s.activo
+      ? `<button class="btn-ghost" style="width:100%;justify-content:center;margin-top:10px;font-size:12px;" onclick="event.stopPropagation(); toggleServicioEnMercado(${s.id}, false)"><i class="ti ti-eye-off"></i> Quitar del mercado</button>`
+      : `<button class="btn-or" style="width:100%;justify-content:center;margin-top:10px;font-size:12px;" onclick="event.stopPropagation(); toggleServicioEnMercado(${s.id}, true)"><i class="ti ti-rocket"></i> Lanzar al mercado</button>`;
+
     html += `<div class="service-card editable" onclick="${clickFn}">
-      <img class="service-img" src="${thumb}" alt="${s.nombre}">
+      <img class="service-img" src="${thumb}" alt="${s.nombre}" style="${s.activo ? '' : 'opacity:.5;'}">
       <div class="service-body">
+        <div style="margin-bottom:8px;">${estadoBadge}</div>
         <div class="service-name">${s.nombre}</div>
         <div class="service-desc">${s.descripcion}</div>
         <div class="service-price">S/. ${Number(s.precio).toLocaleString('es-PE')}</div>
         <div style="font-size:11px;color:var(--sub);margin-top:8px;"><i class="ti ti-photo" style="font-size:12px;"></i> ${imgs.length} foto${imgs.length===1?'':'s'}</div>
+        ${btnLanzar}
       </div>
     </div>`;
   });
   grid.innerHTML = html || '<div style="color:var(--sub);font-size:13px;">Aún no has agregado servicios.</div>';
+}
+
+// Publicar / despublicar un servicio en el marketplace. Un servicio nuevo
+// nace como borrador: solo aparece en el catálogo cuando lo lanzas.
+async function toggleServicioEnMercado(id, lanzar){
+  const s = perfilData.servicios.find(sv => sv.id === id);
+  if(!s) return;
+
+  if(lanzar){
+    if(!s.imagenes || s.imagenes.length === 0){
+      alert('Agrega al menos una foto antes de lanzar este servicio al mercado.');
+      return;
+    }
+    if(!s.descripcion || !s.descripcion.trim()){
+      alert('Escribe una descripción antes de lanzar este servicio al mercado.');
+      return;
+    }
+  }
+
+  const { error } = await sb.from('services').update({ active: lanzar })
+    .eq('id', id).eq('provider_id', usuarioActual.id);
+
+  if(error){ alert('No se pudo actualizar el servicio: ' + error.message); return; }
+
+  s.activo = lanzar;
+  renderServiciosGrid();
 }
 
 function switchProfileTab(tab){
@@ -2625,13 +2711,15 @@ async function saveService(){
     const idx = perfilData.servicios.findIndex(s => s.id === servicioEditingId);
     if(idx >= 0) perfilData.servicios[idx] = { ...perfilData.servicios[idx], nombre, precio, categoria, descripcion, imagenes };
   } else {
+    // Un servicio nuevo nace como BORRADOR: no aparece en el catálogo hasta
+    // que el proveedor lo lanza al mercado a propósito.
     const { data, error } = await sb.from('services').insert({
       provider_id: usuarioActual.id, name: nombre, price: precio, category: categoria, description: descripcion,
-      imagenes, image_url: imagenes[0] || null, active: true
+      imagenes, image_url: imagenes[0] || null, active: false
     }).select('id').single();
     if(error){ alert('No se pudo crear el servicio: ' + error.message); return; }
 
-    perfilData.servicios.push({ id: data.id, nombre, precio, categoria, descripcion, imagenes });
+    perfilData.servicios.push({ id: data.id, nombre, precio, categoria, descripcion, imagenes, activo: false });
   }
 
   closeServiceModal();
@@ -2690,37 +2778,55 @@ function closeServiceViewer(){
   document.getElementById('service-viewer-overlay').classList.remove('open');
 }
 
-// ─── SOLICITUDES DE RESERVA (anti-overbooking) ─────────────────────────────
-// Comparte la misma clave que catalogo.html: cuando un cliente pide fecha
-// desde el marketplace, la solicitud aparece aquí, dividida por proveedor.
-const REQUESTS_STORAGE_KEY = 'todoeventos_solicitudes_v1';
+// ─── RESERVAS ──────────────────────────────────────────────────────────────
+// Viven en la tabla "requests" de Supabase. Cuando un cliente reserva un
+// horario libre desde el marketplace, la reserva nace confirmada y bloquea
+// ese bloque en la agenda del proveedor automáticamente.
 
-function loadSolicitudes(){
-  try {
-    const raw = localStorage.getItem(REQUESTS_STORAGE_KEY);
-    if(raw) return JSON.parse(raw);
-  } catch(e){ console.warn('No se pudieron leer las solicitudes', e); }
-  return []; // cuenta nueva: sin solicitudes todavia
-}
+async function loadSolicitudes(){
+  const { data, error } = await sb
+    .from('requests')
+    .select('id, event_date, start_time, end_time, status, message, client_name, client_phone, client_email, total_amount, commission_amount, event_type, services(name)')
+    .eq('provider_id', usuarioActual.id)
+    .order('event_date', { ascending: false });
 
-function saveSolicitudes(list){
-  try { localStorage.setItem(REQUESTS_STORAGE_KEY, JSON.stringify(list)); }
-  catch(e){ console.warn('No se pudieron guardar las solicitudes', e); }
+  if(error){ console.warn('No se pudieron leer las reservas', error); return []; }
+
+  return (data || []).map(r => ({
+    id: r.id,
+    fecha: r.event_date,
+    hora: (r.start_time || '').slice(0,5),
+    horaFin: (r.end_time || '').slice(0,5),
+    estado: r.status,
+    mensaje: r.message || '(Sin mensaje adicional)',
+    cliente: r.client_name || 'Cliente',
+    telefono: r.client_phone || '',
+    correo: r.client_email || '',
+    tipoEvento: r.event_type || 'Evento',
+    total: Number(r.total_amount) || 0,
+    comision: Number(r.commission_amount) || 0,
+    servicios: [{ nombre: r.services?.name || 'Servicio', precio: Number(r.total_amount) || 0 }]
+  }));
 }
 
 let solicitudes = [];
 
-// Solo veo las solicitudes dirigidas a MÍ, no las de otros proveedores.
+// La consulta ya filtra por provider_id, asi que todo lo cargado es mio.
 function misSolicitudes(){
-  return solicitudes.filter(r => r.proveedorId === usuarioActual.id);
+  return solicitudes;
 }
 
 function updateReqBadge(){
   const badge = document.getElementById('req-badge');
   if(!badge) return;
-  const pendientes = misSolicitudes().filter(r => r.estado === 'pendiente').length;
-  badge.textContent = pendientes;
-  badge.classList.toggle('empty', pendientes === 0);
+  // Se resaltan las reservas confirmadas que aun no ocurren, y las
+  // solicitudes viejas que siguen esperando respuesta.
+  const hoy = new Date().toISOString().split('T')[0];
+  const activas = misSolicitudes().filter(r =>
+    (r.estado === 'pendiente') || (r.estado === 'confirmada' && r.fecha >= hoy)
+  ).length;
+  badge.textContent = activas;
+  badge.classList.toggle('empty', activas === 0);
 }
 
 function fmtFechaSolicitud(fechaStr){
@@ -2729,28 +2835,29 @@ function fmtFechaSolicitud(fechaStr){
   return { dia: d.getDate(), mes: meses3[d.getMonth()], anio: d.getFullYear() };
 }
 
-function renderSolicitudes(){
-  // Releemos por si el cliente envió una solicitud nueva desde el marketplace
-  solicitudes = loadSolicitudes();
+async function renderSolicitudes(){
+  // Releemos por si un cliente reservó desde el marketplace hace un momento
+  solicitudes = await loadSolicitudes();
   const cont = document.getElementById('req-list');
   if(!cont) return;
 
-  const mias = misSolicitudes().filter(r => r.estado !== 'rechazada');
-  const pendientes = mias.filter(r => r.estado === 'pendiente').length;
+  const mias = misSolicitudes().filter(r => r.estado !== 'rechazada' && r.estado !== 'cancelada');
+  const hoy = new Date().toISOString().split('T')[0];
+  const proximas = mias.filter(r => r.estado === 'confirmada' && r.fecha >= hoy).length;
 
   const sub = document.getElementById('req-sub');
-  if(sub) sub.textContent = pendientes > 0
-    ? pendientes + (pendientes === 1 ? ' solicitud pendiente de respuesta' : ' solicitudes pendientes de respuesta')
-    : 'No tienes solicitudes pendientes';
+  if(sub) sub.textContent = proximas > 0
+    ? proximas + (proximas === 1 ? ' reserva confirmada por venir' : ' reservas confirmadas por venir')
+    : 'No tienes reservas próximas';
 
   if(mias.length === 0){
-    cont.innerHTML = '<div class="req-empty"><i class="ti ti-inbox-off"></i>No tienes solicitudes por ahora.<br>Cuando un cliente pida tu fecha desde el marketplace, aparecerá aquí.</div>';
+    cont.innerHTML = '<div class="req-empty"><i class="ti ti-inbox-off"></i>No tienes reservas por ahora.<br>Cuando un cliente reserve tu servicio desde el marketplace, aparecerá aquí.</div>';
     updateReqBadge();
     return;
   }
 
-  // Pendientes primero
-  mias.sort((a,b) => (a.estado === 'pendiente' ? -1 : 1) - (b.estado === 'pendiente' ? -1 : 1));
+  // Las más próximas primero
+  mias.sort((a,b) => (a.fecha < b.fecha ? 1 : -1));
 
   cont.innerHTML = mias.map(r => {
     const f = fmtFechaSolicitud(r.fecha);
@@ -2758,18 +2865,26 @@ function renderSolicitudes(){
       `<div class="req-svc-row"><b>${s.nombre}</b><span>${fmtMoneyCaja(s.precio)}</span></div>`
     ).join('');
 
+    const horario = r.hora ? `${r.hora}${r.horaFin ? ' – ' + r.horaFin : ''}` : '';
+    const yaPaso = r.fecha < hoy;
+
     const acciones = r.estado === 'pendiente'
       ? `<div class="req-actions">
-           <button class="req-btn-accept" onclick="aceptarSolicitud('${r.id}')"><i class="ti ti-check"></i> Aceptar Fecha</button>
-           <button class="req-btn-reject" onclick="rechazarSolicitud('${r.id}')"><i class="ti ti-x"></i> Fecha Ocupada</button>
+           <button class="req-btn-accept" onclick="aceptarSolicitud(${r.id})"><i class="ti ti-check"></i> Aceptar Fecha</button>
+           <button class="req-btn-reject" onclick="rechazarSolicitud(${r.id})"><i class="ti ti-x"></i> Fecha Ocupada</button>
          </div>`
-      : `<div class="req-accepted-note"><i class="ti ti-circle-check"></i> Fecha aceptada. Se notificó a ${r.cliente} para proceder con el contrato.</div>`;
+      : yaPaso
+        ? `<div class="req-accepted-note"><i class="ti ti-circle-check"></i> Evento realizado. ${r.cliente} ya puede dejarte una reseña.</div>`
+        : `<div class="req-accepted-note"><i class="ti ti-circle-check"></i> Reserva confirmada. Contacto: ${r.telefono || r.correo || '—'}</div>
+           <div class="req-actions" style="margin-top:8px;">
+             <button class="req-btn-reject" onclick="cancelarReserva(${r.id})"><i class="ti ti-x"></i> Cancelar reserva</button>
+           </div>`;
 
     return `<div class="req-card ${r.estado}">
       <div class="req-head">
         <div>
           <div class="req-cliente">${r.cliente}</div>
-          <div class="req-tipo">${r.tipoEvento}</div>
+          <div class="req-tipo">${r.tipoEvento}${horario ? ' · ' + horario : ''}</div>
         </div>
         <div class="req-fecha-box">
           <div class="req-fecha-dia">${f.dia}</div>
@@ -2778,7 +2893,9 @@ function renderSolicitudes(){
       </div>
       <div class="req-servicios">
         ${serviciosHtml}
-        <div class="req-svc-total"><span>Total estimado</span><span>${fmtMoneyCaja(r.total)}</span></div>
+        <div class="req-svc-total"><span>Total</span><span>${fmtMoneyCaja(r.total)}</span></div>
+        ${r.comision ? `<div class="req-svc-row" style="opacity:.7;"><span>Comisión TodoEventos</span><span>−${fmtMoneyCaja(r.comision)}</span></div>
+        <div class="req-svc-total"><span>Recibes</span><span>${fmtMoneyCaja(r.total - r.comision)}</span></div>` : ''}
       </div>
       <div class="req-msg">"${r.mensaje}"</div>
       ${acciones}
@@ -2788,49 +2905,76 @@ function renderSolicitudes(){
   updateReqBadge();
 }
 
-function aceptarSolicitud(id){
+// Flujo antiguo (solicitud que el proveedor aprueba). Se mantiene para las
+// reservas que quedaron en estado "pendiente"; las nuevas nacen confirmadas.
+async function aceptarSolicitud(id){
   const r = solicitudes.find(x => x.id === id);
   if(!r) return;
 
-  // Verificación anti-overbooking: ¿ya hay un evento agendado ese día?
   const yaOcupado = agendaEvents.some(e => e.date === r.fecha);
   if(yaOcupado){
     const seguir = confirm('⚠️ Ya tienes un evento agendado el ' + r.fecha + '.\n\n¿Aceptar de todos modos? Podrías generar un cruce de reservas.');
     if(!seguir) return;
   }
 
-  r.estado = 'aceptada';
-  saveSolicitudes(solicitudes);
+  const { error } = await sb.from('requests').update({ status: 'aceptada' }).eq('id', id).eq('provider_id', usuarioActual.id);
+  if(error){ alert('No se pudo aceptar: ' + error.message); return; }
 
-  // Al aceptar, la fecha se bloquea automáticamente en la agenda del proveedor.
-  const existe = agendaEvents.some(e => e.date === r.fecha);
-  if(!existe){
-    agendaEvents.push({
-      id: 'e' + Date.now(),
-      date: r.fecha,
-      tipo: r.tipoEvento,
-      cliente: r.cliente,
-      hora: '18:00',
-      distrito: '',
-      estado: 'Pendiente pago'
-    });
-    saveAgendaEvents(agendaEvents);
-  }
+  await bloquearFechaEnAgenda(r);
+  alert('Fecha aceptada. Quedó bloqueada en tu agenda.');
 
-  alert('✅ Fecha aceptada.\n\nSe envió una alerta a ' + r.cliente + ' informando que estás disponible y listo para proceder con el contrato.\n\nLa fecha quedó bloqueada en tu agenda.');
-
-  renderSolicitudes();
-  renderHomeKPIs();
+  await refrescarReservasYAgenda();
 }
 
-function rechazarSolicitud(id){
+async function rechazarSolicitud(id){
   const r = solicitudes.find(x => x.id === id);
   if(!r) return;
   if(!confirm('¿Rechazar la solicitud de ' + r.cliente + '?\n\nSe le notificará que no tienes esa fecha disponible.')) return;
 
-  r.estado = 'rechazada';
-  saveSolicitudes(solicitudes);
+  const { error } = await sb.from('requests').update({ status: 'rechazada' }).eq('id', id).eq('provider_id', usuarioActual.id);
+  if(error){ alert('No se pudo rechazar: ' + error.message); return; }
+
+  await refrescarReservasYAgenda();
+}
+
+async function cancelarReserva(id){
+  const r = solicitudes.find(x => x.id === id);
+  if(!r) return;
+  if(!confirm('¿Cancelar la reserva de ' + r.cliente + ' del ' + r.fecha + '?\n\nLa fecha volverá a quedar libre en el marketplace.')) return;
+
+  const { error } = await sb.from('requests').update({ status: 'cancelada' }).eq('id', id).eq('provider_id', usuarioActual.id);
+  if(error){ alert('No se pudo cancelar: ' + error.message); return; }
+
+  // El bloque de agenda ligado a esta reserva se borra solo (ON DELETE
+  // CASCADE no aplica aqui porque la reserva no se borra), asi que lo
+  // quitamos a mano para liberar la fecha.
+  await sb.from('agenda').delete().eq('request_id', id).eq('provider_id', usuarioActual.id);
+
+  await refrescarReservasYAgenda();
+}
+
+async function bloquearFechaEnAgenda(r){
+  const yaExiste = agendaEvents.some(e => e.requestId === r.id);
+  if(yaExiste) return;
+
+  await sb.from('agenda').insert({
+    provider_id: usuarioActual.id,
+    request_id: r.id,
+    title: (r.tipoEvento || 'Evento') + ' — ' + r.cliente,
+    event_date: r.fecha,
+    type: r.tipoEvento || 'Evento',
+    client_name: r.cliente,
+    start_time: r.hora || null,
+    end_time: r.horaFin || null,
+    status: 'Confirmado'
+  });
+}
+
+async function refrescarReservasYAgenda(){
+  [solicitudes, agendaEvents] = await Promise.all([loadSolicitudes(), loadAgendaEvents()]);
   renderSolicitudes();
+  renderAgenda();
+  renderHomeKPIs();
 }
 
 // Primer cálculo al cargar la página, ya que "Inicio" es la vista por defecto.

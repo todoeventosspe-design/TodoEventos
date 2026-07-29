@@ -378,6 +378,48 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
 .resena-card-fecha{font-size:11px;color:var(--sub);}
 .resena-card-texto{font-size:13px;color:var(--sub);line-height:1.55;}
 
+/* ── RESERVA CON CALENDARIO (estilo Airbnb) ── */
+.bk-box{background:var(--bg2);border:1px solid var(--border);border-radius:20px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto;animation:pmIn .2s ease;}
+.bk-box::-webkit-scrollbar{width:8px;}
+.bk-box::-webkit-scrollbar-thumb{background:rgba(168,85,247,.3);border-radius:100px;border:2px solid var(--bg2);}
+.bk-head{padding:22px 24px 0;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.bk-title{font-size:17px;font-weight:700;color:var(--fg);}
+.bk-sub{font-size:12.5px;color:var(--sub);margin-top:3px;}
+.bk-close{background:none;border:none;color:var(--sub);font-size:22px;cursor:pointer;line-height:1;flex-shrink:0;}
+.bk-body{padding:18px 24px 24px;}
+.bk-cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.bk-cal-mes{font-size:14px;font-weight:700;}
+.bk-cal-nav{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--fg);width:30px;height:30px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.bk-cal-nav:disabled{opacity:.3;cursor:not-allowed;}
+.bk-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.bk-dow{text-align:center;font-size:10.5px;color:var(--sub);font-weight:700;padding:4px 0;text-transform:uppercase;}
+.bk-dia{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid transparent;background:rgba(255,255,255,.04);color:var(--fg);position:relative;}
+.bk-dia:hover:not(.off){border-color:rgba(168,85,247,.5);}
+.bk-dia.off{opacity:.22;cursor:not-allowed;background:transparent;}
+.bk-dia.vacio{background:transparent;cursor:default;}
+.bk-dia.sel{background:var(--pu);color:#fff;}
+.bk-dia .bk-dot{width:4px;height:4px;border-radius:50%;background:var(--or);position:absolute;bottom:5px;}
+.bk-dia.sel .bk-dot{background:#fff;}
+.bk-leyenda{display:flex;gap:14px;margin-top:12px;font-size:11px;color:var(--sub);flex-wrap:wrap;}
+.bk-leyenda span{display:inline-flex;align-items:center;gap:5px;}
+.bk-leyenda i{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.bk-ocupado{background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.25);border-radius:10px;padding:11px 13px;margin:16px 0;font-size:12.5px;color:var(--sub);}
+.bk-ocupado b{color:var(--or);}
+.bk-field{margin-bottom:14px;}
+.bk-field label{display:block;font-size:11.5px;color:var(--sub);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;}
+.bk-field input,.bk-field select,.bk-field textarea{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:9px;padding:11px 13px;color:var(--fg);font-size:13.5px;font-family:inherit;}
+.bk-field input:focus,.bk-field select:focus,.bk-field textarea:focus{outline:none;border-color:var(--pu);}
+.bk-field input[type="time"]{color-scheme:dark;}
+.bk-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.bk-resumen{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:14px;margin:16px 0;}
+.bk-resumen-row{display:flex;justify-content:space-between;font-size:12.5px;color:var(--sub);padding:5px 0;}
+.bk-resumen-total{display:flex;justify-content:space-between;font-size:15px;font-weight:800;color:var(--fg);padding-top:10px;margin-top:6px;border-top:1px solid var(--border);}
+.bk-resumen-total span:last-child{color:var(--or);}
+.bk-error{color:#f87171;font-size:12.5px;margin-bottom:12px;min-height:16px;}
+.bk-cta{width:100%;background:linear-gradient(135deg,var(--pu),var(--ind));color:#fff;border:none;padding:14px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;}
+.bk-cta:disabled{opacity:.5;cursor:not-allowed;}
+.bk-aviso{font-size:11px;color:var(--sub);text-align:center;margin-top:10px;line-height:1.5;}
+
 /* ── SOLICITUD DE DISPONIBILIDAD (carrito) ── */
 .rq-intro{font-size:12.5px;color:var(--sub);line-height:1.6;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.22);border-radius:10px;padding:12px;margin-bottom:18px;}
 .rq-providers{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:18px;}
@@ -717,7 +759,7 @@ function render() {
       </div>
       <div class="pcard-actions">
         <button class="pcard-btn-outline" onclick="openProvider('${p.providerId}')"><i class="ti ti-user"></i> Ver Perfil</button>
-        <button class="pcard-btn-solid" onclick="quickHire(${p.id})"><i class="ti ti-shopping-cart-plus"></i> Contratar</button>
+        <button class="pcard-btn-solid" onclick="abrirReserva(${p.id})"><i class="ti ti-calendar-check"></i> Reservar</button>
       </div>`;
     grid.appendChild(card);
   });
@@ -895,6 +937,7 @@ function addToCart(servicioIndex){
   if(!currentModalProvider) return;
   const s = currentModalServicios[servicioIndex];
   if(!s) return;
+  if(!exigirLogin('Necesitas una cuenta para armar tu presupuesto.')) return;
 
   // Evita duplicar exactamente el mismo servicio del mismo proveedor
   const yaExiste = cart.some(it => it.proveedorId === currentModalProvider.id && it.servicio === s.nombre);
@@ -983,117 +1026,12 @@ function closeCart(){
   document.getElementById('cart-overlay').classList.remove('open');
 }
 
-// ─── SOLICITUD DE DISPONIBILIDAD (anti-overbooking) ────────────────────────
-// En vez de cobrar de inmediato, se le pregunta a cada proveedor si tiene la
-// fecha libre. Solo cuando aceptan, el cliente coordina el pago.
-const REQUESTS_STORAGE_KEY = 'todoeventos_solicitudes_v1';
-
-function loadRequests(){
-  try {
-    const raw = localStorage.getItem(REQUESTS_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch(e){ return []; }
-}
-
-function saveRequests(list){
-  try { localStorage.setItem(REQUESTS_STORAGE_KEY, JSON.stringify(list)); }
-  catch(e){ console.warn('No se pudo guardar la solicitud', e); }
-}
-
-function goToRequest(){
-  if(cart.length === 0) return;
-  document.getElementById('rq-error').textContent = '';
-
-  // Muestra a qué proveedores se enviará la solicitud
-  const proveedores = [...new Set(cart.map(it => it.proveedor))];
-  document.getElementById('rq-providers-list').innerHTML =
-    proveedores.map(p => `<span class="rq-prov-chip">${p}</span>`).join('');
-
-  // La fecha mínima es mañana
-  const manana = new Date();
-  manana.setDate(manana.getDate() + 1);
-  document.getElementById('rq-fecha').min = manana.toISOString().split('T')[0];
-
-  showCartView('request');
-}
-
-function backToCart(){
-  showCartView('list');
-}
-
-function sendAvailabilityRequest(){
-  const cliente = document.getElementById('rq-cliente').value.trim();
-  const fecha = document.getElementById('rq-fecha').value;
-  const tipo = document.getElementById('rq-tipo').value;
-  const mensaje = document.getElementById('rq-mensaje').value.trim();
-  const errEl = document.getElementById('rq-error');
-
-  if(!cliente){ errEl.textContent = 'Escribe tu nombre para que el proveedor sepa quién solicita.'; return; }
-  if(!fecha){ errEl.textContent = 'Elige la fecha de tu evento.'; return; }
-  const fechaSel = new Date(fecha + 'T00:00:00');
-  const hoy = new Date(); hoy.setHours(0,0,0,0);
-  if(fechaSel <= hoy){ errEl.textContent = 'La fecha del evento debe ser posterior a hoy.'; return; }
-  errEl.textContent = '';
-
-  const btn = document.getElementById('rq-send-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="ck-spinner"></span> Enviando solicitud…';
-
-  const proveedoresSet = [...new Set(cart.map(it => it.proveedor))];
-  const totalEstimado = cartTotal();
-  const cantidadServicios = cart.length;
-
-  setTimeout(() => {
-    // La solicitud se divide POR PROVEEDOR: cada uno recibe solo sus servicios
-    const requests = loadRequests();
-    const grupoId = 'grp' + Date.now();
-
-    proveedoresSet.forEach(nombreProv => {
-      const susServicios = cart.filter(it => it.proveedor === nombreProv);
-      requests.push({
-        id: 'rq' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
-        grupoId,
-        proveedorId: susServicios[0].proveedorId,
-        proveedor: nombreProv,
-        cliente,
-        fecha,
-        tipoEvento: tipo,
-        mensaje: mensaje || '(Sin mensaje adicional)',
-        servicios: susServicios.map(s => ({ nombre: s.servicio, precio: s.precio })),
-        total: susServicios.reduce((sum,s) => sum + s.precio, 0),
-        estado: 'pendiente',
-        creada: new Date().toISOString()
-      });
-    });
-    saveRequests(requests);
-
-    // Resumen de la solicitud
-    const fechaBonita = fechaSel.toLocaleDateString('es-PE', { day:'numeric', month:'long', year:'numeric' });
-    document.getElementById('ck-success-detail').innerHTML =
-      `<div style="margin-bottom:6px;">Evento: <b>${tipo}</b> el <b>${fechaBonita}</b></div>` +
-      `<div style="margin-bottom:6px;"><b>${cantidadServicios}</b> servicio${cantidadServicios!==1?'s':''} solicitado${cantidadServicios!==1?'s':''} a <b>${proveedoresSet.length}</b> proveedor${proveedoresSet.length!==1?'es':''}</div>` +
-      `<div style="margin-bottom:6px;">Proveedores: <b>${proveedoresSet.join(', ')}</b></div>` +
-      `<div>Presupuesto estimado: <b style="color:var(--or);">${money(totalEstimado)}</b></div>` +
-      `<div style="margin-top:10px;font-size:11.5px;opacity:.75;">Aún no se ha cobrado nada. Espera la confirmación de disponibilidad.</div>`;
-
-    cart = [];
-    saveCart();
-    updateCartBadge();
-
-    btn.disabled = false;
-    btn.innerHTML = '<i class="ti ti-send"></i> Enviar Solicitud de Reserva';
-    document.getElementById('rq-cliente').value = '';
-    document.getElementById('rq-fecha').value = '';
-    document.getElementById('rq-mensaje').value = '';
-
-    showCartView('success');
-  }, 1400);
-}
 
 // ─── CONTRATAR RÁPIDO desde la tarjeta ─────────────────────────────────────
 function quickHire(providerId){
   const p = providers.find(x => x.id === providerId);
   if(!p) return;
+  if(!exigirLogin('Necesitas una cuenta para armar tu presupuesto.')) return;
 
   const servicioNombre = 'Servicio base — ' + (catNames[p.cat] || 'Evento');
   const yaExiste = cart.some(it => it.proveedorId === p.providerId && it.servicio === servicioNombre);
@@ -1264,22 +1202,9 @@ function openProviderFromDetail(){
 
 function hireFromDetail(){
   if(currentDetailProviderId === null) return;
-  const p = providers.find(x => x.id === currentDetailProviderId);
-  const servicioNombre = 'Servicio base — ' + (catNames[p.cat] || 'Evento');
-  const yaExiste = cart.some(it => it.proveedorId === p.providerId && it.servicio === servicioNombre);
-
-  const btn = document.getElementById('sd-hire-btn');
-  if(yaExiste){
-    btn.innerHTML = '<i class="ti ti-check"></i> Ya está en tu carrito';
-    return;
-  }
-
-  cart.push({ id:'ci'+Date.now(), proveedorId:p.providerId, proveedor:p.name, servicio:servicioNombre, precio:Number(p.price) });
-  saveCart();
-  updateCartBadge();
-
-  btn.classList.add('added');
-  btn.innerHTML = '<i class="ti ti-check"></i> Añadido al carrito';
+  const id = currentDetailProviderId;
+  closeServiceDetail();
+  abrirReserva(id);
 }
 
 function contactProviderFromModal(){
@@ -1800,6 +1725,19 @@ window.addEventListener('focus', () => {
   cargarProvidersReales();
 });
 
+// Tiempo real: si un proveedor lanza, edita, despublica o borra un servicio,
+// el catálogo se actualiza solo sin que el cliente recargue la página.
+if(sb){
+  sb.channel('catalogo-servicios')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'services' }, () => {
+      cargarProvidersReales();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+      cargarProvidersReales();
+    })
+    .subscribe();
+}
+
 /* ─── Sesión: mostrar "Ingresar" o el menú de usuario según corresponda ─── */
 const SUPABASE_URL = 'https://vqnyaozauljtashpjfoo.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxbnlhb3phdWxqdGFzaHBqZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDM0NzIsImV4cCI6MjA5OTI3OTQ3Mn0.0JT-UAQnSUygXPNjI69Sf3Rg3mv_NeTwwz9-7vnWcno';
@@ -1845,6 +1783,11 @@ async function cerrarSesion(){
   window.location.href = 'index.html';
 }
 
+// Sesión activa del visitante. Queda en null si nadie inició sesión: el
+// carrito y la reserva lo consultan para exigir cuenta antes de continuar.
+let sesionUsuario = null;
+let perfilUsuario = null;
+
 async function verificarSesionNav(){
   if(!sb) return;
   const { data } = await sb.auth.getSession();
@@ -1853,9 +1796,12 @@ async function verificarSesionNav(){
   const usuario = data.session.user;
   const { data: perfil } = await sb
     .from('profiles')
-    .select('full_name, role, is_admin')
+    .select('full_name, role, is_admin, email')
     .eq('id', usuario.id)
     .single();
+
+  sesionUsuario = usuario;
+  perfilUsuario = perfil;
 
   const nombre = (perfil && perfil.full_name) ? perfil.full_name : usuario.email;
   const rol = perfil ? perfil.role : 'cliente';
@@ -1879,6 +1825,255 @@ async function verificarSesionNav(){
 }
 
 verificarSesionNav();
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RESERVA DIRECTA CON CALENDARIO DE DISPONIBILIDAD
+   El cliente ve qué bloques tiene ocupados el proveedor (leídos de la
+   vista "disponibilidad_publica", que NO expone datos de otros clientes)
+   y reserva un horario libre sin esperar aprobación.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+// Comisión que cobra TodoEventos sobre cada transacción.
+const COMISION_PCT = 0.10;
+
+const MESES_BK = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DOWS_BK = ['D','L','M','M','J','V','S'];
+
+let reservaServicio = null;   // servicio que se está reservando
+let reservaOcupados = [];     // bloques ocupados del proveedor
+let reservaAnio = 0;
+let reservaMes = 0;           // 0-indexado
+let reservaFechaSel = null;   // 'YYYY-MM-DD'
+
+// Puerta de entrada: sin cuenta no se reserva ni se arma presupuesto.
+function exigirLogin(mensaje){
+  if(sesionUsuario) return true;
+  const seguir = confirm(mensaje + '\n\n¿Quieres iniciar sesión o crear tu cuenta ahora?');
+  if(seguir) window.location.href = 'login.html?modo=registro&rol=cliente';
+  return false;
+}
+
+function pad2bk(n){ return n < 10 ? '0'+n : ''+n; }
+function fechaKey(y,m,d){ return y + '-' + pad2bk(m+1) + '-' + pad2bk(d); }
+
+async function abrirReserva(serviceId){
+  if(!exigirLogin('Necesitas una cuenta para reservar un servicio.')) return;
+
+  if(perfilUsuario && perfilUsuario.role === 'proveedor'){
+    alert('Estás con una cuenta de proveedor. Para reservar servicios necesitas una cuenta de cliente.');
+    return;
+  }
+
+  const s = providers.find(x => x.id === serviceId);
+  if(!s) return;
+
+  reservaServicio = s;
+  reservaFechaSel = null;
+
+  document.getElementById('bk-servicio').textContent = s.name;
+  document.getElementById('bk-proveedor').textContent = money(s.price) + ' · ' + (catNames[s.cat] || 'Servicio');
+  document.getElementById('bk-detalle').style.display = 'none';
+  document.getElementById('bk-error').textContent = '';
+  document.getElementById('bk-mensaje').value = '';
+
+  const hoy = new Date();
+  reservaAnio = hoy.getFullYear();
+  reservaMes = hoy.getMonth();
+
+  document.getElementById('bk-overlay').classList.add('open');
+
+  await cargarDisponibilidad();
+  renderCalendarioReserva();
+}
+
+function cerrarReserva(){
+  document.getElementById('bk-overlay').classList.remove('open');
+  reservaServicio = null;
+  reservaFechaSel = null;
+}
+
+// Lee los bloques ocupados del proveedor. La vista solo devuelve
+// proveedor/fecha/horario: nunca el nombre ni el local de otro cliente.
+async function cargarDisponibilidad(){
+  reservaOcupados = [];
+  if(!sb || !reservaServicio) return;
+
+  const desde = fechaKey(reservaAnio, reservaMes, 1);
+  const ultimoDia = new Date(reservaAnio, reservaMes + 1, 0).getDate();
+  const hasta = fechaKey(reservaAnio, reservaMes, ultimoDia);
+
+  const { data, error } = await sb
+    .from('disponibilidad_publica')
+    .select('event_date, start_time, end_time')
+    .eq('provider_id', reservaServicio.providerId)
+    .gte('event_date', desde)
+    .lte('event_date', hasta);
+
+  if(error){ console.error('No se pudo leer la disponibilidad:', error); return; }
+  reservaOcupados = data || [];
+}
+
+function ocupadosDeFecha(fecha){
+  return reservaOcupados.filter(o => o.event_date === fecha);
+}
+
+async function cambiarMesReserva(delta){
+  reservaMes += delta;
+  if(reservaMes < 0){ reservaMes = 11; reservaAnio--; }
+  if(reservaMes > 11){ reservaMes = 0; reservaAnio++; }
+  reservaFechaSel = null;
+  document.getElementById('bk-detalle').style.display = 'none';
+  await cargarDisponibilidad();
+  renderCalendarioReserva();
+}
+
+function renderCalendarioReserva(){
+  document.getElementById('bk-mes').textContent = MESES_BK[reservaMes] + ' ' + reservaAnio;
+
+  const hoy = new Date();
+  hoy.setHours(0,0,0,0);
+
+  // No dejamos retroceder antes del mes actual
+  const btnPrev = document.getElementById('bk-prev');
+  btnPrev.disabled = (reservaAnio === hoy.getFullYear() && reservaMes <= hoy.getMonth());
+
+  const primerDia = new Date(reservaAnio, reservaMes, 1).getDay();
+  const totalDias = new Date(reservaAnio, reservaMes + 1, 0).getDate();
+
+  let html = DOWS_BK.map(d => `<div class="bk-dow">${d}</div>`).join('');
+  for(let i = 0; i < primerDia; i++) html += '<div class="bk-dia vacio"></div>';
+
+  for(let d = 1; d <= totalDias; d++){
+    const key = fechaKey(reservaAnio, reservaMes, d);
+    const fecha = new Date(reservaAnio, reservaMes, d);
+    const esPasado = fecha <= hoy;
+    const ocupados = ocupadosDeFecha(key);
+    const sel = reservaFechaSel === key;
+
+    const clases = ['bk-dia'];
+    if(esPasado) clases.push('off');
+    if(sel) clases.push('sel');
+
+    html += `<div class="${clases.join(' ')}" ${esPasado ? '' : `onclick="seleccionarDiaReserva('${key}')"`}>
+      ${d}${ocupados.length && !esPasado ? '<span class="bk-dot"></span>' : ''}
+    </div>`;
+  }
+
+  document.getElementById('bk-cal').innerHTML = html;
+}
+
+function seleccionarDiaReserva(fecha){
+  reservaFechaSel = fecha;
+  renderCalendarioReserva();
+
+  const ocupados = ocupadosDeFecha(fecha);
+  const wrap = document.getElementById('bk-ocupado-wrap');
+
+  if(ocupados.length){
+    const bloques = ocupados.map(o => {
+      const ini = (o.start_time || '').slice(0,5);
+      const fin = (o.end_time || '').slice(0,5);
+      return ini ? `<b>${ini}${fin ? ' – ' + fin : ''}</b>` : '<b>todo el día</b>';
+    }).join(', ');
+    wrap.innerHTML = `<div class="bk-ocupado"><i class="ti ti-clock-x"></i> Este día el proveedor ya está ocupado en: ${bloques}. Elige un horario que no se cruce.</div>`;
+  } else {
+    wrap.innerHTML = `<div class="bk-ocupado" style="background:rgba(74,222,128,.08);border-color:rgba(74,222,128,.25);"><i class="ti ti-check"></i> <b style="color:#4ade80;">Día completamente libre.</b> Elige el horario que necesites.</div>`;
+  }
+
+  const [y,m,d] = fecha.split('-').map(Number);
+  document.getElementById('bk-res-fecha').textContent = d + ' de ' + MESES_BK[m-1] + ' de ' + y;
+  document.getElementById('bk-res-total').textContent = money(reservaServicio.price);
+  document.getElementById('bk-error').textContent = '';
+  document.getElementById('bk-detalle').style.display = 'block';
+  document.getElementById('bk-detalle').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+// Dos bloques se cruzan si uno empieza antes de que el otro termine.
+function seCruzan(iniA, finA, iniB, finB){
+  if(!iniB) return true; // bloque sin horario = día entero ocupado
+  return iniA < (finB || '23:59') && (finA || '23:59') > iniB;
+}
+
+async function confirmarReserva(){
+  const errEl = document.getElementById('bk-error');
+  errEl.textContent = '';
+
+  if(!reservaServicio || !reservaFechaSel){
+    errEl.textContent = 'Elige una fecha en el calendario.';
+    return;
+  }
+
+  const horaIni = document.getElementById('bk-hora-ini').value;
+  const horaFin = document.getElementById('bk-hora-fin').value;
+
+  if(!horaIni || !horaFin){ errEl.textContent = 'Indica la hora de inicio y de fin.'; return; }
+  if(horaFin <= horaIni){ errEl.textContent = 'La hora de fin debe ser posterior a la de inicio.'; return; }
+
+  // Revalidamos contra la disponibilidad más reciente: otro cliente pudo
+  // haber reservado ese mismo bloque mientras este llenaba el formulario.
+  await cargarDisponibilidad();
+  const choque = ocupadosDeFecha(reservaFechaSel).some(o =>
+    seCruzan(horaIni, horaFin, (o.start_time || '').slice(0,5), (o.end_time || '').slice(0,5))
+  );
+  if(choque){
+    errEl.textContent = 'Ese horario acaba de ocuparse. Elige otro bloque o cambia de fecha.';
+    seleccionarDiaReserva(reservaFechaSel);
+    return;
+  }
+
+  const btn = document.getElementById('bk-confirmar');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="ck-spinner"></span> Confirmando…';
+
+  const total = Number(reservaServicio.price) || 0;
+  const nombreCliente = (perfilUsuario && perfilUsuario.full_name) || sesionUsuario.email;
+
+  const { data: reserva, error } = await sb.from('requests').insert({
+    client_id: sesionUsuario.id,
+    provider_id: reservaServicio.providerId,
+    service_id: reservaServicio.id,
+    event_date: reservaFechaSel,
+    start_time: horaIni,
+    end_time: horaFin,
+    event_type: document.getElementById('bk-tipo').value,
+    message: document.getElementById('bk-mensaje').value.trim() || null,
+    status: 'confirmada',
+    client_name: nombreCliente,
+    client_email: (perfilUsuario && perfilUsuario.email) || sesionUsuario.email,
+    total_amount: total,
+    commission_amount: Math.round(total * COMISION_PCT * 100) / 100
+  }).select('id').single();
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-calendar-check"></i> Confirmar reserva';
+
+  if(error){
+    errEl.textContent = 'No se pudo confirmar la reserva: ' + error.message;
+    return;
+  }
+
+  // La reserva bloquea de inmediato ese horario en la agenda del proveedor.
+  const { error: errAgenda } = await sb.from('agenda').insert({
+    provider_id: reservaServicio.providerId,
+    request_id: reserva.id,
+    title: document.getElementById('bk-tipo').value + ' — ' + nombreCliente,
+    event_date: reservaFechaSel,
+    type: document.getElementById('bk-tipo').value,
+    client_name: nombreCliente,
+    start_time: horaIni,
+    end_time: horaFin,
+    status: 'Confirmado'
+  });
+
+  if(errAgenda) console.error('La reserva se creó pero no se bloqueó la agenda:', errAgenda);
+
+  cerrarReserva();
+
+  const [y,m,d] = reservaFechaSel.split('-').map(Number);
+  alert('¡Reserva confirmada!\n\n' + reservaServicio.name +
+        '\n' + d + ' de ' + MESES_BK[m-1] + ' de ' + y + ', ' + horaIni + ' – ' + horaFin +
+        '\n\nPuedes verla en "Mi cuenta". El proveedor ya tiene el bloque reservado en su agenda.');
+}
 </script>
 <!-- ─── MODAL: Perfil Público del Proveedor ─── -->
 <div class="modal-overlay" id="provider-modal-overlay" onclick="if(event.target===this) closeProviderModal()">
@@ -1916,6 +2111,82 @@ verificarSesionNav();
     </div>
   </div>
 </div>
+<!-- ─── RESERVA CON CALENDARIO DE DISPONIBILIDAD ─── -->
+<div class="modal-overlay" id="bk-overlay" onclick="if(event.target===this) cerrarReserva()">
+  <div class="bk-box">
+    <div class="bk-head">
+      <div>
+        <div class="bk-title" id="bk-servicio">Reservar servicio</div>
+        <div class="bk-sub" id="bk-proveedor">—</div>
+      </div>
+      <button class="bk-close" onclick="cerrarReserva()">&times;</button>
+    </div>
+
+    <div class="bk-body">
+      <div class="bk-cal-head">
+        <button class="bk-cal-nav" id="bk-prev" onclick="cambiarMesReserva(-1)"><i class="ti ti-chevron-left"></i></button>
+        <div class="bk-cal-mes" id="bk-mes">—</div>
+        <button class="bk-cal-nav" onclick="cambiarMesReserva(1)"><i class="ti ti-chevron-right"></i></button>
+      </div>
+
+      <div class="bk-cal-grid" id="bk-cal"></div>
+
+      <div class="bk-leyenda">
+        <span><i style="background:rgba(255,255,255,.18);"></i> Libre</span>
+        <span><i style="background:var(--or);"></i> Con reservas ese día</span>
+        <span><i style="background:rgba(255,255,255,.06);"></i> No disponible</span>
+      </div>
+
+      <div id="bk-detalle" style="display:none;">
+        <div id="bk-ocupado-wrap"></div>
+
+        <div class="bk-row2">
+          <div class="bk-field">
+            <label>Hora inicio</label>
+            <input type="time" id="bk-hora-ini" value="18:00">
+          </div>
+          <div class="bk-field">
+            <label>Hora fin</label>
+            <input type="time" id="bk-hora-fin" value="23:00">
+          </div>
+        </div>
+
+        <div class="bk-field">
+          <label>Tipo de evento</label>
+          <select id="bk-tipo">
+            <option>Boda</option>
+            <option>Cumpleaños</option>
+            <option>Quinceañero</option>
+            <option>Corporativo</option>
+            <option>Bautizo</option>
+            <option>Otro</option>
+          </select>
+        </div>
+
+        <div class="bk-field">
+          <label>Mensaje para el proveedor (opcional)</label>
+          <textarea id="bk-mensaje" rows="2" placeholder="Cuéntale detalles del evento: cantidad de invitados, local, etc."></textarea>
+        </div>
+
+        <div class="bk-resumen">
+          <div class="bk-resumen-row"><span id="bk-res-fecha">—</span></div>
+          <div class="bk-resumen-total"><span>Total</span><span id="bk-res-total">S/. 0</span></div>
+        </div>
+
+        <div class="bk-error" id="bk-error"></div>
+
+        <button class="bk-cta" id="bk-confirmar" onclick="confirmarReserva()">
+          <i class="ti ti-calendar-check"></i> Confirmar reserva
+        </button>
+        <div class="bk-aviso">
+          Al reservar aceptas gestionar el pago y la comunicación dentro de TodoEventos.
+          Es lo que te protege si algo sale mal con el servicio.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ─── CARRITO / PRESUPUESTO DE EVENTO ─── -->
 <div class="cart-overlay" id="cart-overlay" onclick="if(event.target===this) closeCart()">
   <aside class="cart-panel" id="cart-panel">
@@ -1933,53 +2204,9 @@ verificarSesionNav();
           <span class="cart-total-val" id="cart-total">S/. 0</span>
         </div>
         <button class="cart-checkout-btn" id="cart-checkout-btn" onclick="goToRequest()">
-          <i class="ti ti-calendar-check"></i> Solicitar Disponibilidad de Fecha
+          <i class="ti ti-calendar-check"></i> Elegir fecha y reservar
         </button>
       </div>
-    </div>
-
-    <!-- Estado 2: solicitud de disponibilidad (anti-overbooking) -->
-    <div class="cart-view" id="cart-view-request">
-      <button class="cart-back" onclick="backToCart()"><i class="ti ti-arrow-left"></i> Volver al carrito</button>
-
-      <div class="rq-intro">
-        <b style="color:var(--fg);">Aún no se cobra nada.</b> Enviaremos tu solicitud a cada proveedor para que confirme si tiene tu fecha libre. Solo cuando acepten, coordinarás el pago.
-      </div>
-
-      <div class="rq-providers">
-        <div class="rq-providers-lbl">Se enviará a</div>
-        <div id="rq-providers-list"></div>
-      </div>
-
-      <div class="rq-field">
-        <label>Tu nombre</label>
-        <input type="text" id="rq-cliente" placeholder="¿Cómo te llamas?">
-      </div>
-      <div class="rq-field">
-        <label>Fecha del evento</label>
-        <input type="date" id="rq-fecha">
-      </div>
-      <div class="rq-field">
-        <label>Tipo de evento</label>
-        <select id="rq-tipo">
-          <option>Boda</option>
-          <option>Quinceañero</option>
-          <option>Cumpleaños</option>
-          <option>Corporativo</option>
-          <option>Bautizo</option>
-          <option>Otro</option>
-        </select>
-      </div>
-      <div class="rq-field">
-        <label>Mensaje para los proveedores</label>
-        <textarea id="rq-mensaje" rows="3" placeholder="Cuéntales sobre tu evento: número de invitados, horario, detalles importantes…"></textarea>
-      </div>
-
-      <div class="ck-error" id="rq-error"></div>
-
-      <button class="cart-checkout-btn" id="rq-send-btn" onclick="sendAvailabilityRequest()">
-        <i class="ti ti-send"></i> Enviar Solicitud de Reserva
-      </button>
     </div>
 
     <!-- Estado 3: éxito -->
@@ -2038,7 +2265,7 @@ verificarSesionNav();
 
       <div class="sd-actions">
         <button class="sd-btn-outline" onclick="openProviderFromDetail()"><i class="ti ti-user"></i> Ver perfil completo</button>
-        <button class="sd-btn-solid" id="sd-hire-btn" onclick="hireFromDetail()"><i class="ti ti-shopping-cart-plus"></i> Contratar</button>
+        <button class="sd-btn-solid" id="sd-hire-btn" onclick="hireFromDetail()"><i class="ti ti-calendar-check"></i> Reservar</button>
       </div>
     </div>
   </div>
