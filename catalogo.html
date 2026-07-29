@@ -672,6 +672,9 @@ async function cargarProvidersReales(){
       reviews: s.profiles.reviews_count || 0,
       district: (s.profiles.location || 'Lima').split(',')[0].trim(),
       tags: [],
+      // Portada real: la primera foto que el proveedor subió a este
+      // servicio (image_url = imagenes[0], se guarda así en el dashboard).
+      foto: s.image_url || null,
       img: CAT_IMG[s.category] || 'a',
       icon: CAT_ICON[s.category] || 'ti-star',
       badge: badgeParaRating(Number(s.profiles.rating) || 5),
@@ -740,8 +743,8 @@ function render() {
     card.className = 'pcard';
     card.innerHTML = `
       <div class="pcard-clickable" onclick="openServiceDetail(${p.id})">
-        <div class="pcard-img ci-${p.img}">
-          <i class="ti ${p.icon}"></i>
+        <div class="pcard-img ${p.foto ? '' : 'ci-' + p.img}" ${p.foto ? `style="background-image:url('${p.foto}');background-size:cover;background-position:center;"` : ''}>
+          ${p.foto ? '' : `<i class="ti ${p.icon}"></i>`}
           <span class="pcard-vbdg">${p.badge}</span>
           <span class="pcard-price-tag">desde S/. ${p.price}</span>
           <button class="pcard-fav" onclick="event.stopPropagation();"><i class="ti ti-heart"></i></button>
@@ -1081,8 +1084,20 @@ function openServiceDetail(providerId){
   document.getElementById('sd-badge').textContent = p.badge || '✓ Verificado';
   // Descripción real que el proveedor escribió al crear el servicio (no un texto genérico por categoría)
   document.getElementById('sd-desc').textContent = p.desc || 'Este proveedor todavía no agregó una descripción para este servicio.';
-  document.getElementById('sd-hero-icon').className = 'ti ' + p.icon;
-  document.getElementById('sd-hero').className = 'sd-hero ci-' + p.img;
+  const sdHero = document.getElementById('sd-hero');
+  const sdHeroIcon = document.getElementById('sd-hero-icon');
+  if(p.foto){
+    sdHero.className = 'sd-hero';
+    sdHero.style.backgroundImage = `url('${p.foto}')`;
+    sdHero.style.backgroundSize = 'cover';
+    sdHero.style.backgroundPosition = 'center';
+    sdHeroIcon.style.display = 'none';
+  } else {
+    sdHero.className = 'sd-hero ci-' + p.img;
+    sdHero.style.backgroundImage = '';
+    sdHeroIcon.className = 'ti ' + p.icon;
+    sdHeroIcon.style.display = '';
+  }
 
   // "Qué incluye" y "Requerimientos" no existen como datos reales del
   // proveedor todavía, así que se ocultan en vez de inventar contenido.
