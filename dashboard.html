@@ -1013,10 +1013,54 @@ verificarAccesoDashboard();
   </div>
 </div>
 
+<input type="file" id="file-picker-hidden" accept="image/png,image/jpeg" style="display:none;">
+
 <script>
 // Se dispara cuando verificarAccesoDashboard() (bloque anterior) confirma
 // sesion real + rol proveedor aprobado. Recien ahi cargamos perfil/servicios
 // reales de Supabase, porque antes no sabemos quien es el usuario.
+// ─── SUBIDA DE FOTOS (archivo real, no URL) ───────────────────────────────
+// Un solo <input type="file"> oculto, reutilizado por feed/servicios/avatar/
+// banner: cada llamador registra su callback, dispara el picker, y cuando
+// el usuario elige un archivo, se sube al bucket publico "fotos-servicios"
+// de Supabase Storage (carpeta = tu propio user id, por las politicas RLS).
+let onFotoSubida = null;
+
+function elegirFoto(callback){
+  onFotoSubida = callback;
+  document.getElementById('file-picker-hidden').value = '';
+  document.getElementById('file-picker-hidden').click();
+}
+
+document.getElementById('file-picker-hidden').addEventListener('change', async function(e){
+  const file = e.target.files[0];
+  if(!file || !onFotoSubida) return;
+
+  if(!['image/png','image/jpeg'].includes(file.type)){
+    alert('Solo se aceptan imágenes PNG o JPG.');
+    return;
+  }
+  if(file.size > 5 * 1024 * 1024){
+    alert('La imagen no puede pesar más de 5MB.');
+    return;
+  }
+
+  const callback = onFotoSubida;
+  onFotoSubida = null;
+
+  const ext = file.type === 'image/png' ? 'png' : 'jpg';
+  const ruta = usuarioActual.id + '/' + Date.now() + '_' + Math.random().toString(36).slice(2,8) + '.' + ext;
+
+  const { error } = await sb.storage.from('fotos-servicios').upload(ruta, file, { contentType: file.type });
+  if(error){
+    alert('No se pudo subir la foto: ' + error.message);
+    return;
+  }
+
+  const { data } = sb.storage.from('fotos-servicios').getPublicUrl(ruta);
+  callback(data.publicUrl);
+});
+
 function onAccesoDashboardOk(){
   initPerfilYPlantillas();
 
@@ -2338,20 +2382,19 @@ function renderFeedGrid(){
   if(countEl) countEl.textContent = '(' + feed.length + '/' + FEED_MAX + ')';
 }
 
-async function addFeedFoto(){
+function addFeedFoto(){
   if(!perfilData.feed) perfilData.feed = [];
   if(perfilData.feed.length >= FEED_MAX){
     alert('Ya tienes ' + FEED_MAX + ' fotos en tu feed personal, que es el máximo permitido. Elimina alguna para agregar una nueva.');
     return;
   }
-  const url = prompt('Pega la URL de la nueva foto para tu feed personal:', '');
-  if(!url) return;
+  elegirFoto(async (url) => {
+    const { data, error } = await sb.from('feed_photos').insert({ provider_id: usuarioActual.id, url }).select('id, url').single();
+    if(error){ alert('No se pudo guardar la foto: ' + error.message); return; }
 
-  const { data, error } = await sb.from('feed_photos').insert({ provider_id: usuarioActual.id, url: url.trim() }).select('id, url').single();
-  if(error){ alert('No se pudo guardar la foto: ' + error.message); return; }
-
-  perfilData.feed.push(data);
-  renderFeedGrid();
+    perfilData.feed.push(data);
+    renderFeedGrid();
+  });
 }
 
 async function removeFeedFoto(index){
@@ -2464,20 +2507,20 @@ async function saveProfileChanges(){
   renderFeedGrid();
 }
 
-// Simulación de "cambiar imagen": pide una URL y actualiza la vista previa.
-// Se guarda de forma definitiva recién al presionar "Guardar Cambios".
+// Sube la foto elegida y actualiza la vista previa. Se guarda de forma
+// definitiva recien al presionar "Guardar Cambios".
 function changeProfileImage(target){
-  const url = prompt(target === 'avatar' ? 'Pega la URL de tu nueva foto de perfil:' : 'Pega la URL de tu nueva imagen de portada:', '');
-  if(!url) return;
-  if(target === 'avatar'){
-    perfilData.avatarUrl = url.trim();
-    document.getElementById('perfil-avatar-img').src = perfilData.avatarUrl;
-  } else {
-    perfilData.bannerUrl = url.trim();
-    const bannerImgEl = document.getElementById('perfil-banner-img');
-    bannerImgEl.src = perfilData.bannerUrl;
-    bannerImgEl.style.display = 'block';
-  }
+  elegirFoto((url) => {
+    if(target === 'avatar'){
+      perfilData.avatarUrl = url;
+      document.getElementById('perfil-avatar-img').src = perfilData.avatarUrl;
+    } else {
+      perfilData.bannerUrl = url;
+      const bannerImgEl = document.getElementById('perfil-banner-img');
+      bannerImgEl.src = perfilData.bannerUrl;
+      bannerImgEl.style.display = 'block';
+    }
+  });
 }
 
 // ─── MODAL DE SERVICIO: crear / editar / eliminar ───
@@ -2530,10 +2573,10 @@ function addServiceModalImage(){
     alert('Ya tienes ' + SERVICIO_IMG_MAX + ' fotos en este servicio, que es el máximo permitido.');
     return;
   }
-  const url = prompt('Pega la URL de la foto para este servicio:', '');
-  if(!url) return;
-  servicioImagenesDraft.push(url.trim());
-  renderServiceModalImages();
+  elegirFoto((url) => {
+    servicioImagenesDraft.push(url);
+    renderServiceModalImages();
+  });
 }
 
 function removeServiceModalImage(index){
