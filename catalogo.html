@@ -761,10 +761,11 @@ function handleNavSearch(val) {
 async function openProvider(providerId) {
   if(!sb || !providerId) return;
 
-  const [{ data: perfilReal }, { data: serviciosReal }, { data: feedReal }] = await Promise.all([
+  const [{ data: perfilReal }, { data: serviciosReal }, { data: feedReal }, { data: comentariosReal }] = await Promise.all([
     sb.from('profiles').select('full_name, categoria, location, bio, avatar_url, banner_url, rating, reviews_count').eq('id', providerId).single(),
     sb.from('services').select('name, price, description, imagenes').eq('provider_id', providerId).eq('active', true),
-    sb.from('feed_photos').select('url').eq('provider_id', providerId)
+    sb.from('feed_photos').select('url').eq('provider_id', providerId),
+    sb.from('comentarios_perfil').select('client_name, comment, created_at').eq('provider_id', providerId).order('created_at', { ascending: false })
   ]);
 
   if(!perfilReal) return;
@@ -830,6 +831,17 @@ async function openProvider(providerId) {
   galGrid.innerHTML = galeria.length
     ? galeria.slice(0,9).map(u => `<img src="${u}" alt="Foto de ${nombre}">`).join('')
     : '<div style="grid-column:1/-1;color:var(--sub);font-size:12.5px;">Este proveedor aún no ha subido fotos de su trabajo.</div>';
+
+  const comentariosCont = document.getElementById('pm-comentarios');
+  comentariosCont.innerHTML = (comentariosReal && comentariosReal.length)
+    ? comentariosReal.map(c => `<div class="resena-card">
+        <div class="resena-card-top">
+          <span style="font-weight:700;font-size:12.5px;">${c.client_name || 'Cliente de TodoEventos'}</span>
+          <span class="resena-card-fecha">${new Date(c.created_at).toLocaleDateString('es-PE', { day:'numeric', month:'short', year:'numeric' })}</span>
+        </div>
+        <div class="resena-card-texto">${c.comment}</div>
+      </div>`).join('')
+    : '<div class="sd-resenas-vacio">Nadie ha dejado comentarios sobre este proveedor todavía.</div>';
 
   document.getElementById('provider-modal-overlay').dataset.providerName = nombre;
   document.getElementById('provider-modal-overlay').classList.add('open');
@@ -1171,7 +1183,7 @@ function openServiceDetail(providerId){
   hireBtn.innerHTML = '<i class="ti ti-shopping-cart-plus"></i> Contratar';
 
   document.getElementById('sd-overlay').classList.add('open');
-  cargarResenasPreview(p.providerId || p.id);
+  cargarResenasPreview(p.id);
 }
 
 function closeServiceDetail(){
@@ -1179,18 +1191,15 @@ function closeServiceDetail(){
 }
 
 /* ─── Reseñas de la comunidad (tabla real "reviews" en Supabase) ───
-   Nota: mientras el catálogo siga usando el array de datos de muestra
-   "providers" en vez de la tabla real "services"/"profiles", el id que
-   llega aquí no es un UUID real, así que no habrá reseñas que mostrar.
-   En cuanto el catálogo se conecte a datos reales, esto funciona solo. */
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-async function fetchResenas(providerId){
-  if(!sb || typeof providerId !== 'string' || !UUID_RE.test(providerId)) return [];
+   Cada reseña esta ligada a un SERVICIO especifico (no al proveedor en
+   general), asi que un mismo proveedor con varios servicios puede tener
+   reseñas distintas en cada uno. */
+async function fetchResenas(serviceId){
+  if(!sb || serviceId === null || serviceId === undefined) return [];
   const { data, error } = await sb
     .from('reviews')
     .select('rating, comment, created_at')
-    .eq('provider_id', providerId)
+    .eq('service_id', serviceId)
     .order('created_at', { ascending: false });
   if(error){ console.error('Error cargando reseñas:', error); return []; }
   return data || [];
@@ -1899,6 +1908,9 @@ verificarSesionNav();
 
       <div class="pm-section-title"><i class="ti ti-photo"></i> Galería</div>
       <div class="pm-gallery" id="pm-gallery"></div>
+
+      <div class="pm-section-title"><i class="ti ti-message-2"></i> Comentarios sobre este proveedor</div>
+      <div id="pm-comentarios" style="margin-bottom:22px;"></div>
 
       <button class="pm-cta" onclick="contactProviderFromModal()"><i class="ti ti-message-circle-2"></i> Contactar y reservar</button>
     </div>

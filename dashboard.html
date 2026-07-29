@@ -927,7 +927,7 @@ verificarAccesoDashboard();
         <!-- Pestañas internas -->
         <div class="profile-tabs">
           <button class="profile-tab active" id="ptab-servicios" onclick="switchProfileTab('servicios')"><i class="ti ti-box"></i> Mis Servicios</button>
-          <button class="profile-tab" id="ptab-resenas" onclick="switchProfileTab('resenas')"><i class="ti ti-star"></i> Reseñas <span id="ptab-resenas-count"></span></button>
+          <button class="profile-tab" id="ptab-resenas" onclick="switchProfileTab('resenas')"><i class="ti ti-message-2"></i> Comentarios <span id="ptab-resenas-count"></span></button>
         </div>
 
         <!-- Servicios -->
@@ -937,8 +937,9 @@ verificarAccesoDashboard();
           <button class="btn-or" id="btn-add-servicio" style="display:none;margin-top:16px;" onclick="openServiceModal()"><i class="ti ti-plus"></i> Añadir nuevo servicio</button>
         </div>
 
-        <!-- Reseñas: solo lectura, las genera el mercado, no el proveedor -->
+        <!-- Comentarios de perfil: solo lectura, los genera el mercado, no el proveedor -->
         <div class="profile-panel" id="ppanel-resenas">
+          <div class="tool-desc" style="margin-bottom:14px;">Lo que tus clientes dicen sobre ti como persona/negocio (distinto de las reseñas de cada servicio, esas se ven al abrir el servicio).</div>
           <div class="reviews-list" id="perfil-resenas-list"></div>
         </div>
 
@@ -1010,6 +1011,8 @@ verificarAccesoDashboard();
     <div class="profile-bio" id="viewer-descripcion" style="margin-bottom:16px;"></div>
     <div class="panel-title" style="font-size:12.5px;"><i class="ti ti-photo"></i> Fotos de este servicio</div>
     <div class="gallery-grid" id="viewer-img-grid"></div>
+    <div class="panel-title" style="font-size:12.5px;margin-top:16px;"><i class="ti ti-star"></i> Reseñas de este servicio <span id="viewer-resenas-count"></span></div>
+    <div class="reviews-list" id="viewer-resenas-list"></div>
     <button class="btn-or" style="width:100%;margin-top:16px;justify-content:center;" onclick="editarServicioDesdeVisor()"><i class="ti ti-edit"></i> Editar este servicio</button>
   </div>
 </div>
@@ -2252,11 +2255,24 @@ function calcularRatingDesdeResenas(){
 async function cargarPerfilDesdeSupabase(){
   const p = perfilRowInicial;
 
-  const [{ data: servicios }, { data: resenas }, { data: feedFotos }] = await Promise.all([
+  const [{ data: servicios }, { data: resenas }, { data: comentarios }, { data: feedFotos }] = await Promise.all([
     sb.from('services').select('id, name, price, category, description, imagenes').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true }),
-    sb.from('reviews').select('id, rating, comment, created_at, client_name').eq('provider_id', usuarioActual.id).order('created_at', { ascending: false }),
+    sb.from('reviews').select('id, service_id, rating, comment, created_at, client_name').eq('provider_id', usuarioActual.id).order('created_at', { ascending: false }),
+    sb.from('comentarios_perfil').select('id, comment, created_at, client_name').eq('provider_id', usuarioActual.id).order('created_at', { ascending: false }),
     sb.from('feed_photos').select('id, url').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true })
   ]);
+
+  // Las reseñas son POR SERVICIO: se agrupan aca para mostrarlas dentro
+  // del visor de cada servicio, no en un tab general del perfil.
+  const resenasPorServicio = {};
+  (resenas || []).forEach(r => {
+    if(!resenasPorServicio[r.service_id]) resenasPorServicio[r.service_id] = [];
+    resenasPorServicio[r.service_id].push({
+      estrellas: r.rating, comentario: r.comment || '',
+      cliente: r.client_name || 'Cliente de TodoEventos',
+      fecha: new Date(r.created_at).toLocaleDateString('es-PE', { month:'short', year:'numeric' })
+    });
+  });
 
   perfilData = {
     nombre: p.full_name || '',
@@ -2268,10 +2284,13 @@ async function cargarPerfilDesdeSupabase(){
     ratingReal: p.rating || 0,
     reviews_count: p.reviews_count || 0,
     servicios: (servicios || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, categoria: s.category || 'musica', descripcion: s.description || '', imagenes: s.imagenes || [] })),
-    resenas: (resenas || []).map(r => ({
-      id: r.id, estrellas: r.rating, comentario: r.comment || '',
-      cliente: r.client_name || 'Cliente de TodoEventos',
-      fecha: new Date(r.created_at).toLocaleDateString('es-PE', { month:'short', year:'numeric' })
+    resenasPorServicio,
+    // "Comentarios" del perfil: sobre el proveedor como persona/negocio,
+    // distintos de las reseñas de un servicio puntual.
+    comentarios: (comentarios || []).map(c => ({
+      id: c.id, comentario: c.comment || '',
+      cliente: c.client_name || 'Cliente de TodoEventos',
+      fecha: new Date(c.created_at).toLocaleDateString('es-PE', { month:'short', year:'numeric' })
     })),
     feed: (feedFotos || []).map(f => ({ id: f.id, url: f.url }))
   };
@@ -2328,28 +2347,26 @@ function renderPerfil(){
   renderResenasTab();
 }
 
-// Reseñas: solo lectura. El mercado (los clientes) las genera, el proveedor no.
+// Comentarios de perfil: solo lectura. El mercado (los clientes) los genera, el proveedor no.
 function renderResenasTab(){
   const cont = document.getElementById('perfil-resenas-list');
   if(!cont) return;
-  const resenas = perfilData.resenas || [];
+  const comentarios = perfilData.comentarios || [];
   const countEl = document.getElementById('ptab-resenas-count');
-  if(countEl) countEl.textContent = '(' + resenas.length + ')';
+  if(countEl) countEl.textContent = '(' + comentarios.length + ')';
 
-  if(resenas.length === 0){
-    cont.innerHTML = '<div style="color:var(--sub);font-size:13px;">Aún no tienes reseñas. Aparecerán aquí cuando tus clientes califiquen tu servicio.</div>';
+  if(comentarios.length === 0){
+    cont.innerHTML = '<div style="color:var(--sub);font-size:13px;">Aún no tienes comentarios. Aparecerán aquí cuando tus clientes te comenten después de contratarte.</div>';
     return;
   }
 
   let html = '';
-  resenas.forEach(r => {
-    const estrellas = '★'.repeat(r.estrellas) + '☆'.repeat(5 - r.estrellas);
+  comentarios.forEach(r => {
     html += `<div class="review-card">
       <div class="review-head">
         <span class="review-cliente">${r.cliente}</span>
         <span class="review-fecha">${r.fecha}</span>
       </div>
-      <div class="review-stars">${estrellas}</div>
       <div class="review-comentario">${r.comentario}</div>
     </div>`;
   });
@@ -2648,6 +2665,17 @@ function openServiceViewer(id){
   grid.innerHTML = imgs.length
     ? imgs.map((url, i) => `<div class="gallery-item"><img src="${url}" alt="Foto ${i+1}"></div>`).join('')
     : '<div style="color:var(--sub);font-size:13px;grid-column:1/-1;">Este servicio todavía no tiene fotos.</div>';
+
+  const resenasServicio = (perfilData.resenasPorServicio && perfilData.resenasPorServicio[id]) || [];
+  document.getElementById('viewer-resenas-count').textContent = '(' + resenasServicio.length + ')';
+  const resenasCont = document.getElementById('viewer-resenas-list');
+  resenasCont.innerHTML = resenasServicio.length
+    ? resenasServicio.map(r => `<div class="review-card">
+        <div class="review-head"><span class="review-cliente">${r.cliente}</span><span class="review-fecha">${r.fecha}</span></div>
+        <div class="review-stars">${'★'.repeat(r.estrellas)}${'☆'.repeat(5 - r.estrellas)}</div>
+        <div class="review-comentario">${r.comentario}</div>
+      </div>`).join('')
+    : '<div style="color:var(--sub);font-size:13px;">Este servicio todavía no tiene reseñas.</div>';
 
   document.getElementById('service-viewer-overlay').classList.add('open');
 }
