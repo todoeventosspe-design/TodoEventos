@@ -2430,7 +2430,7 @@ function renderServiciosGrid(){
   perfilData.servicios.forEach(s => {
     const imgs = s.imagenes || [];
     const thumb = imgs[0] || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(s.nombre) + '&background=212121&color=9A9A9A&size=400';
-    const clickFn = perfilEditMode ? `openServiceModal('${s.id}')` : `openServiceViewer('${s.id}')`;
+    const clickFn = perfilEditMode ? `openServiceModal(${s.id})` : `openServiceViewer(${s.id})`;
     html += `<div class="service-card editable" onclick="${clickFn}">
       <img class="service-img" src="${thumb}" alt="${s.nombre}">
       <div class="service-body">
