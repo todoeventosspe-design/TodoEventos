@@ -377,6 +377,8 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
 .resena-card-stars{color:var(--gold);font-size:13px;letter-spacing:1px;}
 .resena-card-fecha{font-size:11px;color:var(--sub);}
 .resena-card-texto{font-size:13px;color:var(--sub);line-height:1.55;}
+.sd-galeria{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.sd-galeria img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;background:#1a1626;cursor:pointer;}
 
 /* ── RESERVA CON CALENDARIO (estilo Airbnb) ── */
 .bk-box{background:var(--bg2);border:1px solid var(--border);border-radius:20px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto;animation:pmIn .2s ease;}
@@ -574,11 +576,6 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
       <h1 class="results-title" id="results-title">Todos los servicios</h1>
       <p class="results-sub" id="results-sub">Proveedores verificados disponibles en Lima</p>
     </div>
-    <div class="sort-row">
-      <button class="sort-btn active" onclick="toggleSort('price-asc',this)"><i class="ti ti-sort-ascending" style="font-size:13px;"></i> Precio</button>
-      <button class="sort-btn" onclick="toggleSort('rating',this)"><i class="ti ti-star" style="font-size:13px;"></i> Mejor calificado</button>
-      <button class="sort-btn" onclick="toggleSort('reviews',this)"><i class="ti ti-message" style="font-size:13px;"></i> Más reseñas</button>
-    </div>
   </div>
 
   <div id="prov-grid">
@@ -655,31 +652,40 @@ async function cargarProvidersReales(){
   if(!sb) return;
   const { data, error } = await sb
     .from('services')
-    .select('id, name, description, price, category, image_url, provider_id, profiles!services_provider_id_fkey(full_name, location, rating, reviews_count)')
+    .select('id, name, description, price, category, image_url, imagenes, provider_id, profiles!services_provider_id_fkey(full_name, location, rating, reviews_count)')
     .eq('active', true);
 
   if(error){ console.error('Error cargando el catálogo:', error); return; }
 
   providers = (data || [])
     .filter(s => s.profiles) // por si el perfil del proveedor ya no existe
-    .map(s => ({
-      id: s.id,
-      providerId: s.provider_id,
-      name: s.name,
-      cat: s.category || 'musica',
-      price: Number(s.price) || 0,
-      rating: Number(s.profiles.rating) || 5,
-      reviews: s.profiles.reviews_count || 0,
-      district: (s.profiles.location || 'Lima').split(',')[0].trim(),
-      tags: [],
-      // Portada real: la primera foto que el proveedor subió a este
-      // servicio (image_url = imagenes[0], se guarda así en el dashboard).
-      foto: s.image_url || null,
-      img: CAT_IMG[s.category] || 'a',
-      icon: CAT_ICON[s.category] || 'ti-star',
-      badge: badgeParaRating(Number(s.profiles.rating) || 5),
-      desc: s.description || ''
-    }));
+    .map(s => {
+      const reviews = s.profiles.reviews_count || 0;
+      // Sin reseñas todavía = proveedor nuevo. No mostramos un rating
+      // inventado (el "5.0 por defecto" de la base es interno, no una
+      // calificación real ganada por el mercado).
+      const esNuevo = reviews === 0;
+      return {
+        id: s.id,
+        providerId: s.provider_id,
+        name: s.name,
+        cat: s.category || 'musica',
+        price: Number(s.price) || 0,
+        rating: Number(s.profiles.rating) || 0,
+        reviews,
+        esNuevo,
+        district: (s.profiles.location || 'Lima').split(',')[0].trim(),
+        tags: [],
+        // Portada + galería reales: las fotos que el proveedor subió a este
+        // servicio desde el dashboard.
+        foto: s.image_url || null,
+        imagenes: Array.isArray(s.imagenes) ? s.imagenes : [],
+        img: CAT_IMG[s.category] || 'a',
+        icon: CAT_ICON[s.category] || 'ti-star',
+        badge: esNuevo ? 'Nuevo ✨' : badgeParaRating(Number(s.profiles.rating) || 0),
+        desc: s.description || ''
+      };
+    });
 
   render();
 }
@@ -752,9 +758,10 @@ function render() {
         <div class="pcard-body-top">
           <div class="pcard-name">${p.name}</div>
           <div class="pcard-rat">
+            ${p.esNuevo ? `<span class="rc">Proveedor nuevo · sin reseñas todavía</span>` : `
             <span class="stars">${'★'.repeat(Math.floor(p.rating))}${p.rating % 1 ? '½' : ''}</span>
             <span class="rn">${p.rating.toFixed(1)}</span>
-            <span class="rc">(${p.reviews} reseñas)</span>
+            <span class="rc">(${p.reviews} reseñas)</span>`}
           </div>
           <div class="pcard-loc"><i class="ti ti-map-pin" style="font-size:12px;"></i> ${p.district}, Lima</div>
           <div class="ptags">${p.tags.map((t,i) => `<span class="ptag${i>0?' i':''}">${t}</span>`).join('')}</div>
@@ -821,20 +828,21 @@ async function openProvider(providerId) {
   const bio = perfilReal.bio || `${nombre} es un proveedor verificado en TodoEventos.pe.`;
   const avatarUrl = perfilReal.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombre)}&background=a855f7&color=fff&size=200`;
   const bannerUrl = perfilReal.banner_url || '';
-  const rating = Number(perfilReal.rating) || 5;
+  const rating = Number(perfilReal.rating) || 0;
   const reviews = perfilReal.reviews_count || 0;
+  const esNuevo = reviews === 0;
   const servicios = (serviciosReal || []).map(s => ({ nombre: s.name, precio: s.price, descripcion: s.description, imagenes: s.imagenes || [] }));
   let galeria = [];
   servicios.forEach(s => { (s.imagenes||[]).forEach(u => galeria.push(u)); });
   galeria = galeria.concat((feedReal || []).map(f => f.url));
 
-  const p = { id: providerId, badge: badgeParaRating(rating) };
+  const p = { id: providerId, badge: esNuevo ? 'Nuevo ✨' : badgeParaRating(rating) };
 
   document.getElementById('pm-name').textContent = nombre;
   document.getElementById('pm-categoria').textContent = categoria;
   document.getElementById('pm-ubicacion').textContent = ubicacion;
-  document.getElementById('pm-rating').textContent = Number(rating).toFixed(1);
-  document.getElementById('pm-reviews').textContent = '(' + reviews + ' reseñas)';
+  document.getElementById('pm-rating').textContent = esNuevo ? 'Nuevo' : Number(rating).toFixed(1);
+  document.getElementById('pm-reviews').textContent = esNuevo ? 'sin reseñas todavía' : '(' + reviews + ' reseñas)';
   document.getElementById('pm-bio').textContent = bio;
   document.getElementById('pm-avatar-img').src = avatarUrl;
   document.getElementById('pm-badge').textContent = p.badge || '✓ Verificado';
@@ -1079,7 +1087,7 @@ function openServiceDetail(providerId){
   document.getElementById('sd-name').textContent = p.name;
   document.getElementById('sd-categoria').textContent = catNames[p.cat] || 'Servicio';
   document.getElementById('sd-district').textContent = p.district + ', Lima';
-  document.getElementById('sd-rating').textContent = p.rating.toFixed(1) + ' (' + p.reviews + ')';
+  document.getElementById('sd-rating').textContent = p.esNuevo ? 'Nuevo · sin reseñas' : p.rating.toFixed(1) + ' (' + p.reviews + ')';
   document.getElementById('sd-price').textContent = money(p.price);
   document.getElementById('sd-badge').textContent = p.badge || '✓ Verificado';
   // Descripción real que el proveedor escribió al crear el servicio (no un texto genérico por categoría)
@@ -1104,9 +1112,20 @@ function openServiceDetail(providerId){
   document.getElementById('sd-incluye').closest('.sd-block').style.display = 'none';
   document.getElementById('sd-requisitos').closest('.sd-block').style.display = 'none';
 
+  // Galería real: todas las fotos que el proveedor subió a este servicio
+  // desde su dashboard, no solo la portada.
+  const galeriaBlock = document.getElementById('sd-galeria-block');
+  const galeriaImgs = p.imagenes || [];
+  if(galeriaImgs.length > 1){
+    document.getElementById('sd-galeria').innerHTML = galeriaImgs.map(u => `<img src="${u}" alt="${p.name}">`).join('');
+    galeriaBlock.style.display = 'block';
+  } else {
+    galeriaBlock.style.display = 'none';
+  }
+
   const hireBtn = document.getElementById('sd-hire-btn');
   hireBtn.classList.remove('added');
-  hireBtn.innerHTML = '<i class="ti ti-shopping-cart-plus"></i> Contratar';
+  hireBtn.innerHTML = '<i class="ti ti-calendar-check"></i> Reservar';
 
   document.getElementById('sd-overlay').classList.add('open');
   cargarResenasPreview(p.id);
@@ -2235,6 +2254,11 @@ async function confirmarReserva(){
       <div class="sd-block">
         <div class="sd-block-title"><i class="ti ti-file-description"></i> Descripción del servicio</div>
         <div class="sd-text" id="sd-desc">—</div>
+      </div>
+
+      <div class="sd-block" id="sd-galeria-block" style="display:none;">
+        <div class="sd-block-title"><i class="ti ti-photo"></i> Fotos del servicio</div>
+        <div class="sd-galeria" id="sd-galeria"></div>
       </div>
 
       <div class="sd-block">
