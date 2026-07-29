@@ -1077,28 +1077,18 @@ function dateKey(y,m,d){ return y + '-' + pad2(m+1) + '-' + pad2(d); }
 
 function loadAgendaEvents(){
   try {
-    const raw = localStorage.getItem(AGENDA_STORAGE_KEY);
+    const raw = localStorage.getItem(AGENDA_STORAGE_KEY + '_' + usuarioActual.id);
     if(raw) return JSON.parse(raw);
   } catch(e){ console.warn('No se pudo leer la agenda guardada', e); }
-  // Sin datos previos: sembramos 4 eventos de ejemplo realistas para el mes actual
-  const daysInCurrentMonth = new Date(calYear, calMonth+1, 0).getDate();
-  const clamp = (d) => Math.min(d, daysInCurrentMonth);
-  const seed = [
-    { id:'s1', date: dateKey(calYear, calMonth, clamp(today.getDate()+2)),  tipo:'Boda',        cliente:'María Fernández', hora:'18:00', distrito:'Miraflores', estado:'Confirmado' },
-    { id:'s2', date: dateKey(calYear, calMonth, clamp(today.getDate()+6)),  tipo:'Corporativo', cliente:'Corp. Andina',    hora:'12:00', distrito:'San Isidro', estado:'Confirmado' },
-    { id:'s3', date: dateKey(calYear, calMonth, clamp(today.getDate()+13)), tipo:'Quinceañero',  cliente:'Rosa Quispe',     hora:'16:00', distrito:'Surco', estado:'Pendiente pago' },
-    { id:'s4', date: dateKey(calYear, calMonth, clamp(today.getDate()+21)), tipo:'Cumpleaños',   cliente:'Jorge Ramos',     hora:'15:00', distrito:'San Borja', estado:'Confirmado' }
-  ];
-  saveAgendaEvents(seed);
-  return seed;
+  return []; // cuenta nueva: sin eventos todavia
 }
 
 function saveAgendaEvents(events){
-  try { localStorage.setItem(AGENDA_STORAGE_KEY, JSON.stringify(events)); }
+  try { localStorage.setItem(AGENDA_STORAGE_KEY + '_' + usuarioActual.id, JSON.stringify(events)); }
   catch(e){ console.warn('No se pudo guardar la agenda', e); }
 }
 
-let agendaEvents = loadAgendaEvents();
+let agendaEvents = []; // se carga real en onAccesoDashboardOk, una vez sabemos quien eres
 
 function eventColorClass(tipo){
   return (tipo === 'Quinceañero' || tipo === 'Bautizo') ? 'gold' : '';
@@ -1270,7 +1260,7 @@ function plantillaVacia(){
 // Carga la lista de plantillas, migrando el formato antiguo (una sola plantilla) si existiera.
 function loadPlantillas(){
   try{
-    const raw = localStorage.getItem(PLANTILLAS_STORAGE_KEY);
+    const raw = localStorage.getItem(PLANTILLAS_STORAGE_KEY + '_' + usuarioActual.id);
     if(raw){
       const parsed = JSON.parse(raw);
       if(Array.isArray(parsed) && parsed.length) return parsed;
@@ -1293,7 +1283,7 @@ function loadPlantillas(){
 }
 
 function savePlantillasToStorage(arr){
-  try{ localStorage.setItem(PLANTILLAS_STORAGE_KEY, JSON.stringify(arr)); }
+  try{ localStorage.setItem(PLANTILLAS_STORAGE_KEY + '_' + usuarioActual.id, JSON.stringify(arr)); }
   catch(e){ console.error('No se pudieron guardar las plantillas:', e); }
 }
 
@@ -1769,29 +1759,18 @@ function fechaCortaOffset(diasOffset){
 
 function loadCajaMovimientos(){
   try {
-    const raw = localStorage.getItem(CAJA_STORAGE_KEY);
+    const raw = localStorage.getItem(CAJA_STORAGE_KEY + '_' + usuarioActual.id);
     if(raw) return JSON.parse(raw);
   } catch(e){ console.warn('No se pudo leer la caja guardada', e); }
-  // Sin datos previos: cargamos los 5 movimientos de la maqueta original,
-  // con fechas relativas a hoy (igual que la Agenda) para que "Ingresos del
-  // mes" en Inicio muestre datos reales desde el primer momento.
-  const seed = [
-    { id:'c1', fecha: fechaCortaOffset(-4), concepto:'Boda María F. — DJ + sonido', tipo:'Ingreso', monto:1950 },
-    { id:'c2', fecha: fechaCortaOffset(-1), concepto:'Compra de cableado XLR',       tipo:'Gasto',   monto:320  },
-    { id:'c3', fecha: fechaCortaOffset(3),  concepto:'Evento Corp. Andina',          tipo:'Ingreso', monto:2400 },
-    { id:'c4', fecha: fechaCortaOffset(6),  concepto:'Mantenimiento parlantes',      tipo:'Gasto',   monto:480  },
-    { id:'c5', fecha: fechaCortaOffset(9),  concepto:'Adelanto quinceañero Rosa Q.', tipo:'Ingreso', monto:800  }
-  ];
-  saveCajaMovimientos(seed);
-  return seed;
+  return []; // cuenta nueva: sin movimientos todavia
 }
 
 function saveCajaMovimientos(movs){
-  try { localStorage.setItem(CAJA_STORAGE_KEY, JSON.stringify(movs)); }
+  try { localStorage.setItem(CAJA_STORAGE_KEY + '_' + usuarioActual.id, JSON.stringify(movs)); }
   catch(e){ console.warn('No se pudo guardar la caja', e); }
 }
 
-let cajaMovimientos = loadCajaMovimientos();
+let cajaMovimientos = [];
 let cajaModalTipo = 'Ingreso';
 
 function fmtMoneyCaja(n){
@@ -1883,26 +1862,18 @@ const CRM_STORAGE_KEY = 'todoeventos_dashboard_crm_v1';
 
 function loadCrmClientes(){
   try {
-    const raw = localStorage.getItem(CRM_STORAGE_KEY);
+    const raw = localStorage.getItem(CRM_STORAGE_KEY + '_' + usuarioActual.id);
     if(raw) return JSON.parse(raw);
   } catch(e){ console.warn('No se pudo leer el CRM guardado', e); }
-  // Sin datos previos: cargamos los 4 clientes de la maqueta original
-  const seed = [
-    { id:'p1', nombre:'María Fernández',     tipo:'Boda',         eventos:3, estado:'Última vez: Nov 2026' },
-    { id:'p2', nombre:'Corporación Andina',  tipo:'Corporativo',  eventos:5, estado:'Última vez: Nov 2026' },
-    { id:'p3', nombre:'Rosa Quispe',         tipo:'Quinceañero',  eventos:1, estado:'Cotización enviada'   },
-    { id:'p4', nombre:'Jorge Ramos',         tipo:'Cumpleaños',   eventos:2, estado:'Última vez: Oct 2026' }
-  ];
-  saveCrmClientes(seed);
-  return seed;
+  return []; // cuenta nueva: sin clientes todavia
 }
 
 function saveCrmClientes(list){
-  try { localStorage.setItem(CRM_STORAGE_KEY, JSON.stringify(list)); }
+  try { localStorage.setItem(CRM_STORAGE_KEY + '_' + usuarioActual.id, JSON.stringify(list)); }
   catch(e){ console.warn('No se pudo guardar el CRM', e); }
 }
 
-let crmClientes = loadCrmClientes();
+let crmClientes = [];
 let crmEditingId = null;
 
 function crmIniciales(nombre){
@@ -2015,27 +1986,18 @@ const INV_STORAGE_KEY = 'todoeventos_dashboard_inventario_v1';
 
 function loadInvItems(){
   try {
-    const raw = localStorage.getItem(INV_STORAGE_KEY);
+    const raw = localStorage.getItem(INV_STORAGE_KEY + '_' + usuarioActual.id);
     if(raw) return JSON.parse(raw);
   } catch(e){ console.warn('No se pudo leer el inventario guardado', e); }
-  // Sin datos previos: cargamos los 5 equipos de la maqueta original
-  const seed = [
-    { id:'i1', nombre:'Parlantes JBL (activos)',    disponible:4,  total:4  },
-    { id:'i2', nombre:'Consola / mixer',             disponible:2,  total:2  },
-    { id:'i3', nombre:'Luces LED / robóticas',       disponible:6,  total:10 },
-    { id:'i4', nombre:'Micrófonos inalámbricos',     disponible:1,  total:4  },
-    { id:'i5', nombre:'Cables XLR',                  disponible:16, total:20 }
-  ];
-  saveInvItems(seed);
-  return seed;
+  return []; // cuenta nueva: sin inventario todavia
 }
 
 function saveInvItems(list){
-  try { localStorage.setItem(INV_STORAGE_KEY, JSON.stringify(list)); }
+  try { localStorage.setItem(INV_STORAGE_KEY + '_' + usuarioActual.id, JSON.stringify(list)); }
   catch(e){ console.warn('No se pudo guardar el inventario', e); }
 }
 
-let invItems = loadInvItems();
+let invItems = [];
 let invEditingId = null;
 
 // Semáforo de stock: verde ≥70%, dorado ≥30%, rojo por debajo (crítico)
@@ -2640,31 +2602,13 @@ function closeServiceViewer(){
 // Comparte la misma clave que catalogo.html: cuando un cliente pide fecha
 // desde el marketplace, la solicitud aparece aquí, dividida por proveedor.
 const REQUESTS_STORAGE_KEY = 'todoeventos_solicitudes_v1';
-// El proveedor que está usando este dashboard (el demo del marketplace).
-const MI_PROVEEDOR_ID = 1;
 
 function loadSolicitudes(){
   try {
     const raw = localStorage.getItem(REQUESTS_STORAGE_KEY);
     if(raw) return JSON.parse(raw);
   } catch(e){ console.warn('No se pudieron leer las solicitudes', e); }
-  // Primera vez: dejamos una solicitud de prueba para que la sección se vea viva
-  const seed = [{
-    id: 'rq_demo_1',
-    grupoId: 'grp_demo',
-    proveedorId: MI_PROVEEDOR_ID,
-    proveedor: 'DJ Nexus Lima',
-    cliente: 'Carlos Mendoza',
-    fecha: '2026-12-12',
-    tipoEvento: 'Boda',
-    mensaje: 'Hola! Somos unos 120 invitados, la recepción empieza a las 7pm en un local en San Isidro. Nos gustaría música variada, sobre todo salsa y cumbia para la fiesta. ¿Tienes libre esa fecha?',
-    servicios: [{ nombre:'Paquete Boda Premium', precio:1800 }],
-    total: 1800,
-    estado: 'pendiente',
-    creada: new Date().toISOString()
-  }];
-  saveSolicitudes(seed);
-  return seed;
+  return []; // cuenta nueva: sin solicitudes todavia
 }
 
 function saveSolicitudes(list){
@@ -2672,11 +2616,11 @@ function saveSolicitudes(list){
   catch(e){ console.warn('No se pudieron guardar las solicitudes', e); }
 }
 
-let solicitudes = loadSolicitudes();
+let solicitudes = [];
 
 // Solo veo las solicitudes dirigidas a MÍ, no las de otros proveedores.
 function misSolicitudes(){
-  return solicitudes.filter(r => r.proveedorId === MI_PROVEEDOR_ID);
+  return solicitudes.filter(r => r.proveedorId === usuarioActual.id);
 }
 
 function updateReqBadge(){

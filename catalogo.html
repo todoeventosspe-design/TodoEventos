@@ -1084,7 +1084,7 @@ function quickHire(providerId){
   if(!p) return;
 
   const servicioNombre = 'Servicio base — ' + (catNames[p.cat] || 'Evento');
-  const yaExiste = cart.some(it => it.proveedorId === p.id && it.servicio === servicioNombre);
+  const yaExiste = cart.some(it => it.proveedorId === p.providerId && it.servicio === servicioNombre);
   if(yaExiste){
     addBotMsg(`El servicio base de <b>${p.name}</b> ya está en tu presupuesto. 🛒`);
     if(!document.getElementById('chat-panel').classList.contains('open')) toggleChat();
@@ -1093,7 +1093,7 @@ function quickHire(providerId){
 
   cart.push({
     id: 'ci' + Date.now(),
-    proveedorId: p.id,
+    proveedorId: p.providerId,
     proveedor: p.name,
     servicio: servicioNombre,
     precio: Number(p.price)
@@ -1257,7 +1257,7 @@ function hireFromDetail(){
   if(currentDetailProviderId === null) return;
   const p = providers.find(x => x.id === currentDetailProviderId);
   const servicioNombre = 'Servicio base — ' + (catNames[p.cat] || 'Evento');
-  const yaExiste = cart.some(it => it.proveedorId === p.id && it.servicio === servicioNombre);
+  const yaExiste = cart.some(it => it.proveedorId === p.providerId && it.servicio === servicioNombre);
 
   const btn = document.getElementById('sd-hire-btn');
   if(yaExiste){
@@ -1265,7 +1265,7 @@ function hireFromDetail(){
     return;
   }
 
-  cart.push({ id:'ci'+Date.now(), proveedorId:p.id, proveedor:p.name, servicio:servicioNombre, precio:Number(p.price) });
+  cart.push({ id:'ci'+Date.now(), proveedorId:p.providerId, proveedor:p.name, servicio:servicioNombre, precio:Number(p.price) });
   saveCart();
   updateCartBadge();
 
