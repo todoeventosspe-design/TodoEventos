@@ -107,12 +107,22 @@ try {
   console.error('No se pudo inicializar Supabase:', e);
 }
 
+// Escapa texto de usuario antes de meterlo en innerHTML (anti-XSS). Los
+// campos de esta solicitud los escribio el postulante en el signup, asi
+// que son 100% hostiles.
+function esc(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 let todasLasSolicitudes = [];
 let tabActual = 'pendiente';
 
 async function init(){
   if(!sb){
+    // Fail-closed: si el SDK no carga no sabemos si sos admin, asi que no
+    // se muestra nada (antes esto dejaba la pagina renderizada y vacia).
     document.getElementById('loading-screen').textContent = 'No se pudo conectar con el servidor. Recarga la página.';
+    window.location.href = 'login.html';
     return;
   }
 
@@ -183,35 +193,35 @@ function render(){
 
     const accionesHtml = s.estado === 'pendiente' ? `
       <div class="btns">
-        <button class="btn btn-aprobar" onclick="aprobar(${s.id}, '${s.user_id}')"><i class="ti ti-check"></i> Aprobar</button>
-        <button class="btn btn-rechazar" onclick="rechazar(${s.id}, '${s.user_id}')"><i class="ti ti-x"></i> Rechazar</button>
+        <button class="btn btn-aprobar" data-id="${s.id}" data-uid="${esc(s.user_id)}" onclick="aprobar(this.dataset.id, this.dataset.uid)"><i class="ti ti-check"></i> Aprobar</button>
+        <button class="btn btn-rechazar" data-id="${s.id}" data-uid="${esc(s.user_id)}" onclick="rechazar(this.dataset.id, this.dataset.uid)"><i class="ti ti-x"></i> Rechazar</button>
       </div>
     ` : `
       <span class="estado-tag ${s.estado}"><i class="ti ${s.estado === 'aprobado' ? 'ti-check' : 'ti-x'}"></i> ${s.estado === 'aprobado' ? 'Aprobado' : 'Rechazado'}</span>
-      ${s.motivo_rechazo ? `<div class="motivo">Motivo: ${s.motivo_rechazo}</div>` : ''}
+      ${s.motivo_rechazo ? `<div class="motivo">Motivo: ${esc(s.motivo_rechazo)}</div>` : ''}
     `;
 
     return `
       <div class="card">
         <div class="card-head">
           <div>
-            <div class="card-neg">${s.nombre_negocio}</div>
-            <span class="card-cat">${s.categoria}</span>
+            <div class="card-neg">${esc(s.nombre_negocio)}</div>
+            <span class="card-cat">${esc(s.categoria)}</span>
           </div>
           <div class="card-fecha">Solicitado el ${fecha}</div>
         </div>
 
         <div class="grid2">
-          <div class="dato"><span class="k">Contacto</span><span class="v">${nombreDueno}</span></div>
-          <div class="dato"><span class="k">Correo</span><span class="v">${correoDueno}</span></div>
-          <div class="dato"><span class="k">RUC / DNI</span><span class="v">${s.ruc_dni}</span></div>
-          <div class="dato"><span class="k">Teléfono</span><span class="v">${s.telefono}</span></div>
-          <div class="dato"><span class="k">Distrito</span><span class="v">${s.distrito}</span></div>
-          <div class="dato"><span class="k">Experiencia</span><span class="v">${s.anios_experiencia ? s.anios_experiencia + ' años' : '—'}</span></div>
-          ${s.redes_sitio ? `<div class="dato"><span class="k">Redes / Web</span><span class="v">${s.redes_sitio}</span></div>` : ''}
+          <div class="dato"><span class="k">Contacto</span><span class="v">${esc(nombreDueno)}</span></div>
+          <div class="dato"><span class="k">Correo</span><span class="v">${esc(correoDueno)}</span></div>
+          <div class="dato"><span class="k">RUC / DNI</span><span class="v">${esc(s.ruc_dni)}</span></div>
+          <div class="dato"><span class="k">Teléfono</span><span class="v">${esc(s.telefono)}</span></div>
+          <div class="dato"><span class="k">Distrito</span><span class="v">${esc(s.distrito)}</span></div>
+          <div class="dato"><span class="k">Experiencia</span><span class="v">${s.anios_experiencia ? esc(s.anios_experiencia) + ' años' : '—'}</span></div>
+          ${s.redes_sitio ? `<div class="dato"><span class="k">Redes / Web</span><span class="v">${esc(s.redes_sitio)}</span></div>` : ''}
         </div>
 
-        <div class="desc">${s.descripcion}</div>
+        <div class="desc">${esc(s.descripcion)}</div>
 
         ${accionesHtml}
       </div>
@@ -222,16 +232,12 @@ function render(){
 async function aprobar(solicitudId, userId){
   if(!confirm('¿Aprobar esta solicitud? El proveedor podrá acceder a su dashboard de inmediato.')) return;
 
-  const { error: e1 } = await sb.from('solicitudes_proveedor')
-    .update({ estado: 'aprobado', revisado_at: new Date().toISOString() })
-    .eq('id', solicitudId);
-  const { error: e2 } = await sb.from('profiles')
-    .update({ verification_status: 'aprobado' })
-    .eq('id', userId);
-
-  if(e1 || e2){
+  // RPC atomico: aprueba solicitud + perfil en una sola transaccion (antes
+  // eran 2 updates sueltos; si el segundo fallaba quedaba en estado mixto).
+  const { error } = await sb.rpc('aprobar_proveedor', { p_user_id: userId });
+  if(error){
     alert('Hubo un problema al aprobar. Intenta de nuevo.');
-    console.error(e1, e2);
+    console.error(error);
     return;
   }
   await cargarSolicitudes();
@@ -241,16 +247,10 @@ async function rechazar(solicitudId, userId){
   const motivo = prompt('Motivo del rechazo (se guarda para referencia, pero por ahora no se le envía por correo al proveedor automáticamente):');
   if(motivo === null) return; // canceló
 
-  const { error: e1 } = await sb.from('solicitudes_proveedor')
-    .update({ estado: 'rechazado', motivo_rechazo: motivo || null, revisado_at: new Date().toISOString() })
-    .eq('id', solicitudId);
-  const { error: e2 } = await sb.from('profiles')
-    .update({ verification_status: 'rechazado' })
-    .eq('id', userId);
-
-  if(e1 || e2){
+  const { error } = await sb.rpc('rechazar_proveedor', { p_user_id: userId, p_motivo: motivo || null });
+  if(error){
     alert('Hubo un problema al rechazar. Intenta de nuevo.');
-    console.error(e1, e2);
+    console.error(error);
     return;
   }
   await cargarSolicitudes();

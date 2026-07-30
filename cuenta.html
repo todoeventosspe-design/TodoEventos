@@ -267,6 +267,11 @@ try {
   console.error('No se pudo inicializar Supabase:', e);
 }
 
+// Escapa texto de usuario antes de meterlo en innerHTML (anti-XSS).
+function esc(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 let usuarioActual = null;
 let rolActual = 'cliente';
 
@@ -472,8 +477,8 @@ async function cargarContratados(){
     item.className = 'contratado-item';
     item.innerHTML = `
       <div class="contratado-info">
-        <h4>${nombreServicio}</h4>
-        <div class="sub">${nombreProveedor} · ${fecha}</div>
+        <h4>${esc(nombreServicio)}</h4>
+        <div class="sub">${esc(nombreProveedor)} · ${fecha}</div>
       </div>
     `;
 
@@ -562,7 +567,6 @@ async function guardarResena(){
     client_id: usuarioActual.id,
     provider_id: resenaActual.providerId,
     service_id: resenaActual.serviceId,
-    client_name: document.getElementById('nombre-display').textContent || 'Cliente de TodoEventos',
     rating: estrellasElegidas,
     comment: document.getElementById('resena-comentario').value.trim() || null
   }, { onConflict: 'request_id' });
@@ -610,7 +614,6 @@ async function guardarComentario(){
     request_id: comentarioActual.requestId,
     client_id: usuarioActual.id,
     provider_id: comentarioActual.providerId,
-    client_name: document.getElementById('nombre-display').textContent || 'Cliente de TodoEventos',
     comment: texto
   }, { onConflict: 'request_id' });
 

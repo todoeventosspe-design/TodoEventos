@@ -597,7 +597,7 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
         <div class="cp-av-dot"></div>
       </div>
       <div class="cp-info">
-        <div class="cp-name">Asistente IA · TodoEventos</div>
+        <div class="cp-name">Asistente · TodoEventos</div>
         <div class="cp-status">En línea · responde al instante</div>
       </div>
       <div class="cp-actions">
@@ -626,6 +626,11 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
 </div>
 
 <script>
+// Escapa texto de usuario antes de meterlo en innerHTML (anti-XSS).
+function esc(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 // ─── DATA ───
 // Datos reales de Supabase (tablas "services" + "profiles"). Se llenan en
 // cargarProvidersReales(), al inicio. Empieza vacio hasta que la consulta
@@ -749,21 +754,21 @@ function render() {
     card.className = 'pcard';
     card.innerHTML = `
       <div class="pcard-clickable" onclick="openServiceDetail(${p.id})">
-        <div class="pcard-img ${p.foto ? '' : 'ci-' + p.img}" ${p.foto ? `style="background-image:url('${p.foto}');background-size:cover;background-position:center;"` : ''}>
+        <div class="pcard-img ${p.foto ? '' : 'ci-' + p.img}" ${p.foto ? `style="background-image:url('${esc(p.foto)}');background-size:cover;background-position:center;"` : ''}>
           ${p.foto ? '' : `<i class="ti ${p.icon}"></i>`}
           <span class="pcard-vbdg">${p.badge}</span>
           <span class="pcard-price-tag">desde S/. ${p.price}</span>
           <button class="pcard-fav" onclick="event.stopPropagation();"><i class="ti ti-heart"></i></button>
         </div>
         <div class="pcard-body-top">
-          <div class="pcard-name">${p.name}</div>
+          <div class="pcard-name">${esc(p.name)}</div>
           <div class="pcard-rat">
             ${p.esNuevo ? `<span class="rc">Proveedor nuevo · sin reseñas todavía</span>` : `
             <span class="stars">${'★'.repeat(Math.floor(p.rating))}${p.rating % 1 ? '½' : ''}</span>
             <span class="rn">${p.rating.toFixed(1)}</span>
             <span class="rc">(${p.reviews} reseñas)</span>`}
           </div>
-          <div class="pcard-loc"><i class="ti ti-map-pin" style="font-size:12px;"></i> ${p.district}, Lima</div>
+          <div class="pcard-loc"><i class="ti ti-map-pin" style="font-size:12px;"></i> ${esc(p.district)}, Lima</div>
           <div class="ptags">${p.tags.map((t,i) => `<span class="ptag${i>0?' i':''}">${t}</span>`).join('')}</div>
         </div>
       </div>
@@ -860,14 +865,14 @@ async function openProvider(providerId) {
   svGrid.innerHTML = servicios.map((s, i) => {
     const imgs = s.imagenes || [];
     const galeriaHtml = imgs.length
-      ? `<div class="pm-svc-gallery">${imgs.slice(0,6).map(u => `<img src="${u}" alt="${s.nombre}">`).join('')}</div>`
+      ? `<div class="pm-svc-gallery">${imgs.slice(0,6).map(u => `<img src="${esc(u)}" alt="${esc(s.nombre)}">`).join('')}</div>`
       : `<div class="pm-svc-nofotos">Este paquete aún no tiene fotos.</div>`;
     return `
     <div class="pm-service" id="pm-svc-${i}">
       <div class="pm-service-main" onclick="toggleServiceDetail(${i})">
         <div class="pm-service-info">
-          <div class="pm-service-name">${s.nombre} <i class="ti ti-chevron-down pm-svc-chev" id="pm-svc-chev-${i}"></i></div>
-          <div class="pm-service-desc">${s.descripcion || ''}</div>
+          <div class="pm-service-name">${esc(s.nombre)} <i class="ti ti-chevron-down pm-svc-chev" id="pm-svc-chev-${i}"></i></div>
+          <div class="pm-service-desc">${esc(s.descripcion || '')}</div>
         </div>
         <div class="pm-service-price">${money(s.precio)}</div>
       </div>
@@ -882,17 +887,17 @@ async function openProvider(providerId) {
 
   const galGrid = document.getElementById('pm-gallery');
   galGrid.innerHTML = galeria.length
-    ? galeria.slice(0,9).map(u => `<img src="${u}" alt="Foto de ${nombre}">`).join('')
+    ? galeria.slice(0,9).map(u => `<img src="${esc(u)}" alt="Foto de ${esc(nombre)}">`).join('')
     : '<div style="grid-column:1/-1;color:var(--sub);font-size:12.5px;">Este proveedor aún no ha subido fotos de su trabajo.</div>';
 
   const comentariosCont = document.getElementById('pm-comentarios');
   comentariosCont.innerHTML = (comentariosReal && comentariosReal.length)
     ? comentariosReal.map(c => `<div class="resena-card">
         <div class="resena-card-top">
-          <span style="font-weight:700;font-size:12.5px;">${c.client_name || 'Cliente de TodoEventos'}</span>
+          <span style="font-weight:700;font-size:12.5px;">${esc(c.client_name || 'Cliente de TodoEventos')}</span>
           <span class="resena-card-fecha">${new Date(c.created_at).toLocaleDateString('es-PE', { day:'numeric', month:'short', year:'numeric' })}</span>
         </div>
-        <div class="resena-card-texto">${c.comment}</div>
+        <div class="resena-card-texto">${esc(c.comment)}</div>
       </div>`).join('')
     : '<div class="sd-resenas-vacio">Nadie ha dejado comentarios sobre este proveedor todavía.</div>';
 
@@ -953,7 +958,7 @@ function addToCart(servicioIndex){
   // Evita duplicar exactamente el mismo servicio del mismo proveedor
   const yaExiste = cart.some(it => it.proveedorId === currentModalProvider.id && it.servicio === s.nombre);
   if(yaExiste){
-    addBotMsg(`<b>${s.nombre}</b> ya está en tu presupuesto. 🛒`);
+    addBotMsg(`<b>${esc(s.nombre)}</b> ya está en tu presupuesto. 🛒`);
     if(!document.getElementById('chat-panel').classList.contains('open')) toggleChat();
     return;
   }
@@ -1018,13 +1023,13 @@ function renderCart(){
 }
 
 function showCartView(view){
-  ['list','request','success'].forEach(v => {
+  ['list','success'].forEach(v => {
     document.getElementById('cart-view-' + v).classList.toggle('active', v === view);
   });
   const title = document.getElementById('cart-title');
-  if(view === 'list') title.innerHTML = '<i class="ti ti-shopping-cart"></i> Mi Presupuesto de Evento';
-  else if(view === 'request') title.innerHTML = '<i class="ti ti-calendar-check"></i> Solicitar disponibilidad';
-  else title.innerHTML = '<i class="ti ti-circle-check"></i> Solicitud enviada';
+  title.innerHTML = view === 'list'
+    ? '<i class="ti ti-shopping-cart"></i> Mi Presupuesto de Evento'
+    : '<i class="ti ti-circle-check"></i> Solicitud enviada';
 }
 
 function openCart(){
@@ -1037,6 +1042,18 @@ function closeCart(){
   document.getElementById('cart-overlay').classList.remove('open');
 }
 
+// El presupuesto es solo un planificador: la reserva de verdad se hace
+// servicio por servicio con su propio calendario de disponibilidad.
+function goToRequest(){
+  if(cart.length === 0) return;
+  if(!exigirLogin('Necesitas una cuenta para reservar.')) return;
+  const primero = cart[0];
+  const servicio = providers.find(p => p.providerId === primero.proveedorId);
+  closeCart();
+  if(servicio) abrirReserva(servicio.id);
+  else alert('Abre el servicio que quieras reservar y elige tu fecha en su calendario.');
+}
+
 
 // ─── CONTRATAR RÁPIDO desde la tarjeta ─────────────────────────────────────
 function quickHire(providerId){
@@ -1047,7 +1064,7 @@ function quickHire(providerId){
   const servicioNombre = 'Servicio base — ' + (catNames[p.cat] || 'Evento');
   const yaExiste = cart.some(it => it.proveedorId === p.providerId && it.servicio === servicioNombre);
   if(yaExiste){
-    addBotMsg(`El servicio base de <b>${p.name}</b> ya está en tu presupuesto. 🛒`);
+    addBotMsg(`El servicio base de <b>${esc(p.name)}</b> ya está en tu presupuesto. 🛒`);
     if(!document.getElementById('chat-panel').classList.contains('open')) toggleChat();
     return;
   }
@@ -1096,7 +1113,7 @@ function openServiceDetail(providerId){
   const sdHeroIcon = document.getElementById('sd-hero-icon');
   if(p.foto){
     sdHero.className = 'sd-hero';
-    sdHero.style.backgroundImage = `url('${p.foto}')`;
+    sdHero.style.backgroundImage = `url('${esc(p.foto)}')`;
     sdHero.style.backgroundSize = 'cover';
     sdHero.style.backgroundPosition = 'center';
     sdHeroIcon.style.display = 'none';
@@ -1117,7 +1134,7 @@ function openServiceDetail(providerId){
   const galeriaBlock = document.getElementById('sd-galeria-block');
   const galeriaImgs = p.imagenes || [];
   if(galeriaImgs.length > 1){
-    document.getElementById('sd-galeria').innerHTML = galeriaImgs.map(u => `<img src="${u}" alt="${p.name}">`).join('');
+    document.getElementById('sd-galeria').innerHTML = galeriaImgs.map(u => `<img src="${esc(u)}" alt="${esc(p.name)}">`).join('');
     galeriaBlock.style.display = 'block';
   } else {
     galeriaBlock.style.display = 'none';
@@ -1158,7 +1175,7 @@ function resenaCardHTML(r){
       <span class="resena-card-stars">${estrellas}</span>
       <span class="resena-card-fecha">${fecha}</span>
     </div>
-    ${r.comment ? `<div class="resena-card-texto">${r.comment}</div>` : ''}
+    ${r.comment ? `<div class="resena-card-texto">${esc(r.comment)}</div>` : ''}
   </div>`;
 }
 
@@ -1219,7 +1236,7 @@ function contactProviderFromModal(){
   closeProviderModal();
   if (!document.getElementById('chat-panel').classList.contains('open')) toggleChat();
   setTimeout(() => {
-    addBotMsg(`¡Buena elección! Para reservar con <b>${nombre}</b>, indícame la fecha de tu evento y confirmo su disponibilidad. También puedo armarte un presupuesto completo si me cuentas más del evento. 🎉`);
+    addBotMsg(`¡Buena elección! Para reservar con <b>${esc(nombre)}</b>, indícame la fecha de tu evento y confirmo su disponibilidad. También puedo armarte un presupuesto completo si me cuentas más del evento. 🎉`);
   }, 350);
 }
 
@@ -1605,7 +1622,8 @@ function generateResponse(raw){
   if(asksPrice&&cats.length){
     setContext('faq');
     const cat=cats[0]; const cheap=cheapestIn(cat,1)[0]; const best=bestRatedIn(cat,1)[0]; ctx.mentioned.add(cat);
-    return `Para <b>${catLabelChat[cat]}</b> los precios van desde <b>${money(cheap.price)}</b> (${cheap.name}) hasta opciones premium. El mejor calificado es <b>${best.name}</b> (★${best.rating}, ${best.reviews} reseñas) desde ${money(best.price)}.`+threadBack();
+    if(!cheap||!best) return `Todavía no tengo proveedores cargados en <b>${catLabelChat[cat]}</b>. ¿Buscas otra categoría?`;
+    return `Para <b>${catLabelChat[cat]}</b> los precios van desde <b>${money(cheap.price)}</b> (${esc(cheap.name)}) hasta opciones premium. El mejor calificado es <b>${esc(best.name)}</b> (★${best.rating}, ${best.reviews} reseñas) desde ${money(best.price)}.`+threadBack();
   }
   if(asksPrice&&!cats.length&&!ev){ setContext('faq'); return '¿De qué servicio quieres el precio — música, catering, fotografía, local, decoración…? Dímelo y te doy el rango exacto.'; }
   if(asksBest&&cats.length){
@@ -1613,11 +1631,11 @@ function generateResponse(raw){
     const cat=cats[0]; const b=bestRatedIn(cat,2); ctx.mentioned.add(cat);
     return `En <b>${catLabelChat[cat]}</b> los top son <b>${b[0].name}</b> (★${b[0].rating}, desde ${money(b[0].price)})`+(b[1]?` y <b>${b[1].name}</b> (★${b[1].rating})`:'')+'. ¿Los ves en el marketplace?'+threadBack();
   }
-  if(asksPayment){ setContext('faq'); return 'Aceptamos <b>Yape</b>, <b>Plin</b>, Visa/Mastercard y Culqi. Todo el cobro es seguro dentro de la plataforma — sin coordinar transferencias por fuera. 💳'; }
+  if(asksPayment){ setContext('faq'); return 'Reservas tu fecha y horario directo con el proveedor desde la plataforma; el pago lo coordinas con él una vez confirmada la reserva. 💳'; }
   if(asksCancel){ setContext('faq'); return 'Cada proveedor tiene su política de cancelación visible en su perfil (usualmente reembolso completo cancelando con 7+ días de anticipación). Si algo falla, nuestro soporte media por ti.'; }
   if(asksTrust){ setContext('faq'); return 'Todos los proveedores pasan verificación de identidad y antecedentes. Las reseñas solo las deja quien reservó de verdad — nada falso. 🛡️'; }
   if(asksProvider){ setContext('faq'); return '¡Genial! Entra a la sección <b>"Para Proveedores"</b> del menú: creas tu perfil, fijas precios y recibes reservas gratis el primer mes.'; }
-  if(asksReserve&&!ev){ setContext('faq'); return 'Muy fácil: 1) eliges el proveedor, 2) revisas su disponibilidad para tu fecha, 3) confirmas y pagas con Yape/Plin/tarjeta. Queda garantizado al instante. 🎯'; }
+  if(asksReserve&&!ev){ setContext('faq'); return 'Muy fácil: 1) eliges el proveedor, 2) revisas su disponibilidad para tu fecha, 3) confirmas el horario. Queda bloqueado al instante en su agenda. 🎯'; }
 
   // ── PRIORIDAD 4: armar PRESUPUESTO (solo si hay datos del evento este turno) ──
   const eventInfoThisTurn = ev || (ctx.eventType && (bud||gue||dist));
@@ -1630,14 +1648,15 @@ function generateResponse(raw){
   if(cats.length){
     setContext('faq');
     const cat=cats[0]; const best=bestRatedIn(cat,1)[0]; const cheap=cheapestIn(cat,1)[0]; ctx.mentioned.add(cat);
-    if(best.name===cheap.name) return `En <b>${catLabelChat[cat]}</b> la mejor opción es <b>${best.name}</b> (★${best.rating}) desde ${money(best.price)}. ¿Qué evento organizas? Te armo el paquete completo.`;
-    return `Para <b>${catLabelChat[cat]}</b>: desde <b>${cheap.name}</b> a ${money(cheap.price)} hasta premium como <b>${best.name}</b> (★${best.rating}). ¿Qué evento organizas? Te armo el paquete completo.`;
+    if(!best||!cheap) return `Todavía no tengo proveedores cargados en <b>${catLabelChat[cat]}</b>. ¿Buscas otra categoría?`;
+    if(best.name===cheap.name) return `En <b>${catLabelChat[cat]}</b> la mejor opción es <b>${esc(best.name)}</b> (★${best.rating}) desde ${money(best.price)}. ¿Qué evento organizas? Te armo el paquete completo.`;
+    return `Para <b>${catLabelChat[cat]}</b>: desde <b>${esc(cheap.name)}</b> a ${money(cheap.price)} hasta premium como <b>${esc(best.name)}</b> (★${best.rating}). ¿Qué evento organizas? Te armo el paquete completo.`;
   }
 
   // ── PRIORIDAD 6: distrito suelto ──
   if(dist){
     const list=inDistrict(dist); const nice=dist.replace(/^\w/,c=>c.toUpperCase());
-    if(list.length){ const s=list.slice(0,3).map(p=>`<b>${p.name}</b> (${catLabelChat[p.cat]}, ${money(p.price)})`).join(', '); return `En <b>${nice}</b> tenemos ${list.length} proveedores, por ejemplo: ${s}. ¿Buscas algo puntual ahí?`; }
+    if(list.length){ const s=list.slice(0,3).map(p=>`<b>${esc(p.name)}</b> (${catLabelChat[p.cat]}, ${money(p.price)})`).join(', '); return `En <b>${esc(nice)}</b> tenemos ${list.length} proveedores, por ejemplo: ${s}. ¿Buscas algo puntual ahí?`; }
     return `Aún no tengo proveedores cargados específicamente en ${nice}, pero cubrimos toda Lima. ¿Qué servicio buscas?`;
   }
 
@@ -1646,7 +1665,7 @@ function generateResponse(raw){
   if(gue&&!ctx.eventType) return `Entendido, ${gue} personas. ¿Qué tipo de evento es y con qué presupuesto? Con eso te recomiendo el paquete ideal.`;
 
   // ── PRIORIDAD 8: qué es esto ──
-  if(/qué es todoeventos|que es todoeventos|de qué se trata|de que se trata/.test(m)) return 'TodoEventos.pe es el marketplace #1 de servicios para eventos en Lima: +1,200 proveedores verificados y un asistente que arma presupuestos en minutos. Todo con reseñas reales y pago seguro con Yape o Plin.';
+  if(/qué es todoeventos|que es todoeventos|de qué se trata|de que se trata/.test(m)) return 'TodoEventos.pe es un marketplace de servicios para eventos en Lima: proveedores verificados y un asistente que arma presupuestos en minutos, con reseñas reales de quienes ya reservaron.';
 
   // ── PRIORIDAD 9: fallback (protocolo de incertidumbre) ──
   ctx.unclear=(ctx.unclear||0)+1;
@@ -1688,8 +1707,9 @@ function updateChatContext(cat){
       if(isLoading) return;
       setLoading(true); await new Promise(r=>setTimeout(r,500));
       const best=bestRatedIn(cat,1)[0]; const cheap=cheapestIn(cat,1)[0];
+      if(!best||!cheap){ removeTypingIndicator(); setLoading(false); return; }
       removeTypingIndicator();
-      addBotMsg(`Veo que exploras <b>${catLabelChat[cat]}</b> 🎯 El top es <b>${best.name}</b> (★${best.rating}) y el más económico <b>${cheap.name}</b> desde ${money(cheap.price)}. ¿Fecha o presupuesto en mente?`);
+      addBotMsg(`Veo que exploras <b>${catLabelChat[cat]}</b> 🎯 El top es <b>${esc(best.name)}</b> (★${best.rating}) y el más económico <b>${esc(cheap.name)}</b> desde ${money(cheap.price)}. ¿Fecha o presupuesto en mente?`);
       setLoading(false);
     },500);
   }
@@ -1766,6 +1786,7 @@ document.addEventListener('click', function(e){
 
 async function cerrarSesion(){
   if(sb) await sb.auth.signOut();
+  localStorage.removeItem(CART_STORAGE_KEY); // no dejar el carrito de una cuenta visible a la siguiente en este navegador
   window.location.href = 'index.html';
 }
 
@@ -2034,47 +2055,29 @@ async function confirmarReserva(){
   btn.disabled = true;
   btn.innerHTML = '<span class="ck-spinner"></span> Confirmando…';
 
-  const total = Number(reservaServicio.price) || 0;
-  const nombreCliente = (perfilUsuario && perfilUsuario.full_name) || sesionUsuario.email;
-
-  const { data: reserva, error } = await sb.from('requests').insert({
-    client_id: sesionUsuario.id,
+  // precio, comision, status y datos del cliente los decide el trigger del
+  // servidor (blindar_reserva) — el navegador solo manda lo que el cliente
+  // eligio. La agenda del proveedor tambien la bloquea un trigger aparte.
+  const { error } = await sb.from('requests').insert({
     provider_id: reservaServicio.providerId,
     service_id: reservaServicio.id,
     event_date: reservaFechaSel,
     start_time: horaIni,
     end_time: horaFin,
     event_type: document.getElementById('bk-tipo').value,
-    message: document.getElementById('bk-mensaje').value.trim() || null,
-    status: 'confirmada',
-    client_name: nombreCliente,
-    client_email: (perfilUsuario && perfilUsuario.email) || sesionUsuario.email,
-    total_amount: total,
-    commission_amount: Math.round(total * COMISION_PCT * 100) / 100
+    message: document.getElementById('bk-mensaje').value.trim() || null
   }).select('id').single();
 
   btn.disabled = false;
   btn.innerHTML = '<i class="ti ti-calendar-check"></i> Confirmar reserva';
 
   if(error){
-    errEl.textContent = 'No se pudo confirmar la reserva: ' + error.message;
+    errEl.textContent = error.message.includes('agenda_no_overlap')
+      ? 'Ese horario acaba de ocuparse. Elige otro bloque o cambia de fecha.'
+      : 'No se pudo confirmar la reserva: ' + error.message;
+    if(error.message.includes('agenda_no_overlap')) seleccionarDiaReserva(reservaFechaSel);
     return;
   }
-
-  // La reserva bloquea de inmediato ese horario en la agenda del proveedor.
-  const { error: errAgenda } = await sb.from('agenda').insert({
-    provider_id: reservaServicio.providerId,
-    request_id: reserva.id,
-    title: document.getElementById('bk-tipo').value + ' — ' + nombreCliente,
-    event_date: reservaFechaSel,
-    type: document.getElementById('bk-tipo').value,
-    client_name: nombreCliente,
-    start_time: horaIni,
-    end_time: horaFin,
-    status: 'Confirmado'
-  });
-
-  if(errAgenda) console.error('La reserva se creó pero no se bloqueó la agenda:', errAgenda);
 
   cerrarReserva();
 

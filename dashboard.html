@@ -302,8 +302,8 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
       <i class="ti ti-clock-hour-4" style="font-size:30px;color:var(--or);"></i>
     </div>
     <h2 id="verif-titulo" style="font-size:19px;font-weight:700;margin-bottom:10px;">Tu cuenta está en revisión</h2>
-    <p id="verif-texto" style="font-size:13.5px;color:var(--sub);line-height:1.7;margin-bottom:22px;">
-      Estamos revisando la información de tu negocio. Te avisaremos por correo apenas tu cuenta quede aprobada — normalmente toma menos de 48 horas.
+    <p id="verif-texto" style="font-size:13.5px;color:var(--sub);line-height:1.7;margin-bottom:22px;white-space:pre-line;">
+      Estamos revisando la información de tu negocio. Vuelve a entrar más tarde para ver si tu cuenta ya quedó aprobada — normalmente toma menos de 48 horas.
     </p>
     <button onclick="window.location.href='index.html'" style="background:var(--or);color:#fff;border:none;padding:12px 24px;border-radius:10px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;">
       Volver al inicio
@@ -318,6 +318,11 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 let sb = null;
 let usuarioActual = null;
+
+// Escapa texto de usuario antes de meterlo en innerHTML (anti-XSS).
+function esc(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
 let perfilRowInicial = null; // fila cruda de "profiles", leida una sola vez al verificar acceso
 try {
   const storageAdapter = {
@@ -343,9 +348,9 @@ function mostrarCandado(icono, titulo, texto){
 
 async function verificarAccesoDashboard(){
   if(!sb){
-    // Si Supabase no cargó, no bloqueamos el acceso (evita dejar a todos
-    // afuera por un problema de red) pero avisamos en consola.
+    // Fail-closed: si no sabemos si hay sesion, no se muestra el dashboard.
     console.warn('No se pudo verificar la sesión: Supabase no disponible.');
+    mostrarCandado('ti-wifi-off', 'No se pudo conectar', 'Revisa tu conexión a internet y recarga la página.');
     return;
   }
 
@@ -374,13 +379,19 @@ async function verificarAccesoDashboard(){
 
   if(perfil.verification_status === 'pendiente'){
     mostrarCandado('ti-clock-hour-4', 'Tu cuenta está en revisión',
-      'Estamos revisando la información de tu negocio. Te avisaremos por correo apenas tu cuenta quede aprobada — normalmente toma menos de 48 horas.');
+      'Estamos revisando la información de tu negocio. Vuelve a entrar más tarde para ver si ya quedó aprobada — normalmente toma menos de 48 horas.');
     return;
   }
 
   if(perfil.verification_status === 'rechazado'){
+    // El motivo se muestra aca mismo: todavia no hay correos, asi que este
+    // es el unico lugar donde el proveedor puede enterarse.
+    const { data: sol } = await sb.from('solicitudes_proveedor')
+      .select('motivo_rechazo').eq('user_id', usuario.id).maybeSingle();
     mostrarCandado('ti-x', 'Tu solicitud no fue aprobada',
-      'Revisa el correo que te enviamos con el motivo. Si crees que fue un error, contáctanos para resolverlo.');
+      (sol && sol.motivo_rechazo)
+        ? 'Motivo: ' + sol.motivo_rechazo + '\n\nSi crees que fue un error, contáctanos para resolverlo.'
+        : 'Si crees que fue un error, contáctanos para resolverlo.');
     return;
   }
 
@@ -443,21 +454,18 @@ verificarAccesoDashboard();
       <div class="kpi-row">
         <div class="kpi">
           <div class="kpi-ico"><i class="ti ti-calendar-check"></i></div>
-          <div class="kpi-val" id="home-kpi-eventos">7</div>
+          <div class="kpi-val" id="home-kpi-eventos">—</div>
           <div class="kpi-lbl">Eventos este mes</div>
-          <div class="kpi-trend up"><i class="ti ti-trending-up"></i> +2 vs. mes pasado</div>
         </div>
         <div class="kpi">
           <div class="kpi-ico"><i class="ti ti-cash"></i></div>
-          <div class="kpi-val" id="home-kpi-ingresos">S/. 8,400</div>
+          <div class="kpi-val" id="home-kpi-ingresos">—</div>
           <div class="kpi-lbl">Ingresos del mes</div>
-          <div class="kpi-trend up"><i class="ti ti-trending-up"></i> +18%</div>
         </div>
         <div class="kpi">
           <div class="kpi-ico"><i class="ti ti-message-2"></i></div>
-          <div class="kpi-val" id="home-kpi-cotizaciones">12</div>
+          <div class="kpi-val" id="home-kpi-cotizaciones">—</div>
           <div class="kpi-lbl">Cotizaciones pendientes</div>
-          <div class="kpi-trend down"><i class="ti ti-clock"></i> 3 por responder</div>
         </div>
         <div class="kpi">
           <div class="kpi-ico"><i class="ti ti-star"></i></div>
@@ -1198,7 +1206,7 @@ function buildCalendar(){
     if(isToday) classes += ' today';
     html += `<div class="${classes}" onclick="openEventModal('${key}')">
       <span class="cal-num">${d}</span>
-      ${ev ? `<div class="cal-ev ${eventColorClass(ev.tipo)}">${ev.tipo} · ${ev.cliente.split(' ')[0]}</div>` : ''}
+      ${ev ? `<div class="cal-ev ${eventColorClass(ev.tipo)}">${esc(ev.tipo)} · ${esc(ev.cliente.split(' ')[0])}</div>` : ''}
     </div>`;
   }
 
@@ -1240,10 +1248,10 @@ function renderProximosEventos(){
     const pillClass = e.estado === 'Confirmado' ? 'green' : 'gold';
     html += `<tr style="cursor:pointer;" onclick="openEventModal('${e.date}')">
       <td>${fechaCorta}</td>
-      <td>${e.cliente}</td>
-      <td>${e.tipo}</td>
-      <td>${e.distrito || '—'}</td>
-      <td><span class="pill ${pillClass}">${e.estado || 'Confirmado'}</span></td>
+      <td>${esc(e.cliente)}</td>
+      <td>${esc(e.tipo)}</td>
+      <td>${esc(e.distrito || '—')}</td>
+      <td><span class="pill ${pillClass}">${esc(e.estado || 'Confirmado')}</span></td>
     </tr>`;
   });
   tbody.innerHTML = html;
@@ -1340,7 +1348,6 @@ async function deleteEvent(){
 
 // ─── PLANTILLAS DE COTIZACIÓN: varias plantillas por ocasión, persistentes por proveedor ───
 const PLANTILLAS_STORAGE_KEY = 'todoeventos_dashboard_plantillas_v2';
-const PLANTILLA_STORAGE_KEY_OLD = 'todoeventos_dashboard_plantilla_v1'; // formato anterior, de una sola plantilla
 const OCASIONES = ['General','Boda','Quinceañero','Corporativo','Cumpleaños'];
 
 function nombreNegocioPorDefecto(){
@@ -1374,16 +1381,6 @@ function loadPlantillas(){
   }catch(e){
     console.error('No se pudieron leer las plantillas guardadas:', e);
   }
-
-  // Migración desde la versión anterior (una sola plantilla, sin ocasión)
-  try{
-    const rawOld = localStorage.getItem(PLANTILLA_STORAGE_KEY_OLD);
-    if(rawOld){
-      const old = JSON.parse(rawOld);
-      const migrada = Object.assign(plantillaVacia(), old, { id:'tpl_migrada', nombre:'General', ocasion:'General' });
-      return [migrada];
-    }
-  }catch(e){ /* ignorar y usar plantilla por defecto */ }
 
   return [plantillaVacia()];
 }
@@ -2415,10 +2412,10 @@ function renderResenasTab(){
   comentarios.forEach(r => {
     html += `<div class="review-card">
       <div class="review-head">
-        <span class="review-cliente">${r.cliente}</span>
+        <span class="review-cliente">${esc(r.cliente)}</span>
         <span class="review-fecha">${r.fecha}</span>
       </div>
-      <div class="review-comentario">${r.comentario}</div>
+      <div class="review-comentario">${esc(r.comentario)}</div>
     </div>`;
   });
   cont.innerHTML = html;
@@ -2759,9 +2756,9 @@ function openServiceViewer(id){
   const resenasCont = document.getElementById('viewer-resenas-list');
   resenasCont.innerHTML = resenasServicio.length
     ? resenasServicio.map(r => `<div class="review-card">
-        <div class="review-head"><span class="review-cliente">${r.cliente}</span><span class="review-fecha">${r.fecha}</span></div>
+        <div class="review-head"><span class="review-cliente">${esc(r.cliente)}</span><span class="review-fecha">${r.fecha}</span></div>
         <div class="review-stars">${'★'.repeat(r.estrellas)}${'☆'.repeat(5 - r.estrellas)}</div>
-        <div class="review-comentario">${r.comentario}</div>
+        <div class="review-comentario">${esc(r.comentario)}</div>
       </div>`).join('')
     : '<div style="color:var(--sub);font-size:13px;">Este servicio todavía no tiene reseñas.</div>';
 
@@ -2874,8 +2871,8 @@ async function renderSolicitudes(){
            <button class="req-btn-reject" onclick="rechazarSolicitud(${r.id})"><i class="ti ti-x"></i> Fecha Ocupada</button>
          </div>`
       : yaPaso
-        ? `<div class="req-accepted-note"><i class="ti ti-circle-check"></i> Evento realizado. ${r.cliente} ya puede dejarte una reseña.</div>`
-        : `<div class="req-accepted-note"><i class="ti ti-circle-check"></i> Reserva confirmada. Contacto: ${r.telefono || r.correo || '—'}</div>
+        ? `<div class="req-accepted-note"><i class="ti ti-circle-check"></i> Evento realizado. ${esc(r.cliente)} ya puede dejarte una reseña.</div>`
+        : `<div class="req-accepted-note"><i class="ti ti-circle-check"></i> Reserva confirmada. Contacto: ${esc(r.telefono || r.correo || '—')}</div>
            <div class="req-actions" style="margin-top:8px;">
              <button class="req-btn-reject" onclick="cancelarReserva(${r.id})"><i class="ti ti-x"></i> Cancelar reserva</button>
            </div>`;
@@ -2883,8 +2880,8 @@ async function renderSolicitudes(){
     return `<div class="req-card ${r.estado}">
       <div class="req-head">
         <div>
-          <div class="req-cliente">${r.cliente}</div>
-          <div class="req-tipo">${r.tipoEvento}${horario ? ' · ' + horario : ''}</div>
+          <div class="req-cliente">${esc(r.cliente)}</div>
+          <div class="req-tipo">${esc(r.tipoEvento)}${horario ? ' · ' + esc(horario) : ''}</div>
         </div>
         <div class="req-fecha-box">
           <div class="req-fecha-dia">${f.dia}</div>
@@ -2897,7 +2894,7 @@ async function renderSolicitudes(){
         ${r.comision ? `<div class="req-svc-row" style="opacity:.7;"><span>Comisión TodoEventos</span><span>−${fmtMoneyCaja(r.comision)}</span></div>
         <div class="req-svc-total"><span>Recibes</span><span>${fmtMoneyCaja(r.total - r.comision)}</span></div>` : ''}
       </div>
-      <div class="req-msg">"${r.mensaje}"</div>
+      <div class="req-msg">"${esc(r.mensaje)}"</div>
       ${acciones}
     </div>`;
   }).join('');
@@ -2929,7 +2926,7 @@ async function aceptarSolicitud(id){
 async function rechazarSolicitud(id){
   const r = solicitudes.find(x => x.id === id);
   if(!r) return;
-  if(!confirm('¿Rechazar la solicitud de ' + r.cliente + '?\n\nSe le notificará que no tienes esa fecha disponible.')) return;
+  if(!confirm('¿Rechazar la solicitud de ' + r.cliente + '?\n\nLa verá rechazada al entrar a su cuenta.')) return;
 
   const { error } = await sb.from('requests').update({ status: 'rechazada' }).eq('id', id).eq('provider_id', usuarioActual.id);
   if(error){ alert('No se pudo rechazar: ' + error.message); return; }

@@ -197,13 +197,13 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
       </div>
 
       <div class="hint" style="font-size:11.5px;color:var(--sub);margin:-4px 0 16px;line-height:1.6;">
-        Revisaremos tu información antes de activar tu cuenta. Te avisaremos por correo cuando esté aprobada.
+        Revisaremos tu información antes de activar tu cuenta. Vuelve a entrar más tarde para ver si ya quedó aprobada.
       </div>
     </div>
 
     <div class="row-between" id="row-remember">
       <label class="remember"><input type="checkbox" id="chk-recordar" checked> Recordarme</label>
-      <a href="#" class="forgot">¿Olvidaste tu contraseña?</a>
+      <a href="#" class="forgot" onclick="recuperarPassword();return false;">¿Olvidaste tu contraseña?</a>
     </div>
 
     <button class="btn-login" id="btn-login" onclick="handleSubmit()"><i class="ti ti-login-2" id="btn-icon"></i> <span id="btn-text">Ingresar al marketplace</span></button>
@@ -602,6 +602,26 @@ async function verificarCodigo(){
   sessionStorage.removeItem('te_pending_verification');
   localStorage.setItem('te_remember', 'true');
   window.location.href = REDIRECT_MAP[pendiente.role] || 'index.html';
+}
+
+// Recuperar contraseña: Supabase manda el correo con el enlace de reseteo.
+// El enlace vuelve a confirmacion.html con la sesion ya abierta, y desde
+// "Mi cuenta" el usuario define su nueva contraseña.
+async function recuperarPassword(){
+  const email = document.getElementById('email').value.trim().toLowerCase();
+  if(!email){
+    showError('Escribe tu correo arriba y vuelve a hacer clic en "¿Olvidaste tu contraseña?".');
+    return;
+  }
+  if(!sb){ showError('No se pudo conectar con el servidor. Recarga la página.'); return; }
+
+  showLoading('Enviando enlace de recuperación…');
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: new URL('confirmacion.html', window.location.href).href
+  });
+
+  if(error){ showError('No se pudo enviar el enlace: ' + error.message); return; }
+  showSuccess('Te enviamos un enlace a ' + email + ' para crear una contraseña nueva. Revisa tu correo (y la carpeta de spam).');
 }
 
 async function reenviarCodigo(){
