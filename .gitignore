@@ -5,3 +5,6 @@ skills-lock.json
 .env
 .env.local
 node_modules/
+
+.vercel
+.env*

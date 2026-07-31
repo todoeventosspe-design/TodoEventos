@@ -1083,16 +1083,17 @@ async function onAccesoDashboardOk(){
 
   // Recien ahora sabemos quien eres: recargamos los modulos que dependen de
   // tu cuenta (antes de esto solo tenian arreglos vacios, para no crashear
-  // mientras se confirmaba la sesion).
-  cajaMovimientos = loadCajaMovimientos();
-  crmClientes = loadCrmClientes();
-  invItems = loadInvItems();
-
-  // Agenda y reservas viven en Supabase, no en localStorage
-  [agendaEvents, solicitudes] = await Promise.all([loadAgendaEvents(), loadSolicitudes()]);
+  // mientras se confirmaba la sesion). Todo vive en Supabase, no en el navegador.
+  [cajaMovimientos, crmClientes, invItems, agendaEvents, solicitudes] = await Promise.all([
+    loadCajaMovimientos(), loadCrmClientes(), loadInvItems(),
+    loadAgendaEvents(), loadSolicitudes()
+  ]);
 
   renderHomeKPIs();
   renderAgenda();
+  renderCaja();
+  renderCrm();
+  renderInventario();
 }
 
 // ─── NAVEGACIÓN ENTRE VISTAS (vanilla JS) ───
@@ -1356,7 +1357,7 @@ function nombreNegocioPorDefecto(){
 
 function plantillaVacia(){
   return {
-    id: 'tpl_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+    id: null,
     nombre: 'General',
     ocasion: 'General',
     negocio: nombreNegocioPorDefecto(),
@@ -1370,24 +1371,36 @@ function plantillaVacia(){
   };
 }
 
-// Carga la lista de plantillas, migrando el formato antiguo (una sola plantilla) si existiera.
-function loadPlantillas(){
-  try{
-    const raw = localStorage.getItem(PLANTILLAS_STORAGE_KEY + '_' + usuarioActual.id);
-    if(raw){
-      const parsed = JSON.parse(raw);
-      if(Array.isArray(parsed) && parsed.length) return parsed;
-    }
-  }catch(e){
-    console.error('No se pudieron leer las plantillas guardadas:', e);
+const CAMPOS_PLANTILLA = ['nombre','ocasion','negocio','color','validez','telefono','correo','pago','intro','terminos'];
+
+// Las plantillas viven en Supabase (cotizacion_plantillas). Si el proveedor
+// todavia no tiene ninguna, se crea una por defecto para que el cotizador
+// siempre tenga algo que usar.
+async function loadPlantillas(){
+  await importarLocalUnaVez(PLANTILLAS_STORAGE_KEY, 'cotizacion_plantillas', p => {
+    const fila = {};
+    CAMPOS_PLANTILLA.forEach(k => { if(p[k] !== undefined && p[k] !== null) fila[k] = p[k]; });
+    return fila;
+  });
+
+  const { data, error } = await sb.from('cotizacion_plantillas')
+    .select('id,' + CAMPOS_PLANTILLA.join(','))
+    .eq('provider_id', usuarioActual.id)
+    .order('id', { ascending:true });
+  if(error){
+    console.error('No se pudieron leer las plantillas:', error);
+    return [plantillaVacia()];
   }
+  if(data && data.length) return data;
 
-  return [plantillaVacia()];
-}
-
-function savePlantillasToStorage(arr){
-  try{ localStorage.setItem(PLANTILLAS_STORAGE_KEY + '_' + usuarioActual.id, JSON.stringify(arr)); }
-  catch(e){ console.error('No se pudieron guardar las plantillas:', e); }
+  const { data: creada, error: errCrear } = await sb.from('cotizacion_plantillas')
+    .insert({ ...plantillaVacia(), id: undefined, provider_id: usuarioActual.id })
+    .select('id,' + CAMPOS_PLANTILLA.join(',')).single();
+  if(errCrear){
+    console.error('No se pudo crear la plantilla por defecto:', errCrear);
+    return [plantillaVacia()];
+  }
+  return [creada];
 }
 
 let plantillas = []; // se inicializa más abajo, una vez que perfilData ya existe
@@ -1398,8 +1411,10 @@ function findPlantillaPorOcasion(ocasion){
       || plantillas[0];
 }
 
+// Los ids vienen de Postgres (numericos) pero el <select> y los data-attributes
+// los devuelven como texto: comparamos siempre como texto.
 function findPlantillaPorId(id){
-  return plantillas.find(p => p.id === id) || findPlantillaPorOcasion('General');
+  return plantillas.find(p => String(p.id) === String(id)) || findPlantillaPorOcasion('General');
 }
 
 // Refresca el <select> de plantilla dentro del Cotizador con la lista actual
@@ -1408,9 +1423,9 @@ function renderCotPlantillaSelect(preferirId){
   if(!sel) return;
   const idPrevio = preferirId || sel.value;
   sel.innerHTML = plantillas.map(p =>
-    `<option value="${p.id}">${p.nombre} — ${p.ocasion}</option>`
+    `<option value="${esc(String(p.id))}">${esc(p.nombre)} — ${esc(p.ocasion)}</option>`
   ).join('');
-  if(plantillas.some(p => p.id === idPrevio)){
+  if(plantillas.some(p => String(p.id) === String(idPrevio))){
     sel.value = idPrevio;
   }
 }
@@ -1427,12 +1442,12 @@ function renderPlantillaLista(){
   const cont = document.getElementById('plantilla-lista-cards');
   cont.innerHTML = plantillas.map(p => `
     <div style="background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;">
-      <div style="width:10px;height:10px;border-radius:50%;background:${p.color};flex-shrink:0;"></div>
+      <div style="width:10px;height:10px;border-radius:50%;background:${esc(p.color || '#F97316')};flex-shrink:0;"></div>
       <div style="flex:1;min-width:0;">
-        <div style="font-size:14px;font-weight:700;">${p.nombre}</div>
-        <div style="font-size:12px;color:var(--sub);">Se usa para: ${p.ocasion}</div>
+        <div style="font-size:14px;font-weight:700;">${esc(p.nombre)}</div>
+        <div style="font-size:12px;color:var(--sub);">Se usa para: ${esc(p.ocasion)}</div>
       </div>
-      <button class="btn-ghost" style="padding:8px 12px;" onclick="openPlantillaEditor('${p.id}')" title="Editar"><i class="ti ti-edit"></i></button>
+      <button class="btn-ghost" style="padding:8px 12px;" onclick="openPlantillaEditor('${esc(String(p.id))}')" title="Editar"><i class="ti ti-edit"></i></button>
     </div>
   `).join('');
 }
@@ -1481,7 +1496,7 @@ function openPlantillaEditor(id){
   document.getElementById('plantilla-modal-overlay').classList.add('open');
 }
 
-function savePlantilla(){
+async function savePlantilla(){
   const nombre = document.getElementById('pl-nombre').value.trim();
   const negocio = document.getElementById('pl-negocio').value.trim();
   if(!nombre){
@@ -1494,8 +1509,7 @@ function savePlantilla(){
   }
 
   const idExistente = document.getElementById('pl-id').value;
-  const data = {
-    id: idExistente || plantillaVacia().id,
+  const campos = {
     nombre: nombre,
     ocasion: document.getElementById('pl-ocasion').value,
     negocio: negocio,
@@ -1508,16 +1522,29 @@ function savePlantilla(){
     terminos: document.getElementById('pl-terminos').value.trim()
   };
 
-  const idx = plantillas.findIndex(p => p.id === data.id);
-  if(idx >= 0) plantillas[idx] = data;
-  else plantillas.push(data);
+  let guardada;
+  if(idExistente){
+    const { data, error } = await sb.from('cotizacion_plantillas').update(campos)
+      .eq('id', idExistente).eq('provider_id', usuarioActual.id)
+      .select('id,' + CAMPOS_PLANTILLA.join(',')).single();
+    if(error){ alert('No se pudo guardar la plantilla: ' + error.message); return; }
+    guardada = data;
+    const idx = plantillas.findIndex(p => String(p.id) === String(idExistente));
+    if(idx >= 0) plantillas[idx] = guardada;
+  } else {
+    const { data, error } = await sb.from('cotizacion_plantillas')
+      .insert({ ...campos, provider_id: usuarioActual.id })
+      .select('id,' + CAMPOS_PLANTILLA.join(',')).single();
+    if(error){ alert('No se pudo guardar la plantilla: ' + error.message); return; }
+    guardada = data;
+    plantillas.push(guardada);
+  }
 
-  savePlantillasToStorage(plantillas);
-  renderCotPlantillaSelect(data.id);
+  renderCotPlantillaSelect(String(guardada.id));
   backToPlantillaLista();
 }
 
-function deletePlantilla(){
+async function deletePlantilla(){
   const id = document.getElementById('pl-id').value;
   if(!id) return;
   if(plantillas.length <= 1){
@@ -1527,8 +1554,11 @@ function deletePlantilla(){
   const p = findPlantillaPorId(id);
   if(!confirm('¿Eliminar la plantilla "' + p.nombre + '"? Esta acción no se puede deshacer.')) return;
 
-  plantillas = plantillas.filter(x => x.id !== id);
-  savePlantillasToStorage(plantillas);
+  const { error } = await sb.from('cotizacion_plantillas').delete()
+    .eq('id', id).eq('provider_id', usuarioActual.id);
+  if(error){ alert('No se pudo eliminar la plantilla: ' + error.message); return; }
+
+  plantillas = plantillas.filter(x => String(x.id) !== String(id));
   renderCotPlantillaSelect();
   backToPlantillaLista();
 }
@@ -1860,17 +1890,62 @@ function fechaCortaOffset(diasOffset){
   return d.getDate() + ' ' + MESES3[d.getMonth()];
 }
 
-function loadCajaMovimientos(){
-  try {
-    const raw = localStorage.getItem(CAJA_STORAGE_KEY + '_' + usuarioActual.id);
-    if(raw) return JSON.parse(raw);
-  } catch(e){ console.warn('No se pudo leer la caja guardada', e); }
-  return []; // cuenta nueva: sin movimientos todavia
+// Fecha del navegador en formato ISO local (no UTC: en Lima el toISOString()
+// de la noche salta al dia siguiente).
+function isoHoy(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 }
 
-function saveCajaMovimientos(movs){
-  try { localStorage.setItem(CAJA_STORAGE_KEY + '_' + usuarioActual.id, JSON.stringify(movs)); }
-  catch(e){ console.warn('No se pudo guardar la caja', e); }
+// "2026-07-31" -> "31 Jul" (solo para mostrar; en la base siempre va la fecha completa)
+function fechaCortaIso(iso){
+  if(!iso) return '';
+  const [y,m,d] = String(iso).split('-').map(Number);
+  return d + ' ' + (MESES3[m-1] || '');
+}
+
+// "2026-07" -> "Jul 26"
+function etiquetaMesIso(ym){
+  return (MESES3[Number(ym.slice(5,7)) - 1] || '') + ' ' + ym.slice(2,4);
+}
+
+// La caja vieja guardaba "31 Jul" (sin anio). Al importar asumimos el anio actual.
+function fechaCortaAIso(corta){
+  if(/^\d{4}-\d{2}-\d{2}$/.test(corta || '')) return corta;
+  const [dia, mes] = String(corta || '').split(' ');
+  const idx = MESES3.indexOf(mes);
+  if(!dia || idx < 0) return isoHoy();
+  return new Date().getFullYear() + '-' + String(idx+1).padStart(2,'0') + '-' + String(Number(dia)).padStart(2,'0');
+}
+
+// Migracion one-shot: si el navegador aun guarda datos de la etapa localStorage,
+// se suben a Supabase una sola vez y se borra la clave local (asi no quedan
+// datos de una cuenta visibles para la siguiente en un navegador compartido).
+async function importarLocalUnaVez(clave, tabla, mapFila){
+  const key = clave + '_' + usuarioActual.id;
+  let filas = null;
+  try { filas = JSON.parse(localStorage.getItem(key) || 'null'); }
+  catch(e){ filas = null; }
+  if(!Array.isArray(filas) || filas.length === 0){ localStorage.removeItem(key); return; }
+
+  const { error } = await sb.from(tabla).insert(
+    filas.map(f => ({ ...mapFila(f), provider_id: usuarioActual.id }))
+  );
+  if(error){ console.warn('No se pudieron importar a ' + tabla + ' los datos guardados en este navegador', error); return; }
+  localStorage.removeItem(key);
+}
+
+async function loadCajaMovimientos(){
+  await importarLocalUnaVez(CAJA_STORAGE_KEY, 'caja_movimientos', m => ({
+    fecha: fechaCortaAIso(m.fecha), concepto: m.concepto, tipo: m.tipo, monto: m.monto
+  }));
+  const { data, error } = await sb.from('caja_movimientos')
+    .select('id,fecha,concepto,tipo,monto')
+    .eq('provider_id', usuarioActual.id)
+    .order('fecha', { ascending:false })
+    .order('id', { ascending:false });
+  if(error){ console.warn('No se pudo leer la caja', error); return []; }
+  return (data || []).map(m => ({ ...m, monto: Number(m.monto) }));
 }
 
 let cajaMovimientos = [];
@@ -1902,11 +1977,11 @@ function renderCajaTable(){
     const moneyClass = m.tipo === 'Ingreso' ? 'pos' : 'neg';
     const sign = m.tipo === 'Ingreso' ? '+' : '−';
     html += `<tr>
-      <td>${m.fecha}</td>
-      <td>${m.concepto}</td>
-      <td><span class="pill ${pillClass}">${m.tipo}</span></td>
+      <td>${esc(fechaCortaIso(m.fecha))}</td>
+      <td>${esc(m.concepto)}</td>
+      <td><span class="pill ${pillClass}">${esc(m.tipo)}</span></td>
       <td class="money ${moneyClass}">${sign} ${fmtMoneyCaja(m.monto)}</td>
-      <td><button class="btn-remove-item" onclick="removeCajaMovimiento('${m.id}')" title="Eliminar movimiento"><i class="ti ti-x"></i></button></td>
+      <td><button class="btn-remove-item" onclick="removeCajaMovimiento(${Number(m.id)})" title="Eliminar movimiento"><i class="ti ti-x"></i></button></td>
     </tr>`;
   });
   tbody.innerHTML = html;
@@ -1930,7 +2005,7 @@ function closeCajaModal(){
   document.getElementById('caja-modal-overlay').classList.remove('open');
 }
 
-function saveCajaMovimiento(){
+async function saveCajaMovimiento(){
   const concepto = document.getElementById('caja-concepto').value.trim();
   const monto = parseFloat(document.getElementById('caja-monto').value);
 
@@ -1939,23 +2014,27 @@ function saveCajaMovimiento(){
     return;
   }
 
-  const nuevo = {
-    id: 'c' + Date.now(),
-    fecha: fechaCortaHoy(),
+  const { data, error } = await sb.from('caja_movimientos').insert({
+    provider_id: usuarioActual.id,
+    fecha: isoHoy(),
     concepto,
     tipo: cajaModalTipo,
     monto
-  };
-  cajaMovimientos.unshift(nuevo);
-  saveCajaMovimientos(cajaMovimientos);
+  }).select('id,fecha,concepto,tipo,monto').single();
+  if(error){ alert('No se pudo guardar el movimiento: ' + error.message); return; }
+
+  cajaMovimientos.unshift({ ...data, monto: Number(data.monto) });
   closeCajaModal();
   renderCaja();
   renderHomeKPIs();
 }
 
-function removeCajaMovimiento(id){
+async function removeCajaMovimiento(id){
+  const { error } = await sb.from('caja_movimientos').delete()
+    .eq('id', id).eq('provider_id', usuarioActual.id);
+  if(error){ alert('No se pudo eliminar el movimiento: ' + error.message); return; }
+
   cajaMovimientos = cajaMovimientos.filter(m => m.id !== id);
-  saveCajaMovimientos(cajaMovimientos);
   renderCaja();
   renderHomeKPIs();
 }
@@ -1963,17 +2042,16 @@ function removeCajaMovimiento(id){
 // ─── CRM DE CLIENTES: persistencia, badges automáticos y modal ───
 const CRM_STORAGE_KEY = 'todoeventos_dashboard_crm_v1';
 
-function loadCrmClientes(){
-  try {
-    const raw = localStorage.getItem(CRM_STORAGE_KEY + '_' + usuarioActual.id);
-    if(raw) return JSON.parse(raw);
-  } catch(e){ console.warn('No se pudo leer el CRM guardado', e); }
-  return []; // cuenta nueva: sin clientes todavia
-}
-
-function saveCrmClientes(list){
-  try { localStorage.setItem(CRM_STORAGE_KEY + '_' + usuarioActual.id, JSON.stringify(list)); }
-  catch(e){ console.warn('No se pudo guardar el CRM', e); }
+async function loadCrmClientes(){
+  await importarLocalUnaVez(CRM_STORAGE_KEY, 'crm_clientes', c => ({
+    nombre: c.nombre, tipo: c.tipo, eventos: c.eventos || 0, estado: c.estado
+  }));
+  const { data, error } = await sb.from('crm_clientes')
+    .select('id,nombre,tipo,eventos,estado')
+    .eq('provider_id', usuarioActual.id)
+    .order('id', { ascending:true });
+  if(error){ console.warn('No se pudo leer el CRM', error); return []; }
+  return data || [];
 }
 
 let crmClientes = [];
@@ -2002,9 +2080,9 @@ function renderCrmList(){
   crmClientes.forEach(c => {
     const badge = crmBadge(c.eventos);
     const ini = crmIniciales(c.nombre);
-    html += `<div class="crm-row" onclick="openCrmModal('${c.id}')">
-      <div class="crm-avatar">${ini}</div>
-      <div class="crm-info"><div class="crm-name">${c.nombre}</div><div class="crm-meta">${c.tipo} · ${c.eventos} evento${c.eventos===1?'':'s'} · ${c.estado}</div></div>
+    html += `<div class="crm-row" onclick="openCrmModal(${Number(c.id)})">
+      <div class="crm-avatar">${esc(ini)}</div>
+      <div class="crm-info"><div class="crm-name">${esc(c.nombre)}</div><div class="crm-meta">${esc(c.tipo)} · ${c.eventos} evento${c.eventos===1?'':'s'} · ${esc(c.estado)}</div></div>
       <span class="pill ${badge.cls}">${badge.text}</span>
     </div>`;
   });
@@ -2047,7 +2125,7 @@ function closeCrmModal(){
   crmEditingId = null;
 }
 
-function saveCrmCliente(){
+async function saveCrmCliente(){
   const nombre = document.getElementById('crm-nombre').value.trim();
   const tipo = document.getElementById('crm-tipo').value;
   const eventos = parseInt(document.getElementById('crm-eventos').value) || 0;
@@ -2063,22 +2141,31 @@ function saveCrmCliente(){
   const estado = eventos >= 2 ? ('Última vez: ' + mesAbrev + ' ' + new Date().getFullYear()) : 'Cotización enviada';
 
   if(crmEditingId){
+    const { error } = await sb.from('crm_clientes').update({ nombre, tipo, eventos, estado })
+      .eq('id', crmEditingId).eq('provider_id', usuarioActual.id);
+    if(error){ alert('No se pudo guardar el cliente: ' + error.message); return; }
     const idx = crmClientes.findIndex(c => c.id === crmEditingId);
     if(idx >= 0) crmClientes[idx] = { ...crmClientes[idx], nombre, tipo, eventos, estado };
   } else {
-    crmClientes.push({ id: 'p' + Date.now(), nombre, tipo, eventos, estado });
+    const { data, error } = await sb.from('crm_clientes')
+      .insert({ provider_id: usuarioActual.id, nombre, tipo, eventos, estado })
+      .select('id,nombre,tipo,eventos,estado').single();
+    if(error){ alert('No se pudo guardar el cliente: ' + error.message); return; }
+    crmClientes.push(data);
   }
 
-  saveCrmClientes(crmClientes);
   closeCrmModal();
   renderCrm();
   renderHomeKPIs();
 }
 
-function deleteCrmCliente(){
+async function deleteCrmCliente(){
   if(!crmEditingId) return;
+  const { error } = await sb.from('crm_clientes').delete()
+    .eq('id', crmEditingId).eq('provider_id', usuarioActual.id);
+  if(error){ alert('No se pudo eliminar el cliente: ' + error.message); return; }
+
   crmClientes = crmClientes.filter(c => c.id !== crmEditingId);
-  saveCrmClientes(crmClientes);
   closeCrmModal();
   renderCrm();
   renderHomeKPIs();
@@ -2087,17 +2174,16 @@ function deleteCrmCliente(){
 // ─── CONTROL DE INVENTARIO: persistencia, semáforo de stock y modal ───
 const INV_STORAGE_KEY = 'todoeventos_dashboard_inventario_v1';
 
-function loadInvItems(){
-  try {
-    const raw = localStorage.getItem(INV_STORAGE_KEY + '_' + usuarioActual.id);
-    if(raw) return JSON.parse(raw);
-  } catch(e){ console.warn('No se pudo leer el inventario guardado', e); }
-  return []; // cuenta nueva: sin inventario todavia
-}
-
-function saveInvItems(list){
-  try { localStorage.setItem(INV_STORAGE_KEY + '_' + usuarioActual.id, JSON.stringify(list)); }
-  catch(e){ console.warn('No se pudo guardar el inventario', e); }
+async function loadInvItems(){
+  await importarLocalUnaVez(INV_STORAGE_KEY, 'inventario_items', it => ({
+    nombre: it.nombre, disponible: it.disponible || 0, total: it.total || 0
+  }));
+  const { data, error } = await sb.from('inventario_items')
+    .select('id,nombre,disponible,total')
+    .eq('provider_id', usuarioActual.id)
+    .order('id', { ascending:true });
+  if(error){ console.warn('No se pudo leer el inventario', error); return []; }
+  return data || [];
 }
 
 let invItems = [];
@@ -2117,8 +2203,8 @@ function renderInvList(){
   invItems.forEach(it => {
     const ratio = it.total > 0 ? Math.min(100, (it.disponible / it.total) * 100) : 0;
     const estado = invEstado(it.disponible, it.total);
-    html += `<div class="inv-item" onclick="openInvModal('${it.id}')">
-      <div class="inv-name">${it.nombre}</div>
+    html += `<div class="inv-item" onclick="openInvModal(${Number(it.id)})">
+      <div class="inv-name">${esc(it.nombre)}</div>
       <div class="inv-track"><div class="inv-fill" style="width:${ratio}%;background:${estado.color};"></div></div>
       <div class="inv-count">${estado.label}</div>
     </div>`;
@@ -2133,7 +2219,7 @@ function renderInvAlert(){
     alertEl.innerHTML = '✅ Todo tu inventario está en niveles saludables. Ningún equipo requiere reposición urgente.';
     return;
   }
-  const nombres = criticos.map(it => `<b style="color:var(--fg);">${it.nombre}</b> (${it.disponible} de ${it.total})`).join(', ');
+  const nombres = criticos.map(it => `<b style="color:var(--fg);">${esc(it.nombre)}</b> (${it.disponible} de ${it.total})`).join(', ');
   alertEl.innerHTML = (criticos.length === 1 ? 'El equipo ' : 'Los equipos ') + nombres +
     (criticos.length === 1 ? ' está' : ' están') + ' bajo stock. Considera reponerlos antes de tu próximo evento.';
 }
@@ -2176,7 +2262,7 @@ function closeInvModal(){
   invEditingId = null;
 }
 
-function saveInvItem(){
+async function saveInvItem(){
   const nombre = document.getElementById('inv-nombre').value.trim();
   const disponible = parseInt(document.getElementById('inv-cantidad').value);
   const total = parseInt(document.getElementById('inv-total').value);
@@ -2191,21 +2277,30 @@ function saveInvItem(){
   }
 
   if(invEditingId){
+    const { error } = await sb.from('inventario_items').update({ nombre, disponible, total })
+      .eq('id', invEditingId).eq('provider_id', usuarioActual.id);
+    if(error){ alert('No se pudo guardar el equipo: ' + error.message); return; }
     const idx = invItems.findIndex(it => it.id === invEditingId);
     if(idx >= 0) invItems[idx] = { ...invItems[idx], nombre, disponible, total };
   } else {
-    invItems.push({ id: 'i' + Date.now(), nombre, disponible, total });
+    const { data, error } = await sb.from('inventario_items')
+      .insert({ provider_id: usuarioActual.id, nombre, disponible, total })
+      .select('id,nombre,disponible,total').single();
+    if(error){ alert('No se pudo guardar el equipo: ' + error.message); return; }
+    invItems.push(data);
   }
 
-  saveInvItems(invItems);
   closeInvModal();
   renderInventario();
 }
 
-function deleteInvItem(){
+async function deleteInvItem(){
   if(!invEditingId) return;
+  const { error } = await sb.from('inventario_items').delete()
+    .eq('id', invEditingId).eq('provider_id', usuarioActual.id);
+  if(error){ alert('No se pudo eliminar el equipo: ' + error.message); return; }
+
   invItems = invItems.filter(it => it.id !== invEditingId);
-  saveInvItems(invItems);
   closeInvModal();
   renderInventario();
 }
@@ -2222,16 +2317,15 @@ function renderAnalytics(){
   document.getElementById('an-eventos').textContent = agendaEvents.length;
   document.getElementById('an-ticket').textContent = fmtMoneyCaja(ticketProm);
 
-  // Agrupar ingresos por mes, a partir de la fecha corta "D Mmm" de cada movimiento
-  const ordenMeses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  // Agrupar ingresos por mes usando la fecha completa "YYYY-MM-DD": asi Jul 2026
+  // y Jul 2027 no se suman en la misma barra.
   const porMes = {};
   ingresosMovs.forEach(m => {
-    const partes = m.fecha.split(' ');
-    const mes = partes[1] || partes[0];
-    porMes[mes] = (porMes[mes] || 0) + m.monto;
+    const ym = String(m.fecha).slice(0,7);
+    porMes[ym] = (porMes[ym] || 0) + Number(m.monto);
   });
 
-  const mesesConDatos = Object.keys(porMes).sort((a,b) => ordenMeses.indexOf(a) - ordenMeses.indexOf(b));
+  const mesesConDatos = Object.keys(porMes).sort();
   const maxValor = Math.max(1, ...mesesConDatos.map(m => porMes[m]));
 
   const barsEl = document.getElementById('an-bars');
@@ -2241,7 +2335,7 @@ function renderAnalytics(){
     let barsHtml = '';
     mesesConDatos.forEach(mes => {
       const alturaPct = Math.round((porMes[mes] / maxValor) * 100);
-      barsHtml += `<div class="bar-col"><div class="bar" style="height:${Math.max(alturaPct,6)}%;" title="${fmtMoneyCaja(porMes[mes])}"></div><div class="bar-lbl">${mes}</div></div>`;
+      barsHtml += `<div class="bar-col"><div class="bar" style="height:${Math.max(alturaPct,6)}%;" title="${fmtMoneyCaja(porMes[mes])}"></div><div class="bar-lbl">${etiquetaMesIso(mes)}</div></div>`;
     });
     barsEl.innerHTML = barsHtml;
   }
@@ -2251,10 +2345,10 @@ function renderAnalytics(){
   if(mesesConDatos.length === 0){
     insightEl.innerHTML = 'Registra tus primeros ingresos en <b style="color:var(--fg);">Control de Caja</b> para empezar a ver estadísticas reales aquí.';
   } else if(mesesConDatos.length === 1){
-    insightEl.innerHTML = 'Todos tus ingresos registrados están concentrados en <b style="color:var(--fg);">' + mesesConDatos[0] + '</b>. Registra movimientos en otros meses para ver comparativas.';
+    insightEl.innerHTML = 'Todos tus ingresos registrados están concentrados en <b style="color:var(--fg);">' + etiquetaMesIso(mesesConDatos[0]) + '</b>. Registra movimientos en otros meses para ver comparativas.';
   } else {
     const mejorMes = mesesConDatos.reduce((a,b) => porMes[a] >= porMes[b] ? a : b);
-    insightEl.innerHTML = '<b style="color:var(--fg);">' + mejorMes + '</b> es tu mejor mes hasta ahora, con ' + fmtMoneyCaja(porMes[mejorMes]) + ' en ingresos. Sigue así.';
+    insightEl.innerHTML = '<b style="color:var(--fg);">' + etiquetaMesIso(mejorMes) + '</b> es tu mejor mes hasta ahora, con ' + fmtMoneyCaja(porMes[mejorMes]) + ' en ingresos. Sigue así.';
   }
 
   const subEl = document.getElementById('an-sub');
@@ -2274,10 +2368,10 @@ function renderHomeKPIs(){
   if(elEventos) elEventos.textContent = eventosDelMes;
 
   // Ingresos del mes → suma real desde Control de Caja (mismo mes que "hoy")
-  const mesAbrevHoy = fechaCortaHoy().split(' ')[1];
+  const mesHoy = isoHoy().slice(0,7);
   const ingresosDelMes = cajaMovimientos
-    .filter(m => m.tipo === 'Ingreso' && m.fecha.split(' ')[1] === mesAbrevHoy)
-    .reduce((s,m) => s + m.monto, 0);
+    .filter(m => m.tipo === 'Ingreso' && String(m.fecha).slice(0,7) === mesHoy)
+    .reduce((s,m) => s + Number(m.monto), 0);
   const elIngresos = document.getElementById('home-kpi-ingresos');
   if(elIngresos) elIngresos.textContent = fmtMoneyCaja(ingresosDelMes);
 
@@ -2349,7 +2443,7 @@ async function initPerfilYPlantillas(){
 
   // Ahora que perfilData ya existe, inicializamos las plantillas de cotización
   // (el nombre de negocio por defecto de una plantilla nueva toma el del perfil del proveedor).
-  plantillas = loadPlantillas();
+  plantillas = await loadPlantillas();
   renderCotPlantillaSelect();
   onTipoEventoChange(); // sugiere la plantilla correcta según el tipo de evento por defecto
 
