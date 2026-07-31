@@ -2525,7 +2525,7 @@ function renderFeedGrid(){
   let html = '';
   feed.forEach((f, i) => {
     html += `<div class="gallery-item">
-      <img src="${f.url}" alt="Foto ${i+1}">
+      <img src="${esc(f.url)}" alt="Foto ${i+1}">
       ${perfilEditMode ? `<button class="gallery-remove" onclick="removeFeedFoto(${i})"><i class="ti ti-x"></i></button>` : ''}
     </div>`;
   });
@@ -2581,11 +2581,11 @@ function renderServiciosGrid(){
       : `<button class="btn-or" style="width:100%;justify-content:center;margin-top:10px;font-size:12px;" onclick="event.stopPropagation(); toggleServicioEnMercado(${s.id}, true)"><i class="ti ti-rocket"></i> Lanzar al mercado</button>`;
 
     html += `<div class="service-card editable" onclick="${clickFn}">
-      <img class="service-img" src="${thumb}" alt="${s.nombre}" style="${s.activo ? '' : 'opacity:.5;'}">
+      <img class="service-img" src="${esc(thumb)}" alt="${esc(s.nombre)}" style="${s.activo ? '' : 'opacity:.5;'}">
       <div class="service-body">
         <div style="margin-bottom:8px;">${estadoBadge}</div>
-        <div class="service-name">${s.nombre}</div>
-        <div class="service-desc">${s.descripcion}</div>
+        <div class="service-name">${esc(s.nombre)}</div>
+        <div class="service-desc">${esc(s.descripcion)}</div>
         <div class="service-price">S/. ${Number(s.precio).toLocaleString('es-PE')}</div>
         <div style="font-size:11px;color:var(--sub);margin-top:8px;"><i class="ti ti-photo" style="font-size:12px;"></i> ${imgs.length} foto${imgs.length===1?'':'s'}</div>
         ${btnLanzar}
@@ -2750,7 +2750,7 @@ function renderServiceModalImages(){
   let html = '';
   servicioImagenesDraft.forEach((url, i) => {
     html += `<div class="service-img-item">
-      <img src="${url}" alt="Foto ${i+1}">
+      <img src="${esc(url)}" alt="Foto ${i+1}">
       <button class="gallery-remove" onclick="removeServiceModalImage(${i})"><i class="ti ti-x"></i></button>
     </div>`;
   });
@@ -2842,7 +2842,7 @@ function openServiceViewer(id){
   const imgs = s.imagenes || [];
   const grid = document.getElementById('viewer-img-grid');
   grid.innerHTML = imgs.length
-    ? imgs.map((url, i) => `<div class="gallery-item"><img src="${url}" alt="Foto ${i+1}"></div>`).join('')
+    ? imgs.map((url, i) => `<div class="gallery-item"><img src="${esc(url)}" alt="Foto ${i+1}"></div>`).join('')
     : '<div style="color:var(--sub);font-size:13px;grid-column:1/-1;">Este servicio todavía no tiene fotos.</div>';
 
   const resenasServicio = (perfilData.resenasPorServicio && perfilData.resenasPorServicio[id]) || [];

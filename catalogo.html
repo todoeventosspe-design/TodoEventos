@@ -631,6 +631,15 @@ function esc(s){
   return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
+// Las fotos legitimas siempre salen del bucket publico de Storage. Cualquier
+// otra cosa (otro dominio, "javascript:", "data:") se descarta: el catalogo
+// muestra el placeholder de la categoria en vez de cargarla.
+const PREFIJO_FOTOS = 'https://vqnyaozauljtashpjfoo.supabase.co/storage/v1/object/public/';
+
+function fotoSegura(url){
+  return (typeof url === 'string' && url.startsWith(PREFIJO_FOTOS)) ? url : null;
+}
+
 // ─── DATA ───
 // Datos reales de Supabase (tablas "services" + "profiles"). Se llenan en
 // cargarProvidersReales(), al inicio. Empieza vacio hasta que la consulta
@@ -682,9 +691,10 @@ async function cargarProvidersReales(){
         district: (s.profiles.location || 'Lima').split(',')[0].trim(),
         tags: [],
         // Portada + galería reales: las fotos que el proveedor subió a este
-        // servicio desde el dashboard.
-        foto: s.image_url || null,
-        imagenes: Array.isArray(s.imagenes) ? s.imagenes : [],
+        // servicio desde el dashboard. Se filtran contra el bucket de Storage:
+        // una URL puesta a mano (otro dominio, "javascript:", "data:") se descarta.
+        foto: fotoSegura(s.image_url),
+        imagenes: (Array.isArray(s.imagenes) ? s.imagenes : []).map(fotoSegura).filter(Boolean),
         img: CAT_IMG[s.category] || 'a',
         icon: CAT_ICON[s.category] || 'ti-star',
         badge: esNuevo ? 'Nuevo ✨' : badgeParaRating(Number(s.profiles.rating) || 0),
@@ -836,10 +846,10 @@ async function openProvider(providerId) {
   const rating = Number(perfilReal.rating) || 0;
   const reviews = perfilReal.reviews_count || 0;
   const esNuevo = reviews === 0;
-  const servicios = (serviciosReal || []).map(s => ({ nombre: s.name, precio: s.price, descripcion: s.description, imagenes: s.imagenes || [] }));
+  const servicios = (serviciosReal || []).map(s => ({ nombre: s.name, precio: s.price, descripcion: s.description, imagenes: (s.imagenes || []).map(fotoSegura).filter(Boolean) }));
   let galeria = [];
   servicios.forEach(s => { (s.imagenes||[]).forEach(u => galeria.push(u)); });
-  galeria = galeria.concat((feedReal || []).map(f => f.url));
+  galeria = galeria.concat((feedReal || []).map(f => fotoSegura(f.url)).filter(Boolean));
 
   const p = { id: providerId, badge: esNuevo ? 'Nuevo ✨' : badgeParaRating(rating) };
 
