@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel de administrador — TodoEventos.pe</title>
+<title>Panel de administrador de TodoEventos.pe</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -67,7 +67,7 @@ h1{font-size:22px;font-weight:700;margin:22px 0 4px;}
 <body>
 
 <div class="loading-screen" id="loading-screen">
-  <span class="spinner"></span> Verificando acceso…
+  <span class="spinner"></span> Revisando tu acceso…
 </div>
 
 <div class="wrap contenido" id="contenido">
@@ -76,7 +76,7 @@ h1{font-size:22px;font-weight:700;margin:22px 0 4px;}
     <a href="index.html" class="back-link"><i class="ti ti-arrow-left"></i> Volver al inicio</a>
   </div>
   <h1>Panel de administrador</h1>
-  <p class="sub">Solicitudes de proveedores que quieren unirse a la plataforma.</p>
+  <p class="sub">Proveedores que se registraron y esperan que revisemos su cuenta.</p>
 
   <div class="tabs">
     <button class="tab active" id="tab-pendientes" onclick="cambiarTab('pendiente')">Pendientes <span id="count-pendientes"></span></button>
@@ -230,13 +230,13 @@ function render(){
 }
 
 async function aprobar(solicitudId, userId){
-  if(!confirm('¿Aprobar esta solicitud? El proveedor podrá acceder a su dashboard de inmediato.')) return;
+  if(!confirm('¿Aprobar esta solicitud? El proveedor va a poder entrar a su panel de una vez.')) return;
 
   // RPC atomico: aprueba solicitud + perfil en una sola transaccion (antes
   // eran 2 updates sueltos; si el segundo fallaba quedaba en estado mixto).
   const { error } = await sb.rpc('aprobar_proveedor', { p_user_id: userId });
   if(error){
-    alert('Hubo un problema al aprobar. Intenta de nuevo.');
+    alert('No se pudo aprobar. Intenta de nuevo.');
     console.error(error);
     return;
   }
@@ -244,12 +244,12 @@ async function aprobar(solicitudId, userId){
 }
 
 async function rechazar(solicitudId, userId){
-  const motivo = prompt('Motivo del rechazo (se guarda para referencia, pero por ahora no se le envía por correo al proveedor automáticamente):');
+  const motivo = prompt('Motivo del rechazo. El proveedor lo ve al entrar a su cuenta, no le llega por correo:');
   if(motivo === null) return; // canceló
 
   const { error } = await sb.rpc('rechazar_proveedor', { p_user_id: userId, p_motivo: motivo || null });
   if(error){
-    alert('Hubo un problema al rechazar. Intenta de nuevo.');
+    alert('No se pudo rechazar. Intenta de nuevo.');
     console.error(error);
     return;
   }

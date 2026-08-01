@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>¡Cuenta confirmada! — TodoEventos.pe</title>
+<title>Cuenta confirmada en TodoEventos.pe</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -67,11 +67,11 @@ h1{font-size:21px;font-weight:700;margin-bottom:10px;}
 
   <div class="card">
     <div class="check-badge"><i class="ti ti-circle-check"></i></div>
-    <h1 id="titulo">¡Tu cuenta ha sido confirmada!</h1>
-    <p class="sub" id="subtitulo">Gracias por unirte a TodoEventos.pe. Ya puedes empezar a explorar la plataforma.</p>
+    <h1 id="titulo">Listo, tu cuenta ya está activa</h1>
+    <p class="sub" id="subtitulo">Ya puedes entrar y empezar a usar TodoEventos.pe.</p>
 
     <div class="estado" id="estado">
-      <span class="spinner"></span> <span id="estado-texto">Verificando tu cuenta…</span>
+      <span class="spinner"></span> <span id="estado-texto">Estamos verificando tu cuenta…</span>
     </div>
 
     <a href="index.html" class="btn btn-primary"><i class="ti ti-home"></i> Ir al inicio</a>
@@ -151,8 +151,8 @@ async function verificarSesion(){
   }
 
   const mensajePorRol = {
-    cliente: 'Ya puedes explorar el marketplace y armar tu evento ideal.',
-    proveedor: 'Ya puedes gestionar tu negocio desde tu panel de herramientas.'
+    cliente: 'Ya puedes entrar al catálogo y armar tu evento.',
+    proveedor: 'Ya puedes manejar tu negocio desde tu panel.'
   };
 
   if(perfil && perfil.full_name){

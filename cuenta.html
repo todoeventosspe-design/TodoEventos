@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mi cuenta — TodoEventos.pe</title>
+<title>Mi cuenta en TodoEventos.pe</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -126,7 +126,7 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
     <div class="field">
       <label>Correo electrónico</label>
       <input type="email" id="input-correo">
-      <div class="hint">Si lo cambias, te llegará un correo de confirmación a la nueva dirección antes de que el cambio quede activo.</div>
+      <div class="hint">Si lo cambias, te mandamos un correo a la nueva dirección para confirmar que es tuya.</div>
     </div>
     <div class="row2">
       <div class="field">
@@ -185,7 +185,7 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
   <div class="card" id="card-admin" style="display:none;">
     <div class="card-title"><i class="ti ti-shield-lock"></i> Administración</div>
     <p style="font-size:13px;color:var(--sub);line-height:1.6;margin-bottom:16px;">
-      Tu cuenta tiene permisos de administrador. Desde aquí puedes revisar las solicitudes de proveedores.
+      Tu cuenta es de administrador, así que desde acá puedes revisar las solicitudes de los proveedores.
     </p>
     <a href="admin.html" class="btn btn-primary" style="text-decoration:none;">
       <i class="ti ti-external-link"></i> Ir al panel de admin
@@ -203,7 +203,7 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
 <!-- Modal: dejar / editar reseña -->
 <div class="modal-overlay" id="modal-resena">
   <div class="modal-resena">
-    <h3 id="resena-titulo">Reseña tu experiencia</h3>
+    <h3 id="resena-titulo">Cuenta cómo te fue</h3>
     <div class="sub" id="resena-sub"></div>
     <div class="stars-input" id="stars-input">
       <i class="ti ti-star" data-val="1"></i>
@@ -224,7 +224,7 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
 <!-- Modal: dejar / editar comentario de perfil (sobre el proveedor, no el servicio) -->
 <div class="modal-overlay" id="modal-comentario">
   <div class="modal-resena">
-    <h3 id="comentario-titulo">Comenta sobre el proveedor</h3>
+    <h3 id="comentario-titulo">Deja un comentario sobre el proveedor</h3>
     <div class="sub" id="comentario-sub"></div>
     <textarea id="comentario-texto" rows="4" placeholder="¿Cómo fue trabajar con esta persona/negocio? (puntualidad, trato, profesionalismo…)"></textarea>
     <div class="msg" id="msg-comentario"></div>
@@ -526,7 +526,7 @@ async function cargarContratados(){
 
 function abrirModalResena(requestId, providerId, serviceId, providerNombre, servicioNombre, ratingExistente, comentarioExistente){
   resenaActual = { requestId, providerId, serviceId, providerNombre, servicioNombre };
-  document.getElementById('resena-titulo').textContent = ratingExistente ? 'Edita tu reseña' : 'Reseña tu experiencia';
+  document.getElementById('resena-titulo').textContent = ratingExistente ? 'Edita tu reseña' : 'Cuenta cómo te fue';
   document.getElementById('resena-sub').textContent = `${servicioNombre} · ${providerNombre}`;
   document.getElementById('resena-comentario').value = comentarioExistente || '';
   document.getElementById('msg-resena').classList.remove('show');
@@ -587,7 +587,7 @@ let comentarioActual = null; // { requestId, providerId, providerNombre }
 
 function abrirModalComentario(requestId, providerId, providerNombre, comentarioExistente){
   comentarioActual = { requestId, providerId, providerNombre };
-  document.getElementById('comentario-titulo').textContent = comentarioExistente ? 'Edita tu comentario' : 'Comenta sobre el proveedor';
+  document.getElementById('comentario-titulo').textContent = comentarioExistente ? 'Edita tu comentario' : 'Deja un comentario sobre el proveedor';
   document.getElementById('comentario-sub').textContent = providerNombre;
   document.getElementById('comentario-texto').value = comentarioExistente || '';
   document.getElementById('msg-comentario').classList.remove('show');

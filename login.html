@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Acceso — TodoEventos.pe</title>
+<title>Ingresar a TodoEventos.pe</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -96,7 +96,7 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
 
 <div class="login-wrap">
   <span class="logo"><span class="lp">Todo</span><span class="lo">Eventos</span><span class="dot">.pe</span></span>
-  <p class="login-sub">Bienvenido de vuelta 👋</p>
+  <p class="login-sub">Bienvenido de vuelta</p>
 
   <div class="card">
     <div id="vista-form">
@@ -107,7 +107,7 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
 
     <div class="role-ctx">
       <div class="role-ctx-title" id="ctx-title">Ingresa como Cliente</div>
-      <div class="role-ctx-desc" id="ctx-desc">Explora el marketplace y arma tu evento ideal.</div>
+      <div class="role-ctx-desc" id="ctx-desc">Mira el catálogo y arma tu evento.</div>
     </div>
 
     <div class="msg error" id="msg-error"><i class="ti ti-alert-circle"></i> <span id="err-text">Correo o contraseña incorrectos.</span></div>
@@ -175,13 +175,13 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
           <input type="tel" id="prov-telefono" placeholder="Ej. 987 654 321">
         </div>
         <div class="field-plain">
-          <label>Distrito donde operas</label>
+          <label>¿En qué distrito trabajas?</label>
           <input type="text" id="prov-distrito" placeholder="Ej. Miraflores">
         </div>
       </div>
 
       <div class="field-plain">
-        <label>Describe brevemente tu negocio</label>
+        <label>Cuéntanos qué hace tu negocio</label>
         <textarea id="prov-descripcion" rows="2" placeholder="¿Qué ofreces y qué te diferencia?"></textarea>
       </div>
 
@@ -208,14 +208,14 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
 
     <button class="btn-login" id="btn-login" onclick="handleSubmit()"><i class="ti ti-login-2" id="btn-icon"></i> <span id="btn-text">Ingresar al marketplace</span></button>
 
-    <p class="foot-note" id="foot-note">¿Aún no tienes cuenta? <a href="#" onclick="toggleAuthMode();return false;">Regístrate gratis</a></p>
+    <p class="foot-note" id="foot-note">¿No tienes cuenta? <a href="#" onclick="toggleAuthMode();return false;">Regístrate, es gratis</a></p>
     </div>
 
     <!-- ─── Verificación por código (reemplaza el link de confirmación) ─── -->
     <div id="vista-codigo" style="display:none;">
       <div class="role-ctx" style="margin-bottom:20px;">
         <div class="role-ctx-title"><i class="ti ti-mail-check" style="margin-right:6px;"></i> Revisa tu correo</div>
-        <div class="role-ctx-desc">Te enviamos un código de 6 dígitos a <b id="codigo-email-destino" style="color:var(--fg);"></b>. Ingrésalo para activar tu cuenta.</div>
+        <div class="role-ctx-desc">Te mandamos un código de 6 dígitos a <b id="codigo-email-destino" style="color:var(--fg);"></b>. Escríbelo acá para activar tu cuenta.</div>
       </div>
 
       <div class="msg error" id="msg-error-codigo"><i class="ti ti-alert-circle"></i> <span id="err-text-codigo"></span></div>
@@ -235,7 +235,7 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
     </div>
   </div>
 
-  <a href="index.html" class="back-home"><i class="ti ti-arrow-left" style="font-size:14px;"></i> Volver al Inicio</a>
+  <a href="index.html" class="back-home"><i class="ti ti-arrow-left" style="font-size:14px;"></i> Volver al inicio</a>
 </div>
 
 <script>
@@ -286,7 +286,7 @@ let authMode = 'login'; // 'login' | 'registro'
 const ROLE_UI = {
   cliente: {
     ctxTitle: 'Ingresa como Cliente',
-    ctxDesc: 'Explora el marketplace y arma tu evento ideal.',
+    ctxDesc: 'Mira el catálogo y arma tu evento.',
   },
   proveedor: {
     ctxTitle: 'Ingresa como Proveedor',
@@ -332,7 +332,7 @@ function updateUI(){
     document.getElementById('btn-text').textContent = currentRole === 'cliente'
       ? 'Ingresar al marketplace' : 'Ingresar al dashboard';
     document.getElementById('foot-note').innerHTML = (currentRole === 'cliente')
-      ? '¿Aún no tienes cuenta? <a href="#" onclick="toggleAuthMode();return false;">Regístrate gratis</a>'
+      ? '¿No tienes cuenta? <a href="#" onclick="toggleAuthMode();return false;">Regístrate, es gratis</a>'
       : '¿Quieres vender en TodoEventos? <a href="proveedores.html">Conoce los planes</a> · <a href="#" onclick="toggleAuthMode();return false;">o crea tu cuenta</a>';
   }
 }

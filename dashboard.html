@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Proveedor — TodoEventos.pe</title>
+<title>Panel del proveedor en TodoEventos.pe</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
@@ -303,7 +303,7 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
     </div>
     <h2 id="verif-titulo" style="font-size:19px;font-weight:700;margin-bottom:10px;">Tu cuenta está en revisión</h2>
     <p id="verif-texto" style="font-size:13.5px;color:var(--sub);line-height:1.7;margin-bottom:22px;white-space:pre-line;">
-      Estamos revisando la información de tu negocio. Vuelve a entrar más tarde para ver si tu cuenta ya quedó aprobada — normalmente toma menos de 48 horas.
+      Estamos revisando la información de tu negocio. Vuelve a entrar más tarde para ver si ya quedó aprobada. Normalmente lo revisamos en un par de días.
     </p>
     <button onclick="window.location.href='index.html'" style="background:var(--or);color:#fff;border:none;padding:12px 24px;border-radius:10px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;">
       Volver al inicio
@@ -379,7 +379,7 @@ async function verificarAccesoDashboard(){
 
   if(perfil.verification_status === 'pendiente'){
     mostrarCandado('ti-clock-hour-4', 'Tu cuenta está en revisión',
-      'Estamos revisando la información de tu negocio. Vuelve a entrar más tarde para ver si ya quedó aprobada — normalmente toma menos de 48 horas.');
+      'Estamos revisando la información de tu negocio. Vuelve a entrar más tarde para ver si ya quedó aprobada. Normalmente lo revisamos en un par de días.');
     return;
   }
 
@@ -421,7 +421,7 @@ verificarAccesoDashboard();
     <button class="side-item" onclick="openTool('caja')"><i class="ti ti-cash"></i> Control de Caja</button>
     <button class="side-item" onclick="openTool('crm')"><i class="ti ti-users"></i> CRM Clientes</button>
     <button class="side-item" onclick="openTool('inventario')"><i class="ti ti-package"></i> Inventario</button>
-    <button class="side-item" onclick="openTool('analytics')"><i class="ti ti-chart-bar"></i> Analytics</button>
+    <button class="side-item" onclick="openTool('analytics')"><i class="ti ti-chart-bar"></i> Reportes</button>
 
     <div class="side-spacer"></div>
 
@@ -444,8 +444,8 @@ verificarAccesoDashboard();
     <section class="view active" id="view-home">
       <div class="topbar">
         <div class="greeting">
-          <h1 id="home-greeting-nombre">¡Hola! 👋</h1>
-          <p>Este es el resumen de tu negocio hoy.</p>
+          <h1 id="home-greeting-nombre">Hola</h1>
+          <p>Así va tu negocio hoy.</p>
         </div>
         <div class="top-badge"><span class="dot-live"></span> Perfil activo y visible</div>
       </div>
@@ -476,43 +476,43 @@ verificarAccesoDashboard();
       </div>
 
       <div class="section-title">Tus herramientas</div>
-      <div class="section-sub">Todo lo que necesitas para gestionar tu negocio en un solo lugar.</div>
+      <div class="section-sub">Las seis herramientas de tu panel.</div>
 
       <div class="tools-grid">
         <button class="tool-card" onclick="openTool('agenda')">
           <div class="tool-ico"><i class="ti ti-calendar-event"></i></div>
-          <div class="tool-title">Agenda Inteligente</div>
-          <div class="tool-desc">Sincroniza tus eventos y evita cruces de fechas automáticamente.</div>
+          <div class="tool-title">Agenda</div>
+          <div class="tool-desc">Tus eventos en un calendario, sin que se te crucen dos el mismo día.</div>
           <div class="tool-arrow">Abrir <i class="ti ti-arrow-right"></i></div>
         </button>
         <button class="tool-card" onclick="openTool('cotizador')">
           <div class="tool-ico"><i class="ti ti-file-invoice"></i></div>
-          <div class="tool-title">Cotizador Rápido</div>
-          <div class="tool-desc">Genera presupuestos profesionales en segundos y envíalos al cliente.</div>
+          <div class="tool-title">Cotizador</div>
+          <div class="tool-desc">Arma el presupuesto y descárgalo en PDF para mandárselo al cliente.</div>
           <div class="tool-arrow">Abrir <i class="ti ti-arrow-right"></i></div>
         </button>
         <button class="tool-card" onclick="openTool('caja')">
           <div class="tool-ico"><i class="ti ti-cash"></i></div>
           <div class="tool-title">Control de Caja</div>
-          <div class="tool-desc">Registra ingresos y gastos para saber cuánto ganas de verdad.</div>
+          <div class="tool-desc">Anota lo que entra y lo que sale para saber cuánto te queda.</div>
           <div class="tool-arrow">Abrir <i class="ti ti-arrow-right"></i></div>
         </button>
         <button class="tool-card" onclick="openTool('crm')">
           <div class="tool-ico"><i class="ti ti-users"></i></div>
-          <div class="tool-title">CRM de Clientes</div>
-          <div class="tool-desc">Guarda el historial y da seguimiento a cada cliente sin perder detalle.</div>
+          <div class="tool-title">Clientes</div>
+          <div class="tool-desc">Tus clientes, cuántos eventos te han contratado y en qué quedaron.</div>
           <div class="tool-arrow">Abrir <i class="ti ti-arrow-right"></i></div>
         </button>
         <button class="tool-card" onclick="openTool('inventario')">
           <div class="tool-ico"><i class="ti ti-package"></i></div>
-          <div class="tool-title">Control de Inventario</div>
-          <div class="tool-desc">Controla tus equipos e insumos y evita quedarte sin stock.</div>
+          <div class="tool-title">Inventario</div>
+          <div class="tool-desc">Cuántos equipos tienes y cuáles se te están acabando.</div>
           <div class="tool-arrow">Abrir <i class="ti ti-arrow-right"></i></div>
         </button>
         <button class="tool-card" onclick="openTool('analytics')">
           <div class="tool-ico"><i class="ti ti-chart-bar"></i></div>
-          <div class="tool-title">Analytics & Reportes</div>
-          <div class="tool-desc">Métricas de ventas, temporadas altas y tu crecimiento mes a mes.</div>
+          <div class="tool-title">Reportes</div>
+          <div class="tool-desc">Cuánto facturaste por mes y cómo vienes comparado con antes.</div>
           <div class="tool-arrow">Abrir <i class="ti ti-arrow-right"></i></div>
         </button>
       </div>
@@ -520,10 +520,10 @@ verificarAccesoDashboard();
 
     <!-- ─── AGENDA ─── -->
     <section class="view" id="view-agenda">
-      <button class="back-btn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Volver al Inicio del Dashboard</button>
+      <button class="back-btn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Volver al inicio del panel</button>
       <div class="view-head">
         <div class="view-ico"><i class="ti ti-calendar-event"></i></div>
-        <div><div class="view-h">Agenda Inteligente</div><div class="view-sub" id="agenda-sub">Cargando…</div></div>
+        <div><div class="view-h">Agenda</div><div class="view-sub" id="agenda-sub">Cargando…</div></div>
       </div>
       <div class="panel">
         <div class="cal-head">
@@ -572,7 +572,7 @@ verificarAccesoDashboard();
           <label>Distrito</label>
           <input type="text" id="modal-distrito" placeholder="Ej. Miraflores">
         </div>
-        <div class="tool-desc" style="margin:-6px 0 14px;font-size:11.5px;">Este bloque se mostrará como <b>ocupado</b> en tu calendario público, sin revelar el nombre del cliente ni el local.</div>
+        <div class="tool-desc" style="margin:-6px 0 14px;font-size:11.5px;">En tu calendario público este bloque solo aparece como <b>ocupado</b>: no se ve el nombre del cliente ni el local.</div>
         <div class="field">
           <label>Estado</label>
           <select id="modal-estado">
@@ -598,7 +598,7 @@ verificarAccesoDashboard();
             <div class="modal-title"><i class="ti ti-file-invoice" style="color:var(--or);margin-right:6px;"></i> Plantillas de cotización</div>
             <button class="modal-close" onclick="closePlantillaModal()"><i class="ti ti-x"></i></button>
           </div>
-          <div class="modal-date">Crea una plantilla distinta por tipo de evento (boda, corporativo, etc.). Al cotizar, se sugiere automáticamente la que corresponda.</div>
+          <div class="modal-date">Puedes tener una plantilla por tipo de evento (boda, corporativo, lo que uses). Al cotizar se elige sola según el tipo.</div>
 
           <div id="plantilla-lista-cards"></div>
 
@@ -659,10 +659,10 @@ verificarAccesoDashboard();
 
     <!-- ─── COTIZADOR ─── -->
     <section class="view" id="view-cotizador">
-      <button class="back-btn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Volver al Inicio del Dashboard</button>
+      <button class="back-btn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Volver al inicio del panel</button>
       <div class="view-head">
         <div class="view-ico"><i class="ti ti-file-invoice"></i></div>
-        <div><div class="view-h">Cotizador Rápido</div><div class="view-sub">Arma un presupuesto y envíalo al cliente</div></div>
+        <div><div class="view-h">Cotizador</div><div class="view-sub">Arma el presupuesto y descárgalo en PDF</div></div>
         <button class="btn-ghost" style="margin-left:auto;" onclick="openPlantillaLista()"><i class="ti ti-layout-grid"></i> Plantillas de cotización</button>
       </div>
       <div class="panel">
@@ -687,7 +687,7 @@ verificarAccesoDashboard();
         <div class="field" style="margin-bottom:0;">
           <label><i class="ti ti-file-invoice" style="font-size:12px;"></i> Plantilla a usar en el PDF</label>
           <select id="cot-plantilla"></select>
-          <div style="font-size:11.5px;color:var(--sub);margin-top:6px;">Se sugiere sola según el tipo de evento. Puedes cambiarla o <a href="#" onclick="openPlantillaLista();return false;" style="color:var(--or);font-weight:600;">crear una nueva</a>.</div>
+          <div style="font-size:11.5px;color:var(--sub);margin-top:6px;">Se elige sola según el tipo de evento. Puedes cambiarla o <a href="#" onclick="openPlantillaLista();return false;" style="color:var(--or);font-weight:600;">crear una nueva</a>.</div>
         </div>
       </div>
       <div class="panel">
@@ -710,14 +710,14 @@ verificarAccesoDashboard();
           <div style="font-size:22px;font-weight:700;color:var(--or);" id="cot-total">S/. 0</div>
         </div>
         <div class="add-row">
-          <button class="btn-outline-or" onclick="exportCotizacionPDF()">📥 Descargar PDF</button>
+          <button class="btn-outline-or" onclick="exportCotizacionPDF()"><i class="ti ti-download"></i> Descargar PDF</button>
         </div>
       </div>
     </section>
 
     <!-- ─── CAJA ─── -->
     <section class="view" id="view-caja">
-      <button class="back-btn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Volver al Inicio del Dashboard</button>
+      <button class="back-btn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Volver al inicio del panel</button>
       <div class="view-head">
         <div class="view-ico"><i class="ti ti-cash"></i></div>
         <div><div class="view-h">Control de Caja</div><div class="view-sub" id="caja-sub">Ingresos y gastos</div></div>
@@ -766,10 +766,10 @@ verificarAccesoDashboard();
 
     <!-- ─── CRM ─── -->
     <section class="view" id="view-crm">
-      <button class="back-btn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Volver al Inicio del Dashboard</button>
+      <button class="back-btn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Volver al inicio del panel</button>
       <div class="view-head">
         <div class="view-ico"><i class="ti ti-users"></i></div>
-        <div><div class="view-h">CRM de Clientes</div><div class="view-sub" id="crm-sub">Historial y seguimiento de tus clientes</div></div>
+        <div><div class="view-h">Clientes</div><div class="view-sub" id="crm-sub">A quiénes les has trabajado</div></div>
       </div>
       <div class="panel">
         <div class="panel-title"><i class="ti ti-address-book"></i> Tus clientes</div>
@@ -815,10 +815,10 @@ verificarAccesoDashboard();
 
     <!-- ─── INVENTARIO ─── -->
     <section class="view" id="view-inventario">
-      <button class="back-btn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Volver al Inicio del Dashboard</button>
+      <button class="back-btn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Volver al inicio del panel</button>
       <div class="view-head">
         <div class="view-ico"><i class="ti ti-package"></i></div>
-        <div><div class="view-h">Control de Inventario</div><div class="view-sub" id="inv-sub">Tus equipos e insumos disponibles</div></div>
+        <div><div class="view-h">Inventario</div><div class="view-sub" id="inv-sub">Qué equipos tienes y cuántos quedan</div></div>
       </div>
       <div class="panel">
         <div class="panel-title"><i class="ti ti-speakerphone"></i> Equipos</div>
@@ -858,10 +858,10 @@ verificarAccesoDashboard();
 
     <!-- ─── ANALYTICS ─── -->
     <section class="view" id="view-analytics">
-      <button class="back-btn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Volver al Inicio del Dashboard</button>
+      <button class="back-btn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Volver al inicio del panel</button>
       <div class="view-head">
         <div class="view-ico"><i class="ti ti-chart-bar"></i></div>
-        <div><div class="view-h">Analytics & Reportes</div><div class="view-sub" id="an-sub">Tu desempeño real, calculado de tu Caja y Agenda</div></div>
+        <div><div class="view-h">Reportes</div><div class="view-sub" id="an-sub">Calculado con lo que registraste en Caja y Agenda</div></div>
       </div>
       <div class="stat-grid">
         <div class="stat"><div class="stat-val" id="an-ingresos">S/. 0</div><div class="stat-lbl">Ingresos totales</div></div>
@@ -874,27 +874,27 @@ verificarAccesoDashboard();
       </div>
       <div class="panel">
         <div class="panel-title"><i class="ti ti-bulb"></i> Insight</div>
-        <div class="tool-desc" id="an-insight">Aún no hay suficientes datos para un insight.</div>
+        <div class="tool-desc" id="an-insight">Todavía no hay datos suficientes para sacar conclusiones.</div>
       </div>
     </section>
 
     <!-- ─── MI PERFIL PÚBLICO ─── -->
     <!-- ─── SOLICITUDES / REQUESTS ─── -->
     <section class="view" id="view-solicitudes">
-      <button class="back-btn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Volver al Inicio del Dashboard</button>
+      <button class="back-btn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Volver al inicio del panel</button>
       <div class="view-head">
         <div class="view-ico"><i class="ti ti-inbox"></i></div>
-        <div><div class="view-h">Solicitudes de Reserva</div><div class="view-sub" id="req-sub">Clientes que quieren contratarte</div></div>
+        <div><div class="view-h">Solicitudes de reserva</div><div class="view-sub" id="req-sub">Clientes que quieren tu fecha</div></div>
       </div>
       <div class="panel">
         <div class="panel-title"><i class="ti ti-calendar-question"></i> Verifica tu agenda antes de aceptar</div>
-        <div class="tool-desc" style="margin-bottom:18px;">Cada solicitud te pide confirmar si tienes la fecha libre. Aceptar reserva tu día; rechazar libera el espacio.</div>
+        <div class="tool-desc" style="margin-bottom:18px;">Antes de aceptar, fíjate en que tengas esa fecha libre. Si aceptas, el día te queda tomado.</div>
         <div class="req-list" id="req-list"></div>
       </div>
     </section>
 
     <section class="view" id="view-perfil">
-      <button class="back-btn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Volver al Inicio del Dashboard</button>
+      <button class="back-btn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Volver al inicio del panel</button>
 
       <div class="profile-wrap">
         <!-- Banner + avatar -->
@@ -926,14 +926,14 @@ verificarAccesoDashboard();
         <!-- Biografía -->
         <div class="panel">
           <div class="panel-title"><i class="ti ti-quote"></i> Sobre mí</div>
-          <div class="profile-bio" id="perfil-bio-view">Más de 8 años poniendo el ritmo en las mejores bodas, quinceañeros y eventos corporativos de Lima. Combino equipos de sonido profesional con un ojo para leer a la pista y saber exactamente cuándo subir la energía. Cada evento tiene su propia historia — mi trabajo es ponerle la banda sonora correcta.</div>
+          <div class="profile-bio" id="perfil-bio-view"></div>
           <textarea class="profile-bio-edit" id="perfil-bio-edit" style="display:none;" rows="4"></textarea>
         </div>
 
         <!-- Feed personal: humaniza al proveedor, separado de los servicios -->
         <div class="panel">
           <div class="panel-title"><i class="ti ti-camera"></i> Un poco más sobre mí <span id="feed-count" style="color:var(--sub);font-weight:400;font-size:12px;"></span></div>
-          <div class="tool-desc" style="margin-bottom:12px;">Fotos personales para que tus clientes te conozcan más allá del trabajo.</div>
+          <div class="tool-desc" style="margin-bottom:12px;">Fotos tuyas para que tus clientes vean quién está detrás del negocio.</div>
           <div class="gallery-grid" id="perfil-feed-grid"></div>
         </div>
 
@@ -952,7 +952,7 @@ verificarAccesoDashboard();
 
         <!-- Comentarios de perfil: solo lectura, los genera el mercado, no el proveedor -->
         <div class="profile-panel" id="ppanel-resenas">
-          <div class="tool-desc" style="margin-bottom:14px;">Lo que tus clientes dicen sobre ti como persona/negocio (distinto de las reseñas de cada servicio, esas se ven al abrir el servicio).</div>
+          <div class="tool-desc" style="margin-bottom:14px;">Lo que tus clientes dicen de ti como negocio. Las reseñas de cada servicio se ven al abrir el servicio.</div>
           <div class="reviews-list" id="perfil-resenas-list"></div>
         </div>
 
@@ -1302,7 +1302,7 @@ async function saveEvent(){
 
   const fila = {
     provider_id: usuarioActual.id,
-    title: tipo + ' — ' + cliente,
+    title: tipo + ': ' + cliente,
     event_date: selectedDateStr,
     type: tipo,
     client_name: cliente,
@@ -2194,7 +2194,7 @@ function invEstado(disponible, total){
   const ratio = total > 0 ? disponible / total : 0;
   if(ratio >= 0.7) return { color:'var(--green)', label: disponible + ' / ' + total + ' OK', critical:false };
   if(ratio >= 0.3) return { color:'var(--gold)', label: disponible + ' / ' + total, critical:false };
-  return { color:'var(--red)', label: disponible + ' / ' + total + ' ⚠', critical:true };
+  return { color:'var(--red)', label: disponible + ' / ' + total + ' bajo', critical:true };
 }
 
 function renderInvList(){
@@ -2216,7 +2216,7 @@ function renderInvAlert(){
   const alertEl = document.getElementById('inv-alert');
   const criticos = invItems.filter(it => invEstado(it.disponible, it.total).critical);
   if(criticos.length === 0){
-    alertEl.innerHTML = '✅ Todo tu inventario está en niveles saludables. Ningún equipo requiere reposición urgente.';
+    alertEl.innerHTML = 'Tu inventario está bien. Ningún equipo necesita reposición por ahora.';
     return;
   }
   const nombres = criticos.map(it => `<b style="color:var(--fg);">${esc(it.nombre)}</b> (${it.disponible} de ${it.total})`).join(', ');
@@ -2454,7 +2454,7 @@ function renderPerfil(){
   document.getElementById('perfil-nombre').textContent = perfilData.nombre;
   const primerNombre = (perfilData.nombre || '').split(' ')[0] || 'de vuelta';
   const greetEl = document.getElementById('home-greeting-nombre');
-  if(greetEl) greetEl.textContent = '¡Hola, ' + primerNombre + '! 👋';
+  if(greetEl) greetEl.textContent = 'Hola, ' + primerNombre;
 
   const { rating: homeRating, count: homeCount } = calcularRatingDesdeResenas();
   const kpiRatingEl = document.getElementById('home-kpi-rating');
@@ -3004,7 +3004,7 @@ async function aceptarSolicitud(id){
 
   const yaOcupado = agendaEvents.some(e => e.date === r.fecha);
   if(yaOcupado){
-    const seguir = confirm('⚠️ Ya tienes un evento agendado el ' + r.fecha + '.\n\n¿Aceptar de todos modos? Podrías generar un cruce de reservas.');
+    const seguir = confirm('Ya tienes un evento agendado el ' + r.fecha + '.\n\n¿Aceptar de todos modos? Podrías generar un cruce de reservas.');
     if(!seguir) return;
   }
 
@@ -3051,7 +3051,7 @@ async function bloquearFechaEnAgenda(r){
   await sb.from('agenda').insert({
     provider_id: usuarioActual.id,
     request_id: r.id,
-    title: (r.tipoEvento || 'Evento') + ' — ' + r.cliente,
+    title: (r.tipoEvento || 'Evento') + ': ' + r.cliente,
     event_date: r.fecha,
     type: r.tipoEvento || 'Evento',
     client_name: r.cliente,

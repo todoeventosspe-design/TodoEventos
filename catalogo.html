@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Marketplace — TodoEventos.pe</title>
+<title>Marketplace de TodoEventos.pe</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
 @import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
@@ -574,7 +574,7 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
   <div class="results-header">
     <div>
       <h1 class="results-title" id="results-title">Todos los servicios</h1>
-      <p class="results-sub" id="results-sub">Proveedores verificados disponibles en Lima</p>
+      <p class="results-sub" id="results-sub">Proveedores de Lima que ya pasaron nuestra revisión</p>
     </div>
   </div>
 
@@ -583,8 +583,8 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
   </div>
   <div class="no-results" id="no-results">
     <i class="ti ti-search-off"></i>
-    <h3>Sin resultados para estos filtros</h3>
-    <p style="color:var(--sub);margin-top:.5rem;">Prueba cambiando la categoría o los filtros</p>
+    <h3>No encontramos nada con esos filtros</h3>
+    <p style="color:var(--sub);margin-top:.5rem;">Prueba con otra categoría o quita algún filtro</p>
   </div>
 </div>
 
@@ -598,7 +598,7 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
       </div>
       <div class="cp-info">
         <div class="cp-name">Asistente · TodoEventos</div>
-        <div class="cp-status">En línea · responde al instante</div>
+        <div class="cp-status">En línea</div>
       </div>
       <div class="cp-actions">
         <button class="cp-action-btn" onclick="clearChat()" title="Nueva conversación"><i class="ti ti-refresh" style="font-size:15px;"></i></button>
@@ -616,7 +616,7 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
         <textarea class="cp-input" id="chat-input" rows="1" placeholder="Escribe tu consulta…" onkeydown="handleKey(event)"></textarea>
         <button class="cp-send" id="send-btn" onclick="sendMsg()"><i class="ti ti-send" style="color:#fff;font-size:15px;"></i></button>
       </div>
-      <div class="cp-hint">Asistente inteligente TodoEventos.pe</div>
+      <div class="cp-hint">Asistente de TodoEventos.pe</div>
     </div>
   </div>
   <button class="chat-toggle" onclick="toggleChat()" style="position:relative;" id="chat-toggle-btn">
@@ -657,9 +657,9 @@ const CAT_IMG = {
 };
 
 function badgeParaRating(rating){
-  if(rating >= 4.8) return '🏆 Top Rated';
+  if(rating >= 4.8) return 'Mejor calificado';
   if(rating >= 4.5) return '✓ Verificado';
-  return 'Nuevo ✨';
+  return 'Nuevo';
 }
 
 async function cargarProvidersReales(){
@@ -697,7 +697,7 @@ async function cargarProvidersReales(){
         imagenes: (Array.isArray(s.imagenes) ? s.imagenes : []).map(fotoSegura).filter(Boolean),
         img: CAT_IMG[s.category] || 'a',
         icon: CAT_ICON[s.category] || 'ti-star',
-        badge: esNuevo ? 'Nuevo ✨' : badgeParaRating(Number(s.profiles.rating) || 0),
+        badge: esNuevo ? 'Nuevo' : badgeParaRating(Number(s.profiles.rating) || 0),
         desc: s.description || ''
       };
     });
@@ -851,7 +851,7 @@ async function openProvider(providerId) {
   servicios.forEach(s => { (s.imagenes||[]).forEach(u => galeria.push(u)); });
   galeria = galeria.concat((feedReal || []).map(f => fotoSegura(f.url)).filter(Boolean));
 
-  const p = { id: providerId, badge: esNuevo ? 'Nuevo ✨' : badgeParaRating(rating) };
+  const p = { id: providerId, badge: esNuevo ? 'Nuevo' : badgeParaRating(rating) };
 
   document.getElementById('pm-name').textContent = nombre;
   document.getElementById('pm-categoria').textContent = categoria;
@@ -968,7 +968,7 @@ function addToCart(servicioIndex){
   // Evita duplicar exactamente el mismo servicio del mismo proveedor
   const yaExiste = cart.some(it => it.proveedorId === currentModalProvider.id && it.servicio === s.nombre);
   if(yaExiste){
-    addBotMsg(`<b>${esc(s.nombre)}</b> ya está en tu presupuesto. 🛒`);
+    addBotMsg(`<b>${esc(s.nombre)}</b> ya está en tu presupuesto.`);
     if(!document.getElementById('chat-panel').classList.contains('open')) toggleChat();
     return;
   }
@@ -1074,7 +1074,7 @@ function quickHire(providerId){
   const servicioNombre = 'Servicio base — ' + (catNames[p.cat] || 'Evento');
   const yaExiste = cart.some(it => it.proveedorId === p.providerId && it.servicio === servicioNombre);
   if(yaExiste){
-    addBotMsg(`El servicio base de <b>${esc(p.name)}</b> ya está en tu presupuesto. 🛒`);
+    addBotMsg(`El servicio base de <b>${esc(p.name)}</b> ya está en tu presupuesto.`);
     if(!document.getElementById('chat-panel').classList.contains('open')) toggleChat();
     return;
   }
@@ -1246,7 +1246,7 @@ function contactProviderFromModal(){
   closeProviderModal();
   if (!document.getElementById('chat-panel').classList.contains('open')) toggleChat();
   setTimeout(() => {
-    addBotMsg(`¡Buena elección! Para reservar con <b>${esc(nombre)}</b>, indícame la fecha de tu evento y confirmo su disponibilidad. También puedo armarte un presupuesto completo si me cuentas más del evento. 🎉`);
+    addBotMsg(`Para reservar con <b>${esc(nombre)}</b> dime la fecha de tu evento y reviso si la tiene libre. Si me cuentas más del evento, te armo el presupuesto completo.`);
   }, 350);
 }
 
@@ -1377,7 +1377,7 @@ const knowledgeBase = {
           </div>
         </div>`;
     },
-    followup: '¿Quieres que te muestre proveedores de <b>catering con parrilleros profesionales</b> o de <b>alquiler de mobiliario</b> en el marketplace? 🎯'
+    followup: '¿Quieres que te muestre proveedores de <b>catering con parrilleros profesionales</b> o de <b>alquiler de mobiliario</b> en el marketplace?'
   },
   babyshower: {
     triggers: ['baby shower','babyshower','revelación de género','revelacion de genero'],
@@ -1406,7 +1406,7 @@ const knowledgeBase = {
           </div>
         </div>`;
     },
-    followup: '¿Te muestro proveedores de <b>decoración</b>, <b>pastelería</b> o <b>catering de bocaditos</b> para tu baby shower? 🎯'
+    followup: '¿Te muestro proveedores de <b>decoración</b>, <b>pastelería</b> o <b>catering de bocaditos</b> para tu baby shower?'
   },
   corporativo: {
     triggers: ['corporativo','empresa','evento de trabajo','lanzamiento','conferencia'],
@@ -1435,7 +1435,7 @@ const knowledgeBase = {
           </div>
         </div>`;
     },
-    followup: '¿Busco proveedores de <b>locales</b>, <b>catering corporativo</b> o <b>producción audiovisual</b> para ti? 🎯'
+    followup: '¿Busco proveedores de <b>locales</b>, <b>catering corporativo</b> o <b>producción audiovisual</b> para ti?'
   }
 };
 
@@ -1484,8 +1484,8 @@ function renderBudget(eventType, budget, guests, district) {
   if (budget) {
     const diff = budget - total;
     balance = diff >= 0
-      ? `<div class="bt-balance ok">✅ Te sobran ${money(diff)} de tu presupuesto</div>`
-      : `<div class="bt-balance over">⚠️ Excede tu presupuesto por ${money(Math.abs(diff))} — puedo ajustar a opciones más económicas</div>`;
+      ? `<div class="bt-balance ok">Te sobran ${money(diff)} de tu presupuesto</div>`
+      : `<div class="bt-balance over">Se pasa de tu presupuesto por ${money(Math.abs(diff))}. Si quieres, lo ajusto con opciones más baratas.</div>`;
   }
 
   return `
@@ -1498,7 +1498,7 @@ function renderBudget(eventType, budget, guests, district) {
         <tfoot><tr><td colspan="2" class="bt-total-lbl">Total estimado</td><td class="bt-total">${money(total)}</td></tr></tfoot>
       </table>
       ${balance}
-      <div class="bt-cta">¿Reservamos estos proveedores o ajustamos algún ítem? Puedes verlos en el <b>marketplace</b> 👆</div>
+      <div class="bt-cta">¿Reservamos estos proveedores o ajustamos algún ítem? Los tienes todos en el <b>marketplace</b>.</div>
     </div>`;
 }
 
@@ -1511,7 +1511,7 @@ function toggleChat(){
     panel.classList.add('open'); icon.className='ti ti-x';
     if(!chatInitialized){
       chatInitialized=true;
-      setTimeout(()=>addBotMsg('¡Hola! 👋 Soy el <b>Asistente TodoEventos</b>, tu planificador de eventos. Cuéntame qué quieres celebrar (tipo, invitados, distrito y presupuesto) y te armo todo. También puedo darte <b>consejos de organización</b> — pruébame con "quiero hacer una parrillada". 🎉'),200);
+      setTimeout(()=>addBotMsg('Hola, soy el <b>asistente de TodoEventos</b>. Cuéntame qué quieres celebrar (qué es, cuánta gente, en qué distrito y cuánto tienes) y te armo el presupuesto. También te puedo dar <b>ideas para organizarlo</b>: prueba escribiendo "quiero hacer una parrillada".'),200);
     }
     setTimeout(scrollMsgs,150);
   } else { panel.classList.remove('open'); icon.className='ti ti-robot'; }
@@ -1522,7 +1522,7 @@ function clearChat(){
   ctx.guests=null; ctx.district=null; ctx.date=null; ctx.lastTopic=null; ctx.mentioned.clear(); ctx.unclear=0;
   document.getElementById('chat-msgs').innerHTML='';
   document.getElementById('quick-replies').style.display='flex';
-  setTimeout(()=>addBotMsg('Conversación reiniciada. ¡Hola de nuevo! ¿Qué evento organizamos? 🎉'),200);
+  setTimeout(()=>addBotMsg('Listo, empezamos de nuevo. ¿Qué evento tienes?'),200);
 }
 
 function scrollMsgs(){ const m=document.getElementById('chat-msgs'); m.scrollTop=m.scrollHeight; }
@@ -1557,7 +1557,7 @@ function threadBack() {
   if (ctx.eventType && ctx.currentContext !== 'quoting') {
     const evName = eventNames[ctx.eventType] || 'tu evento';
     const loc = ctx.district ? ` en ${ctx.district.replace(/^\w/,c=>c.toUpperCase())}` : '';
-    return `<div class="thread-back">💡 Por cierto, ¿lo sumamos al presupuesto de <b>${evName}${loc}</b> que estábamos armando, o lo dejamos como extra?</div>`;
+    return `<div class="thread-back">Por cierto, ¿lo sumamos al presupuesto de <b>${evName}${loc}</b> que estábamos armando, o lo dejamos como extra?</div>`;
   }
   return '';
 }
@@ -1590,10 +1590,10 @@ function generateResponse(raw){
   if(hasIntent||ev||bud||gue||dist||cats.length) ctx.unclear=0;
 
   // ── PRIORIDAD 1: conversacional ──
-  if(isGreeting&&!cats.length&&!ev&&!bud){ setContext('idle'); return '¡Hola! 👋 Cuéntame qué evento quieres organizar, o pídeme consejos (tipo "ideas para una parrillada"). ¿En qué te ayudo?'; }
-  if(isThanks) return '¡De nada! 😊 ¿Seguimos con algo más — otro servicio, comparar proveedores, o ajustar el presupuesto?';
-  if(isBye) return '¡Hasta luego! Cuando quieras retomar, aquí estaré. Que tengas un eventazo. 🎉';
-  if(asksHelp) return 'Puedo: 1) <b>armar presupuestos</b> completos con proveedores reales, 2) darte <b>consejos de organización</b> (parrilladas, baby showers, corporativos), 3) recomendarte y comparar proveedores, y 4) explicarte pagos y reservas. ¿Por dónde empezamos?';
+  if(isGreeting&&!cats.length&&!ev&&!bud){ setContext('idle'); return 'Hola. Cuéntame qué evento quieres organizar, o pídeme ideas (por ejemplo "ideas para una parrillada").'; }
+  if(isThanks) return 'De nada. ¿Vemos algo más? Puedo buscarte otro servicio, comparar proveedores o ajustar el presupuesto.';
+  if(isBye) return 'Hasta luego. Cuando quieras seguir, acá estoy.';
+  if(asksHelp) return 'Te puedo armar un <b>presupuesto</b> con proveedores del catálogo, darte <b>ideas para organizar</b> (parrilladas, baby showers, corporativos), comparar proveedores entre sí y explicarte cómo funcionan las reservas. ¿Por dónde empezamos?';
 
   // ── PRIORIDAD 2: CONSULTOR EXPERTO (base de conocimiento) ──
   const knowledge=findKnowledge(m);
@@ -1617,13 +1617,13 @@ function generateResponse(raw){
     let ans;
     if(/trago|alcohol|licor|cerveza/.test(calcSubject)){
       const tragos=n*3, cerveza=(n*1.5).toFixed(0), botellas=Math.ceil(n/8);
-      ans=`Para <b>${n} personas</b> en un evento de 4–5 h, la regla de oro:<ul class="cc-list"><li><b>~3 tragos por persona</b> → unos ${tragos} tragos en total.</li><li>Si es cerveza: ~${cerveza} L (una caja de 12 alcanza para ~15 personas).</li><li>Si es licor fuerte: ~${botellas} botellas de 750 ml + gaseosas/hielo para mezclar.</li></ul>Siempre suma un 10% extra por si acaso. 🍻`;
+      ans=`Para <b>${n} personas</b> en un evento de 4–5 h, la regla de oro:<ul class="cc-list"><li><b>~3 tragos por persona</b> → unos ${tragos} tragos en total.</li><li>Si es cerveza: ~${cerveza} L (una caja de 12 alcanza para ~15 personas).</li><li>Si es licor fuerte: ~${botellas} botellas de 750 ml + gaseosas/hielo para mezclar.</li></ul>Suma un 10% extra por si acaso.`;
     } else if(/gaseosa|bebida/.test(calcSubject)){
       const litros=(n*1.5).toFixed(0);
-      ans=`Para <b>${n} personas</b> calcula <b>~1.5 L de bebida por persona</b> en un evento largo → unos ${litros} L en total (mezcla gaseosa, agua y refresco natural como chicha o limonada). 🥤`;
+      ans=`Para <b>${n} personas</b> calcula <b>~1.5 L de bebida por persona</b> en un evento largo → unos ${litros} L en total (mezcla gaseosa, agua y refresco natural como chicha o limonada).`;
     } else if(/hielo/.test(calcSubject)){
       const kg=Math.ceil(n*0.5);
-      ans=`Para <b>${n} personas</b> calcula <b>~0.5 kg de hielo por persona</b> → unos ${kg} kg (más si hace calor o hay barra de tragos). 🧊`;
+      ans=`Para <b>${n} personas</b> calcula <b>~0.5 kg de hielo por persona</b> → unos ${kg} kg (más si hace calor o hay barra de tragos).`;
     }
     return ans + threadBack();
   }
@@ -1635,17 +1635,17 @@ function generateResponse(raw){
     if(!cheap||!best) return `Todavía no tengo proveedores cargados en <b>${catLabelChat[cat]}</b>. ¿Buscas otra categoría?`;
     return `Para <b>${catLabelChat[cat]}</b> los precios van desde <b>${money(cheap.price)}</b> (${esc(cheap.name)}) hasta opciones premium. El mejor calificado es <b>${esc(best.name)}</b> (★${best.rating}, ${best.reviews} reseñas) desde ${money(best.price)}.`+threadBack();
   }
-  if(asksPrice&&!cats.length&&!ev){ setContext('faq'); return '¿De qué servicio quieres el precio — música, catering, fotografía, local, decoración…? Dímelo y te doy el rango exacto.'; }
+  if(asksPrice&&!cats.length&&!ev){ setContext('faq'); return '¿De qué servicio quieres saber el precio? Dime la categoría (música, catering, fotografía, local, decoración) y te digo desde cuánto está.'; }
   if(asksBest&&cats.length){
     setContext('faq');
     const cat=cats[0]; const b=bestRatedIn(cat,2); ctx.mentioned.add(cat);
     return `En <b>${catLabelChat[cat]}</b> los top son <b>${b[0].name}</b> (★${b[0].rating}, desde ${money(b[0].price)})`+(b[1]?` y <b>${b[1].name}</b> (★${b[1].rating})`:'')+'. ¿Los ves en el marketplace?'+threadBack();
   }
-  if(asksPayment){ setContext('faq'); return 'Reservas tu fecha y horario directo con el proveedor desde la plataforma; el pago lo coordinas con él una vez confirmada la reserva. 💳'; }
-  if(asksCancel){ setContext('faq'); return 'Cada proveedor tiene su política de cancelación visible en su perfil (usualmente reembolso completo cancelando con 7+ días de anticipación). Si algo falla, nuestro soporte media por ti.'; }
-  if(asksTrust){ setContext('faq'); return 'Todos los proveedores pasan verificación de identidad y antecedentes. Las reseñas solo las deja quien reservó de verdad — nada falso. 🛡️'; }
-  if(asksProvider){ setContext('faq'); return '¡Genial! Entra a la sección <b>"Para Proveedores"</b> del menú: creas tu perfil, fijas precios y recibes reservas gratis el primer mes.'; }
-  if(asksReserve&&!ev){ setContext('faq'); return 'Muy fácil: 1) eliges el proveedor, 2) revisas su disponibilidad para tu fecha, 3) confirmas el horario. Queda bloqueado al instante en su agenda. 🎯'; }
+  if(asksPayment){ setContext('faq'); return 'Reservas la fecha y el horario acá en la plataforma. El pago lo coordinas directo con el proveedor después de que la reserva quede confirmada: todavía no cobramos por acá.'; }
+  if(asksCancel){ setContext('faq'); return 'Las condiciones de cancelación las pone cada proveedor, así que conviene preguntárselas antes de cerrar. Como todavía no manejamos el pago, cualquier devolución la ves directamente con él.'; }
+  if(asksTrust){ setContext('faq'); return 'Antes de aprobar a un proveedor revisamos su identidad y su negocio. Y para dejar una reseña hay que haber reservado por la plataforma, así que no se pueden inventar.'; }
+  if(asksProvider){ setContext('faq'); return 'Entra a <b>"Para Proveedores"</b> en el menú: creas tu perfil, pones tus precios y esperas que aprobemos tu cuenta. Por ahora no cobramos comisión.'; }
+  if(asksReserve&&!ev){ setContext('faq'); return 'Eliges al proveedor, miras qué horarios tiene libres tu fecha y confirmas uno. Queda bloqueado en su agenda en ese momento.'; }
 
   // ── PRIORIDAD 4: armar PRESUPUESTO (solo si hay datos del evento este turno) ──
   const eventInfoThisTurn = ev || (ctx.eventType && (bud||gue||dist));
@@ -1675,12 +1675,12 @@ function generateResponse(raw){
   if(gue&&!ctx.eventType) return `Entendido, ${gue} personas. ¿Qué tipo de evento es y con qué presupuesto? Con eso te recomiendo el paquete ideal.`;
 
   // ── PRIORIDAD 8: qué es esto ──
-  if(/qué es todoeventos|que es todoeventos|de qué se trata|de que se trata/.test(m)) return 'TodoEventos.pe es un marketplace de servicios para eventos en Lima: proveedores verificados y un asistente que arma presupuestos en minutos, con reseñas reales de quienes ya reservaron.';
+  if(/qué es todoeventos|que es todoeventos|de qué se trata|de que se trata/.test(m)) return 'TodoEventos.pe es un marketplace de servicios para eventos en Lima: proveedores que revisamos uno por uno y un asistente que te arma el presupuesto. Las reseñas las dejan solo los que reservaron acá.';
 
   // ── PRIORIDAD 9: fallback (protocolo de incertidumbre) ──
   ctx.unclear=(ctx.unclear||0)+1;
-  if(ctx.unclear>=2) return 'Puedo ayudarte con: <b>presupuestos</b> de eventos, <b>consejos de organización</b> (parrillada, baby shower, corporativo), <b>precios</b> y recomendaciones de proveedores, o <b>pagos y reservas</b>. ¿Cuál te sirve? 🤔';
-  return 'Cuéntame un poco más: ¿qué evento organizas, cuántas personas, y tienes presupuesto o distrito en mente? También puedo darte ideas de organización si me dices el tipo de evento. 🎉';
+  if(ctx.unclear>=2) return 'Puedo ayudarte con: <b>presupuestos</b> de eventos, <b>consejos de organización</b> (parrillada, baby shower, corporativo), <b>precios</b> y recomendaciones de proveedores, o cómo funcionan las <b>reservas</b>. ¿Cuál te sirve?';
+  return 'Cuéntame un poco más: ¿qué evento organizas, cuántas personas, y tienes presupuesto o distrito en mente? También te doy ideas de organización si me dices qué tipo de evento es.';
 }
 
 // ── ENVÍO ──────────────────────────────────────────────────────────────────
@@ -1719,7 +1719,7 @@ function updateChatContext(cat){
       const best=bestRatedIn(cat,1)[0]; const cheap=cheapestIn(cat,1)[0];
       if(!best||!cheap){ removeTypingIndicator(); setLoading(false); return; }
       removeTypingIndicator();
-      addBotMsg(`Veo que exploras <b>${catLabelChat[cat]}</b> 🎯 El top es <b>${esc(best.name)}</b> (★${best.rating}) y el más económico <b>${esc(cheap.name)}</b> desde ${money(cheap.price)}. ¿Fecha o presupuesto en mente?`);
+      addBotMsg(`Veo que exploras <b>${catLabelChat[cat]}</b>. El mejor calificado es <b>${esc(best.name)}</b> (★${best.rating}) y el más económico <b>${esc(cheap.name)}</b> desde ${money(cheap.price)}. ¿Fecha o presupuesto en mente?`);
       setLoading(false);
     },500);
   }
@@ -2235,8 +2235,8 @@ async function confirmarReserva(){
     <div class="cart-view" id="cart-view-success">
       <div class="ck-success">
         <div class="ck-success-ico"><i class="ti ti-calendar-check"></i></div>
-        <div class="ck-success-title">¡Solicitud enviada con éxito! 🎉</div>
-        <div class="ck-success-sub">Los proveedores verificarán su agenda para la fecha elegida y te notificarán si están disponibles.</div>
+        <div class="ck-success-title">Solicitud enviada</div>
+        <div class="ck-success-sub">Revisa tu cuenta para ver en qué quedó cada proveedor con la fecha que elegiste.</div>
         <div class="ck-success-detail" id="ck-success-detail"></div>
         <button class="cart-checkout-btn" onclick="closeCart()">Volver al marketplace</button>
       </div>
