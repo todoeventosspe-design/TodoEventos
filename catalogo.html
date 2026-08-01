@@ -113,90 +113,6 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
 #empty-state h3{font-size:1.25rem;font-weight:700;margin-bottom:.5rem;}
 #empty-state p{font-size:14px;color:var(--sub);}
 
-/* ── FLOATING CHATBOT ── */
-#chat-bubble{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;align-items:flex-end;gap:12px;}
-.chat-toggle{width:58px;height:58px;background:linear-gradient(135deg,#7c3aed,#6366f1);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 28px rgba(124,58,237,.5);transition:transform .2s,box-shadow .2s;}
-.chat-toggle:hover{transform:scale(1.08);box-shadow:0 8px 36px rgba(124,58,237,.65);}
-.chat-toggle i{font-size:24px;color:#fff;transition:all .2s;}
-.chat-online-dot{position:absolute;top:2px;right:2px;width:13px;height:13px;background:#22c55e;border-radius:50%;border:2px solid var(--bg);animation:pulse-green 2s ease-in-out infinite;}
-@keyframes pulse-green{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4);}50%{box-shadow:0 0 0 5px rgba(34,197,94,0);}}
-
-/* Chat panel */
-#chat-panel{width:360px;background:var(--bg3);border:1px solid rgba(168,85,247,.22);border-radius:22px;overflow:hidden;display:none;flex-direction:column;box-shadow:0 12px 50px rgba(0,0,0,.6),0 0 0 1px rgba(168,85,247,.08);}
-#chat-panel.open{display:flex;animation:slideUp .25s ease;}
-@keyframes slideUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
-.cp-header{background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(99,102,241,.15));border-bottom:1px solid rgba(168,85,247,.15);padding:14px 16px;display:flex;align-items:center;gap:10px;}
-.cp-av-wrap{position:relative;flex-shrink:0;}
-.cp-av{width:36px;height:36px;background:linear-gradient(135deg,#6366f1,#a855f7);border-radius:50%;display:flex;align-items:center;justify-content:center;}
-.cp-av-dot{position:absolute;bottom:0;right:0;width:10px;height:10px;background:#22c55e;border-radius:50%;border:2px solid var(--bg3);}
-.cp-info{flex:1;}
-.cp-name{font-size:13.5px;font-weight:700;}
-.cp-status{font-size:11px;color:#86efac;display:flex;align-items:center;gap:4px;margin-top:1px;}
-.cp-status::before{content:'';width:5px;height:5px;background:#22c55e;border-radius:50%;display:inline-block;}
-.cp-actions{display:flex;gap:4px;}
-.cp-action-btn{background:transparent;border:none;color:var(--sub);cursor:pointer;padding:5px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all .18s;}
-.cp-action-btn:hover{background:rgba(255,255,255,.08);color:var(--fg);}
-.cp-msgs{flex:1;padding:14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:360px;min-height:200px;scroll-behavior:smooth;}
-.cp-msgs::-webkit-scrollbar{width:3px;}
-.cp-msgs::-webkit-scrollbar-track{background:transparent;}
-.cp-msgs::-webkit-scrollbar-thumb{background:rgba(168,85,247,.3);border-radius:10px;}
-/* Messages */
-.msg-wrap{display:flex;flex-direction:column;gap:3px;}
-.msg-wrap.user{align-items:flex-end;}
-.msg-bot{background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.15);border-radius:14px 14px 14px 4px;padding:10px 14px;font-size:13px;line-height:1.6;max-width:90%;color:var(--fg);}
-.msg-user{background:linear-gradient(135deg,rgba(124,58,237,.35),rgba(99,102,241,.3));border:1px solid rgba(99,102,241,.25);border-radius:14px 14px 4px 14px;padding:10px 14px;font-size:13px;line-height:1.6;max-width:90%;color:var(--fg);}
-.msg-time{font-size:10px;color:var(--sub);padding:0 4px;}
-/* ── Tarjetas del asistente: presupuestos y consultor ── */
-.msg-bot .chat-card{margin:2px 0;}
-.chat-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;margin-top:6px;}
-.cc-head{font-size:13.5px;font-weight:700;color:var(--fg);margin-bottom:8px;}
-.cc-sec{margin-bottom:9px;}
-.cc-sec:last-child{margin-bottom:0;}
-.cc-tag{display:inline-block;font-size:11px;font-weight:700;color:var(--gold);background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.2);padding:2px 9px;border-radius:100px;margin-bottom:5px;}
-.cc-list{margin:4px 0 0;padding-left:16px;font-size:12.5px;line-height:1.65;color:var(--sub);}
-.cc-list li{margin-bottom:3px;}
-.cc-list b{color:var(--fg);}
-.cc-follow{margin-top:8px;font-size:12.5px;color:var(--fg);background:rgba(168,85,247,.08);border-radius:8px;padding:8px 10px;}
-/* Tabla de presupuesto */
-.budget-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12px;}
-.budget-table th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--sub);padding:4px 6px;border-bottom:1px solid rgba(255,255,255,.1);}
-.budget-table td{padding:6px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:top;}
-.bt-cat{font-weight:600;color:var(--fg);white-space:nowrap;}
-.bt-prov{color:var(--sub);}
-.bt-star{color:var(--gold);font-size:11px;}
-.bt-price{text-align:right;font-weight:700;color:var(--fg);white-space:nowrap;}
-.budget-table tfoot td{border-bottom:none;padding-top:8px;}
-.bt-total-lbl{font-weight:700;color:var(--fg);}
-.bt-total{text-align:right;font-weight:800;color:var(--gold);font-size:14px;}
-.bt-resumen{font-size:11.5px;color:var(--sub);line-height:1.6;padding-bottom:6px;border-bottom:1px dashed rgba(255,255,255,.1);}
-.bt-resumen b{color:var(--fg);}
-.bt-balance{margin-top:8px;font-size:12px;font-weight:600;padding:7px 10px;border-radius:8px;}
-.bt-balance.ok{background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2);}
-.bt-balance.over{background:rgba(251,191,36,.1);color:var(--gold);border:1px solid rgba(251,191,36,.2);}
-.bt-cta{margin-top:9px;font-size:12px;color:var(--fg);}
-.thread-back{margin-top:8px;font-size:12px;color:var(--sub);background:rgba(99,102,241,.08);border-left:2px solid var(--ind);border-radius:0 8px 8px 0;padding:7px 10px;}
-.thread-back b{color:var(--fg);}
-/* Quick replies */
-.quick-replies{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 10px;}
-.qr{background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.2);color:var(--pu);padding:6px 13px;border-radius:100px;font-size:12px;cursor:pointer;transition:all .18s;font-family:'General Sans',sans-serif;}
-.qr:hover{background:rgba(168,85,247,.2);border-color:rgba(168,85,247,.4);}
-/* Input */
-.cp-input-wrap{padding:10px 12px;border-top:1px solid var(--border);background:rgba(0,0,0,.15);}
-.cp-input-row{display:flex;gap:8px;align-items:flex-end;}
-.cp-input{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:10px 13px;font-size:13px;color:var(--fg);font-family:'General Sans',sans-serif;outline:none;resize:none;max-height:100px;line-height:1.5;transition:border-color .2s;}
-.cp-input:focus{border-color:rgba(168,85,247,.4);}
-.cp-send{background:linear-gradient(135deg,#7c3aed,#6366f1);border:none;border-radius:10px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:opacity .2s;box-shadow:0 2px 10px rgba(124,58,237,.4);}
-.cp-send:hover{opacity:.85;}
-.cp-send:disabled{opacity:.4;cursor:not-allowed;}
-.cp-hint{font-size:10.5px;color:var(--sub);margin-top:6px;text-align:center;}
-/* Typing indicator */
-.typing-ind{display:flex;align-items:center;gap:5px;padding:10px 14px;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.12);border-radius:14px 14px 14px 4px;width:fit-content;}
-.typing-ind span{width:6px;height:6px;background:var(--pu);border-radius:50%;animation:typingBounce 1.2s ease infinite;}
-.typing-ind span:nth-child(2){animation-delay:.2s;}
-.typing-ind span:nth-child(3){animation-delay:.4s;}
-@keyframes typingBounce{0%,100%{opacity:.3;transform:translateY(0);}50%{opacity:1;transform:translateY(-5px);}}
-/* Error message */
-.msg-error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:14px;padding:10px 14px;font-size:12.5px;color:#fca5a5;max-width:90%;}
 /* No results */
 .no-results{display:none;text-align:center;padding:4rem 2rem;grid-column:1/-1;}
 .no-results i{font-size:3rem;color:rgba(255,255,255,.15);display:block;margin-bottom:1rem;}
@@ -588,42 +504,13 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
   </div>
 </div>
 
-<!-- ═══ FLOATING CHATBOT ═══ -->
-<div id="chat-bubble">
-  <div id="chat-panel">
-    <div class="cp-header">
-      <div class="cp-av-wrap">
-        <div class="cp-av"><i class="ti ti-robot" style="color:#fff;font-size:17px;"></i></div>
-        <div class="cp-av-dot"></div>
-      </div>
-      <div class="cp-info">
-        <div class="cp-name">Asistente · TodoEventos</div>
-        <div class="cp-status">En línea</div>
-      </div>
-      <div class="cp-actions">
-        <button class="cp-action-btn" onclick="clearChat()" title="Nueva conversación"><i class="ti ti-refresh" style="font-size:15px;"></i></button>
-        <button class="cp-action-btn" onclick="toggleChat()" title="Cerrar"><i class="ti ti-x" style="font-size:15px;"></i></button>
-      </div>
-    </div>
-    <div class="cp-msgs" id="chat-msgs"></div>
-    <div class="quick-replies" id="quick-replies">
-      <span class="qr" onclick="sendQuick(this)">Quiero planificar una boda</span>
-      <span class="qr" onclick="sendQuick(this)">¿Cuánto cuesta un DJ?</span>
-      <span class="qr" onclick="sendQuick(this)">Cumpleaños para 40 niños</span>
-    </div>
-    <div class="cp-input-wrap">
-      <div class="cp-input-row">
-        <textarea class="cp-input" id="chat-input" rows="1" placeholder="Escribe tu consulta…" onkeydown="handleKey(event)"></textarea>
-        <button class="cp-send" id="send-btn" onclick="sendMsg()"><i class="ti ti-send" style="color:#fff;font-size:15px;"></i></button>
-      </div>
-      <div class="cp-hint">Asistente de TodoEventos.pe</div>
-    </div>
-  </div>
-  <button class="chat-toggle" onclick="toggleChat()" style="position:relative;" id="chat-toggle-btn">
-    <i class="ti ti-robot" id="chat-toggle-icon"></i>
-    <span class="chat-online-dot"></span>
-  </button>
-</div>
+<!-- ═══ ASISTENTE ═══
+     El agente vive en ElevenLabs; acá solo va el widget. Las funciones que le
+     dan acceso al catálogo real están al final del bloque de JavaScript. -->
+<!-- Los textos y colores salen del panel del agente (pestaña Widget), no de acá:
+     ponerlos en los dos lados sería tener dos configuraciones peleándose. -->
+<elevenlabs-convai agent-id="agent_1801kyrek4bjebtsayxyheen8zqc"></elevenlabs-convai>
+<script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
 
 <script>
 // Escapa texto de usuario antes de meterlo en innerHTML (anti-XSS).
@@ -639,6 +526,9 @@ const PREFIJO_FOTOS = 'https://vqnyaozauljtashpjfoo.supabase.co/storage/v1/objec
 function fotoSegura(url){
   return (typeof url === 'string' && url.startsWith(PREFIJO_FOTOS)) ? url : null;
 }
+
+// Postgres devuelve los "numeric" como texto, por eso el Number().
+function money(n){ return 'S/. ' + Number(n || 0).toLocaleString('es-PE'); }
 
 // ─── DATA ───
 // Datos reales de Supabase (tablas "services" + "profiles"). Se llenan en
@@ -797,8 +687,6 @@ function setCategory(cat, el) {
   el.classList.add('active');
   const bcEl = document.getElementById('breadcrumb-cat');
   if(bcEl) bcEl.textContent = cat === 'all' ? 'Marketplace' : (catNames[cat] || 'Marketplace');
-  // Update chatbot context
-  if (cat !== 'all') updateChatContext(cat);
   render();
 }
 
@@ -830,7 +718,7 @@ async function openProvider(providerId) {
 
   const [{ data: perfilReal }, { data: serviciosReal }, { data: feedReal }, { data: comentariosReal }] = await Promise.all([
     sb.from('profiles').select('full_name, categoria, location, bio, avatar_url, banner_url, rating, reviews_count').eq('id', providerId).single(),
-    sb.from('services').select('name, price, description, imagenes').eq('provider_id', providerId).eq('active', true),
+    sb.from('services').select('id, name, price, description, imagenes').eq('provider_id', providerId).eq('active', true),
     sb.from('feed_photos').select('url').eq('provider_id', providerId),
     sb.from('comentarios_perfil').select('client_name, comment, created_at').eq('provider_id', providerId).order('created_at', { ascending: false })
   ]);
@@ -846,7 +734,7 @@ async function openProvider(providerId) {
   const rating = Number(perfilReal.rating) || 0;
   const reviews = perfilReal.reviews_count || 0;
   const esNuevo = reviews === 0;
-  const servicios = (serviciosReal || []).map(s => ({ nombre: s.name, precio: s.price, descripcion: s.description, imagenes: (s.imagenes || []).map(fotoSegura).filter(Boolean) }));
+  const servicios = (serviciosReal || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, descripcion: s.description, imagenes: (s.imagenes || []).map(fotoSegura).filter(Boolean) }));
   let galeria = [];
   servicios.forEach(s => { (s.imagenes||[]).forEach(u => galeria.push(u)); });
   galeria = galeria.concat((feedReal || []).map(f => fotoSegura(f.url)).filter(Boolean));
@@ -967,11 +855,7 @@ function addToCart(servicioIndex){
 
   // Evita duplicar exactamente el mismo servicio del mismo proveedor
   const yaExiste = cart.some(it => it.proveedorId === currentModalProvider.id && it.servicio === s.nombre);
-  if(yaExiste){
-    addBotMsg(`<b>${esc(s.nombre)}</b> ya está en tu presupuesto.`);
-    if(!document.getElementById('chat-panel').classList.contains('open')) toggleChat();
-    return;
-  }
+  if(yaExiste){ openCart(); return; }  // ya lo tiene: que lo vea en el carrito
 
   cart.push({
     id: 'ci' + Date.now(),
@@ -1073,11 +957,7 @@ function quickHire(providerId){
 
   const servicioNombre = 'Servicio base — ' + (catNames[p.cat] || 'Evento');
   const yaExiste = cart.some(it => it.proveedorId === p.providerId && it.servicio === servicioNombre);
-  if(yaExiste){
-    addBotMsg(`El servicio base de <b>${esc(p.name)}</b> ya está en tu presupuesto.`);
-    if(!document.getElementById('chat-panel').classList.contains('open')) toggleChat();
-    return;
-  }
+  if(yaExiste){ openCart(); return; }  // ya lo tiene: que lo vea en el carrito
 
   cart.push({
     id: 'ci' + Date.now(),
@@ -1241,489 +1121,69 @@ function hireFromDetail(){
   abrirReserva(id);
 }
 
+// Botón "Contactar y reservar" del perfil: lleva directo al calendario del
+// primer servicio del proveedor, que es lo que el usuario venía a hacer.
 function contactProviderFromModal(){
-  const nombre = document.getElementById('provider-modal-overlay').dataset.providerName || 'este proveedor';
+  const servicio = currentModalServicios[0];
   closeProviderModal();
-  if (!document.getElementById('chat-panel').classList.contains('open')) toggleChat();
-  setTimeout(() => {
-    addBotMsg(`Para reservar con <b>${esc(nombre)}</b> dime la fecha de tu evento y reviso si la tiene libre. Si me cuentas más del evento, te armo el presupuesto completo.`);
-  }, 350);
+  if (servicio) abrirReserva(servicio.id);
 }
 
-// ─── ASISTENTE TODOEVENTOS — MOTOR DE REGLAS AVANZADO (Vanilla JS) ─────────
-// 100% offline. Gestor de contexto por estados, base de conocimiento de
-// consultor experto (parrilladas, baby showers, etc.), y presupuestos
-// renderizados como HTML estructurado. Sin dependencias externas.
+// ─── ASISTENTE: agente de ElevenLabs con acceso al catálogo real ───────────
+// El agente corre en la nube de ElevenLabs (el widget está al final del body).
+// Lo único que vive acá son estas tres funciones. El agente las llama cuando
+// necesita datos, y así contesta con los proveedores y precios que hay de
+// verdad en "providers" en vez de inventarlos.
+//
+// Las tres están declaradas también en el panel del agente, como herramientas
+// de tipo "cliente". Si le cambias el nombre a una acá, hay que cambiarlo allá
+// o el agente la llama y no encuentra nada. Está explicado en ASISTENTE.md.
 
-let chatOpen = false;
-let chatInitialized = false;
-let isLoading = false;
+document.querySelector('elevenlabs-convai')
+  .addEventListener('elevenlabs-convai:call', (e) => {
+    e.detail.config.clientTools = {
 
-// ── GESTOR DE ESTADOS Y CONTEXTO ──────────────────────────────────────────
-// currentContext dice en qué "modo" está la conversación:
-//   'idle'      → sin tema activo
-//   'quoting'   → armando un presupuesto de evento
-//   'consulting'→ pidiendo consejos/listas de planificación
-//   'faq'       → preguntas sueltas (pagos, confianza, cómo reservar)
-const ctx = {
-  currentContext: 'idle',
-  prevContext: null,
-  // datos del evento que se van recordando
-  eventType: null,
-  budget: null,
-  guests: null,
-  district: null,
-  date: null,
-  lastTopic: null,       // último tema tratado (para el "hilo conductor")
-  mentioned: new Set(),  // categorías ya comentadas
-  unclear: 0
-};
+      // La fuente de la que el agente arma cualquier presupuesto: proveedores
+      // reales del catálogo, filtrados y ordenados por calificación.
+      buscar_proveedores: ({ categoria, presupuesto_max, distrito }) => {
+        let r = providers;
+        if (categoria) r = r.filter(p => p.cat === categoria);
+        if (distrito) r = r.filter(p => p.district.toLowerCase() === String(distrito).trim().toLowerCase());
+        if (presupuesto_max) r = r.filter(p => p.price <= Number(presupuesto_max));
+        if (!r.length) return 'No hay ningún proveedor cargado con esos filtros. Dilo tal cual, sin ofrecer alternativas inventadas.';
+        return JSON.stringify(
+          [...r].sort((a, b) => b.rating - a.rating).slice(0, 8).map(p => ({
+            id: p.id,
+            nombre: p.name,
+            categoria: p.cat,
+            precio_soles: p.price,
+            distrito: p.district,
+            calificacion: p.esNuevo
+              ? 'proveedor nuevo, todavía sin reseñas'
+              : `${p.rating} de 5 (${p.reviews} reseñas)`
+          }))
+        );
+      },
 
-function setContext(next) {
-  if (next !== ctx.currentContext) {
-    ctx.prevContext = ctx.currentContext;
-    ctx.currentContext = next;
-  }
-}
+      // Abre la ficha del servicio que el agente está recomendando, para que
+      // el usuario lo vea sin tener que buscarlo a mano en la grilla.
+      mostrar_proveedor: ({ id }) => {
+        const p = providers.find(x => String(x.id) === String(id));
+        if (!p) return 'Ese id no existe en el catálogo.';
+        openServiceDetail(p.id);
+        return `Ficha de ${p.name} abierta en pantalla.`;
+      },
 
-const catLabelChat = {musica:'Música & DJs',catering:'Catering',fotografia:'Fotografía & Video',locales:'Locales & Salones',animadores:'Animadores',decoracion:'Decoración',bar:'Bar Móvil',pasteleria:'Pastelería',transporte:'Transporte',seguridad:'Seguridad'};
-
-// ── HELPERS DE MATCH SEGURO (límites de palabra) ──────────────────────────
-function hasWord(msg, phrase) {
-  const esc = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return new RegExp('(^|[^a-záéíóúñ])' + esc + '($|[^a-záéíóúñ])', 'i').test(msg);
-}
-
-// ── DETECTORES ────────────────────────────────────────────────────────────
-const eventKeywords = {
-  boda: ['boda','matrimonio','casamiento','casarme','casarnos'],
-  cumpleanos_infantil: ['cumpleaños infantil','fiesta infantil','cumple de mi hijo','cumple de mi hija','cumpleaños de mi hijo','cumpleaños de mi hija'],
-  cumpleanos_adulto: ['cumpleaños','cumple','mi cumple'],
-  quinceanero: ['quinceañero','quinceañera','15 años','quince años'],
-  corporativo: ['corporativo','empresa','evento de trabajo','lanzamiento','conferencia'],
-  bautizo: ['bautizo','primera comunión','confirmación'],
-  graduacion: ['graduación','promoción','grado'],
-  parrillada: ['parrilla','parrillada','asado','barbacoa','bbq'],
-  babyshower: ['baby shower','babyshower','revelación de género','revelacion de genero']
-};
-const districtList = ['miraflores','san isidro','surco','la molina','san borja','barranco','san miguel','jesús maría','jesus maria','lince','pueblo libre','magdalena','chorrillos','callao'];
-
-function detectEvent(m){ for(const [t,ws] of Object.entries(eventKeywords)){ if(ws.some(w=>hasWord(m,w))) return t; } return null; }
-function detectDistrict(m){ return districtList.find(d=>hasWord(m,d))||null; }
-function detectBudget(m){
-  let x=m.match(/(\d{1,3}(?:[.,]\d{3})+|\d{4,6})/);
-  if(x){ let n=parseInt(x[1].replace(/[.,]/g,''),10); if(n>=100&&n<=500000) return n; }
-  x=m.match(/(\d+(?:\.\d+)?)\s*mil/); if(x) return Math.round(parseFloat(x[1])*1000);
-  return null;
-}
-function detectGuests(m){ let x=m.match(/(\d{1,4})\s*(personas|invitados|pax|niños|gente|asistentes|comensales)/); return x?parseInt(x[1],10):null; }
-function detectCats(m){
-  const map={
-    musica:['dj','djs','música','musica','sonido','banda','orquesta'],
-    catering:['catering','comida','buffet','banquete','menú','menu','cena','almuerzo','bocaditos'],
-    fotografia:['foto','fotos','fotografía','fotografia','fotógrafo','fotografo','video','filmación','dron','drone'],
-    locales:['local','locales','salón','salon','salones','quinta','terraza','jardín','jardin','recepción'],
-    animadores:['animador','animadores','show infantil','payaso','magia','mago'],
-    decoracion:['decoración','decoracion','globos','flores','centro de mesa','ambientación'],
-    bar:['bar','barra','tragos','coctel','cócteles','licor','bartender'],
-    pasteleria:['torta','tortas','pastel','pasteles','cupcake','postre','postres','repostería'],
-    transporte:['transporte','movilidad','bus','van','traslado','combi'],
-    seguridad:['seguridad','vigilancia','guardias']
-  };
-  const found=[]; for(const [c,ws] of Object.entries(map)){ if(ws.some(w=>hasWord(m,w))) found.push(c); } return found;
-}
-
-// ── ACCESO A LA BASE DE PROVEEDORES ───────────────────────────────────────
-function cheapestIn(cat,n=1){ return providers.filter(p=>p.cat===cat).sort((a,b)=>a.price-b.price).slice(0,n); }
-function bestRatedIn(cat,n=1){ return providers.filter(p=>p.cat===cat).sort((a,b)=>b.rating-a.rating||b.reviews-a.reviews).slice(0,n); }
-function inDistrict(d){ return providers.filter(p=>p.district.toLowerCase()===d); }
-function money(n){ return 'S/. '+n.toLocaleString('es-PE'); }
-
-// ── BASE DE CONOCIMIENTO DEL CONSULTOR EXPERTO ────────────────────────────
-// Respuestas ricas para preguntas abiertas de planificación. Cada entrada
-// devuelve HTML estructurado.
-const knowledgeBase = {
-  parrillada: {
-    triggers: ['parrilla','parrillada','asado','barbacoa','bbq'],
-    build: (guests) => {
-      const n = guests || 20;
-      const carneKg = (n * 0.4).toFixed(1); // 400 g por persona
-      const carbonKg = Math.max(3, Math.round(n * 0.5));
-      const bebidaL = (n * 1.5).toFixed(0);
-      return `
-        <div class="chat-card">
-          <div class="cc-head">🔥 Guía para tu parrillada${guests?` (${n} personas)`:''}</div>
-          <div class="cc-sec"><span class="cc-tag">🍖 Insumos (comida)</span>
-            <ul class="cc-list">
-              <li><b>Carnes:</b> ~${carneKg} kg en total (calcula 350–400 g por persona). Mezcla res, pollo, chorizo y anticuchos.</li>
-              <li><b>Guarniciones:</b> papa nativa, choclo, ensalada criolla, camote.</li>
-              <li><b>Cremas y salsas:</b> ají, chimichurri, huancaína, mostaza y kétchup.</li>
-              <li><b>Bebidas:</b> ~${bebidaL} L en total (gaseosa, agua, cerveza, chicha morada).</li>
-            </ul>
-          </div>
-          <div class="cc-sec"><span class="cc-tag">🛠️ Logística y fierros</span>
-            <ul class="cc-list">
-              <li>Parrilla + ~${carbonKg} kg de carbón + encendedor.</li>
-              <li>Herramientas: pinzas largas, trinchante, cuchillo, tabla.</li>
-              <li>Menaje: platos, cubiertos, vasos, servilletas, papel toalla.</li>
-            </ul>
-          </div>
-          <div class="cc-sec"><span class="cc-tag">🪑 Mobiliario y confort</span>
-            <ul class="cc-list">
-              <li>Mesas y sillas para ${n} personas.</li>
-              <li><b>Toldo o sombra</b> — clave si es de día por el sol de Lima.</li>
-              <li>Opcional: barra móvil, coolers con hielo, música.</li>
-            </ul>
-          </div>
-        </div>`;
-    },
-    followup: '¿Quieres que te muestre proveedores de <b>catering con parrilleros profesionales</b> o de <b>alquiler de mobiliario</b> en el marketplace?'
-  },
-  babyshower: {
-    triggers: ['baby shower','babyshower','revelación de género','revelacion de genero'],
-    build: (guests) => {
-      const n = guests || 25;
-      return `
-        <div class="chat-card">
-          <div class="cc-head">🍼 Guía para tu baby shower${guests?` (${n} personas)`:''}</div>
-          <div class="cc-sec"><span class="cc-tag">🎀 Ambiente y decoración</span>
-            <ul class="cc-list">
-              <li>Tema y paleta de colores (globos, backdrop para fotos, centros de mesa).</li>
-              <li>Mesa de dulces / candy bar temática.</li>
-            </ul>
-          </div>
-          <div class="cc-sec"><span class="cc-tag">🍰 Comida y bebida</span>
-            <ul class="cc-list">
-              <li>Bocaditos dulces y salados, torta temática, cupcakes.</li>
-              <li>Bebidas sin alcohol (limonada, refrescos, ponche de frutas).</li>
-            </ul>
-          </div>
-          <div class="cc-sec"><span class="cc-tag">🎲 Dinámica</span>
-            <ul class="cc-list">
-              <li>Juegos clásicos, animador/a, y detalles de recuerdo para invitados.</li>
-              <li>Rincón de fotos con marco temático.</li>
-            </ul>
-          </div>
-        </div>`;
-    },
-    followup: '¿Te muestro proveedores de <b>decoración</b>, <b>pastelería</b> o <b>catering de bocaditos</b> para tu baby shower?'
-  },
-  corporativo: {
-    triggers: ['corporativo','empresa','evento de trabajo','lanzamiento','conferencia'],
-    build: (guests) => {
-      const n = guests || 50;
-      return `
-        <div class="chat-card">
-          <div class="cc-head">💼 Guía para tu evento corporativo${guests?` (${n} personas)`:''}</div>
-          <div class="cc-sec"><span class="cc-tag">📍 Local y logística</span>
-            <ul class="cc-list">
-              <li>Salón o local con aforo para ${n} personas, proyector y sonido.</li>
-              <li>Transporte / estacionamiento para asistentes.</li>
-              <li>Personal: recepción, seguridad, coordinador.</li>
-            </ul>
-          </div>
-          <div class="cc-sec"><span class="cc-tag">🍽️ Catering</span>
-            <ul class="cc-list">
-              <li>Coffee break, almuerzo o cóctel según el horario.</li>
-              <li>Opciones vegetarianas y consideraciones de dieta.</li>
-            </ul>
-          </div>
-          <div class="cc-sec"><span class="cc-tag">🎥 Producción</span>
-            <ul class="cc-list">
-              <li>Fotografía / video del evento, iluminación, branding en pantallas.</li>
-            </ul>
-          </div>
-        </div>`;
-    },
-    followup: '¿Busco proveedores de <b>locales</b>, <b>catering corporativo</b> o <b>producción audiovisual</b> para ti?'
-  }
-};
-
-function findKnowledge(m) {
-  for (const [key, entry] of Object.entries(knowledgeBase)) {
-    if (entry.triggers.some(t => hasWord(m, t))) return { key, entry };
-  }
-  return null;
-}
-
-// ── PLANTILLAS DE PAQUETE POR EVENTO ──────────────────────────────────────
-const eventTemplates = {
-  boda:['locales','catering','musica','fotografia','decoracion'],
-  cumpleanos_infantil:['animadores','catering','decoracion','pasteleria'],
-  cumpleanos_adulto:['locales','catering','musica','bar'],
-  quinceanero:['locales','catering','musica','fotografia','decoracion'],
-  corporativo:['locales','catering','fotografia','seguridad'],
-  bautizo:['catering','pasteleria','decoracion'],
-  graduacion:['locales','catering','musica','fotografia'],
-  parrillada:['catering','bar','decoracion'],
-  babyshower:['decoracion','pasteleria','catering']
-};
-const eventNames = {boda:'tu boda',cumpleanos_infantil:'el cumpleaños infantil',cumpleanos_adulto:'tu cumpleaños',quinceanero:'el quinceañero',corporativo:'tu evento corporativo',bautizo:'el bautizo',graduacion:'la graduación',parrillada:'tu parrillada',babyshower:'tu baby shower'};
-
-// ── FORMATEADOR DE PRESUPUESTOS (HTML estructurado, no texto plano) ────────
-function renderBudget(eventType, budget, guests, district) {
-  const cats = eventTemplates[eventType] || ['catering','musica','decoracion'];
-  let rows = '', total = 0;
-  cats.forEach(cat => {
-    const pick = budget ? cheapestIn(cat,1)[0] : bestRatedIn(cat,1)[0];
-    if (pick) {
-      total += pick.price;
-      ctx.mentioned.add(cat);
-      rows += `<tr><td class="bt-cat">${catLabelChat[cat]}</td><td class="bt-prov">${pick.name} <span class="bt-star">★${pick.rating}</span></td><td class="bt-price">${money(pick.price)}</td></tr>`;
-    }
+      // Filtra el catálogo que se ve detrás del chat.
+      filtrar_catalogo: ({ categoria }) => {
+        const tab = [...document.querySelectorAll('.cat-tab')]
+          .find(t => (t.getAttribute('onclick') || '').includes(`'${categoria}'`));
+        if (!tab) return 'Esa categoría no existe.';
+        setCategory(categoria, tab);
+        return `Catálogo filtrado por ${catNames[categoria]}.`;
+      }
+    };
   });
-
-  const evName = eventNames[eventType] || 'tu evento';
-  let resumen = [];
-  resumen.push(`<b>Evento:</b> ${evName.replace(/^(tu|el|la) /,'').replace(/^\w/,c=>c.toUpperCase())}`);
-  if (guests) resumen.push(`<b>Invitados:</b> ${guests}`);
-  if (district) resumen.push(`<b>Distrito:</b> ${district.replace(/^\w/,c=>c.toUpperCase())}`);
-  if (budget) resumen.push(`<b>Presupuesto:</b> ${money(budget)}`);
-
-  let balance = '';
-  if (budget) {
-    const diff = budget - total;
-    balance = diff >= 0
-      ? `<div class="bt-balance ok">Te sobran ${money(diff)} de tu presupuesto</div>`
-      : `<div class="bt-balance over">Se pasa de tu presupuesto por ${money(Math.abs(diff))}. Si quieres, lo ajusto con opciones más baratas.</div>`;
-  }
-
-  return `
-    <div class="chat-card budget">
-      <div class="cc-head">🧾 Presupuesto para ${evName}</div>
-      <div class="bt-resumen">${resumen.join(' &nbsp;·&nbsp; ')}</div>
-      <table class="budget-table">
-        <thead><tr><th>Categoría</th><th>Proveedor</th><th>Costo</th></tr></thead>
-        <tbody>${rows}</tbody>
-        <tfoot><tr><td colspan="2" class="bt-total-lbl">Total estimado</td><td class="bt-total">${money(total)}</td></tr></tfoot>
-      </table>
-      ${balance}
-      <div class="bt-cta">¿Reservamos estos proveedores o ajustamos algún ítem? Los tienes todos en el <b>marketplace</b>.</div>
-    </div>`;
-}
-
-// ── UI DEL CHAT ───────────────────────────────────────────────────────────
-function toggleChat(){
-  chatOpen=!chatOpen;
-  const panel=document.getElementById('chat-panel');
-  const icon=document.getElementById('chat-toggle-icon');
-  if(chatOpen){
-    panel.classList.add('open'); icon.className='ti ti-x';
-    if(!chatInitialized){
-      chatInitialized=true;
-      setTimeout(()=>addBotMsg('Hola, soy el <b>asistente de TodoEventos</b>. Cuéntame qué quieres celebrar (qué es, cuánta gente, en qué distrito y cuánto tienes) y te armo el presupuesto. También te puedo dar <b>ideas para organizarlo</b>: prueba escribiendo "quiero hacer una parrillada".'),200);
-    }
-    setTimeout(scrollMsgs,150);
-  } else { panel.classList.remove('open'); icon.className='ti ti-robot'; }
-}
-
-function clearChat(){
-  ctx.currentContext='idle'; ctx.prevContext=null; ctx.eventType=null; ctx.budget=null;
-  ctx.guests=null; ctx.district=null; ctx.date=null; ctx.lastTopic=null; ctx.mentioned.clear(); ctx.unclear=0;
-  document.getElementById('chat-msgs').innerHTML='';
-  document.getElementById('quick-replies').style.display='flex';
-  setTimeout(()=>addBotMsg('Listo, empezamos de nuevo. ¿Qué evento tienes?'),200);
-}
-
-function scrollMsgs(){ const m=document.getElementById('chat-msgs'); m.scrollTop=m.scrollHeight; }
-function now(){ return new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'}); }
-
-function addBotMsg(html,isError){
-  const msgs=document.getElementById('chat-msgs');
-  const wrap=document.createElement('div'); wrap.className='msg-wrap';
-  const bubble=document.createElement('div'); bubble.className=isError?'msg-error':'msg-bot';
-  // Permite **negrita** y HTML enriquecido (tablas/listas de las tarjetas)
-  bubble.innerHTML=html.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
-  const time=document.createElement('div'); time.className='msg-time'; time.textContent=now();
-  wrap.appendChild(bubble); wrap.appendChild(time); msgs.appendChild(wrap); scrollMsgs();
-}
-function addTypingIndicator(){
-  const msgs=document.getElementById('chat-msgs');
-  const ind=document.createElement('div'); ind.className='typing-ind'; ind.id='typing-indicator';
-  ind.innerHTML='<span></span><span></span><span></span>'; msgs.appendChild(ind); scrollMsgs();
-}
-function removeTypingIndicator(){ const i=document.getElementById('typing-indicator'); if(i) i.remove(); }
-function addUserMsg(text){
-  const msgs=document.getElementById('chat-msgs');
-  const wrap=document.createElement('div'); wrap.className='msg-wrap user';
-  const bubble=document.createElement('div'); bubble.className='msg-user'; bubble.textContent=text;
-  const time=document.createElement('div'); time.className='msg-time'; time.textContent=now();
-  wrap.appendChild(bubble); wrap.appendChild(time); msgs.appendChild(wrap);
-  document.getElementById('quick-replies').style.display='none'; scrollMsgs();
-}
-
-// ── HILO CONDUCTOR: puente de vuelta al evento principal ───────────────────
-function threadBack() {
-  if (ctx.eventType && ctx.currentContext !== 'quoting') {
-    const evName = eventNames[ctx.eventType] || 'tu evento';
-    const loc = ctx.district ? ` en ${ctx.district.replace(/^\w/,c=>c.toUpperCase())}` : '';
-    return `<div class="thread-back">Por cierto, ¿lo sumamos al presupuesto de <b>${evName}${loc}</b> que estábamos armando, o lo dejamos como extra?</div>`;
-  }
-  return '';
-}
-
-// ── MOTOR PRINCIPAL ────────────────────────────────────────────────────────
-function generateResponse(raw){
-  const m=raw.toLowerCase().trim();
-
-  // Actualizar memoria
-  const ev=detectEvent(m), dist=detectDistrict(m), bud=detectBudget(m), gue=detectGuests(m), cats=detectCats(m);
-  if(ev) ctx.eventType=ev;
-  if(dist) ctx.district=dist;
-  if(bud) ctx.budget=bud;
-  if(gue) ctx.guests=gue;
-
-  // Intenciones explícitas
-  const asksPrice=/cuánto|cuanto|precio|cobra|sale|costo|vale|tarifa/.test(m);
-  const asksBest=/mejor|recomien|top|cuál elijo|cual elijo|más barato|mas barato|económico|economico/.test(m);
-  const asksPayment=/pago|pagar|yape|plin|tarjeta|culqi|transferencia|efectivo/.test(m);
-  const asksCancel=/cancelar|cancelación|cancelacion|reembolso|devolución|devolucion/.test(m);
-  const asksTrust=/confiable|verificado|estafa|seguro|garantía|garantia/.test(m);
-  const asksReserve=/cómo reservo|como reservo|cómo contrato|como contrato|apartar|reservar/.test(m);
-  const asksProvider=/quiero ser proveedor|soy proveedor|registrar mi negocio|ofrecer mis servicios/.test(m);
-  const asksHelp=/qué puedes hacer|que puedes hacer|en qué ayudas|en que ayudas|para qué sirves/.test(m);
-  const isGreeting=/^(hola|buenas|buenos días|buenos dias|buenas tardes|buenas noches|hey|hi|qué tal|que tal)\b/.test(m);
-  const isThanks=/^(gracias|muchas gracias|genial|perfecto|excelente|buenísimo|ok|listo|dale)\b/.test(m)&&m.split(' ').length<6;
-  const isBye=/^(chau|adiós|adios|nos vemos|bye|hasta luego)\b/.test(m);
-
-  const hasIntent=asksPrice||asksBest||asksPayment||asksCancel||asksTrust||asksReserve||asksProvider||asksHelp||isGreeting||isThanks||isBye;
-  if(hasIntent||ev||bud||gue||dist||cats.length) ctx.unclear=0;
-
-  // ── PRIORIDAD 1: conversacional ──
-  if(isGreeting&&!cats.length&&!ev&&!bud){ setContext('idle'); return 'Hola. Cuéntame qué evento quieres organizar, o pídeme ideas (por ejemplo "ideas para una parrillada").'; }
-  if(isThanks) return 'De nada. ¿Vemos algo más? Puedo buscarte otro servicio, comparar proveedores o ajustar el presupuesto.';
-  if(isBye) return 'Hasta luego. Cuando quieras seguir, acá estoy.';
-  if(asksHelp) return 'Te puedo armar un <b>presupuesto</b> con proveedores del catálogo, darte <b>ideas para organizar</b> (parrilladas, baby showers, corporativos), comparar proveedores entre sí y explicarte cómo funcionan las reservas. ¿Por dónde empezamos?';
-
-  // ── PRIORIDAD 2: CONSULTOR EXPERTO (base de conocimiento) ──
-  const knowledge=findKnowledge(m);
-  const wantsAdvice=/idea|ideas|consejo|consejos|qué necesito|que necesito|qué compro|que compro|qué debería|que deberia|cómo organizo|como organizo|ayúdame a organizar|ayudame a organizar|lista de|qué llevo|que llevo/.test(m);
-  if(knowledge&&(wantsAdvice||hasWord(m,'parrilla')||hasWord(m,'parrillada')||hasWord(m,'baby shower'))){
-    setContext('consulting');
-    ctx.lastTopic=knowledge.key;
-    const card=knowledge.entry.build(ctx.guests);
-    const back=threadBack();
-    return card+`<div class="cc-follow">${knowledge.entry.followup}</div>`+back;
-  }
-
-  // ── PRIORIDAD 2.5: CÁLCULOS RÁPIDOS DE CONSULTOR (trago, bebida, comida) ──
-  // Estos ganan al re-armado de presupuesto: son preguntas de asesoría, no datos nuevos del evento.
-  const calcSubject = /(trago|alcohol|licor|cerveza|bebida|gaseosa|hielo)/.test(m) ? RegExp.$1 : null;
-  const asksCalc = /cómo calculo|como calculo|cuánto|cuanto|cuánta|cuanta/.test(m) && calcSubject
-                   || /^y (de |del |el )?(trago|alcohol|licor|cerveza|bebida|gaseosa|hielo)s?\??$/.test(m);
-  if(asksCalc && calcSubject){
-    setContext('consulting');
-    const n = detectGuests(m) || ctx.guests || 50;
-    let ans;
-    if(/trago|alcohol|licor|cerveza/.test(calcSubject)){
-      const tragos=n*3, cerveza=(n*1.5).toFixed(0), botellas=Math.ceil(n/8);
-      ans=`Para <b>${n} personas</b> en un evento de 4–5 h, la regla de oro:<ul class="cc-list"><li><b>~3 tragos por persona</b> → unos ${tragos} tragos en total.</li><li>Si es cerveza: ~${cerveza} L (una caja de 12 alcanza para ~15 personas).</li><li>Si es licor fuerte: ~${botellas} botellas de 750 ml + gaseosas/hielo para mezclar.</li></ul>Suma un 10% extra por si acaso.`;
-    } else if(/gaseosa|bebida/.test(calcSubject)){
-      const litros=(n*1.5).toFixed(0);
-      ans=`Para <b>${n} personas</b> calcula <b>~1.5 L de bebida por persona</b> en un evento largo → unos ${litros} L en total (mezcla gaseosa, agua y refresco natural como chicha o limonada).`;
-    } else if(/hielo/.test(calcSubject)){
-      const kg=Math.ceil(n*0.5);
-      ans=`Para <b>${n} personas</b> calcula <b>~0.5 kg de hielo por persona</b> → unos ${kg} kg (más si hace calor o hay barra de tragos).`;
-    }
-    return ans + threadBack();
-  }
-
-  // ── PRIORIDAD 3: preguntas explícitas (ganan al paquete recordado) ──
-  if(asksPrice&&cats.length){
-    setContext('faq');
-    const cat=cats[0]; const cheap=cheapestIn(cat,1)[0]; const best=bestRatedIn(cat,1)[0]; ctx.mentioned.add(cat);
-    if(!cheap||!best) return `Todavía no tengo proveedores cargados en <b>${catLabelChat[cat]}</b>. ¿Buscas otra categoría?`;
-    return `Para <b>${catLabelChat[cat]}</b> los precios van desde <b>${money(cheap.price)}</b> (${esc(cheap.name)}) hasta opciones premium. El mejor calificado es <b>${esc(best.name)}</b> (★${best.rating}, ${best.reviews} reseñas) desde ${money(best.price)}.`+threadBack();
-  }
-  if(asksPrice&&!cats.length&&!ev){ setContext('faq'); return '¿De qué servicio quieres saber el precio? Dime la categoría (música, catering, fotografía, local, decoración) y te digo desde cuánto está.'; }
-  if(asksBest&&cats.length){
-    setContext('faq');
-    const cat=cats[0]; const b=bestRatedIn(cat,2); ctx.mentioned.add(cat);
-    return `En <b>${catLabelChat[cat]}</b> los top son <b>${b[0].name}</b> (★${b[0].rating}, desde ${money(b[0].price)})`+(b[1]?` y <b>${b[1].name}</b> (★${b[1].rating})`:'')+'. ¿Los ves en el marketplace?'+threadBack();
-  }
-  if(asksPayment){ setContext('faq'); return 'Reservas la fecha y el horario acá en la plataforma. El pago lo coordinas directo con el proveedor después de que la reserva quede confirmada: todavía no cobramos por acá.'; }
-  if(asksCancel){ setContext('faq'); return 'Las condiciones de cancelación las pone cada proveedor, así que conviene preguntárselas antes de cerrar. Como todavía no manejamos el pago, cualquier devolución la ves directamente con él.'; }
-  if(asksTrust){ setContext('faq'); return 'Antes de aprobar a un proveedor revisamos su identidad y su negocio. Y para dejar una reseña hay que haber reservado por la plataforma, así que no se pueden inventar.'; }
-  if(asksProvider){ setContext('faq'); return 'Entra a <b>"Para Proveedores"</b> en el menú: creas tu perfil, pones tus precios y esperas que aprobemos tu cuenta. Por ahora no cobramos comisión.'; }
-  if(asksReserve&&!ev){ setContext('faq'); return 'Eliges al proveedor, miras qué horarios tiene libres tu fecha y confirmas uno. Queda bloqueado en su agenda en ese momento.'; }
-
-  // ── PRIORIDAD 4: armar PRESUPUESTO (solo si hay datos del evento este turno) ──
-  const eventInfoThisTurn = ev || (ctx.eventType && (bud||gue||dist));
-  if(ctx.eventType && eventInfoThisTurn){
-    setContext('quoting');
-    return renderBudget(ctx.eventType, ctx.budget, ctx.guests, ctx.district);
-  }
-
-  // ── PRIORIDAD 5: categoría suelta ──
-  if(cats.length){
-    setContext('faq');
-    const cat=cats[0]; const best=bestRatedIn(cat,1)[0]; const cheap=cheapestIn(cat,1)[0]; ctx.mentioned.add(cat);
-    if(!best||!cheap) return `Todavía no tengo proveedores cargados en <b>${catLabelChat[cat]}</b>. ¿Buscas otra categoría?`;
-    if(best.name===cheap.name) return `En <b>${catLabelChat[cat]}</b> la mejor opción es <b>${esc(best.name)}</b> (★${best.rating}) desde ${money(best.price)}. ¿Qué evento organizas? Te armo el paquete completo.`;
-    return `Para <b>${catLabelChat[cat]}</b>: desde <b>${esc(cheap.name)}</b> a ${money(cheap.price)} hasta premium como <b>${esc(best.name)}</b> (★${best.rating}). ¿Qué evento organizas? Te armo el paquete completo.`;
-  }
-
-  // ── PRIORIDAD 6: distrito suelto ──
-  if(dist){
-    const list=inDistrict(dist); const nice=dist.replace(/^\w/,c=>c.toUpperCase());
-    if(list.length){ const s=list.slice(0,3).map(p=>`<b>${esc(p.name)}</b> (${catLabelChat[p.cat]}, ${money(p.price)})`).join(', '); return `En <b>${esc(nice)}</b> tenemos ${list.length} proveedores, por ejemplo: ${s}. ¿Buscas algo puntual ahí?`; }
-    return `Aún no tengo proveedores cargados específicamente en ${nice}, pero cubrimos toda Lima. ¿Qué servicio buscas?`;
-  }
-
-  // ── PRIORIDAD 7: solo presupuesto o invitados ──
-  if(bud&&!ctx.eventType) return `Anotado: <b>${money(bud)}</b> de presupuesto. ¿Para qué evento — boda, cumpleaños, corporativo, quinceañero? Así lo armo a tu medida.`;
-  if(gue&&!ctx.eventType) return `Entendido, ${gue} personas. ¿Qué tipo de evento es y con qué presupuesto? Con eso te recomiendo el paquete ideal.`;
-
-  // ── PRIORIDAD 8: qué es esto ──
-  if(/qué es todoeventos|que es todoeventos|de qué se trata|de que se trata/.test(m)) return 'TodoEventos.pe es un marketplace de servicios para eventos en Lima: proveedores que revisamos uno por uno y un asistente que te arma el presupuesto. Las reseñas las dejan solo los que reservaron acá.';
-
-  // ── PRIORIDAD 9: fallback (protocolo de incertidumbre) ──
-  ctx.unclear=(ctx.unclear||0)+1;
-  if(ctx.unclear>=2) return 'Puedo ayudarte con: <b>presupuestos</b> de eventos, <b>consejos de organización</b> (parrillada, baby shower, corporativo), <b>precios</b> y recomendaciones de proveedores, o cómo funcionan las <b>reservas</b>. ¿Cuál te sirve?';
-  return 'Cuéntame un poco más: ¿qué evento organizas, cuántas personas, y tienes presupuesto o distrito en mente? También te doy ideas de organización si me dices qué tipo de evento es.';
-}
-
-// ── ENVÍO ──────────────────────────────────────────────────────────────────
-async function sendMsg(){
-  if(isLoading) return;
-  const input=document.getElementById('chat-input');
-  const msg=input.value.trim(); if(!msg) return;
-  input.value=''; input.style.height='auto';
-  addUserMsg(msg); setLoading(true);
-  await new Promise(r=>setTimeout(r,500+Math.random()*500));
-  const reply=generateResponse(msg);
-  removeTypingIndicator(); addBotMsg(reply); setLoading(false);
-}
-function setLoading(s){ isLoading=s; const b=document.getElementById('send-btn'); if(s){ b.disabled=true; addTypingIndicator(); } else { b.disabled=false; } }
-function handleKey(e){
-  if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMsg(); }
-  const ta=document.getElementById('chat-input'); ta.style.height='auto'; ta.style.height=Math.min(ta.scrollHeight,100)+'px';
-}
-async function sendQuick(el){
-  if(isLoading) return;
-  const msg=el.textContent;
-  if(!document.getElementById('chat-panel').classList.contains('open')) toggleChat();
-  await new Promise(r=>setTimeout(r,chatInitialized?150:900));
-  if(isLoading) return;
-  addUserMsg(msg); setLoading(true);
-  await new Promise(r=>setTimeout(r,500+Math.random()*500));
-  const reply=generateResponse(msg);
-  removeTypingIndicator(); addBotMsg(reply); setLoading(false);
-}
-function updateChatContext(cat){
-  if(chatOpen&&catLabelChat[cat]&&!ctx.mentioned.has(cat)){
-    ctx.mentioned.add(cat);
-    setTimeout(async()=>{
-      if(isLoading) return;
-      setLoading(true); await new Promise(r=>setTimeout(r,500));
-      const best=bestRatedIn(cat,1)[0]; const cheap=cheapestIn(cat,1)[0];
-      if(!best||!cheap){ removeTypingIndicator(); setLoading(false); return; }
-      removeTypingIndicator();
-      addBotMsg(`Veo que exploras <b>${catLabelChat[cat]}</b>. El mejor calificado es <b>${esc(best.name)}</b> (★${best.rating}) y el más económico <b>${esc(cheap.name)}</b> desde ${money(cheap.price)}. ¿Fecha o presupuesto en mente?`);
-      setLoading(false);
-    },500);
-  }
-}
 
 
 // ─── INIT ───
