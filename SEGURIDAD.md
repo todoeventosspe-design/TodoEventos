@@ -44,11 +44,16 @@ pase y revierte los campos. Entonces la consulta igual reporta "1 fila
 afectada". Para saber si funciona hay que mirar el **valor final**, no el
 número de filas.
 
-## Aprobar y rechazar proveedores
+## Lo que solo puede hacer un admin
 
-Son dos funciones (`aprobar_proveedor`, `rechazar_proveedor`) que empiezan con
-`IF NOT es_admin() THEN RAISE EXCEPTION`. Cualquiera puede llamarlas desde la
-API, pero si no eres admin te rebota.
+Son tres funciones (`aprobar_proveedor`, `rechazar_proveedor` y
+`marcar_fundador`) que empiezan con `IF NOT es_admin() THEN RAISE EXCEPTION`.
+Cualquiera puede llamarlas desde la API, pero si no eres admin te rebota.
+
+Van como RPC y no como UPDATE desde el navegador por dos motivos: RLS no deja
+que un admin escriba en el perfil de otro, y el permiso tiene que decidirlo la
+base. Que el panel esconda el botón cuando no corresponde es comodidad, no
+seguridad.
 
 El linter de Supabase las marca en amarillo junto con `es_admin()`, porque ve
 que son `SECURITY DEFINER` y que están expuestas. Es un falso positivo: el

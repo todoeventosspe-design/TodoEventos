@@ -53,7 +53,14 @@ h1{font-size:22px;font-weight:700;margin:22px 0 4px;}
 .estado-tag{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;padding:4px 11px;border-radius:100px;font-weight:600;}
 .estado-tag.aprobado{background:var(--green-soft);color:var(--green);}
 .estado-tag.rechazado{background:rgba(248,113,113,.1);color:var(--red);}
+.estado-tag.fundador{background:rgba(251,191,36,.12);color:var(--gold);border:1px solid rgba(251,191,36,.3);}
 .motivo{font-size:12px;color:var(--red);margin-top:8px;}
+
+.acciones-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.btn-fundador{background:transparent;border:1px solid rgba(251,191,36,.4);color:var(--gold);padding:7px 14px;font-size:12.5px;}
+.btn-fundador:hover{background:rgba(251,191,36,.1);}
+.fund-info{font-size:12.5px;color:var(--sub);margin:-8px 0 20px;line-height:1.6;}
+.fund-info b{color:var(--gold);}
 
 .vacio{text-align:center;padding:60px 20px;color:var(--sub);}
 .vacio i{font-size:38px;margin-bottom:12px;display:block;}
@@ -84,6 +91,7 @@ h1{font-size:22px;font-weight:700;margin:22px 0 4px;}
     <button class="tab" id="tab-rechazados" onclick="cambiarTab('rechazado')">Rechazados</button>
   </div>
 
+  <div class="fund-info" id="fund-info"></div>
   <div id="lista-solicitudes"></div>
 </div>
 
@@ -116,6 +124,14 @@ function esc(s){
 
 let todasLasSolicitudes = [];
 let tabActual = 'pendiente';
+
+// Cuantos fundadores promete el programa. No lo fuerza la base: pasarse es una
+// decision comercial, no un ataque. Aca solo sirve para avisar antes.
+const LIMITE_FUNDADORES = 20;
+
+// Se apaga si fundador.sql todavia no se corrio. Con la columna ausente el
+// boton no se dibuja, en vez de dibujarlo y que reviente al apretarlo.
+let fundadorDisponible = false;
 
 async function init(){
   if(!sb){
@@ -150,10 +166,17 @@ async function init(){
 }
 
 async function cargarSolicitudes(){
-  const { data, error } = await sb
+  // Si is_founder no existe todavia, Postgres rechaza el select entero y el
+  // panel se queda sin poder aprobar a nadie. Se reintenta sin la columna:
+  // que falte el badge no puede tumbar el resto del panel.
+  const consulta = campoFundador => sb
     .from('solicitudes_proveedor')
-    .select('*, profiles(full_name, email)')
+    .select(`*, profiles(full_name, email${campoFundador})`)
     .order('created_at', { ascending: false });
+
+  let { data, error } = await consulta(', is_founder');
+  fundadorDisponible = !error;
+  if(error) ({ data, error } = await consulta(''));
 
   if(error){
     console.error(error);
@@ -162,6 +185,14 @@ async function cargarSolicitudes(){
   todasLasSolicitudes = data || [];
   actualizarContador();
   render();
+}
+
+function contarFundadores(){
+  const vistos = new Set();
+  todasLasSolicitudes.forEach(s => {
+    if(s.profiles && s.profiles.is_founder) vistos.add(s.user_id);
+  });
+  return vistos.size;
 }
 
 function actualizarContador(){
@@ -181,6 +212,17 @@ function render(){
   const cont = document.getElementById('lista-solicitudes');
   const filtradas = todasLasSolicitudes.filter(s => s.estado === tabActual);
 
+  // El contador del programa fundador solo tiene sentido sobre los aprobados:
+  // es la unica pestana donde se puede marcar a alguien.
+  const info = document.getElementById('fund-info');
+  if(fundadorDisponible && tabActual === 'aprobado'){
+    const n = contarFundadores();
+    info.style.display = 'block';
+    info.innerHTML = `Programa fundador: <b>${n} de ${LIMITE_FUNDADORES}</b> marcados. En el catálogo se ve como un anillo dorado alrededor de la foto.`;
+  } else {
+    info.style.display = 'none';
+  }
+
   if(filtradas.length === 0){
     cont.innerHTML = `<div class="vacio"><i class="ti ti-inbox"></i>No hay solicitudes ${tabActual === 'pendiente' ? 'pendientes' : tabActual + 's'} por ahora.</div>`;
     return;
@@ -190,6 +232,7 @@ function render(){
     const nombreDueno = s.profiles ? s.profiles.full_name : '—';
     const correoDueno = s.profiles ? s.profiles.email : '—';
     const fecha = new Date(s.created_at).toLocaleDateString('es-PE', { day:'numeric', month:'short', year:'numeric' });
+    const esFundador = !!(s.profiles && s.profiles.is_founder);
 
     const accionesHtml = s.estado === 'pendiente' ? `
       <div class="btns">
@@ -197,7 +240,15 @@ function render(){
         <button class="btn btn-rechazar" data-id="${s.id}" data-uid="${esc(s.user_id)}" onclick="rechazar(this.dataset.id, this.dataset.uid)"><i class="ti ti-x"></i> Rechazar</button>
       </div>
     ` : `
-      <span class="estado-tag ${s.estado}"><i class="ti ${s.estado === 'aprobado' ? 'ti-check' : 'ti-x'}"></i> ${s.estado === 'aprobado' ? 'Aprobado' : 'Rechazado'}</span>
+      <div class="acciones-row">
+        <span class="estado-tag ${s.estado}"><i class="ti ${s.estado === 'aprobado' ? 'ti-check' : 'ti-x'}"></i> ${s.estado === 'aprobado' ? 'Aprobado' : 'Rechazado'}</span>
+        ${esFundador ? `<span class="estado-tag fundador"><i class="ti ti-crown"></i> Fundador</span>` : ''}
+        ${s.estado === 'aprobado' && fundadorDisponible ? `
+          <button class="btn btn-fundador" data-uid="${esc(s.user_id)}" data-marcar="${esFundador ? '0' : '1'}"
+                  onclick="toggleFundador(this.dataset.uid, this.dataset.marcar === '1')">
+            <i class="ti ti-crown"></i> ${esFundador ? 'Quitar de fundadores' : 'Marcar como fundador'}
+          </button>` : ''}
+      </div>
       ${s.motivo_rechazo ? `<div class="motivo">Motivo: ${esc(s.motivo_rechazo)}</div>` : ''}
     `;
 
@@ -250,6 +301,25 @@ async function rechazar(solicitudId, userId){
   const { error } = await sb.rpc('rechazar_proveedor', { p_user_id: userId, p_motivo: motivo || null });
   if(error){
     alert('No se pudo rechazar. Intenta de nuevo.');
+    console.error(error);
+    return;
+  }
+  await cargarSolicitudes();
+}
+
+async function toggleFundador(userId, marcar){
+  if(marcar){
+    if(contarFundadores() >= LIMITE_FUNDADORES &&
+       !confirm(`Ya hay ${LIMITE_FUNDADORES} fundadores, que es lo que promete el programa. ¿Marcar uno más igual?`)) return;
+  } else {
+    if(!confirm('¿Quitarle el badge de fundador? Deja de verse en el catálogo.')) return;
+  }
+
+  // El permiso lo decide la base: marcar_fundador rebota a cualquiera que no
+  // sea admin, asi que esconder el boton es comodidad y no seguridad.
+  const { error } = await sb.rpc('marcar_fundador', { p_user_id: userId, p_valor: marcar });
+  if(error){
+    alert('No se pudo cambiar el badge de fundador. Intenta de nuevo.');
     console.error(error);
     return;
   }
