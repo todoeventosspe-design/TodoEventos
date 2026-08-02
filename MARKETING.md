@@ -33,10 +33,14 @@ reservar, y además le regala a un competidor la lista completa de gente a
 quien contactar. El arreglo es una vista pública que exponga solo lo que el
 catálogo necesita. Está explicado en [SEGURIDAD.md](SEGURIDAD.md).
 
-**El badge de fundador no existe.** Se promete en el plan pero no está en el
-producto. Es una columna en `profiles` y un cambio en la tarjeta del catálogo.
+**El badge de fundador ya está en el producto.** La columna y el candado que
+impide que el proveedor se lo ponga solo están en [fundador.sql](fundador.sql),
+y la tarjeta del catálogo pinta el anillo dorado y la etiqueta. Quedan dos
+cosas antes de poder prometerlo: correr ese SQL en Supabase, y que marcar a un
+fundador deje de ser un `update` a mano, porque el panel de admin todavía no
+tiene el botón.
 
-**La prioridad en el orden del catálogo tampoco existe.** El catálogo hoy
+**La prioridad en el orden del catálogo no existe.** El catálogo hoy
 ordena por calificación, precio o reseñas. Poner a los fundadores arriba es
 cambiar el `order` de la consulta.
 

@@ -95,6 +95,14 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
 .pcard-fav{position:absolute;top:10px;right:10px;width:30px;height:30px;background:rgba(0,0,0,.5);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .18s;}
 .pcard-fav:hover{background:rgba(168,85,247,.3);}
 .pcard-fav i{font-size:14px;color:rgba(255,255,255,.7);}
+/* Fundador: anillo dorado por dentro del banner. Va como box-shadow y no como
+   border para que la foto no se recorte ni la tarjeta cambie de tamaño al
+   pasar de un proveedor normal a uno fundador. */
+.pcard.founder{border-color:rgba(252,211,77,.32);}
+.pcard.founder:hover{border-color:rgba(252,211,77,.55);}
+.pcard.founder .pcard-img{box-shadow:inset 0 0 0 2px rgba(252,211,77,.85);}
+.pcard-fbdg{position:absolute;bottom:10px;left:10px;display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#fcd34d,#f59e0b);color:#2b1c02;font-size:10px;font-weight:800;padding:4px 10px;border-radius:100px;box-shadow:0 2px 12px rgba(245,158,11,.4);}
+.pcard-fbdg i{font-size:11px;}
 .pcard-body{padding:14px 16px;}
 .pcard-name{font-size:14px;font-weight:700;margin-bottom:5px;}
 .pcard-rat{display:flex;align-items:center;gap:4px;margin-bottom:5px;}
@@ -554,10 +562,17 @@ function badgeParaRating(rating){
 
 async function cargarProvidersReales(){
   if(!sb) return;
-  const { data, error } = await sb
+  // is_founder la agrega fundador.sql. Si esa migración todavía no se corrió,
+  // Postgres rechaza el select entero por columna inexistente y el catálogo se
+  // queda vacío, así que se reintenta sin ella: preferimos el catálogo sin
+  // badges antes que un catálogo en blanco.
+  const consulta = campoFundador => sb
     .from('services')
-    .select('id, name, description, price, category, image_url, imagenes, provider_id, profiles!services_provider_id_fkey(full_name, location, rating, reviews_count)')
+    .select(`id, name, description, price, category, image_url, imagenes, provider_id, profiles!services_provider_id_fkey(full_name, location, rating, reviews_count${campoFundador})`)
     .eq('active', true);
+
+  let { data, error } = await consulta(', is_founder');
+  if(error) ({ data, error } = await consulta(''));
 
   if(error){ console.error('Error cargando el catálogo:', error); return; }
 
@@ -578,6 +593,10 @@ async function cargarProvidersReales(){
         rating: Number(s.profiles.rating) || 0,
         reviews,
         esNuevo,
+        // Uno de los primeros proveedores del programa fundador. Solo un admin
+        // puede marcarlo: el trigger de la base revierte el campo si lo intenta
+        // el propio proveedor.
+        esFundador: s.profiles.is_founder === true,
         district: (s.profiles.location || 'Lima').split(',')[0].trim(),
         tags: [],
         // Portada + galería reales: las fotos que el proveedor subió a este
@@ -651,12 +670,13 @@ function render() {
 
   data.forEach(p => {
     const card = document.createElement('div');
-    card.className = 'pcard';
+    card.className = p.esFundador ? 'pcard founder' : 'pcard';
     card.innerHTML = `
       <div class="pcard-clickable" onclick="openServiceDetail(${p.id})">
         <div class="pcard-img ${p.foto ? '' : 'ci-' + p.img}" ${p.foto ? `style="background-image:url('${esc(p.foto)}');background-size:cover;background-position:center;"` : ''}>
           ${p.foto ? '' : `<i class="ti ${p.icon}"></i>`}
           <span class="pcard-vbdg">${p.badge}</span>
+          ${p.esFundador ? `<span class="pcard-fbdg"><i class="ti ti-crown"></i> Fundador</span>` : ''}
           <span class="pcard-price-tag">desde S/. ${p.price}</span>
           <button class="pcard-fav" onclick="event.stopPropagation();"><i class="ti ti-heart"></i></button>
         </div>

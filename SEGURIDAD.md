@@ -29,6 +29,12 @@ UPDATE de alguien que no sea admin vuelve a poner el valor anterior en:
 - `role`, para que no se cambie de cliente a proveedor por su cuenta
 - `rating` y `reviews_count`, para que nadie se ponga cinco estrellas y 500 reseñas
 
+`is_founder` está protegido igual, pero por un trigger propio
+(`protect_founder_badge()`, en `fundador.sql`) en vez de por ese mismo. Se hizo
+aparte para no reescribir una función que ya funciona; el efecto es el mismo.
+El badge de fundador es una promesa comercial, así que si el proveedor se lo
+puede poner solo deja de significar nada.
+
 El usuario sí puede editar su nombre, bio, foto, portada, distrito y
 categoría. Si algún día hay que agregar un campo sensible nuevo, va en esa
 lista.
@@ -66,14 +72,15 @@ si dos personas reservan al mismo tiempo.
 ## Correr el pentest
 
 `pentest.sql` prueba todo lo de arriba: aislamiento entre proveedores,
-escritura a nombre ajeno y los cinco intentos de escalada de privilegios. Se
+escritura a nombre ajeno y los intentos de escalada de privilegios. Se
 pega en el SQL editor de Supabase y se ejecuta.
 
 Termina lanzando una excepción a propósito, y eso revierte las filas de prueba
 que insertó. Si el mensaje dice `OK_PENTEST` está todo bien. Si dice `FALLOS`,
 el texto indica qué se pudo hacer que no debería poderse.
 
-Hoy pasa los 18 checks.
+Hoy pasa los 19 checks. Corre `fundador.sql` antes, o falla en el que mira
+`is_founder`.
 
 ## Lo que falta
 
