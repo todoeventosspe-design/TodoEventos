@@ -15,6 +15,7 @@
   --green:#4ade80; --green-soft:rgba(74,222,128,.12); --green-line:rgba(74,222,128,.3);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{overflow-x:hidden;} /* los glows de fondo se salían del borde en celular */
 body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;padding:32px 20px 60px;}
 .wrap{max-width:900px;margin:0 auto;}
 
@@ -133,6 +134,31 @@ const LIMITE_FUNDADORES = 20;
 // boton no se dibuja, en vez de dibujarlo y que reviente al apretarlo.
 let fundadorDisponible = false;
 
+// Perilla global del programa: cuando esta cerrado no se pueden marcar nuevos
+// fundadores (la base tambien lo bloquea). Arranca en true; si programa-fundador.sql
+// todavia no se corrio, la lectura falla y se queda en true sin romper nada.
+let programaAbierto = true;
+
+async function cargarEstadoPrograma(){
+  const { data, error } = await sb.from('app_config').select('founder_program_open').eq('id', 1).single();
+  if(!error && data) programaAbierto = data.founder_program_open;
+}
+
+async function toggleProgramaFundador(){
+  const abrir = !programaAbierto;
+  if(!confirm(abrir
+      ? '¿Reabrir el programa fundador? Se podrán marcar nuevos fundadores.'
+      : '¿Cerrar el programa fundador? No se podrán marcar nuevos (los que ya lo tienen lo conservan).')) return;
+  const { error } = await sb.rpc('set_founder_program', { p_open: abrir });
+  if(error){
+    alert('No se pudo cambiar el programa. ¿Corriste programa-fundador.sql en Supabase?');
+    console.error(error);
+    return;
+  }
+  programaAbierto = abrir;
+  render();
+}
+
 async function init(){
   if(!sb){
     // Fail-closed: si el SDK no carga no sabemos si sos admin, asi que no
@@ -182,6 +208,7 @@ async function cargarSolicitudes(){
     console.error(error);
     return;
   }
+  if(fundadorDisponible) await cargarEstadoPrograma();
   todasLasSolicitudes = data || [];
   actualizarContador();
   render();
@@ -217,8 +244,17 @@ function render(){
   const info = document.getElementById('fund-info');
   if(fundadorDisponible && tabActual === 'aprobado'){
     const n = contarFundadores();
+    const estado = programaAbierto
+      ? `<span style="color:var(--green);font-weight:700;">abierto</span>`
+      : `<span style="color:var(--red);font-weight:700;">cerrado</span>`;
+    const btnTxt = programaAbierto ? 'Cerrar programa' : 'Reabrir programa';
     info.style.display = 'block';
-    info.innerHTML = `Programa fundador: <b>${n} de ${LIMITE_FUNDADORES}</b> marcados. En el catálogo se ve como un anillo dorado alrededor de la foto.`;
+    info.innerHTML =
+      `Programa fundador: <b>${n} de ${LIMITE_FUNDADORES}</b> marcados · estado: ${estado}. `
+      + `En el catálogo se ve como un anillo dorado alrededor de la foto. `
+      + `<button class="btn btn-fundador" style="margin-top:8px;" onclick="toggleProgramaFundador()">`
+      + `<i class="ti ti-${programaAbierto ? 'lock' : 'lock-open'}"></i> ${btnTxt}</button>`
+      + (programaAbierto ? '' : `<div style="margin-top:6px;color:var(--red);font-size:12px;">Cerrado: no se pueden marcar nuevos fundadores.</div>`);
   } else {
     info.style.display = 'none';
   }
@@ -309,6 +345,10 @@ async function rechazar(solicitudId, userId){
 
 async function toggleFundador(userId, marcar){
   if(marcar){
+    if(!programaAbierto){
+      alert('El programa fundador está cerrado. Reábrelo (botón de arriba) antes de marcar nuevos fundadores.');
+      return;
+    }
     if(contarFundadores() >= LIMITE_FUNDADORES &&
        !confirm(`Ya hay ${LIMITE_FUNDADORES} fundadores, que es lo que promete el programa. ¿Marcar uno más igual?`)) return;
   } else {

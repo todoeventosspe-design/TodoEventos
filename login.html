@@ -29,6 +29,7 @@ body.role-proveedor{
   --glow1:rgba(249,115,22,.14); --glow2:rgba(251,191,36,.08);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{overflow-x:hidden;} /* los glows de fondo se salían del borde en celular */
 body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;transition:background .3s;}
 .glow{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;transition:background .4s;}
 .glow.g1{width:420px;height:420px;background:var(--glow1);top:-120px;right:-100px;}
@@ -715,5 +716,12 @@ async function enviarCorreoConfirmacion(email, nombre, nombreNegocio){
 
 updateUI();
 </script>
+
+<!-- ═══ ASESOR (agente de ElevenLabs) ═══
+     Chat flotante para que el proveedor pida ayuda incluso para loguearse.
+     FALTA UN PASO: reemplaza AGENT_ID_DEL_ASESOR por el id real del agente
+     "Asesor Personal" de ElevenLabs (la misma cadena que en dashboard.html). -->
+<elevenlabs-convai agent-id="AGENT_ID_DEL_ASESOR"></elevenlabs-convai>
+<script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
 </body>
 </html>

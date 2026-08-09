@@ -129,6 +129,14 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
 @media(max-width:900px){
   #prov-grid{grid-template-columns:repeat(2,1fr);}
   .nav-search{display:none;}
+  /* El CTA "Para Proveedores" no entra en la barra en celular y empujaba toda
+     la página hacia la derecha. En móvil el catálogo le habla al cliente; el
+     proveedor tiene su acceso desde el inicio. */
+  .btn-prov{display:none;}
+  /* Aligerar la barra en celular: menos padding y sin el link de texto
+     "Nosotros" (está en el pie). Deja lugar para carrito + Ingresar. */
+  .nav-i{padding:12px 16px;}
+  .nl-link{display:none;}
   .filter-inner{overflow-x:auto;flex-wrap:nowrap;}
 }
 @media(max-width:560px){
@@ -643,12 +651,16 @@ function render() {
     data = data.filter(p => p.name.toLowerCase().includes(q) || p.tags.some(t => t.toLowerCase().includes(q)) || p.district.toLowerCase().includes(q));
   }
 
-  // Sort
+  // Sort. Los fundadores van SIEMPRE primero (es la contraparte del badge: se
+  // les prometió prioridad en el catálogo), y dentro de cada grupo se aplica el
+  // orden que el usuario eligió. Number() porque esFundador es booleano.
   const sort = document.getElementById('sort-select').value;
-  if (sort === 'price-asc') data.sort((a,b) => a.price - b.price);
-  else if (sort === 'price-desc') data.sort((a,b) => b.price - a.price);
-  else if (sort === 'rating') data.sort((a,b) => b.rating - a.rating);
-  else if (sort === 'reviews') data.sort((a,b) => b.reviews - a.reviews);
+  let cmp;
+  if (sort === 'price-asc') cmp = (a,b) => a.price - b.price;
+  else if (sort === 'price-desc') cmp = (a,b) => b.price - a.price;
+  else if (sort === 'reviews') cmp = (a,b) => b.reviews - a.reviews;
+  else cmp = (a,b) => b.rating - a.rating; // 'rating' y por defecto
+  data.sort((a,b) => (Number(b.esFundador) - Number(a.esFundador)) || cmp(a,b));
 
   const grid = document.getElementById('prov-grid');
   const noRes = document.getElementById('no-results');

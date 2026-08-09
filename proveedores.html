@@ -9,7 +9,7 @@
 @import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
 :root{--bg:hsl(24,90%,3%);--bg2:hsl(22,60%,5%);--bg3:hsl(20,40%,7%);--fg:hsl(40,10%,96%);--sub:hsl(40,6%,65%);--or:#f97316;--gold:#fbbf24;--pu:#a855f7;--ind:#6366f1;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
+html{scroll-behavior:smooth;overflow-x:hidden;} /* los rings de fondo se salían en celular */
 body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:var(--fg);overflow-x:hidden;}
 .container{max-width:1100px;margin:0 auto;padding:0 2rem;}
 .gt{background:linear-gradient(to left,#ea580c,#f97316,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}

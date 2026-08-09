@@ -26,6 +26,7 @@ body.role-proveedor{
   --glow1:rgba(249,115,22,.14); --glow2:rgba(251,191,36,.08);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{overflow-x:hidden;} /* los glows de fondo se salían del borde en celular */
 body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;}
 .glow{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;}
 .glow.g1{width:420px;height:420px;background:var(--glow1);top:-120px;right:-100px;}

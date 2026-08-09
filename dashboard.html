@@ -40,7 +40,13 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
 .side-urole{font-size:11px;color:var(--sub);}
 
 /* ── MAIN ── */
-.main{flex:1;padding:32px 40px;overflow-y:auto;}
+.main{flex:1;padding:32px 40px;overflow-y:auto;min-width:0;}
+/* Barra superior + botón de menú: solo existen en celular (abajo en la media
+   query se muestran). En escritorio la barra lateral normal manda. */
+.mtopbar{display:none;}
+.nav-hamb{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--fg);width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:21px;font-family:inherit;}
+.nav-hamb:active{background:rgba(255,255,255,.12);}
+.nav-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:55;}
 .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
 .greeting h1{font-size:24px;font-weight:700;}
 .greeting p{font-size:13.5px;color:var(--sub);margin-top:3px;}
@@ -186,7 +192,13 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
   .tools-grid{grid-template-columns:repeat(2,1fr);}
 }
 @media(max-width:720px){
-  .sidebar{display:none;}
+  /* La barra lateral pasa a ser un cajón que entra desde la izquierda. Antes
+     desaparecía sin reemplazo y el proveedor se quedaba sin navegación en el
+     celular, que es justo donde más la usa. */
+  .mtopbar{display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;background:var(--card);border-bottom:1px solid var(--line);padding:11px 15px;}
+  .sidebar{position:fixed;top:0;left:0;height:100vh;width:250px;transform:translateX(-100%);transition:transform .25s ease;z-index:60;overflow-y:auto;box-shadow:0 0 44px rgba(0,0,0,.55);}
+  body.nav-open .sidebar{transform:translateX(0);}
+  body.nav-open .nav-backdrop{display:block;}
   .main{padding:20px;}
   .tools-grid,.kpi-row{grid-template-columns:1fr;}
   .row2,.row3{grid-template-columns:1fr;}
@@ -403,6 +415,13 @@ async function verificarAccesoDashboard(){
 
 verificarAccesoDashboard();
 </script>
+
+<!-- Barra superior solo-móvil: botón de menú que abre la barra lateral -->
+<div class="mtopbar">
+  <button class="nav-hamb" onclick="toggleNav()" aria-label="Abrir menú"><i class="ti ti-menu-2"></i></button>
+  <span class="logo"><span class="lp">Todo</span><span class="lo">Eventos</span><span class="dot">.pe</span></span>
+</div>
+<div class="nav-backdrop" onclick="closeNav()"></div>
 
 <div class="app">
 
@@ -3071,6 +3090,24 @@ async function refrescarReservasYAgenda(){
 // Primer cálculo al cargar la página, ya que "Inicio" es la vista por defecto.
 renderHomeKPIs();
 updateReqBadge();
+
+// ─── Menú móvil (cajón lateral) ───
+function toggleNav(){ document.body.classList.toggle('nav-open'); }
+function closeNav(){ document.body.classList.remove('nav-open'); }
+// Al tocar cualquier opción de la barra lateral, se cierra el cajón para que
+// se vea el contenido al que llevó.
+document.querySelector('.sidebar')?.addEventListener('click', e => {
+  if(e.target.closest('.side-item')) closeNav();
+});
 </script>
+
+<!-- ═══ ASESOR (agente de ElevenLabs para proveedores) ═══
+     El chat flotante abajo a la derecha, igual que Raymi en el catálogo pero
+     para el proveedor: soporte del panel paso a paso + consejos de venta.
+     FALTA UN PASO: reemplaza AGENT_ID_DEL_ASESOR por el id real del agente
+     "Asesor Personal" que creaste en ElevenLabs (panel del agente, arriba).
+     Es la misma cadena en login.html; cámbiala en los dos lados. -->
+<elevenlabs-convai agent-id="AGENT_ID_DEL_ASESOR"></elevenlabs-convai>
+<script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
 </body>
 </html>
