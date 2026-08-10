@@ -282,6 +282,18 @@ try {
 const REDIRECT_MAP = { cliente: 'catalogo.html', proveedor: 'dashboard.html' };
 
 let currentRole = 'cliente';
+
+// Asistente de ElevenLabs según la pestaña. Raymi ayuda a los CLIENTES y el
+// Asesor a los PROVEEDORES; montamos solo el que corresponde (uno a la vez)
+// para que un cliente nunca reciba indicaciones pensadas para proveedores.
+const AGENTE_CLIENTE   = 'agent_1801kyrek4bjebtsayxyheen8zqc'; // Raymi
+const AGENTE_PROVEEDOR = 'agent_5301kz33f0fbfztb6rpxnr8nxf7z'; // Asesor Personal
+function montarAsistente(role){
+  document.querySelectorAll('elevenlabs-convai').forEach(el => el.remove());
+  const w = document.createElement('elevenlabs-convai');
+  w.setAttribute('agent-id', role === 'proveedor' ? AGENTE_PROVEEDOR : AGENTE_CLIENTE);
+  document.body.appendChild(w);
+}
 let authMode = 'login'; // 'login' | 'registro'
 
 const ROLE_UI = {
@@ -302,6 +314,7 @@ function switchRole(role){
   document.body.classList.add('role-' + role);
   document.getElementById('tab-cliente').classList.toggle('active', role === 'cliente');
   document.getElementById('tab-proveedor').classList.toggle('active', role === 'proveedor');
+  montarAsistente(role);
   updateUI();
 }
 
@@ -715,12 +728,13 @@ async function enviarCorreoConfirmacion(email, nombre, nombreNegocio){
 })();
 
 updateUI();
+montarAsistente(currentRole);
 </script>
 
-<!-- ═══ ASESOR (agente de ElevenLabs) ═══
-     Chat flotante para que el proveedor pida ayuda incluso para loguearse.
-     El mismo agente va embebido en dashboard.html. -->
-<elevenlabs-convai agent-id="agent_5301kz33f0fbfztb6rpxnr8nxf7z"></elevenlabs-convai>
+<!-- ═══ ASISTENTE (agente de ElevenLabs) ═══
+     Cambia según la pestaña: en "Acceso Clientes" aparece Raymi (para clientes)
+     y en "Acceso Proveedores" el Asesor (para proveedores). Un cliente nunca
+     debe recibir consejos de proveedor. El montaje lo hace montarAsistente(). -->
 <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
 </body>
 </html>
