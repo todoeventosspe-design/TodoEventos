@@ -322,3 +322,53 @@ footer .logo .b{color:var(--naranja);}
 .user-dropdown a,.user-dropdown button{width:100%;text-align:left;display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--tinta-2);font-size:14px;font-weight:600;font-family:'Epilogue',sans-serif;padding:10px;border-radius:8px;cursor:pointer;text-decoration:none;}
 .user-dropdown a:hover,.user-dropdown button:hover{background:var(--hueso);color:var(--tinta);}
 .user-dropdown .salir{color:#B91C1C;}
+
+/* ============================================================
+   PATRONES DE APP (cuenta, admin, dashboard)
+   Tomados de como resuelve Mercado Libre sus pantallas internas:
+   fondo gris claro con tarjetas blancas encima, radios chicos,
+   sombra en vez de borde grueso, y listas en filas separadas por
+   una linea fina en lugar de tarjetas sueltas. Mas densidad de
+   informacion y menos aire que en las landings.
+   ============================================================ */
+:root{
+  --app-bg:#EDEBF2;       /* gris de fondo, da relieve a lo blanco */
+  --app-radio:8px;
+  --app-sombra:0 1px 2px rgba(18,14,31,.09);
+  --azul:#3483FA;         /* acciones secundarias, como los links de ML */
+}
+
+.app-body{background:var(--app-bg);}
+
+/* Tarjeta blanca sobre el gris */
+.app-card{background:#fff;border-radius:var(--app-radio);box-shadow:var(--app-sombra);padding:22px 24px;margin-bottom:14px;}
+.app-card-h{display:flex;align-items:center;justify-content:space-between;gap:14px;padding-bottom:14px;margin-bottom:16px;border-bottom:1px solid var(--linea);}
+.app-card-t{font-size:16px;font-weight:700;display:flex;align-items:center;gap:9px;color:var(--tinta);}
+.app-card-t i{color:var(--morado);font-size:19px;}
+
+/* Fila de lista: miniatura, datos, accion. Separador fino, sin caja propia */
+.app-row{display:flex;align-items:center;gap:15px;padding:15px 0;border-bottom:1px solid var(--linea);}
+.app-row:last-child{border-bottom:none;}
+.app-row-img{width:64px;height:64px;border-radius:6px;object-fit:cover;background:var(--hueso);flex-shrink:0;}
+.app-row-body{flex:1;min-width:0;}
+.app-row-t{font-size:15px;font-weight:600;color:var(--tinta);}
+.app-row-s{font-size:13.5px;color:var(--tinta-2);margin-top:3px;}
+.app-row-end{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:7px;}
+
+/* Estado en pastilla, como los "Entregado" / "En camino" */
+.pill{font-size:12px;font-weight:700;padding:4px 11px;border-radius:100px;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;}
+.pill.ok{background:var(--verde-bg);color:var(--verde);}
+.pill.wait{background:#FEF3C7;color:#92400E;}
+.pill.off{background:var(--hueso);color:var(--tinta-3);}
+.pill.bad{background:#FEF2F2;color:#B91C1C;}
+
+/* Accion secundaria como link, sin fondo */
+.app-link{color:var(--azul);font-size:14px;font-weight:600;background:none;border:none;cursor:pointer;font-family:inherit;padding:0;text-decoration:none;}
+.app-link:hover{text-decoration:underline;}
+
+@media(max-width:620px){
+  .app-card{padding:18px 16px;border-radius:0;margin-left:-16px;margin-right:-16px;}
+  .app-row{gap:12px;}
+  .app-row-img{width:52px;height:52px;}
+  .app-row-end{align-items:flex-start;}
+}
