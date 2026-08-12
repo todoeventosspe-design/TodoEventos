@@ -5,43 +5,49 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ingresar a TodoEventos.pe</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Epilogue:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-@import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
+
+/* El acento cambia con la clase del body segun el rol elegido. Se conserva
+   ese mecanismo tal cual; lo unico que cambia son los valores, ahora claros. */
 :root{
-  --bg:#0D0D0D; --card:#1A1A1A; --card2:#212121; --line:rgba(255,255,255,.08);
-  --fg:#F5F5F5; --sub:#9A9A9A; --gold:#FBBF24; --green:#4ade80; --red:#f87171;
-  /* Acento dinámico — por defecto (Cliente) usa la paleta morada del marketplace */
-  --ac:#a855f7; --ac-2:#6366f1; --ac-soft:rgba(168,85,247,.12); --ac-line:rgba(168,85,247,.30);
-  --ac-ink:#ffffff; --ac-glow:rgba(168,85,247,.35); --ac-shadow:rgba(99,102,241,.30);
-  --glow1:rgba(168,85,247,.14); --glow2:rgba(99,102,241,.10);
+  --bg:var(--hueso); --card:#fff; --card2:var(--hueso); --line:var(--linea);
+  --fg:var(--tinta); --sub:var(--tinta-2); --gold:var(--amarillo); --green:#15803D; --red:#B91C1C;
+  --ac:#7C3AED; --ac-2:#6D28D9; --ac-soft:#F3EEFF; --ac-line:#7C3AED;
+  --ac-ink:#ffffff; --ac-glow:rgba(124,58,237,.26); --ac-shadow:rgba(124,58,237,.20);
+  --glow1:rgba(124,58,237,.10); --glow2:rgba(249,115,22,.07);
 }
 /* ── MODO CLIENTE: paleta morada/índigo (marketplace) ── */
 body.role-cliente{
-  --ac:#a855f7; --ac-2:#6366f1; --ac-soft:rgba(168,85,247,.12); --ac-line:rgba(168,85,247,.30);
-  --ac-ink:#ffffff; --ac-glow:rgba(168,85,247,.35); --ac-shadow:rgba(99,102,241,.30);
-  --glow1:rgba(168,85,247,.16); --glow2:rgba(99,102,241,.10);
+  --ac:#7C3AED; --ac-2:#6D28D9; --ac-soft:#F3EEFF; --ac-line:#7C3AED;
+  --ac-ink:#ffffff; --ac-glow:rgba(124,58,237,.26); --ac-shadow:rgba(124,58,237,.20);
+  --glow1:rgba(124,58,237,.12); --glow2:rgba(99,102,241,.07);
 }
 /* ── MODO PROVEEDOR: paleta naranja/negro (dashboard) ── */
+/* naranja puro con texto blanco no llega a AA sobre fondo claro: tono profundo */
 body.role-proveedor{
-  --ac:#F97316; --ac-2:#FBBF24; --ac-soft:rgba(249,115,22,.12); --ac-line:rgba(249,115,22,.28);
-  --ac-ink:#1a0a02; --ac-glow:rgba(249,115,22,.35); --ac-shadow:rgba(249,115,22,.30);
-  --glow1:rgba(249,115,22,.14); --glow2:rgba(251,191,36,.08);
+  --ac:#C2410C; --ac-2:#EA580C; --ac-soft:#FFF1E6; --ac-line:#C2410C;
+  --ac-ink:#ffffff; --ac-glow:rgba(194,65,12,.26); --ac-shadow:rgba(194,65,12,.20);
+  --glow1:rgba(249,115,22,.12); --glow2:rgba(251,191,36,.07);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;transition:background .3s;}
+body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;transition:background .3s;}
 .glow{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;transition:background .4s;}
 .glow.g1{width:420px;height:420px;background:var(--glow1);top:-120px;right:-100px;}
 .glow.g2{width:360px;height:360px;background:var(--glow2);bottom:-120px;left:-100px;}
 
 .login-wrap{width:100%;max-width:420px;position:relative;z-index:1;}
-.logo{font-size:24px;font-weight:700;text-decoration:none;display:block;text-align:center;margin-bottom:8px;}
+.logo{font-family:'Anton',sans-serif;font-size:30px;text-transform:uppercase;letter-spacing:-.01em;text-decoration:none;display:block;text-align:center;margin-bottom:8px;}
 .logo .lp{color:var(--ac);}
 .logo .lo{color:var(--ac-2);}
-.logo .dot{color:rgba(245,245,245,.35);font-weight:400;}
+.logo .dot{color:var(--tinta-3);font-weight:400;}
 .login-sub{text-align:center;color:var(--sub);font-size:13.5px;margin-bottom:26px;}
 
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:30px;}
+.card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:30px;box-shadow:0 14px 40px -18px rgba(18,14,31,.18);}
 
 .role-tabs{display:flex;gap:6px;background:var(--card2);border-radius:12px;padding:5px;margin-bottom:24px;}
 .role-tab{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--sub);cursor:pointer;border:none;background:transparent;font-family:inherit;transition:all .18s;}
@@ -58,7 +64,7 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
 .input-wrap i{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:18px;}
 .field input{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:12px 13px 12px 40px;color:var(--fg);font-size:14px;font-family:inherit;}
 .field input:focus{outline:none;border-color:var(--ac-line);}
-.field input::placeholder{color:rgba(154,154,154,.6);}
+.field input::placeholder{color:var(--tinta-3);}
 .field-plain{margin-bottom:16px;}
 .field-plain label{display:block;font-size:12.5px;color:var(--sub);margin-bottom:7px;font-weight:500;}
 .field-plain input,.field-plain select,.field-plain textarea{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:11px 13px;color:var(--fg);font-size:13.5px;font-family:inherit;}
@@ -73,11 +79,11 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
 .forgot:hover{text-decoration:underline;}
 
 .msg{border-radius:10px;padding:11px 13px;font-size:12.5px;margin-bottom:16px;display:none;align-items:center;gap:8px;}
-.msg.error{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--red);}
-.msg.loading{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);color:var(--green);}
-.msg.success{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);color:var(--green);}
+.msg.error{background:#FEF2F2;border:1px solid #FCA5A5;color:var(--red);}
+.msg.loading{background:var(--verde-bg);border:1px solid #86EFAC;color:var(--green);}
+.msg.success{background:var(--verde-bg);border:1px solid #86EFAC;color:var(--green);}
 .msg.show{display:flex;}
-.spinner{width:14px;height:14px;border:2px solid rgba(74,222,128,.3);border-top-color:var(--green);border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0;}
+.spinner{width:14px;height:14px;border:2px solid #86EFAC;border-top-color:var(--green);border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
 .btn-login{width:100%;background:var(--ac);color:var(--ac-ink);border:none;padding:13px;border-radius:10px;font-size:14.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .16s,background .3s;}
@@ -88,6 +94,15 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
 .foot-note a{color:var(--ac);text-decoration:none;font-weight:600;}
 .back-home{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:18px;padding:12px;font-size:13.5px;font-weight:600;color:var(--sub);text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:12px;transition:all .18s;}
 .back-home:hover{color:var(--fg);border-color:var(--ac-line);background:var(--card2);}
+
+/* En movil el formulario se llena con el dedo: 44px minimo por control */
+@media(max-width:620px){
+  .field input{padding-top:14px;padding-bottom:14px;}
+  .field-plain input,.field-plain select,.field-plain textarea{padding-top:14px;padding-bottom:14px;}
+  .btn-login{padding:15px;}
+  .forgot,.foot-note a{display:inline-flex;align-items:center;min-height:44px;}
+  .remember{min-height:44px;}
+}
 </style>
 </head>
 <body class="role-cliente">
