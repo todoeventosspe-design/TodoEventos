@@ -3,482 +3,304 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TodoEventos Pro: la herramienta para tu negocio de eventos</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<title>Para proveedores | TodoEventos.pe</title>
+<meta name="description" content="Agenda, cotizador con PDF, caja y clientes en un solo panel. Gratis mientras estamos empezando.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Epilogue:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-@import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
-:root{--bg:hsl(24,90%,3%);--bg2:hsl(22,60%,5%);--bg3:hsl(20,40%,7%);--fg:hsl(40,10%,96%);--sub:hsl(40,6%,65%);--or:#f97316;--gold:#fbbf24;--pu:#a855f7;--ind:#6366f1;}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
-body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:var(--fg);overflow-x:hidden;}
-.container{max-width:1100px;margin:0 auto;padding:0 2rem;}
-.gt{background:linear-gradient(to left,#ea580c,#f97316,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 15px;border-radius:100px;font-size:12px;font-weight:600;background:rgba(249,115,22,.1);color:var(--or);border:1px solid rgba(249,115,22,.2);}
-.glass{background:rgba(255,255,255,.04);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:inset 0 1px 1px rgba(255,255,255,.08);position:relative;overflow:hidden;}
-.glass::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(160deg,rgba(255,255,255,.28) 0%,rgba(255,255,255,.04) 40%,rgba(255,255,255,.04) 60%,rgba(255,255,255,.22) 100%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;}
-.orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;}
-.dot-grid{background-image:radial-gradient(circle,rgba(255,255,255,.06) 1px,transparent 1px);background-size:30px 30px;}
-section{position:relative;overflow:hidden;}
-@keyframes floatY{0%,100%{transform:translateY(0);}50%{transform:translateY(-14px);}}
-@keyframes pulse-glow-pu{0%,100%{box-shadow:0 0 0 0 rgba(168,85,247,.5);}70%{box-shadow:0 0 0 12px rgba(168,85,247,0);}}
-@keyframes mq{from{transform:translateX(0);}to{transform:translateX(-50%);}}
-@keyframes shine{0%{transform:translateX(-100%);}100%{transform:translateX(100%);}}
+/* Esta pagina le habla al proveedor, asi que el acento manda es el naranja */
+#portada{background:var(--naranja-osc);position:relative;overflow:hidden;padding:0;}
+#portada::before{content:'';position:absolute;inset:0;background:
+  radial-gradient(ellipse 74% 96% at 84% 46%, rgba(124,58,237,.34), transparent 60%),
+  linear-gradient(100deg,#7C2D12 0%,var(--naranja-osc) 52%,#EA580C 100%);}
+.portada-in{max-width:1240px;margin:0 auto;padding:0 20px;display:grid;grid-template-columns:1.06fr .94fr;gap:26px;align-items:stretch;position:relative;z-index:2;min-height:440px;}
+.portada-txt{padding:52px 0;display:flex;flex-direction:column;justify-content:center;}
+.portada-txt h1{font-family:'Anton',sans-serif;text-transform:uppercase;font-size:clamp(42px,6.6vw,78px);line-height:.94;color:#fff;margin-bottom:16px;}
+.portada-txt h1 .ama{color:var(--amarillo);}
+.portada-txt p{font-size:clamp(16px,1.4vw,19px);color:rgba(255,255,255,.94);max-width:44ch;margin-bottom:26px;font-weight:500;}
+.btn-blanco{background:#fff;color:var(--naranja-osc);font-family:'Anton',sans-serif;text-transform:uppercase;font-size:21px;padding:19px 36px;border-radius:9px;display:inline-flex;align-items:center;gap:11px;box-shadow:0 5px 0 rgba(0,0,0,.24);transition:transform .14s,box-shadow .14s;}
+.btn-blanco:hover{transform:translateY(-2px);box-shadow:0 7px 0 rgba(0,0,0,.24);}
+.btn-blanco:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.24);}
+.p-btns{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+.btn-linea{color:#fff;font-weight:700;font-size:16px;padding:19px 22px;border:2px solid rgba(255,255,255,.45);border-radius:9px;}
+.btn-linea:hover{background:rgba(255,255,255,.15);border-color:#fff;}
 
-/* NAV */
-#nav{position:sticky;top:0;z-index:100;background:rgba(8,3,1,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(249,115,22,.1);}
-.nav-i{display:flex;align-items:center;justify-content:space-between;padding:16px 2rem;max-width:1100px;margin:0 auto;}
-.logo{font-size:18px;font-weight:700;text-decoration:none;}
-.logo .lp{color:var(--pu);}
-.logo .lo{background:linear-gradient(to right,var(--pu),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.logo .dot{color:rgba(245,243,235,.3);font-weight:400;}
-.nav-links{display:flex;align-items:center;gap:2px;}
-.nl{background:transparent;border:none;color:rgba(245,243,235,.7);font-size:13.5px;font-family:'General Sans',sans-serif;padding:8px 14px;border-radius:8px;cursor:pointer;transition:all .18s;text-decoration:none;display:inline-block;}
-.nl:hover{color:var(--fg);background:rgba(255,255,255,.06);}
-.nl:hover{background:rgba(249,115,22,.08);color:var(--fg);}
-.btn-back{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(245,243,235,.7);padding:9px 18px;border-radius:100px;font-size:13.5px;font-weight:500;font-family:'General Sans',sans-serif;cursor:pointer;text-decoration:none;}
-.btn-reg-pro{background:linear-gradient(135deg,#ea580c,#fbbf24);color:#1a0500;border:none;padding:10px 22px;border-radius:100px;font-size:13.5px;font-weight:700;font-family:'General Sans',sans-serif;cursor:pointer;}
-.user-menu{position:relative;display:none;align-items:center;}
-.user-menu.show{display:flex;}
-.user-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--or),var(--gold));display:flex;align-items:center;justify-content:center;color:#1a0500;font-weight:700;font-size:13.5px;cursor:pointer;border:none;font-family:'General Sans',sans-serif;}
-.user-dropdown{position:absolute;top:calc(100% + 10px);right:0;background:var(--bg3);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:8px;min-width:190px;box-shadow:0 12px 30px rgba(0,0,0,.4);display:none;z-index:50;}
-.user-dropdown.open{display:block;}
-.user-dropdown-name{padding:8px 10px 10px;font-size:13px;font-weight:600;color:var(--fg);border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:6px;}
-.user-dropdown a,.user-dropdown button{width:100%;text-align:left;display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--fg);font-size:13px;font-family:'General Sans',sans-serif;padding:9px 10px;border-radius:8px;cursor:pointer;text-decoration:none;}
-.user-dropdown a:hover,.user-dropdown button:hover{background:rgba(255,255,255,.06);}
-.user-dropdown .salir{color:#f87171;}
+/* Cifras del hero */
+.cifras{display:flex;align-items:center;justify-content:center;gap:0;padding:34px 0;}
+.cifra{flex:1;text-align:center;padding:0 14px;}
+.cifra + .cifra{border-left:2px solid rgba(255,255,255,.22);}
+.cifra b{display:block;font-family:'Anton',sans-serif;font-size:clamp(30px,4vw,46px);line-height:1;color:var(--amarillo);}
+.cifra span{display:block;font-size:13px;font-weight:700;color:rgba(255,255,255,.9);margin-top:7px;line-height:1.3;}
 
-/* HERO */
-#hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:7rem 2rem 4rem;}
-.hero-orb1{width:600px;height:600px;background:rgba(249,115,22,.12);top:-150px;left:50%;transform:translateX(-50%);}
-.hero-orb2{width:350px;height:350px;background:rgba(168,85,247,.1);bottom:0;right:-80px;animation:floatY 10s ease-in-out infinite;}
-.hero-orb3{width:250px;height:250px;background:rgba(251,191,36,.08);bottom:0;left:-60px;animation:floatY 8s ease-in-out infinite 2s;}
-.ring{position:absolute;border-radius:50%;border:1px solid;}
-.r1{width:800px;height:800px;top:50%;left:50%;transform:translate(-50%,-50%);border-color:rgba(249,115,22,.07);}
-.r2{width:550px;height:550px;top:50%;left:50%;transform:translate(-50%,-50%);border-color:rgba(168,85,247,.06);}
-.hero-pill{display:inline-flex;align-items:center;gap:7px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.22);color:var(--or);padding:5px 16px;border-radius:100px;font-size:12.5px;font-weight:600;margin-bottom:1.5rem;position:relative;z-index:1;}
-.hero-hl{font-size:clamp(48px,7vw,88px);font-weight:700;line-height:1.05;letter-spacing:-.03em;max-width:780px;margin:0 auto 1rem;position:relative;z-index:1;}
-.hero-sub{font-size:1.1rem;color:var(--sub);line-height:1.75;max-width:500px;margin:0 auto 2.5rem;position:relative;z-index:1;}
-.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1;}
-.btn-main{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#ea580c,#f97316);color:#fff;border:none;padding:16px 32px;border-radius:12px;font-size:15px;font-weight:700;font-family:'General Sans',sans-serif;cursor:pointer;transition:opacity .2s;position:relative;overflow:hidden;}
-.btn-main::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);animation:shine 3s ease-in-out infinite 1s;}
-.btn-main:hover{opacity:.88;}
-.btn-sec{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:var(--fg);padding:16px 32px;border-radius:12px;font-size:15px;font-weight:600;font-family:'General Sans',sans-serif;cursor:pointer;text-decoration:none;}
-.hero-stats{display:flex;gap:3rem;justify-content:center;margin-top:3.5rem;flex-wrap:wrap;position:relative;z-index:1;}
-.hstat-n{font-size:2rem;font-weight:800;background:linear-gradient(to left,#ea580c,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.1;}
-.hstat-l{font-size:12px;color:var(--sub);margin-top:3px;text-align:center;}
+.h-sec{font-family:'Anton',sans-serif;text-transform:uppercase;font-size:clamp(26px,3.5vw,40px);line-height:1;margin-bottom:8px;}
+.h-sec .na{color:var(--naranja-osc);}
+.h-sec .mo{color:var(--morado);}
+.p-sec{font-size:16.5px;color:var(--tinta-2);margin-bottom:28px;font-weight:500;}
+.tag-sec{display:inline-block;background:var(--naranja-claro);color:var(--naranja-osc);font-size:12.5px;font-weight:800;padding:6px 14px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px;}
 
-/* DOLOR */
-#dolor{padding:6rem 0;background:var(--bg2);}
-.dolor-orb{width:500px;height:500px;background:rgba(249,115,22,.08);top:50%;left:50%;transform:translate(-50%,-50%);}
-.dolor-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(249,115,22,.1);border-radius:18px;overflow:hidden;position:relative;z-index:1;}
-.dc{background:var(--bg2);padding:2rem;}
-.dc-ico{width:42px;height:42px;border-radius:10px;background:rgba(249,115,22,.12);display:flex;align-items:center;justify-content:center;margin-bottom:1rem;}
-.dc-ico i{color:var(--or);font-size:20px;}
-.dc h3{font-size:1rem;font-weight:700;margin-bottom:.5rem;}
-.dc p{font-size:13px;color:var(--sub);line-height:1.65;}
+/* Problemas */
+#problemas{background:var(--hueso);border-top:2px solid var(--linea);border-bottom:2px solid var(--linea);}
+.probs{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+.prob{background:#fff;border:2px solid var(--linea);border-radius:14px;padding:24px 22px;}
+.prob-i{width:46px;height:46px;border-radius:12px;background:#FEE2E2;color:#B91C1C;display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
+.prob h3{font-family:'Anton',sans-serif;text-transform:uppercase;font-size:17px;line-height:1.1;margin-bottom:8px;}
+.prob p{font-size:14.5px;color:var(--tinta-2);line-height:1.6;}
 
-/* FEATURES */
-#feats{padding:6rem 0;background:var(--bg);}
-.feats-orb1{width:450px;height:450px;background:rgba(168,85,247,.1);top:0;right:-100px;}
-.feats-orb2{width:350px;height:350px;background:rgba(249,115,22,.08);bottom:0;left:-80px;}
-.feats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;position:relative;z-index:1;}
-.fc{background:var(--bg3);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:2rem;transition:all .22s;position:relative;overflow:hidden;}
-.fc::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(249,115,22,.04),transparent);opacity:0;transition:opacity .22s;}
-.fc:hover{border-color:rgba(249,115,22,.25);transform:translateY(-3px);}
-.fc:hover::before{opacity:1;}
-.fc-ico{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;}
-.fc-ico i{font-size:22px;}
-.fc-ico.or{background:rgba(249,115,22,.15);color:var(--or);}
-.fc-ico.go{background:rgba(251,191,36,.15);color:var(--gold);}
-.fc-ico.pu{background:rgba(168,85,247,.15);color:var(--pu);}
-.fc h3{font-size:1rem;font-weight:700;margin-bottom:.5rem;}
-.fc p{font-size:13px;color:var(--sub);line-height:1.65;}
+/* Herramientas */
+.herrs{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+.herr{border:2px solid var(--linea);border-radius:14px;padding:22px;transition:border-color .18s,transform .18s;}
+.herr:hover{border-color:var(--naranja);transform:translateY(-3px);}
+.herr-i{width:46px;height:46px;border-radius:12px;background:var(--naranja-claro);color:var(--naranja-osc);display:flex;align-items:center;justify-content:center;margin-bottom:13px;}
+.herr:nth-child(3n+2) .herr-i{background:var(--morado-claro);color:var(--morado);}
+.herr:nth-child(3n) .herr-i{background:var(--verde-bg);color:var(--verde);}
+.herr h3{font-family:'Anton',sans-serif;text-transform:uppercase;font-size:17px;margin-bottom:7px;}
+.herr p{font-size:14.5px;color:var(--tinta-2);line-height:1.6;}
 
-/* DASHBOARD */
-#dash{padding:6rem 0;background:var(--bg2);}
-.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;}
-.dash-text h2{font-size:2.2rem;font-weight:700;line-height:1.2;margin-bottom:.85rem;}
-.dash-text p{color:var(--sub);font-size:.95rem;line-height:1.7;margin-bottom:1.5rem;}
-.dash-feats{display:flex;flex-direction:column;gap:9px;margin-bottom:2rem;}
-.df{display:flex;align-items:center;gap:10px;font-size:13.5px;}
-.df-check{width:22px;height:22px;border-radius:6px;background:rgba(249,115,22,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.df-check i{color:var(--or);font-size:12px;}
-.db{background:var(--bg3);border:1px solid rgba(249,115,22,.15);border-radius:20px;padding:22px;}
-.db-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
-.db-title{font-size:13.5px;font-weight:700;}
-.db-ok{background:rgba(34,197,94,.15);color:#86efac;font-size:11px;padding:3px 9px;border-radius:100px;}
-.db-kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
-.kpi{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:12px;}
-.kpi-l{font-size:10.5px;color:var(--sub);margin-bottom:3px;}
-.kpi-v{font-size:1.3rem;font-weight:800;}
-.kpi-v.or{color:var(--or);}
-.kpi-v.go{color:var(--gold);}
-.kpi-v.gr{color:#86efac;}
-.ag-t{font-size:11px;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
-.agi{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);padding:9px 11px;border-radius:9px;margin-bottom:6px;}
-.agi-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.agi-dot.or{background:var(--or);}
-.agi-dot.go{background:var(--gold);}
-.agi-dot.pu{background:var(--pu);}
-.agi-info{flex:1;}
-.agi-ev{font-size:12px;font-weight:600;}
-.agi-tm{font-size:10.5px;color:var(--sub);}
-.agi-st{font-size:11px;white-space:nowrap;}
-.agi-st.ok{color:#86efac;}.agi-st.ip{color:var(--gold);}.agi-st.pe{color:var(--sub);}
-.db-bar{margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.05);}
-.db-bar-label{display:flex;justify-content:space-between;font-size:11.5px;color:var(--sub);margin-bottom:7px;}
-.bar-track{height:6px;background:rgba(255,255,255,.06);border-radius:10px;overflow:hidden;}
-.bar-fill{height:100%;background:linear-gradient(to right,#ea580c,#fbbf24);border-radius:10px;width:82%;}
+/* Vista previa del panel */
+#panel{background:var(--morado-osc);color:#fff;}
+.panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;}
+#panel .h-sec{color:#fff;}
+#panel .h-sec .ama{color:var(--amarillo);}
+.panel-p{font-size:16.5px;color:rgba(255,255,255,.9);margin-bottom:20px;font-weight:500;}
+.panel-lista{list-style:none;display:flex;flex-direction:column;gap:11px;margin-bottom:26px;}
+.panel-lista li{display:flex;gap:10px;align-items:flex-start;font-size:15px;color:rgba(255,255,255,.93);font-weight:500;}
+.panel-lista svg{flex-shrink:0;color:var(--amarillo);margin-top:3px;}
+.mock{background:#fff;border-radius:16px;padding:18px;color:var(--tinta);box-shadow:0 22px 50px -18px rgba(0,0,0,.5);}
+.mock-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.mock-t{font-family:'Anton',sans-serif;text-transform:uppercase;font-size:16px;}
+.mock-badge{font-size:11px;font-weight:800;background:var(--hueso);color:var(--tinta-3);padding:4px 10px;border-radius:100px;text-transform:uppercase;letter-spacing:.04em;}
+.mock-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px;}
+.kpi{background:var(--hueso);border-radius:10px;padding:11px 10px;text-align:center;}
+.kpi b{display:block;font-family:'Anton',sans-serif;font-size:19px;line-height:1;color:var(--naranja-osc);}
+.kpi span{display:block;font-size:10.5px;font-weight:700;color:var(--tinta-3);text-transform:uppercase;letter-spacing:.03em;margin-top:4px;}
+.mock-h{font-size:11.5px;font-weight:800;color:var(--tinta-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+.ev{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--linea);}
+.ev:last-child{border-bottom:none;}
+.ev-n{font-size:13.5px;font-weight:700;}
+.ev-d{font-size:11.5px;color:var(--tinta-3);font-weight:600;margin-top:2px;}
+.ev-e{font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:100px;white-space:nowrap;text-transform:uppercase;letter-spacing:.03em;}
+.ev-e.ok{background:var(--verde-bg);color:var(--verde);}
+.ev-e.pe{background:#FEF3C7;color:#92400E;}
 
-/* PLANES */
-#planes{padding:6rem 0;background:var(--bg);}
-.planes-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;max-width:780px;margin:0 auto;}
-.plan-card{border-radius:20px;padding:2.5rem;border:1px solid;}
-.plan-card.free{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.08);}
-.plan-card.pro{background:rgba(249,115,22,.05);border-color:rgba(249,115,22,.25);position:relative;overflow:hidden;}
-.plan-card.pro::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(249,115,22,.06),transparent);pointer-events:none;}
-.plan-badge{display:inline-block;font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px;margin-bottom:1rem;position:relative;z-index:1;}
-.plan-badge.free{background:rgba(255,255,255,.08);color:var(--sub);}
-.plan-badge.pro{background:linear-gradient(135deg,#ea580c,#fbbf24);color:#1a0500;}
-.plan-price{font-size:2.5rem;font-weight:900;line-height:1.1;margin-bottom:.25rem;position:relative;z-index:1;}
-.plan-price span{font-size:1rem;font-weight:500;color:var(--sub);}
-.plan-desc{font-size:13px;color:var(--sub);margin-bottom:1.5rem;line-height:1.5;position:relative;z-index:1;}
-.plan-feats{display:flex;flex-direction:column;gap:9px;margin-bottom:2rem;position:relative;z-index:1;}
-.pf{display:flex;align-items:center;gap:9px;font-size:13.5px;}
-.pf-ico{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.pf-ico.ok{background:rgba(249,115,22,.15);color:var(--or);}
-.pf-ico.no{background:rgba(255,255,255,.06);color:rgba(255,255,255,.25);}
-.pf.dim{color:var(--sub);}
-.plan-btn{display:block;text-align:center;padding:14px;border-radius:10px;font-size:14.5px;font-weight:700;cursor:pointer;font-family:'General Sans',sans-serif;transition:opacity .2s;position:relative;z-index:1;}
-.plan-btn.free{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--fg);}
-.plan-btn.pro{background:linear-gradient(135deg,#ea580c,#f97316);color:#fff;border:none;}
-.plan-btn.pro:hover{opacity:.88;}
+/* Planes */
+#planes{background:var(--hueso);border-top:2px solid var(--linea);border-bottom:2px solid var(--linea);}
+.planes{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.plan{background:#fff;border:2px solid var(--linea);border-radius:18px;padding:28px;display:flex;flex-direction:column;}
+.plan.destacado{border-color:var(--naranja);box-shadow:0 16px 34px -16px rgba(234,88,12,.35);}
+.plan-tag{display:inline-block;align-self:flex-start;font-size:11.5px;font-weight:800;padding:5px 12px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px;background:var(--hueso);color:var(--tinta-3);}
+.plan.destacado .plan-tag{background:var(--naranja-osc);color:#fff;}
+.plan-n{font-family:'Anton',sans-serif;text-transform:uppercase;font-size:26px;line-height:1;}
+.plan-precio{font-family:'Anton',sans-serif;font-size:44px;line-height:1;margin:10px 0 4px;}
+.plan-por{font-size:14px;color:var(--tinta-3);font-weight:700;}
+.plan-d{font-size:14.5px;color:var(--tinta-2);margin:14px 0 18px;line-height:1.6;}
+.plan-lista{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:22px;flex:1;}
+.plan-lista li{display:flex;gap:9px;align-items:flex-start;font-size:14.5px;color:var(--tinta-2);font-weight:500;}
+.plan-lista svg{flex-shrink:0;color:var(--verde);margin-top:3px;}
+.plan.futuro .plan-lista svg{color:var(--tinta-3);}
+.plan-btn{display:block;text-align:center;padding:14px;border-radius:10px;font-weight:800;font-size:15.5px;}
+.plan-btn.solido{background:var(--naranja-osc);color:#fff;}
+.plan-btn.solido:hover{background:var(--naranja);}
+.plan-btn.linea{border:2px solid var(--linea);color:var(--tinta-2);}
+.plan-btn.linea:hover{border-color:var(--morado);color:var(--morado);}
 
-/* TESTIMONIOS */
-#test{padding:6rem 0;background:var(--bg2);}
-.test-orb{width:500px;height:500px;background:rgba(249,115,22,.07);top:50%;left:50%;transform:translate(-50%,-50%);}
-.test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;position:relative;z-index:1;}
-.tcard{background:var(--bg3);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:26px;transition:border-color .22s;}
-.tcard:hover{border-color:rgba(249,115,22,.2);}
-.qm{font-size:3.5rem;line-height:.9;color:rgba(249,115,22,.2);font-family:Georgia,serif;margin-bottom:6px;}
-.ttxt{font-size:13.5px;color:var(--sub);line-height:1.7;font-style:italic;margin-bottom:14px;}
-.tstars{color:#fbbf24;font-size:13px;margin-bottom:14px;}
-.tau{display:flex;align-items:center;gap:10px;}
-.tav{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;}
-.av1{background:linear-gradient(135deg,#ea580c,#f59e0b);}
-.av2{background:linear-gradient(135deg,#7c3aed,#6366f1);}
-.av3{background:linear-gradient(135deg,#0d9488,#0ea5e9);}
-.tnm{font-size:14px;font-weight:700;}
-.trl{font-size:12px;color:var(--sub);}
-
-/* REGISTRO */
-#reg{padding:3rem 0;}
-.reg-box{border:1px solid rgba(249,115,22,.15);border-radius:28px;padding:2.25rem 2rem;text-align:center;position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(234,88,12,.06),rgba(251,191,36,.04));}
-.reg-orb1{width:400px;height:400px;background:rgba(249,115,22,.12);top:-100px;right:-80px;filter:blur(80px);border-radius:50%;pointer-events:none;}
-.reg-orb2{width:300px;height:300px;background:rgba(168,85,247,.1);bottom:-80px;left:-60px;filter:blur(80px);border-radius:50%;pointer-events:none;}
-.reg-h{font-size:2.75rem;font-weight:700;line-height:1.1;max-width:580px;margin:1rem auto;position:relative;z-index:1;}
-.reg-sub{color:var(--sub);font-size:1rem;max-width:380px;margin:.75rem auto 1.5rem;line-height:1.7;position:relative;z-index:1;}
-.reg-form{display:flex;gap:10px;max-width:460px;margin:0 auto;position:relative;z-index:1;flex-wrap:wrap;justify-content:center;}
-.reg-input{flex:1;min-width:220px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--fg);padding:14px 18px;border-radius:10px;font-size:14.5px;font-family:'General Sans',sans-serif;outline:none;}
-.reg-input::placeholder{color:rgba(245,243,235,.3);}
-.reg-input:focus{border-color:rgba(249,115,22,.4);}
-.reg-btn{background:linear-gradient(135deg,#ea580c,#fbbf24);color:#1a0500;border:none;padding:14px 28px;border-radius:10px;font-size:14.5px;font-weight:700;font-family:'General Sans',sans-serif;cursor:pointer;white-space:nowrap;position:relative;overflow:hidden;}
-.reg-note{font-size:12px;color:var(--sub);margin-top:12px;position:relative;z-index:1;}
-
-/* FOOTER */
-#foot{background:hsl(20,90%,2%);border-top:1px solid rgba(249,115,22,.08);padding:3rem 0 2rem;}
-.foot-top{display:grid;grid-template-columns:1.7fr 1fr 1fr;gap:3rem;margin-bottom:2.5rem;}
-.flogo{font-size:17px;font-weight:700;text-decoration:none;}
-.flogo .lp{color:var(--pu);}
-.flogo .lo{background:linear-gradient(to right,var(--pu),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.fdesc{font-size:12.5px;color:rgba(245,243,235,.3);line-height:1.65;margin-top:9px;max-width:210px;}
-.fcol h5{font-size:12px;font-weight:700;color:var(--fg);margin-bottom:12px;text-transform:uppercase;letter-spacing:.07em;}
-.fcol a{display:block;font-size:12.5px;color:rgba(245,243,235,.32);text-decoration:none;margin-bottom:8px;transition:color .18s;}
-.fcol a:hover{color:var(--or);}
-.foot-bot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem;padding-top:2rem;border-top:1px solid rgba(255,255,255,.05);}
-.fcopy{font-size:11.5px;color:rgba(245,243,235,.2);}
-.flinks{display:flex;gap:1.25rem;}
-.flinks a{font-size:11.5px;color:rgba(245,243,235,.2);text-decoration:none;}
-
-.slabel{text-align:center;margin-bottom:.75rem;}
-.stitle{font-size:2.2rem;font-weight:700;text-align:center;line-height:1.15;margin-bottom:.85rem;}
-.ssub{font-size:.95rem;color:var(--sub);text-align:center;max-width:480px;margin:0 auto 3.5rem;}
-
-@media(max-width:900px){
-  .nav-links{display:none;}
-  .dolor-grid,.feats-grid,.dash-grid,.planes-grid,.test-grid,.foot-top{grid-template-columns:1fr;}
-  .planes-grid{max-width:100%;}
-  .stitle{font-size:1.75rem;}
-  .reg-h{font-size:1.85rem;}
+@media(max-width:960px){
+  .portada-in{grid-template-columns:1fr;min-height:0;}
+  .portada-txt{padding:44px 0 8px;}
+  .cifras{padding:0 0 34px;}
+  .probs,.herrs{grid-template-columns:1fr 1fr;}
+  .panel-grid{grid-template-columns:1fr;gap:28px;}
+  .planes{grid-template-columns:1fr;}
+}
+@media(max-width:620px){
+  section{padding:38px 0;}
+  .probs,.herrs{grid-template-columns:1fr;}
+  .btn-blanco,.btn-linea{width:100%;justify-content:center;text-align:center;}
+  .cifra span{font-size:12px;}
+  .f-col a,.f-links a{padding:9px 0;min-height:44px;display:flex;align-items:center;margin-bottom:0;}
 }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-<!-- ═══ NAV ═══ -->
-<header id="nav">
-  <div class="nav-i">
-    <div style="display:flex;align-items:center;gap:14px;">
-      <a href="index.html" class="btn-back"><i class="ti ti-arrow-left" style="font-size:14px;"></i> Inicio</a>
-      <span class="logo"><span class="lp">Todo</span><span class="lo">Eventos</span><span class="dot">.pe</span></span>
-    </div>
-    <nav class="nav-links">
-      <a href="#feats" class="nl">Herramientas</a>
-      <a href="#planes" class="nl">Planes</a>
-      <a href="catalogo.html" class="nl">Marketplace</a>
-      <a href="nosotros.html" class="nl">Nosotros</a>
-    </nav>
-    <div style="display:flex;align-items:center;gap:10px;">
-      <a href="login.html" class="nl" id="btn-ingresar" style="text-decoration:none;">Ingresar</a>
+<div id="chrome-nav"></div>
 
-      <div class="user-menu" id="user-menu">
-        <button class="user-avatar" id="user-avatar-btn" onclick="toggleUserDropdown()"></button>
-        <div class="user-dropdown" id="user-dropdown">
-          <div class="user-dropdown-name" id="user-dropdown-name"></div>
-          <a href="#" id="link-mi-espacio"><i class="ti ti-layout-dashboard" style="font-size:15px;"></i> <span id="link-mi-espacio-texto">Ir al marketplace</span></a>
-          <a href="cuenta.html"><i class="ti ti-user-circle" style="font-size:15px;"></i> Mi cuenta</a>
-          <a href="admin.html" id="link-admin" style="display:none;"><i class="ti ti-shield-lock" style="font-size:15px;"></i> Panel de admin</a>
-          <button class="salir" onclick="cerrarSesion()"><i class="ti ti-logout-2" style="font-size:15px;"></i> Cerrar sesión</button>
-        </div>
+<!-- ═══ PORTADA ═══ -->
+<section id="portada">
+  <div class="portada-in">
+    <div class="portada-txt">
+      <span class="badge-amarillo"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4.5 13H11l-1 9 8.5-11H12z"/></svg> Exclusivo para proveedores de eventos</span>
+      <h1>Saca tu negocio<br><span class="ama">del cuaderno.</span></h1>
+      <p>Tu agenda, tus cotizaciones y tus clientes en un solo lugar, hecho para cómo se trabaja acá.</p>
+      <div class="p-btns">
+        <a href="login.html?modo=registro&rol=proveedor" class="btn-blanco">Comenzar gratis <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a href="catalogo.html" class="btn-linea">Ver el marketplace</a>
       </div>
-
-      <a href="login.html?modo=registro&rol=proveedor" class="btn-reg-pro" style="text-decoration:none;display:inline-flex;align-items:center;">Registro gratuito</a>
     </div>
-  </div>
-</header>
-
-<!-- ═══ HERO ═══ -->
-<section id="hero">
-  <div class="orb hero-orb1"></div>
-  <div class="orb hero-orb2"></div>
-  <div class="orb hero-orb3"></div>
-  <div class="ring r1"></div>
-  <div class="ring r2"></div>
-  <div class="hero-pill"><i class="ti ti-building-store" style="font-size:13px;"></i> Exclusivo para proveedores de eventos</div>
-  <h1 class="hero-hl">Saca tu negocio<br><span class="gt">del cuaderno.</span></h1>
-  <p class="hero-sub">Tu agenda, tus cotizaciones y tus clientes en un solo lugar, hecho para cómo se trabaja acá.</p>
-  <div class="hero-btns">
-    <button class="btn-main" onclick="document.getElementById('reg').scrollIntoView({behavior:'smooth'})">Comenzar gratis hoy <i class="ti ti-arrow-right"></i></button>
-    <a href="catalogo.html" class="btn-sec" style="text-decoration:none;display:inline-flex;align-items:center;gap:7px;"><i class="ti ti-search"></i> Ver el marketplace</a>
-  </div>
-  <div class="hero-stats">
-    <div><div class="hstat-n">0 S/.</div><div class="hstat-l">Para empezar</div></div>
-    <div><div class="hstat-n">0%</div><div class="hstat-l">Comisión los primeros meses</div></div>
-    <div><div class="hstat-n">6</div><div class="hstat-l">Herramientas incluidas</div></div>
+    <div class="cifras">
+      <div class="cifra"><b>S/. 0</b><span>Para empezar</span></div>
+      <div class="cifra"><b>0%</b><span>Comisión los primeros meses</span></div>
+      <div class="cifra"><b>6</b><span>Herramientas incluidas</span></div>
+    </div>
   </div>
 </section>
 
-<!-- ═══ PUNTOS DE DOLOR ═══ -->
-<section id="dolor"><div class="container">
-  <div class="orb dolor-orb"></div>
-  <div class="slabel"><span class="badge"><i class="ti ti-alert-triangle" style="font-size:12px;"></i> ¿Te suena familiar?</span></div>
-  <h2 class="stitle">Los problemas que <span class="gt">todos tienen</span></h2>
-  <div class="dolor-grid">
-    <div class="dc"><div class="dc-ico"><i class="ti ti-clock"></i></div><h3>Pierdes clientes por responder tarde</h3><p>Estás trabajando en un evento y te entran cinco consultas por WhatsApp. Para cuando puedes contestar, ya contrataron a otro.</p></div>
-    <div class="dc"><div class="dc-ico"><i class="ti ti-calendar-x"></i></div><h3>Se te cruzan dos eventos el mismo día</h3><p>Pasa cuando la agenda vive en un cuaderno. Un evento doble te puede costar años de reputación.</p></div>
-    <div class="dc"><div class="dc-ico"><i class="ti ti-calculator-off"></i></div><h3>No sabes bien cuánto te queda</h3><p>Si cobras de memoria y no llevas la cuenta de tus gastos, es fácil estar ganando menos de lo que crees.</p></div>
+<!-- ═══ PROBLEMAS ═══ -->
+<section id="problemas">
+  <div class="wrap">
+    <span class="tag-sec">¿Te suena familiar?</span>
+    <h2 class="h-sec">Los problemas que <span class="na">todos tienen</span></h2>
+    <p class="p-sec">Nada de esto es culpa tuya: así se trabaja hoy en el rubro.</p>
+    <div class="probs">
+      <div class="prob">
+        <div class="prob-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+        <h3>Pierdes clientes por responder tarde</h3>
+        <p>Estás trabajando en un evento y te entran cinco consultas por WhatsApp. Para cuando puedes contestar, ya contrataron a otro.</p>
+      </div>
+      <div class="prob">
+        <div class="prob-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M9 15l6 6M15 15l-6 6"/></svg></div>
+        <h3>Se te cruzan dos eventos el mismo día</h3>
+        <p>Pasa cuando la agenda vive en un cuaderno. Un evento doble te puede costar años de reputación.</p>
+      </div>
+      <div class="prob">
+        <div class="prob-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+        <h3>No sabes bien cuánto te queda</h3>
+        <p>Si cobras de memoria y no llevas la cuenta de tus gastos, es fácil estar ganando menos de lo que crees.</p>
+      </div>
+    </div>
   </div>
-</div></section>
+</section>
 
 <!-- ═══ HERRAMIENTAS ═══ -->
-<section id="feats"><div class="container">
-  <div class="orb feats-orb1"></div>
-  <div class="orb feats-orb2"></div>
-  <div class="slabel"><span class="badge">Herramientas Pro</span></div>
-  <h2 class="stitle">Todo lo que necesitas <span class="gt">en un solo panel</span></h2>
-  <p class="ssub">Seis herramientas, todas incluidas desde el primer día.</p>
-  <div class="feats-grid">
-    <div class="fc"><div class="fc-ico or"><i class="ti ti-calendar-event"></i></div><h3>Agenda</h3><p>Tus eventos en un calendario. Si intentas tomar un horario que ya tienes ocupado, no te deja.</p></div>
-    <div class="fc"><div class="fc-ico go"><i class="ti ti-file-invoice"></i></div><h3>Cotizador</h3><p>Armas el presupuesto, eliges la plantilla y sale en PDF con los datos y el color de tu negocio.</p></div>
-    <div class="fc"><div class="fc-ico or"><i class="ti ti-cash"></i></div><h3>Control de caja</h3><p>Anotas lo que entra y lo que sale, y ves cuánto te quedó cada mes.</p></div>
-    <div class="fc"><div class="fc-ico pu"><i class="ti ti-users"></i></div><h3>Clientes</h3><p>La lista de tus clientes con cuántos eventos te han contratado y en qué quedaron.</p></div>
-    <div class="fc"><div class="fc-ico go"><i class="ti ti-package"></i></div><h3>Inventario</h3><p>Cuántos equipos tienes y cuántos están disponibles. Los que van quedando bajos se marcan en rojo.</p></div>
-    <div class="fc"><div class="fc-ico or"><i class="ti ti-chart-bar"></i></div><h3>Reportes</h3><p>Cuánto facturaste por mes, cuántos eventos hiciste y cuál es tu ticket promedio.</p></div>
+<section id="herramientas">
+  <div class="wrap">
+    <span class="tag-sec">Todo incluido</span>
+    <h2 class="h-sec">Seis herramientas <span class="mo">en un panel</span></h2>
+    <p class="p-sec">Todas abiertas desde el primer día.</p>
+    <div class="herrs">
+      <div class="herr">
+        <div class="herr-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+        <h3>Agenda</h3>
+        <p>Tus eventos en un calendario. Si intentas tomar un horario que ya tienes ocupado, no te deja.</p>
+      </div>
+      <div class="herr">
+        <div class="herr-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg></div>
+        <h3>Cotizador</h3>
+        <p>Armas el presupuesto, eliges la plantilla y sale en PDF con los datos y el color de tu negocio.</p>
+      </div>
+      <div class="herr">
+        <div class="herr-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 11h20"/><circle cx="17" cy="15" r="1.4"/></svg></div>
+        <h3>Control de caja</h3>
+        <p>Anotas lo que entra y lo que sale, y ves cuánto te quedó cada mes.</p>
+      </div>
+      <div class="herr">
+        <div class="herr-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg></div>
+        <h3>Clientes</h3>
+        <p>La lista de tus clientes con cuántos eventos te han contratado y en qué quedaron.</p>
+      </div>
+      <div class="herr">
+        <div class="herr-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8l-9-5-9 5v8l9 5z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg></div>
+        <h3>Inventario</h3>
+        <p>Cuántos equipos tienes y cuántos están disponibles. Los que van quedando bajos se marcan en rojo.</p>
+      </div>
+      <div class="herr">
+        <div class="herr-i"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M7 21V9M12 21V4M17 21v-7"/></svg></div>
+        <h3>Reportes</h3>
+        <p>Cuánto facturaste por mes, cuántos eventos hiciste y cuál es tu ticket promedio.</p>
+      </div>
+    </div>
   </div>
-</div></section>
+</section>
 
-<!-- ═══ DASHBOARD PREVIEW ═══ -->
-<section id="dash"><div class="container">
-  <div class="dash-grid">
-    <div class="dash-text">
-      <div style="margin-bottom:.75rem;"><span class="badge"><i class="ti ti-layout-dashboard" style="font-size:12px;"></i> Dashboard en vivo</span></div>
-      <h2>Tu negocio completo,<br><span class="gt">en una pantalla</span></h2>
-      <p>Al entrar ves cómo vas: lo que llevas facturado en el mes, los eventos que tienes encima y las solicitudes que te faltan responder.</p>
-      <div class="dash-feats">
-        <div class="df"><div class="df-check"><i class="ti ti-check"></i></div><span>Ingresos del mes, eventos y tu calificación</span></div>
-        <div class="df"><div class="df-check"><i class="ti ti-check"></i></div><span>Calendario que no te deja cruzar dos eventos</span></div>
-        <div class="df"><div class="df-check"><i class="ti ti-check"></i></div><span>Cotizador con plantillas y lista de clientes</span></div>
-        <div class="df"><div class="df-check"><i class="ti ti-check"></i></div><span>Caja, inventario y reportes por mes</span></div>
-      </div>
-      <a href="dashboard.html" class="btn-main" style="font-size:14px;padding:14px 26px;text-decoration:none;display:inline-flex;align-items:center;gap:7px;">Ver mi dashboard <i class="ti ti-arrow-right"></i></a>
+<!-- ═══ EL PANEL ═══ -->
+<section id="panel">
+  <div class="wrap panel-grid">
+    <div>
+      <span class="badge-amarillo"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4.5 13H11l-1 9 8.5-11H12z"/></svg> Dashboard en vivo</span>
+      <h2 class="h-sec">Tu negocio completo,<br><span class="ama">en una pantalla</span></h2>
+      <p class="panel-p">Al entrar ves cómo vas: lo que llevas facturado en el mes, los eventos que tienes encima y las solicitudes que te faltan responder.</p>
+      <ul class="panel-lista">
+        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Ingresos del mes, eventos y tu calificación</li>
+        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Calendario que no te deja cruzar dos eventos</li>
+        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Cotizador con plantillas y lista de clientes</li>
+        <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Caja, inventario y reportes por mes</li>
+      </ul>
+      <a href="login.html?modo=registro&rol=proveedor" class="btn-blanco">Ver mi dashboard <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
     </div>
-    <div class="db">
-      <div class="db-h"><div class="db-title">Mi Dashboard</div><span class="db-ok">Ejemplo</span></div>
-      <div class="db-kpi">
-        <div class="kpi"><div class="kpi-l">Ingresos mes</div><div class="kpi-v or">S/.8,400</div></div>
-        <div class="kpi"><div class="kpi-l">Eventos</div><div class="kpi-v go">7</div></div>
-        <div class="kpi"><div class="kpi-l">Calificación</div><div class="kpi-v gr">5.0★</div></div>
+    <div class="mock">
+      <div class="mock-top"><span class="mock-t">Mi Dashboard</span><span class="mock-badge">Ejemplo</span></div>
+      <div class="mock-kpis">
+        <div class="kpi"><b>S/. 8,400</b><span>Ingresos mes</span></div>
+        <div class="kpi"><b>7</b><span>Eventos</span></div>
+        <div class="kpi"><b>5.0★</b><span>Calificación</span></div>
       </div>
-      <div class="ag-t">Próximos eventos</div>
-      <div class="agi"><div class="agi-dot or"></div><div class="agi-info"><div class="agi-ev">Boda en Miraflores</div><div class="agi-tm">Sáb 8 Nov · 6:00 PM · 120 pers.</div></div><div class="agi-st ok">Confirmado</div></div>
-      <div class="agi"><div class="agi-dot go"></div><div class="agi-info"><div class="agi-ev">Evento corporativo en San Isidro</div><div class="agi-tm">Vie 14 Nov · 12:00 PM · corporativo</div></div><div class="agi-st ok">Confirmado</div></div>
-      <div class="agi"><div class="agi-dot pu"></div><div class="agi-info"><div class="agi-ev">Quinceañero en Surco</div><div class="agi-tm">Sáb 22 Nov · 4:00 PM · pago pendiente</div></div><div class="agi-st pe">Pendiente</div></div>
-      <div class="db-bar">
-        <div class="db-bar-label"><span>Cotizaciones pendientes</span><span style="color:var(--or);font-weight:700;">12</span></div>
-        <div class="bar-track"><div class="bar-fill"></div></div>
-      </div>
+      <div class="mock-h">Próximos eventos</div>
+      <div class="ev"><div><div class="ev-n">Boda en Miraflores</div><div class="ev-d">Sáb 8 Nov · 6:00 PM · 120 pers.</div></div><span class="ev-e ok">Confirmado</span></div>
+      <div class="ev"><div><div class="ev-n">Evento corporativo</div><div class="ev-d">Vie 14 Nov · 12:00 PM · San Isidro</div></div><span class="ev-e ok">Confirmado</span></div>
+      <div class="ev"><div><div class="ev-n">Quinceañero en Surco</div><div class="ev-d">Sáb 22 Nov · 4:00 PM</div></div><span class="ev-e pe">Pendiente</span></div>
     </div>
   </div>
-</div></section>
+</section>
 
 <!-- ═══ PLANES ═══ -->
-<section id="planes"><div class="container">
-  <div class="slabel"><span class="badge">Planes</span></div>
-  <h2 class="stitle">Por ahora,<br><span class="gt">todo gratis</span></h2>
-  <p class="ssub">Estamos empezando y todavía no cobramos nada. Cuando eso cambie te avisamos antes.</p>
-  <div class="planes-grid">
-    <div class="plan-card free">
-      <span class="plan-badge free">Lanzamiento</span>
-      <div class="plan-price">S/. 0 <span>/ mes</span></div>
-      <p class="plan-desc">Todas las herramientas abiertas, sin tarjeta y sin permanencia.</p>
-      <div class="plan-feats">
-        <div class="pf"><div class="pf-ico ok"><i class="ti ti-check" style="font-size:11px;"></i></div>Tu perfil público en el marketplace</div>
-        <div class="pf"><div class="pf-ico ok"><i class="ti ti-check" style="font-size:11px;"></i></div>Agenda sin límite de eventos</div>
-        <div class="pf"><div class="pf-ico ok"><i class="ti ti-check" style="font-size:11px;"></i></div>Cotizador con tus plantillas</div>
-        <div class="pf"><div class="pf-ico ok"><i class="ti ti-check" style="font-size:11px;"></i></div>Lista de clientes</div>
-        <div class="pf"><div class="pf-ico ok"><i class="ti ti-check" style="font-size:11px;"></i></div>Control de caja e inventario</div>
-        <div class="pf"><div class="pf-ico ok"><i class="ti ti-check" style="font-size:11px;"></i></div>Reportes por mes</div>
+<section id="planes">
+  <div class="wrap">
+    <span class="tag-sec">Planes</span>
+    <h2 class="h-sec">Por ahora, <span class="na">todo gratis</span></h2>
+    <p class="p-sec">Estamos empezando y todavía no cobramos nada. Cuando eso cambie te avisamos antes.</p>
+    <div class="planes">
+      <div class="plan destacado">
+        <span class="plan-tag">Lanzamiento</span>
+        <div class="plan-n">Gratis</div>
+        <div class="plan-precio">S/. 0</div>
+        <div class="plan-por">al mes</div>
+        <p class="plan-d">Todas las herramientas abiertas, sin tarjeta y sin permanencia.</p>
+        <ul class="plan-lista">
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Tu perfil público en el marketplace</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Agenda sin límite de eventos</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Cotizador con tus plantillas</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Lista de clientes</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Control de caja e inventario</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Reportes por mes</li>
+        </ul>
+        <a href="login.html?modo=registro&rol=proveedor" class="plan-btn solido">Empezar gratis</a>
       </div>
-      <button class="plan-btn free">Empezar gratis</button>
-    </div>
-    <div class="plan-card pro">
-      <span class="plan-badge pro">Más adelante</span>
-      <div class="plan-price" style="background:linear-gradient(to left,#ea580c,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Pro <span style="background:none;-webkit-text-fill-color:var(--sub);">/ todavía no está</span></div>
-      <p class="plan-desc">Lo que estamos armando para cuando la plataforma tenga más movimiento.</p>
-      <div class="plan-feats">
-        <div class="pf"><div class="pf-ico ok"><i class="ti ti-check" style="font-size:11px;"></i></div>Cobrar el adelanto por la plataforma</div>
-        <div class="pf"><div class="pf-ico ok"><i class="ti ti-check" style="font-size:11px;"></i></div>Chat con el cliente sin salir de acá</div>
-        <div class="pf"><div class="pf-ico ok"><i class="ti ti-check" style="font-size:11px;"></i></div>Avisos por correo de cada solicitud</div>
-        <div class="pf"><div class="pf-ico ok"><i class="ti ti-check" style="font-size:11px;"></i></div>Más espacio para fotos de tu trabajo</div>
+      <div class="plan futuro">
+        <span class="plan-tag">Más adelante</span>
+        <div class="plan-n">Pro</div>
+        <div class="plan-precio" style="color:var(--tinta-3);font-size:30px;margin-top:14px;">Todavía no está</div>
+        <div class="plan-por">te avisamos cuando salga</div>
+        <p class="plan-d">Lo que estamos armando para cuando la plataforma tenga más movimiento.</p>
+        <ul class="plan-lista">
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/></svg> Cobrar el adelanto por la plataforma</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/></svg> Chat con el cliente sin salir de acá</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/></svg> Avisos por correo de cada solicitud</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/></svg> Más espacio para fotos de tu trabajo</li>
+        </ul>
+        <a href="#" class="plan-btn linea">Avísenme cuando salga</a>
       </div>
-      <button class="plan-btn pro" onclick="document.getElementById('reg').scrollIntoView({behavior:'smooth'})">Avísenme cuando salga</button>
     </div>
   </div>
-</div></section>
+</section>
 
-<!-- ═══ REGISTRO ═══ -->
-<section id="reg"><div class="container">
-  <div class="reg-box">
-    <div class="reg-orb1"></div>
-    <div class="reg-orb2"></div>
-    <span class="badge" style="position:relative;z-index:1;"><i class="ti ti-rocket" style="font-size:12px;"></i> Registro gratis</span>
-    <h2 class="reg-h">Crea tu perfil<br><span class="gt">en menos de 15 minutos</span></h2>
-    <p class="reg-sub">Llenas tus datos, nosotros revisamos tu negocio y te avisamos en el panel cuando quede aprobado.</p>
-    <div class="reg-form" style="justify-content:center;">
-      <a href="login.html?modo=registro&rol=proveedor" class="reg-btn" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">Registrarme gratis <i class="ti ti-arrow-right"></i></a>
+<!-- ═══ CTA REGISTRO ═══ -->
+<section id="cta" style="padding:44px 0;">
+  <div class="wrap"><div class="ctabox">
+    <div class="cta-l">
+      <span class="cta-tag">Registro gratis</span>
+      <h2>Crea tu perfil en<br>menos de 15 minutos.</h2>
+      <p>Llenas tus datos, nosotros revisamos tu negocio y te avisamos en el panel cuando quede aprobado.</p>
     </div>
-    <p class="reg-note" id="reg-note">Programa fundador · sin comisión durante el lanzamiento · sin permanencia</p>
-  </div>
-</div></section>
-
-<!-- ═══ FOOTER ═══ -->
-<footer id="foot"><div class="container">
-  <div class="foot-top">
-    <div>
-      <a href="index.html" class="flogo"><span class="lp">Todo</span><span class="lo">Eventos</span><span style="color:rgba(245,243,235,.28);font-weight:400;">.pe</span></a>
-      <p class="fdesc">Herramientas para proveedores de eventos en Lima.</p>
+    <div class="cta-r">
+      <a href="login.html?modo=registro&rol=proveedor" class="btn-cta">Registrarme gratis <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <div class="cta-nota">Sin comisión durante el lanzamiento</div>
     </div>
-    <div class="fcol"><h5>Plataforma</h5><a href="#feats">Herramientas</a><a href="#planes">Planes y precios</a><a href="catalogo.html">Marketplace</a></div>
-    <div class="fcol"><h5>Soporte</h5><a href="#">Centro de ayuda</a><a href="#">Contacto</a><a href="#">Términos</a><a href="#">Privacidad</a></div>
-  </div>
-  <div class="foot-bot">
-    <span class="fcopy">© 2026 TodoEventos.pe. Plataforma para proveedores.</span>
-    <div class="flinks"><a href="index.html">← Volver al marketplace</a></div>
-  </div>
-</div></footer>
+  </div></div>
+</section>
 
-<script>
-
-/* ─── Sesión: mostrar "Ingresar" o el menú de usuario según corresponda ─── */
-const SUPABASE_URL = 'https://vqnyaozauljtashpjfoo.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxbnlhb3phdWxqdGFzaHBqZm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDM0NzIsImV4cCI6MjA5OTI3OTQ3Mn0.0JT-UAQnSUygXPNjI69Sf3Rg3mv_NeTwwz9-7vnWcno';
-
-let sb = null;
-try {
-  const storageAdapter = {
-    getItem: (key) => localStorage.getItem(key) ?? sessionStorage.getItem(key),
-    setItem: (key, value) => {
-      const recordar = localStorage.getItem('te_remember') !== 'false';
-      if(recordar){
-        localStorage.setItem(key, value);
-        sessionStorage.removeItem(key);
-      } else {
-        sessionStorage.setItem(key, value);
-        localStorage.removeItem(key);
-      }
-    },
-    removeItem: (key) => {
-      localStorage.removeItem(key);
-      sessionStorage.removeItem(key);
-    }
-  };
-  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: { storage: storageAdapter }
-  });
-} catch(e) {
-  console.error('No se pudo inicializar Supabase:', e);
-}
-
-function toggleUserDropdown(){
-  document.getElementById('user-dropdown').classList.toggle('open');
-}
-document.addEventListener('click', function(e){
-  const menu = document.getElementById('user-menu');
-  if(menu && !menu.contains(e.target)){
-    document.getElementById('user-dropdown').classList.remove('open');
-  }
-});
-
-async function cerrarSesion(){
-  if(sb) await sb.auth.signOut();
-  window.location.href = 'index.html';
-}
-
-async function verificarSesionNav(){
-  if(!sb) return;
-  const { data } = await sb.auth.getSession();
-  if(!data.session) return;
-
-  const usuario = data.session.user;
-  const { data: perfil } = await sb
-    .from('profiles')
-    .select('full_name, role, is_admin')
-    .eq('id', usuario.id)
-    .single();
-
-  const nombre = (perfil && perfil.full_name) ? perfil.full_name : usuario.email;
-  const rol = perfil ? perfil.role : 'cliente';
-
-  // El acceso al panel de admin solo aparece si la cuenta es administradora
-  if(perfil && perfil.is_admin){
-    const linkAdmin = document.getElementById('link-admin');
-    if(linkAdmin) linkAdmin.style.display = 'flex';
-  }
-  const inicial = nombre.trim().charAt(0).toUpperCase();
-
-  document.getElementById('btn-ingresar').style.display = 'none';
-  document.getElementById('user-menu').classList.add('show');
-  document.getElementById('user-avatar-btn').textContent = inicial;
-  document.getElementById('user-dropdown-name').textContent = nombre;
-
-  const destino = rol === 'proveedor' ? 'dashboard.html' : 'catalogo.html';
-  const textoLink = rol === 'proveedor' ? 'Mi dashboard' : 'Ir al marketplace';
-  document.getElementById('link-mi-espacio').href = destino;
-  document.getElementById('link-mi-espacio-texto').textContent = textoLink;
-}
-
-verificarSesionNav();
-</script>
+<div id="chrome-footer"></div>
+<script src="nav.js"></script>
 </body>
 </html>
