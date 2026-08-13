@@ -78,8 +78,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
 .hero-h1 .ama{color:var(--amarillo);}
 .hero-p{font-size:clamp(16px,1.4vw,19px);color:rgba(255,255,255,.93);max-width:466px;margin-bottom:28px;font-weight:500;}
 .hero-btns{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
-.btn-xl{background:var(--naranja);color:#fff;font-family:'Anton',sans-serif;text-transform:uppercase;font-size:21px;letter-spacing:.02em;padding:19px 38px;border-radius:9px;display:inline-flex;align-items:center;gap:11px;box-shadow:0 5px 0 #C2410C;transition:transform .14s,box-shadow .14s;}
-.btn-xl:hover{transform:translateY(-2px);box-shadow:0 7px 0 #C2410C;}
+.btn-xl{background:var(--naranja-osc);color:#fff;font-family:'Anton',sans-serif;text-transform:uppercase;font-size:21px;letter-spacing:.02em;padding:19px 38px;border-radius:9px;display:inline-flex;align-items:center;gap:11px;box-shadow:0 5px 0 #9A3412;transition:transform .14s,box-shadow .14s;}
+.btn-xl:hover{background:var(--naranja);transform:translateY(-2px);box-shadow:0 7px 0 #9A3412;}
 .btn-xl:active{transform:translateY(3px);box-shadow:0 2px 0 #C2410C;}
 .btn-ghost{color:#fff;font-weight:700;font-size:16px;padding:19px 22px;border:2px solid rgba(255,255,255,.42);border-radius:9px;transition:background .16s,border-color .16s;}
 .btn-ghost:hover{background:rgba(255,255,255,.14);border-color:#fff;}
@@ -176,7 +176,9 @@ section{padding:52px 0;}
 
 /* ── CTA PROVEEDOR ── */
 #cta{padding:0 0 52px;}
-.ctabox{background:linear-gradient(96deg,var(--naranja-osc),var(--naranja) 62%,#FB923C);border-radius:18px;padding:44px 46px;display:flex;align-items:center;gap:34px;color:#fff;position:relative;overflow:hidden;}
+/* Todo el degradado tiene que aguantar texto blanco: el tono mas claro
+   manda, y el naranja de marca sobre blanco se queda en 3.5. */
+.ctabox{background:linear-gradient(96deg,#7C2D12,#9A3412 58%,var(--naranja-osc));border-radius:18px;padding:44px 46px;display:flex;align-items:center;gap:34px;color:#fff;position:relative;overflow:hidden;}
 .ctabox::after{content:'';position:absolute;right:-40px;bottom:-90px;width:290px;height:290px;border-radius:50%;background:rgba(255,255,255,.13);}
 .cta-l{flex:1;position:relative;z-index:1;min-width:0;}
 .cta-tag{display:inline-block;background:#fff;color:var(--naranja-osc);font-size:12px;font-weight:800;padding:6px 13px;border-radius:5px;margin-bottom:14px;text-transform:uppercase;letter-spacing:.04em;}
