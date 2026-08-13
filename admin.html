@@ -192,24 +192,37 @@ async function init(){
 }
 
 async function cargarSolicitudes(){
-  // Si is_founder no existe todavia, Postgres rechaza el select entero y el
-  // panel se queda sin poder aprobar a nadie. Se reintenta sin la columna:
-  // que falte el badge no puede tumbar el resto del panel.
-  const consulta = campoFundador => sb
+  // 1) Las solicitudes, SIN unirlas con profiles en la misma consulta. El
+  //    embed directo `profiles(...)` no resuelve porque user_id apunta a
+  //    auth.users (no a profiles), y eso hacia fallar TODA la consulta y
+  //    dejaba el panel vacio en silencio. Por eso las solicitudes reales no
+  //    aparecian aunque existieran.
+  const { data, error } = await sb
     .from('solicitudes_proveedor')
-    .select(`*, profiles(full_name, email${campoFundador})`)
+    .select('*')
     .order('created_at', { ascending: false });
-
-  let { data, error } = await consulta(', is_founder');
-  fundadorDisponible = !error;
-  if(error) ({ data, error } = await consulta(''));
 
   if(error){
     console.error(error);
     return;
   }
+  const solicitudes = data || [];
+
+  // 2) Los perfiles de los postulantes, en una consulta aparte, y se adjuntan
+  //    a cada solicitud como s.profiles (misma forma que antes, para el render).
+  //    is_founder puede no existir si no se corrio fundador.sql: se reintenta.
+  const ids = [...new Set(solicitudes.map(s => s.user_id).filter(Boolean))];
+  const perfilesPorId = {};
+  if(ids.length){
+    let resp = await sb.from('profiles').select('id, full_name, email, is_founder').in('id', ids);
+    fundadorDisponible = !resp.error;
+    if(resp.error) resp = await sb.from('profiles').select('id, full_name, email').in('id', ids);
+    (resp.data || []).forEach(p => { perfilesPorId[p.id] = p; });
+  }
+  solicitudes.forEach(s => { s.profiles = perfilesPorId[s.user_id] || null; });
+
   if(fundadorDisponible) await cargarEstadoPrograma();
-  todasLasSolicitudes = data || [];
+  todasLasSolicitudes = solicitudes;
   actualizarContador();
   render();
 }
