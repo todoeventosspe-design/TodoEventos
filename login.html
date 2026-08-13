@@ -216,7 +216,7 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
     <div id="vista-codigo" style="display:none;">
       <div class="role-ctx" style="margin-bottom:20px;">
         <div class="role-ctx-title"><i class="ti ti-mail-check" style="margin-right:6px;"></i> Revisa tu correo</div>
-        <div class="role-ctx-desc">Te mandamos un código de 6 dígitos a <b id="codigo-email-destino" style="color:var(--fg);"></b>. Escríbelo acá para activar tu cuenta.</div>
+        <div class="role-ctx-desc">Te mandamos un código a <b id="codigo-email-destino" style="color:var(--fg);"></b>. Escríbelo acá para activar tu cuenta.</div>
       </div>
 
       <div class="msg error" id="msg-error-codigo"><i class="ti ti-alert-circle"></i> <span id="err-text-codigo"></span></div>
@@ -226,7 +226,7 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
         <label>Código de verificación</label>
         <div class="input-wrap">
           <i class="ti ti-key"></i>
-          <input type="text" id="codigo-input" placeholder="123456" maxlength="6" inputmode="numeric" style="letter-spacing:4px;font-weight:700;">
+          <input type="text" id="codigo-input" placeholder="12345678" maxlength="8" inputmode="numeric" style="letter-spacing:4px;font-weight:700;">
         </div>
       </div>
 
@@ -573,7 +573,7 @@ async function verificarCodigo(){
   ocultarMensajesCodigo();
   const codigo = document.getElementById('codigo-input').value.trim();
   if(!codigo || codigo.length < 6){
-    showErrorCodigo('Ingresa el código de 6 dígitos que te enviamos.');
+    showErrorCodigo('Ingresa el código que te enviamos.');
     return;
   }
 
