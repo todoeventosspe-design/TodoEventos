@@ -143,8 +143,9 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
       <div class="campos-proveedor-title"><i class="ti ti-building-store"></i> Información de tu negocio</div>
 
       <div class="field-plain">
-        <label>Nombre del negocio</label>
-        <input type="text" id="prov-negocio" placeholder="Ej. DJ Nexus Producciones">
+        <label>Nombre de tu negocio (o tu nombre, si tú eres el servicio)</label>
+        <input type="text" id="prov-negocio" placeholder="Ej. Ghio Catering — o Julián Hidalgo">
+        <div style="font-size:11.5px;color:var(--sub);margin-top:5px;">Así te verán los clientes en el catálogo.</div>
       </div>
 
       <div class="field-row2">
@@ -332,7 +333,9 @@ function updateUI(){
   document.getElementById('ctx-desc').textContent = ui.ctxDesc;
 
   const esRegistro = authMode === 'registro';
-  document.getElementById('field-nombre').style.display = esRegistro ? 'block' : 'none';
+  // El nombre personal solo se le pide al CLIENTE. El proveedor usa un único
+  // campo (el nombre de su negocio) como nombre de la cuenta.
+  document.getElementById('field-nombre').style.display = (esRegistro && currentRole !== 'proveedor') ? 'block' : 'none';
   document.getElementById('campos-proveedor').style.display = (esRegistro && currentRole === 'proveedor') ? 'block' : 'none';
   document.getElementById('row-remember').style.display = esRegistro ? 'none' : 'flex';
   document.getElementById('btn-icon').className = esRegistro ? 'ti ti-user-plus' : 'ti ti-login-2';
@@ -439,12 +442,20 @@ async function doRegister(){
     showError('No se pudo conectar con el servidor. Revisa tu conexión a internet y recarga la página.');
     return;
   }
-  const nombre = document.getElementById('nombre').value.trim();
+  let nombre = document.getElementById('nombre').value.trim();
   const email = document.getElementById('email').value.trim().toLowerCase();
   const pass = document.getElementById('password').value.trim();
 
+  // Para un proveedor, el nombre de la cuenta ES el nombre del negocio (un solo
+  // campo, sin nombre personal aparte). Es lo que se ve en el catálogo.
+  if(currentRole === 'proveedor'){
+    nombre = document.getElementById('prov-negocio').value.trim();
+  }
+
   if(!nombre || !email || !pass){
-    showError('Completa tu nombre, correo y contraseña para continuar.');
+    showError(currentRole === 'proveedor'
+      ? 'Completa el nombre de tu negocio, correo y contraseña para continuar.'
+      : 'Completa tu nombre, correo y contraseña para continuar.');
     return;
   }
   if(pass.length < 6){
