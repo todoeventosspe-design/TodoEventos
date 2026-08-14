@@ -89,6 +89,12 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
 .foot-note a{color:var(--ac);text-decoration:none;font-weight:600;}
 .back-home{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:18px;padding:12px;font-size:13.5px;font-weight:600;color:var(--sub);text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:12px;transition:all .18s;}
 .back-home:hover{color:var(--fg);border-color:var(--ac-line);background:var(--card2);}
+/* Fotos del proveedor al registrarse */
+.foto-add-btn{background:rgba(255,255,255,.05);border:1px dashed var(--line);color:var(--fg);border-radius:9px;padding:9px 14px;font-size:12.5px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;}
+.foto-add-btn:hover{border-color:var(--ac);color:var(--ac);}
+.foto-thumb{position:relative;width:62px;height:62px;border-radius:8px;overflow:hidden;flex:none;border:1px solid var(--line);}
+.foto-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.foto-thumb button{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.7);color:#fff;border:none;font-size:11px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
 </style>
 </head>
 <body class="role-cliente">
@@ -144,7 +150,7 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
 
       <div class="field-plain">
         <label>Nombre de tu negocio (o tu nombre, si tú eres el servicio)</label>
-        <input type="text" id="prov-negocio" placeholder="Ej. Ghio Catering — o Julián Hidalgo">
+        <input type="text" id="prov-negocio" placeholder="Ej. Sabor Criollo Catering — o Andrés Villar">
         <div style="font-size:11.5px;color:var(--sub);margin-top:5px;">Así te verán los clientes en el catálogo.</div>
       </div>
 
@@ -196,6 +202,14 @@ body{font-family:'General Sans','Inter',sans-serif;background:var(--bg);color:va
           <label>Instagram / Web (opcional)</label>
           <input type="text" id="prov-redes" placeholder="@tunegocio">
         </div>
+      </div>
+
+      <div class="field-plain">
+        <label>Fotos de tu trabajo <span style="color:var(--sub);font-weight:400;">(mínimo 2, hasta 8)</span></label>
+        <div style="font-size:11.5px;color:var(--sub);margin:-2px 0 8px;line-height:1.6;">Trabajos anteriores o de tu catálogo. Las revisamos al aprobar tu cuenta.</div>
+        <div id="prov-fotos-grid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;"></div>
+        <button type="button" class="foto-add-btn" onclick="document.getElementById('prov-fotos-input').click()"><i class="ti ti-camera-plus"></i> Agregar fotos</button>
+        <input type="file" id="prov-fotos-input" accept="image/png,image/jpeg" multiple style="display:none;">
       </div>
 
       <div class="hint" style="font-size:11.5px;color:var(--sub);margin:-4px 0 16px;line-height:1.6;">
@@ -307,6 +321,91 @@ const ROLE_UI = {
     ctxDesc: 'Gestiona tu negocio desde el panel de herramientas.',
   }
 };
+
+// ─── Fotos del proveedor al registrarse ───────────────────────────────────
+// Se guardan como File comprimido en memoria y se suben a Storage recien
+// cuando hay sesion (tras verificar el codigo). Minimo 2, hasta 8.
+let fotosProveedor = [];
+const MAX_FOTOS_PROV = 8;
+
+const provFotosInput = document.getElementById('prov-fotos-input');
+if(provFotosInput){
+  provFotosInput.addEventListener('change', async function(e){
+    const files = [...e.target.files];
+    e.target.value = '';
+    for(const file of files){
+      if(fotosProveedor.length >= MAX_FOTOS_PROV){ showError('Puedes subir hasta ' + MAX_FOTOS_PROV + ' fotos.'); break; }
+      if(!['image/png','image/jpeg'].includes(file.type)) continue;
+      const comprimida = await comprimirImagen(file, 1200, 0.8);
+      fotosProveedor.push({ blob: comprimida, url: URL.createObjectURL(comprimida) });
+    }
+    renderFotosProveedor();
+  });
+}
+
+function renderFotosProveedor(){
+  const grid = document.getElementById('prov-fotos-grid');
+  if(!grid) return;
+  grid.innerHTML = fotosProveedor.map((f, i) =>
+    `<div class="foto-thumb"><img src="${f.url}"><button type="button" onclick="quitarFotoProveedor(${i})">✕</button></div>`
+  ).join('');
+}
+
+function quitarFotoProveedor(i){
+  URL.revokeObjectURL(fotosProveedor[i].url);
+  fotosProveedor.splice(i, 1);
+  renderFotosProveedor();
+}
+
+// Redimensiona a maxDim px (lado mayor) y exporta JPEG comprimido, para que
+// las fotos no pesen 5MB cada una. Si algo falla, devuelve el archivo original.
+function comprimirImagen(file, maxDim, quality){
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      if(width > maxDim || height > maxDim){
+        if(width >= height){ height = Math.round(height * maxDim / width); width = maxDim; }
+        else { width = Math.round(width * maxDim / height); height = maxDim; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      canvas.toBlob(b => resolve(b || file), 'image/jpeg', quality);
+    };
+    img.onerror = () => resolve(file);
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+// Sube las fotos a Storage bajo la carpeta del propio usuario (lo exige la RLS
+// del bucket) y devuelve sus URLs publicas.
+async function subirFotosProveedor(userId){
+  const urls = [];
+  for(let i = 0; i < fotosProveedor.length; i++){
+    const ruta = userId + '/sol_' + Date.now() + '_' + i + '.jpg';
+    const { error } = await sb.storage.from('fotos-servicios').upload(ruta, fotosProveedor[i].blob, { contentType: 'image/jpeg' });
+    if(!error){
+      const { data } = sb.storage.from('fotos-servicios').getPublicUrl(ruta);
+      urls.push(data.publicUrl);
+    }
+  }
+  return urls;
+}
+
+// Sube las fotos y guarda la solicitud. Si la columna 'fotos' aun no existe en
+// la base (no se corrio el SQL), reintenta sin ella para no romper el registro.
+async function insertarSolicitudProveedor(userId, datos){
+  const fotos = await subirFotosProveedor(userId);
+  const payload = { user_id: userId, ...datos };
+  if(fotos.length) payload.fotos = fotos;
+  let { error } = await sb.from('solicitudes_proveedor').insert(payload);
+  if(error && /fotos/i.test(error.message || '')){
+    delete payload.fotos;
+    ({ error } = await sb.from('solicitudes_proveedor').insert(payload));
+  }
+  return error;
+}
 
 function switchRole(role){
   currentRole = role;
@@ -477,6 +576,10 @@ async function doRegister(){
       showError('Completa toda la información de tu negocio (nombre, RUC/DNI, teléfono, distrito y descripción).');
       return;
     }
+    if(fotosProveedor.length < 2){
+      showError('Sube al menos 2 fotos de tu trabajo para que podamos revisar tu negocio.');
+      return;
+    }
 
     datosProveedor = {
       nombre_negocio: negocio,
@@ -523,10 +626,7 @@ async function doRegister(){
     // El proyecto no exige confirmar el correo: ya hay sesión activa,
     // así que podemos registrar la solicitud de proveedor de una vez.
     if(currentRole === 'proveedor' && data.user){
-      const { error: errSolicitud } = await sb.from('solicitudes_proveedor').insert({
-        user_id: data.user.id,
-        ...datosProveedor
-      });
+      const errSolicitud = await insertarSolicitudProveedor(data.user.id, datosProveedor);
       if(errSolicitud){
         console.error('Error guardando la solicitud de proveedor:', errSolicitud);
       } else {
@@ -613,10 +713,7 @@ async function verificarCodigo(){
 
   // Ahora sí hay sesión activa: si es proveedor, recién aquí guardamos su solicitud
   if(pendiente.role === 'proveedor' && data.user){
-    const { error: errSolicitud } = await sb.from('solicitudes_proveedor').insert({
-      user_id: data.user.id,
-      ...pendiente.datosProveedor
-    });
+    const errSolicitud = await insertarSolicitudProveedor(data.user.id, pendiente.datosProveedor);
     if(errSolicitud){
       console.error('Error guardando la solicitud de proveedor:', errSolicitud);
     } else {
