@@ -931,6 +931,7 @@ verificarAccesoDashboard();
           </div>
           <div class="profile-headinfo">
             <div class="profile-name" id="perfil-nombre">—</div>
+            <input type="text" class="profile-edit-input" id="perfil-nombre-edit" placeholder="Nombre de tu negocio" style="display:none;font-size:1.35rem;font-weight:700;margin-bottom:8px;">
 
             <div class="profile-meta" id="perfil-meta-view"><span id="perfil-categoria">DJ &amp; Sonido Profesional</span> &middot; <i class="ti ti-map-pin" style="font-size:13px;"></i> <span id="perfil-ubicacion">Miraflores, Lima</span></div>
             <div class="profile-meta-edit" id="perfil-meta-edit" style="display:none;">
@@ -2483,6 +2484,7 @@ function renderPerfil(){
   if(kpiRatingLbl) kpiRatingLbl.textContent = 'Calificación (' + homeCount + (homeCount === 1 ? ' reseña)' : ' reseñas)');
   if(kpiRatingTrend) kpiRatingTrend.style.display = homeCount >= 5 ? 'flex' : 'none';
   document.getElementById('perfil-categoria').textContent = perfilData.categoria;
+  document.getElementById('perfil-nombre-edit').value = perfilData.nombre;
   document.getElementById('perfil-categoria-edit').value = perfilData.categoria;
   document.getElementById('perfil-ubicacion').textContent = perfilData.ubicacion;
   document.getElementById('perfil-ubicacion-edit').value = perfilData.ubicacion;
@@ -2663,12 +2665,15 @@ function toggleProfileEdit(){
 }
 
 function resetEditInputsFromData(){
+  document.getElementById('perfil-nombre-edit').value = perfilData.nombre;
   document.getElementById('perfil-categoria-edit').value = perfilData.categoria;
   document.getElementById('perfil-ubicacion-edit').value = perfilData.ubicacion;
   document.getElementById('perfil-bio-edit').value = perfilData.bio;
 }
 
 function applyEditModeUI(){
+  document.getElementById('perfil-nombre').style.display = perfilEditMode ? 'none' : 'block';
+  document.getElementById('perfil-nombre-edit').style.display = perfilEditMode ? 'block' : 'none';
   document.getElementById('perfil-meta-view').style.display = perfilEditMode ? 'none' : 'flex';
   document.getElementById('perfil-meta-edit').style.display = perfilEditMode ? 'flex' : 'none';
   document.getElementById('perfil-bio-view').style.display = perfilEditMode ? 'none' : 'block';
@@ -2685,25 +2690,33 @@ function applyEditModeUI(){
 }
 
 async function saveProfileChanges(){
+  const nombre = document.getElementById('perfil-nombre-edit').value.trim();
   const categoria = document.getElementById('perfil-categoria-edit').value.trim();
   const ubicacion = document.getElementById('perfil-ubicacion-edit').value.trim();
   const bio = document.getElementById('perfil-bio-edit').value.trim();
 
+  if(!nombre){
+    alert('El nombre de tu negocio no puede quedar vacío.');
+    return;
+  }
   if(!categoria || !ubicacion){
     alert('La categoría y la ubicación no pueden quedar vacías.');
     return;
   }
 
   const { error } = await sb.from('profiles').update({
+    full_name: nombre,
     categoria, location: ubicacion, bio: bio || perfilData.bio,
     avatar_url: perfilData.avatarUrl, banner_url: perfilData.bannerUrl
   }).eq('id', usuarioActual.id);
 
   if(error){ alert('No se pudo guardar el perfil: ' + error.message); return; }
 
+  perfilData.nombre = nombre;
   perfilData.categoria = categoria;
   perfilData.ubicacion = ubicacion;
   perfilData.bio = bio || perfilData.bio;
+  document.getElementById('perfil-nombre').textContent = perfilData.nombre;
 
   perfilEditMode = false;
   applyEditModeUI();
