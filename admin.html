@@ -94,6 +94,7 @@ h1{font-size:22px;font-weight:700;margin:22px 0 4px;}
     <button class="tab active" id="tab-pendientes" onclick="cambiarTab('pendiente')">Pendientes <span id="count-pendientes"></span></button>
     <button class="tab" id="tab-aprobados" onclick="cambiarTab('aprobado')">Aprobados</button>
     <button class="tab" id="tab-rechazados" onclick="cambiarTab('rechazado')">Rechazados</button>
+    <button class="tab" id="tab-feedback" onclick="cambiarTab('feedback')"><i class="ti ti-message-2"></i> Feedback</button>
   </div>
 
   <div class="fund-info" id="fund-info"></div>
@@ -249,6 +250,8 @@ function cambiarTab(tab){
   document.getElementById('tab-pendientes').classList.toggle('active', tab === 'pendiente');
   document.getElementById('tab-aprobados').classList.toggle('active', tab === 'aprobado');
   document.getElementById('tab-rechazados').classList.toggle('active', tab === 'rechazado');
+  document.getElementById('tab-feedback').classList.toggle('active', tab === 'feedback');
+  if(tab === 'feedback' && feedbackData === null){ cargarFeedback().then(render); return; }
   render();
 }
 
@@ -258,8 +261,38 @@ function fotoAdminSegura(u){
   return typeof u === 'string' && u.startsWith(SUPABASE_URL + '/storage/');
 }
 
+// ─── Feedback (comentarios que la gente envía desde el boton de todas las paginas) ───
+let feedbackData = null;
+async function cargarFeedback(){
+  const { data, error } = await sb.from('feedback').select('*').order('created_at', { ascending: false });
+  feedbackData = error ? [] : (data || []);
+}
+function renderFeedback(cont){
+  document.getElementById('fund-info').style.display = 'none';
+  if(!feedbackData || !feedbackData.length){
+    cont.innerHTML = `<div class="vacio"><i class="ti ti-message-2"></i>No hay comentarios todavía.</div>`;
+    return;
+  }
+  cont.innerHTML = feedbackData.map(f => {
+    const fecha = new Date(f.created_at).toLocaleString('es-PE', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+    return `<div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-neg">${esc(f.email || 'Anónimo')}</div>
+          <span class="card-cat"><i class="ti ti-file-text"></i> ${esc(f.pagina || '—')}</span>
+        </div>
+        <div class="card-fecha">${fecha}</div>
+      </div>
+      <div class="desc">${esc(f.mensaje)}</div>
+    </div>`;
+  }).join('');
+}
+
 function render(){
   const cont = document.getElementById('lista-solicitudes');
+
+  if(tabActual === 'feedback'){ renderFeedback(cont); return; }
+
   const filtradas = todasLasSolicitudes.filter(s => s.estado === tabActual);
 
   // El contador del programa fundador solo tiene sentido sobre los aprobados:
