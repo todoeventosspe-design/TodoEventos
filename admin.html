@@ -12,13 +12,14 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
-  --bg:var(--hueso); --card:#fff; --card2:var(--hueso); --line:var(--linea);
+  --bg:var(--app-bg); --card:#fff; --card2:var(--hueso); --line:var(--linea);
   --fg:var(--tinta); --sub:var(--tinta-2); --red:#B91C1C; --gold:#B45309;
-  --or:#C2410C; --or-soft:#FFF1E6; --or-line:#C2410C;
-  --green:#15803D; --green-soft:var(--verde-bg); --green-line:#86EFAC;
+  --or:#C2410C; --or-soft:rgba(194,65,12,.12); --or-line:rgba(194,65,12,.28);
+  --green:#15803D; --green-soft:rgba(74,222,128,.12); --green-line:#86EFAC;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Epilogue',system-ui,sans-serif;background:var(--app-bg);color:var(--fg);min-height:100vh;padding:26px 20px 60px;}
+html{overflow-x:clip;} /* los glows de fondo se salían del borde en celular */
+body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;padding:32px 20px 60px;}
 .wrap{max-width:900px;margin:0 auto;}
 
 .top-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
@@ -31,11 +32,11 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--app-bg);color:
 h1{font-size:22px;font-weight:700;margin:22px 0 4px;}
 .sub{color:var(--sub);font-size:13.5px;margin-bottom:26px;}
 
-.tabs{display:flex;gap:6px;background:#fff;border-radius:var(--app-radio);box-shadow:var(--app-sombra);padding:5px;margin-bottom:20px;width:fit-content;}
-.tab{padding:11px 20px;border-radius:6px;font-size:13.5px;font-weight:700;color:var(--sub);cursor:pointer;border:none;background:transparent;font-family:inherit;min-height:44px;}
+.tabs{display:flex;gap:6px;background:var(--card2);border-radius:12px;padding:5px;margin-bottom:22px;width:fit-content;}
+.tab{padding:9px 18px;border-radius:9px;font-size:13px;font-weight:600;color:var(--sub);cursor:pointer;border:none;background:transparent;font-family:inherit;}
 .tab.active{background:var(--or);color:#fff;}
 
-.card{background:#fff;border-radius:var(--app-radio);box-shadow:var(--app-sombra);padding:20px 22px;margin-bottom:12px;}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-bottom:16px;}
 .card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px;}
 .card-neg{font-size:16px;font-weight:700;margin-bottom:3px;}
 .card-cat{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--or);background:var(--or-soft);padding:3px 10px;border-radius:100px;font-weight:600;}
@@ -48,15 +49,22 @@ h1{font-size:22px;font-weight:700;margin:22px 0 4px;}
 .desc{background:var(--card2);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--fg);line-height:1.6;margin-bottom:16px;}
 
 .btns{display:flex;gap:10px;}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 20px;border-radius:6px;font-size:13.5px;font-weight:700;border:none;cursor:pointer;font-family:inherit;min-height:44px;}
-.btn-aprobar{background:var(--green);color:#fff;}
-.btn-rechazar{background:transparent;border:1px solid #FCA5A5;color:var(--red);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 18px;border-radius:9px;font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:inherit;}
+.btn-aprobar{background:var(--green);color:#052e16;}
+.btn-rechazar{background:transparent;border:1px solid rgba(248,113,113,.35);color:var(--red);}
 .btn:disabled{opacity:.5;cursor:not-allowed;}
 
 .estado-tag{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;padding:4px 11px;border-radius:100px;font-weight:600;}
 .estado-tag.aprobado{background:var(--green-soft);color:var(--green);}
 .estado-tag.rechazado{background:#FEF2F2;color:var(--red);}
+.estado-tag.fundador{background:rgba(251,191,36,.12);color:var(--gold);border:1px solid rgba(251,191,36,.3);}
 .motivo{font-size:12px;color:var(--red);margin-top:8px;}
+
+.acciones-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.btn-fundador{background:transparent;border:1px solid rgba(251,191,36,.4);color:var(--gold);padding:7px 14px;font-size:12.5px;}
+.btn-fundador:hover{background:rgba(251,191,36,.1);}
+.fund-info{font-size:12.5px;color:var(--sub);margin:-8px 0 20px;line-height:1.6;}
+.fund-info b{color:var(--gold);}
 
 .vacio{text-align:center;padding:60px 20px;color:var(--sub);}
 .vacio i{font-size:38px;margin-bottom:12px;display:block;}
@@ -65,6 +73,10 @@ h1{font-size:22px;font-weight:700;margin:22px 0 4px;}
 .spinner{width:16px;height:16px;border:2px solid rgba(194,65,12,.25);border-top-color:var(--or);border-radius:50%;animation:spin .6s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .contenido{display:none;}
+.sol-fotos{display:flex;flex-wrap:wrap;gap:8px;margin:-4px 0 16px;}
+.sol-foto{width:86px;height:86px;border-radius:10px;overflow:hidden;border:1px solid var(--line);display:block;}
+.sol-foto img{width:100%;height:100%;object-fit:cover;display:block;}
+.sol-fotos-lbl{font-size:11.5px;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin:0 0 7px;font-weight:600;}
 </style>
 </head>
 <body>
@@ -85,8 +97,10 @@ h1{font-size:22px;font-weight:700;margin:22px 0 4px;}
     <button class="tab active" id="tab-pendientes" onclick="cambiarTab('pendiente')">Pendientes <span id="count-pendientes"></span></button>
     <button class="tab" id="tab-aprobados" onclick="cambiarTab('aprobado')">Aprobados</button>
     <button class="tab" id="tab-rechazados" onclick="cambiarTab('rechazado')">Rechazados</button>
+    <button class="tab" id="tab-feedback" onclick="cambiarTab('feedback')"><i class="ti ti-message-2"></i> Feedback</button>
   </div>
 
+  <div class="fund-info" id="fund-info"></div>
   <div id="lista-solicitudes"></div>
 </div>
 
@@ -119,6 +133,39 @@ function esc(s){
 
 let todasLasSolicitudes = [];
 let tabActual = 'pendiente';
+
+// Cuantos fundadores promete el programa. No lo fuerza la base: pasarse es una
+// decision comercial, no un ataque. Aca solo sirve para avisar antes.
+const LIMITE_FUNDADORES = 20;
+
+// Se apaga si fundador.sql todavia no se corrio. Con la columna ausente el
+// boton no se dibuja, en vez de dibujarlo y que reviente al apretarlo.
+let fundadorDisponible = false;
+
+// Perilla global del programa: cuando esta cerrado no se pueden marcar nuevos
+// fundadores (la base tambien lo bloquea). Arranca en true; si programa-fundador.sql
+// todavia no se corrio, la lectura falla y se queda en true sin romper nada.
+let programaAbierto = true;
+
+async function cargarEstadoPrograma(){
+  const { data, error } = await sb.from('app_config').select('founder_program_open').eq('id', 1).single();
+  if(!error && data) programaAbierto = data.founder_program_open;
+}
+
+async function toggleProgramaFundador(){
+  const abrir = !programaAbierto;
+  if(!confirm(abrir
+      ? '¿Reabrir el programa fundador? Se podrán marcar nuevos fundadores.'
+      : '¿Cerrar el programa fundador? No se podrán marcar nuevos (los que ya lo tienen lo conservan).')) return;
+  const { error } = await sb.rpc('set_founder_program', { p_open: abrir });
+  if(error){
+    alert('No se pudo cambiar el programa. ¿Corriste programa-fundador.sql en Supabase?');
+    console.error(error);
+    return;
+  }
+  programaAbierto = abrir;
+  render();
+}
 
 async function init(){
   if(!sb){
@@ -153,18 +200,47 @@ async function init(){
 }
 
 async function cargarSolicitudes(){
+  // 1) Las solicitudes, SIN unirlas con profiles en la misma consulta. El
+  //    embed directo `profiles(...)` no resuelve porque user_id apunta a
+  //    auth.users (no a profiles), y eso hacia fallar TODA la consulta y
+  //    dejaba el panel vacio en silencio. Por eso las solicitudes reales no
+  //    aparecian aunque existieran.
   const { data, error } = await sb
     .from('solicitudes_proveedor')
-    .select('*, profiles(full_name, email)')
+    .select('*')
     .order('created_at', { ascending: false });
 
   if(error){
     console.error(error);
     return;
   }
-  todasLasSolicitudes = data || [];
+  const solicitudes = data || [];
+
+  // 2) Los perfiles de los postulantes, en una consulta aparte, y se adjuntan
+  //    a cada solicitud como s.profiles (misma forma que antes, para el render).
+  //    is_founder puede no existir si no se corrio fundador.sql: se reintenta.
+  const ids = [...new Set(solicitudes.map(s => s.user_id).filter(Boolean))];
+  const perfilesPorId = {};
+  if(ids.length){
+    let resp = await sb.from('profiles').select('id, full_name, email, is_founder').in('id', ids);
+    fundadorDisponible = !resp.error;
+    if(resp.error) resp = await sb.from('profiles').select('id, full_name, email').in('id', ids);
+    (resp.data || []).forEach(p => { perfilesPorId[p.id] = p; });
+  }
+  solicitudes.forEach(s => { s.profiles = perfilesPorId[s.user_id] || null; });
+
+  if(fundadorDisponible) await cargarEstadoPrograma();
+  todasLasSolicitudes = solicitudes;
   actualizarContador();
   render();
+}
+
+function contarFundadores(){
+  const vistos = new Set();
+  todasLasSolicitudes.forEach(s => {
+    if(s.profiles && s.profiles.is_founder) vistos.add(s.user_id);
+  });
+  return vistos.size;
 }
 
 function actualizarContador(){
@@ -177,12 +253,70 @@ function cambiarTab(tab){
   document.getElementById('tab-pendientes').classList.toggle('active', tab === 'pendiente');
   document.getElementById('tab-aprobados').classList.toggle('active', tab === 'aprobado');
   document.getElementById('tab-rechazados').classList.toggle('active', tab === 'rechazado');
+  document.getElementById('tab-feedback').classList.toggle('active', tab === 'feedback');
+  if(tab === 'feedback' && feedbackData === null){ cargarFeedback().then(render); return; }
   render();
+}
+
+// Solo se muestran fotos cuya URL es del Storage del proyecto: una solicitud la
+// llena el postulante, asi que su contenido es hostil (evita javascript:/data:).
+function fotoAdminSegura(u){
+  return typeof u === 'string' && u.startsWith(SUPABASE_URL + '/storage/');
+}
+
+// ─── Feedback (comentarios que la gente envía desde el boton de todas las paginas) ───
+let feedbackData = null;
+async function cargarFeedback(){
+  const { data, error } = await sb.from('feedback').select('*').order('created_at', { ascending: false });
+  feedbackData = error ? [] : (data || []);
+}
+function renderFeedback(cont){
+  document.getElementById('fund-info').style.display = 'none';
+  if(!feedbackData || !feedbackData.length){
+    cont.innerHTML = `<div class="vacio"><i class="ti ti-message-2"></i>No hay comentarios todavía.</div>`;
+    return;
+  }
+  cont.innerHTML = feedbackData.map(f => {
+    const fecha = new Date(f.created_at).toLocaleString('es-PE', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+    return `<div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-neg">${esc(f.email || 'Anónimo')}</div>
+          <span class="card-cat"><i class="ti ti-file-text"></i> ${esc(f.pagina || '—')}</span>
+        </div>
+        <div class="card-fecha">${fecha}</div>
+      </div>
+      <div class="desc">${esc(f.mensaje)}</div>
+    </div>`;
+  }).join('');
 }
 
 function render(){
   const cont = document.getElementById('lista-solicitudes');
+
+  if(tabActual === 'feedback'){ renderFeedback(cont); return; }
+
   const filtradas = todasLasSolicitudes.filter(s => s.estado === tabActual);
+
+  // El contador del programa fundador solo tiene sentido sobre los aprobados:
+  // es la unica pestana donde se puede marcar a alguien.
+  const info = document.getElementById('fund-info');
+  if(fundadorDisponible && tabActual === 'aprobado'){
+    const n = contarFundadores();
+    const estado = programaAbierto
+      ? `<span style="color:var(--green);font-weight:700;">abierto</span>`
+      : `<span style="color:var(--red);font-weight:700;">cerrado</span>`;
+    const btnTxt = programaAbierto ? 'Cerrar programa' : 'Reabrir programa';
+    info.style.display = 'block';
+    info.innerHTML =
+      `Programa fundador: <b>${n} de ${LIMITE_FUNDADORES}</b> marcados · estado: ${estado}. `
+      + `En el catálogo se ve como un anillo dorado alrededor de la foto. `
+      + `<button class="btn btn-fundador" style="margin-top:8px;" onclick="toggleProgramaFundador()">`
+      + `<i class="ti ti-${programaAbierto ? 'lock' : 'lock-open'}"></i> ${btnTxt}</button>`
+      + (programaAbierto ? '' : `<div style="margin-top:6px;color:var(--red);font-size:12px;">Cerrado: no se pueden marcar nuevos fundadores.</div>`);
+  } else {
+    info.style.display = 'none';
+  }
 
   if(filtradas.length === 0){
     cont.innerHTML = `<div class="vacio"><i class="ti ti-inbox"></i>No hay solicitudes ${tabActual === 'pendiente' ? 'pendientes' : tabActual + 's'} por ahora.</div>`;
@@ -193,6 +327,7 @@ function render(){
     const nombreDueno = s.profiles ? s.profiles.full_name : '—';
     const correoDueno = s.profiles ? s.profiles.email : '—';
     const fecha = new Date(s.created_at).toLocaleDateString('es-PE', { day:'numeric', month:'short', year:'numeric' });
+    const esFundador = !!(s.profiles && s.profiles.is_founder);
 
     const accionesHtml = s.estado === 'pendiente' ? `
       <div class="btns">
@@ -200,7 +335,15 @@ function render(){
         <button class="btn btn-rechazar" data-id="${s.id}" data-uid="${esc(s.user_id)}" onclick="rechazar(this.dataset.id, this.dataset.uid)"><i class="ti ti-x"></i> Rechazar</button>
       </div>
     ` : `
-      <span class="estado-tag ${s.estado}"><i class="ti ${s.estado === 'aprobado' ? 'ti-check' : 'ti-x'}"></i> ${s.estado === 'aprobado' ? 'Aprobado' : 'Rechazado'}</span>
+      <div class="acciones-row">
+        <span class="estado-tag ${s.estado}"><i class="ti ${s.estado === 'aprobado' ? 'ti-check' : 'ti-x'}"></i> ${s.estado === 'aprobado' ? 'Aprobado' : 'Rechazado'}</span>
+        ${esFundador ? `<span class="estado-tag fundador"><i class="ti ti-crown"></i> Fundador</span>` : ''}
+        ${s.estado === 'aprobado' && fundadorDisponible ? `
+          <button class="btn btn-fundador" data-uid="${esc(s.user_id)}" data-marcar="${esFundador ? '0' : '1'}"
+                  onclick="toggleFundador(this.dataset.uid, this.dataset.marcar === '1')">
+            <i class="ti ti-crown"></i> ${esFundador ? 'Quitar de fundadores' : 'Marcar como fundador'}
+          </button>` : ''}
+      </div>
       ${s.motivo_rechazo ? `<div class="motivo">Motivo: ${esc(s.motivo_rechazo)}</div>` : ''}
     `;
 
@@ -225,6 +368,11 @@ function render(){
         </div>
 
         <div class="desc">${esc(s.descripcion)}</div>
+
+        ${Array.isArray(s.fotos) && s.fotos.filter(fotoAdminSegura).length ? `
+        <div class="sol-fotos-lbl"><i class="ti ti-photo"></i> Fotos del negocio</div>
+        <div class="sol-fotos">${s.fotos.filter(fotoAdminSegura).map(u => `<a href="${esc(u)}" target="_blank" rel="noopener" class="sol-foto"><img src="${esc(u)}" loading="lazy"></a>`).join('')}</div>
+        ` : ''}
 
         ${accionesHtml}
       </div>
@@ -253,6 +401,29 @@ async function rechazar(solicitudId, userId){
   const { error } = await sb.rpc('rechazar_proveedor', { p_user_id: userId, p_motivo: motivo || null });
   if(error){
     alert('No se pudo rechazar. Intenta de nuevo.');
+    console.error(error);
+    return;
+  }
+  await cargarSolicitudes();
+}
+
+async function toggleFundador(userId, marcar){
+  if(marcar){
+    if(!programaAbierto){
+      alert('El programa fundador está cerrado. Reábrelo (botón de arriba) antes de marcar nuevos fundadores.');
+      return;
+    }
+    if(contarFundadores() >= LIMITE_FUNDADORES &&
+       !confirm(`Ya hay ${LIMITE_FUNDADORES} fundadores, que es lo que promete el programa. ¿Marcar uno más igual?`)) return;
+  } else {
+    if(!confirm('¿Quitarle el badge de fundador? Deja de verse en el catálogo.')) return;
+  }
+
+  // El permiso lo decide la base: marcar_fundador rebota a cualquiera que no
+  // sea admin, asi que esconder el boton es comodidad y no seguridad.
+  const { error } = await sb.rpc('marcar_fundador', { p_user_id: userId, p_valor: marcar });
+  if(error){
+    alert('No se pudo cambiar el badge de fundador. Intenta de nuevo.');
     console.error(error);
     return;
   }

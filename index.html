@@ -14,6 +14,33 @@
 /* Ajustes solo del home: el sistema completo vive en estilo.css */
 .gond-vacia{display:none;}
 #gondolas:empty + #trustbar{margin-top:0;}
+
+/* El hero va sin foto: se centra en vez de dejar una columna vacia a la
+   derecha, y el aire que sobra se llena con anillos decorativos (mismo
+   truco que el fondo del banner, sin depender de ninguna imagen) y una
+   franja de confianza corta debajo del boton. */
+.hero-in{grid-template-columns:1fr;min-height:0;}
+.hero-txt{padding:76px 0 40px;max-width:700px;margin:0 auto;text-align:center;align-items:center;}
+.badge-amarillo{margin-left:auto;margin-right:auto;}
+.hero-p{margin-left:auto;margin-right:auto;}
+.hero-btns{justify-content:center;}
+
+.hero-rings{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1;}
+.hero-rings i{position:absolute;border:1.5px solid rgba(255,255,255,.14);border-radius:50%;}
+.hero-rings i:nth-child(1){width:640px;height:640px;top:-360px;right:-200px;}
+.hero-rings i:nth-child(2){width:420px;height:420px;top:-180px;right:-40px;border-color:rgba(255,255,255,.09);}
+.hero-rings i:nth-child(3){width:520px;height:520px;bottom:-340px;left:-220px;}
+
+.hero-mini{padding:20px 0 64px;position:relative;z-index:2;}
+.hero-mini-in{max-width:700px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:28px;flex-wrap:wrap;}
+.hero-mini-it{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:rgba(255,255,255,.92);}
+.hero-mini-it svg{color:var(--amarillo);flex-shrink:0;}
+@media(max-width:620px){
+  .hero-txt{padding:56px 0 32px;}
+  .hero-mini{padding:16px 0 44px;}
+  .hero-mini-in{gap:16px;}
+  .hero-rings i:nth-child(1),.hero-rings i:nth-child(2),.hero-rings i:nth-child(3){display:none;}
+}
 </style>
 </head>
 <body>
@@ -22,6 +49,7 @@
 
 <!-- ═══ HERO ═══ -->
 <section id="hero">
+  <div class="hero-rings" aria-hidden="true"><i></i><i></i><i></i></div>
   <div class="hero-in">
     <div class="hero-txt">
       <span class="badge-amarillo"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4.5 13H11l-1 9 8.5-11H12z"/></svg> Ver precios no te cuesta nada</span>
@@ -31,13 +59,12 @@
         <a href="catalogo.html" class="btn-xl">Ver proveedores <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </div>
     </div>
-    <div class="hero-foto">
-      <img src="DJing.jpeg" alt="DJ tocando en un evento al aire libre en Lima">
-      <div class="foto-tag">
-        <div class="foto-tag-cat">Música &amp; DJs</div>
-        <div class="foto-tag-n">DJ Solari</div>
-        <div class="foto-tag-p"><small>Desde</small>S/. 100</div>
-      </div>
+  </div>
+  <div class="hero-mini">
+    <div class="hero-mini-in">
+      <span class="hero-mini-it"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg> Revisados uno por uno</span>
+      <span class="hero-mini-it"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Agenda a la vista</span>
+      <span class="hero-mini-it"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Sin costo por mirar</span>
     </div>
   </div>
 </section>
@@ -218,5 +245,6 @@ async function cargarGondolas(){
 }
 cargarGondolas();
 </script>
+<script src="feedback.js"></script>
 </body>
 </html>

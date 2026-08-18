@@ -12,24 +12,25 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
-  --bg:var(--hueso); --card:#fff; --card2:var(--hueso); --line:var(--linea);
+  --bg:var(--app-bg); --card:#fff; --card2:var(--hueso); --line:var(--linea);
   --fg:var(--tinta); --sub:var(--tinta-2); --red:#B91C1C;
-  --ac:#7C3AED; --ac-2:#6D28D9; --ac-glow:rgba(124,58,237,.24);
-  --green:#15803D; --green-soft:var(--verde-bg); --green-line:#86EFAC;
-  --glow1:rgba(124,58,237,.10); --glow2:rgba(109,40,217,.07);
+  --ac:#7C3AED; --ac-2:#6D28D9; --ac-glow:rgba(124,58,237,.35);
+  --green:#15803D; --green-soft:rgba(74,222,128,.12); --green-line:rgba(74,222,128,.30);
+  --glow1:rgba(124,58,237,.16); --glow2:rgba(109,40,217,.10);
 }
 /* ── Cliente: paleta morada/índigo (marketplace) ── */
 body.role-cliente{
-  --ac:#7C3AED; --ac-2:#6D28D9; --ac-glow:rgba(124,58,237,.24);
-  --glow1:rgba(124,58,237,.10); --glow2:rgba(109,40,217,.07);
+  --ac:#7C3AED; --ac-2:#6D28D9; --ac-glow:rgba(124,58,237,.35);
+  --glow1:rgba(124,58,237,.16); --glow2:rgba(109,40,217,.10);
 }
 /* ── Proveedor: paleta naranja/dorado (dashboard) ── */
 body.role-proveedor{
-  --ac:#C2410C; --ac-2:#EA580C; --ac-glow:rgba(194,65,12,.24);
-  --glow1:rgba(194,65,12,.10); --glow2:rgba(251,191,36,.07);
+  --ac:#C2410C; --ac-2:#B45309; --ac-glow:rgba(194,65,12,.35);
+  --glow1:rgba(194,65,12,.14); --glow2:rgba(251,191,36,.08);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Epilogue',system-ui,sans-serif;background:var(--app-bg);color:var(--fg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;}
+html{overflow-x:clip;} /* los glows de fondo se salían del borde en celular */
+body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;}
 .glow{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;}
 .glow.g1{width:420px;height:420px;background:var(--glow1);top:-120px;right:-100px;}
 .glow.g2{width:360px;height:360px;background:var(--glow2);bottom:-120px;left:-100px;}
@@ -40,7 +41,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--app-bg);color:
 .logo .lo{color:var(--ac-2);}
 .logo .dot{color:var(--tinta-3);font-weight:400;}
 
-.card{background:#fff;border-radius:12px;box-shadow:0 4px 20px -6px rgba(18,14,31,.14);padding:38px 30px;}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:38px 30px;}
 
 .check-badge{width:72px;height:72px;border-radius:50%;background:var(--green-soft);border:1px solid var(--green-line);display:flex;align-items:center;justify-content:center;margin:0 auto 22px;}
 .check-badge i{font-size:34px;color:var(--green);}
@@ -55,10 +56,10 @@ h1{font-size:21px;font-weight:700;margin-bottom:10px;}
 .spinner{width:14px;height:14px;border:2px solid rgba(124,58,237,.25);border-top-color:var(--ac);border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
-.btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:6px;font-size:15px;font-weight:700;text-decoration:none;font-family:inherit;cursor:pointer;border:none;margin-top:28px;min-height:46px;transition:opacity .16s;}
+.btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:10px;font-size:14.5px;font-weight:700;text-decoration:none;font-family:inherit;cursor:pointer;border:none;margin-top:28px;transition:opacity .16s;}
 .btn:hover{opacity:.9;}
 .btn-primary{background:var(--ac);color:#fff;box-shadow:0 4px 14px var(--ac-glow);}
-.btn-secondary{background:#fff;color:var(--fg);border:1px solid var(--linea);}
+.btn-secondary{background:var(--card2);color:var(--fg);border:1px solid var(--line);}
 </style>
 </head>
 <body>
@@ -176,5 +177,6 @@ async function verificarSesion(){
 
 verificarSesion();
 </script>
+<script src="feedback.js"></script>
 </body>
 </html>

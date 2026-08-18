@@ -30,7 +30,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .side-item{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:10px;color:var(--sub);font-size:14px;font-weight:500;cursor:pointer;border:none;background:transparent;width:100%;text-align:left;font-family:inherit;transition:all .16s;text-decoration:none;}
 .side-item i{font-size:19px;width:20px;text-align:center;}
 .side-item:hover{background:var(--card2);color:var(--fg);}
-.side-item.active{background:var(--or-soft);color:var(--or);border:1px solid var(--or-line);}
+.side-item.active{background:var(--or-soft);color:#9A3412;border:1px solid var(--or-line);}
 .side-spacer{flex:1;}
 .side-cta{display:flex;align-items:center;gap:11px;padding:12px;border-radius:10px;background:var(--or);color:#fff;font-size:13.5px;font-weight:700;cursor:pointer;text-decoration:none;transition:opacity .16s;}
 .side-cta:hover{opacity:.9;}
@@ -43,7 +43,13 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .side-urole{font-size:11px;color:var(--sub);}
 
 /* ── MAIN ── */
-.main{flex:1;padding:32px 40px;overflow-y:auto;}
+.main{flex:1;padding:32px 40px;overflow-y:auto;min-width:0;}
+/* Barra superior + botón de menú: solo existen en celular (abajo en la media
+   query se muestran). En escritorio la barra lateral normal manda. */
+.mtopbar{display:none;}
+.nav-hamb{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--fg);width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:21px;font-family:inherit;}
+.nav-hamb:active{background:rgba(255,255,255,.12);}
+.nav-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:55;}
 .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
 .greeting h1{font-size:24px;font-weight:700;}
 .greeting p{font-size:13.5px;color:var(--sub);margin-top:3px;}
@@ -142,7 +148,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .cal-ev.gold{background:var(--gold);}
 
 /* ── MODAL DE EVENTO ── */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(18,14,31,.16);backdrop-filter:blur(4px);z-index:2000;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(18,14,31,.6);backdrop-filter:blur(4px);z-index:2000;align-items:center;justify-content:center;padding:20px;}
 .modal-overlay.open{display:flex;}
 .modal-box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;width:100%;max-width:380px;animation:modalIn .18s ease;}
 @keyframes modalIn{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
@@ -189,7 +195,13 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
   .tools-grid{grid-template-columns:repeat(2,1fr);}
 }
 @media(max-width:720px){
-  .sidebar{display:none;}
+  /* La barra lateral pasa a ser un cajón que entra desde la izquierda. Antes
+     desaparecía sin reemplazo y el proveedor se quedaba sin navegación en el
+     celular, que es justo donde más la usa. */
+  .mtopbar{display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;background:var(--card);border-bottom:1px solid var(--line);padding:11px 15px;}
+  .sidebar{position:fixed;top:0;left:0;height:100vh;width:250px;transform:translateX(-100%);transition:transform .25s ease;z-index:60;overflow-y:auto;box-shadow:0 0 44px rgba(0,0,0,.55);}
+  body.nav-open .sidebar{transform:translateX(0);}
+  body.nav-open .nav-backdrop{display:block;}
   .main{padding:20px;}
   .tools-grid,.kpi-row{grid-template-columns:1fr;}
   .row2,.row3{grid-template-columns:1fr;}
@@ -249,7 +261,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
 .gallery-item{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:1;background:var(--card2);}
 .gallery-item img{width:100%;height:100%;object-fit:cover;display:block;}
-.gallery-remove{position:absolute;top:6px;right:6px;width:26px;height:26px;background:rgba(18,14,31,.16);border:1px solid rgba(255,255,255,.2);border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;}
+.gallery-remove{position:absolute;top:6px;right:6px;width:26px;height:26px;background:rgba(18,14,31,.68);border:1px solid rgba(255,255,255,.2);border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;}
 .gallery-add{display:flex;align-items:center;justify-content:center;border:2px dashed var(--line);border-radius:12px;aspect-ratio:1;cursor:pointer;color:var(--sub);font-size:13px;flex-direction:column;gap:6px;transition:all .16s;}
 .gallery-add:hover{border-color:var(--or-line);color:var(--or);}
 
@@ -406,6 +418,13 @@ async function verificarAccesoDashboard(){
 
 verificarAccesoDashboard();
 </script>
+
+<!-- Barra superior solo-móvil: botón de menú que abre la barra lateral -->
+<div class="mtopbar">
+  <button class="nav-hamb" onclick="toggleNav()" aria-label="Abrir menú"><i class="ti ti-menu-2"></i></button>
+  <span class="logo"><span class="lp">Todo</span><span class="lo">Eventos</span><span class="dot">.pe</span></span>
+</div>
+<div class="nav-backdrop" onclick="closeNav()"></div>
 
 <div class="app">
 
@@ -915,6 +934,7 @@ verificarAccesoDashboard();
           </div>
           <div class="profile-headinfo">
             <div class="profile-name" id="perfil-nombre">—</div>
+            <input type="text" class="profile-edit-input" id="perfil-nombre-edit" placeholder="Nombre de tu negocio" style="display:none;font-size:1.35rem;font-weight:700;margin-bottom:8px;">
 
             <div class="profile-meta" id="perfil-meta-view"><span id="perfil-categoria">DJ &amp; Sonido Profesional</span> &middot; <i class="ti ti-map-pin" style="font-size:13px;"></i> <span id="perfil-ubicacion">Miraflores, Lima</span></div>
             <div class="profile-meta-edit" id="perfil-meta-edit" style="display:none;">
@@ -1426,7 +1446,7 @@ function renderCotPlantillaSelect(preferirId){
   if(!sel) return;
   const idPrevio = preferirId || sel.value;
   sel.innerHTML = plantillas.map(p =>
-    `<option value="${esc(String(p.id))}">${esc(p.nombre)} — ${esc(p.ocasion)}</option>`
+    `<option value="${esc(String(p.id))}">${esc(p.nombre)} · ${esc(p.ocasion)}</option>`
   ).join('');
   if(plantillas.some(p => String(p.id) === String(idPrevio))){
     sel.value = idPrevio;
@@ -2467,6 +2487,7 @@ function renderPerfil(){
   if(kpiRatingLbl) kpiRatingLbl.textContent = 'Calificación (' + homeCount + (homeCount === 1 ? ' reseña)' : ' reseñas)');
   if(kpiRatingTrend) kpiRatingTrend.style.display = homeCount >= 5 ? 'flex' : 'none';
   document.getElementById('perfil-categoria').textContent = perfilData.categoria;
+  document.getElementById('perfil-nombre-edit').value = perfilData.nombre;
   document.getElementById('perfil-categoria-edit').value = perfilData.categoria;
   document.getElementById('perfil-ubicacion').textContent = perfilData.ubicacion;
   document.getElementById('perfil-ubicacion-edit').value = perfilData.ubicacion;
@@ -2647,12 +2668,15 @@ function toggleProfileEdit(){
 }
 
 function resetEditInputsFromData(){
+  document.getElementById('perfil-nombre-edit').value = perfilData.nombre;
   document.getElementById('perfil-categoria-edit').value = perfilData.categoria;
   document.getElementById('perfil-ubicacion-edit').value = perfilData.ubicacion;
   document.getElementById('perfil-bio-edit').value = perfilData.bio;
 }
 
 function applyEditModeUI(){
+  document.getElementById('perfil-nombre').style.display = perfilEditMode ? 'none' : 'block';
+  document.getElementById('perfil-nombre-edit').style.display = perfilEditMode ? 'block' : 'none';
   document.getElementById('perfil-meta-view').style.display = perfilEditMode ? 'none' : 'flex';
   document.getElementById('perfil-meta-edit').style.display = perfilEditMode ? 'flex' : 'none';
   document.getElementById('perfil-bio-view').style.display = perfilEditMode ? 'none' : 'block';
@@ -2669,25 +2693,33 @@ function applyEditModeUI(){
 }
 
 async function saveProfileChanges(){
+  const nombre = document.getElementById('perfil-nombre-edit').value.trim();
   const categoria = document.getElementById('perfil-categoria-edit').value.trim();
   const ubicacion = document.getElementById('perfil-ubicacion-edit').value.trim();
   const bio = document.getElementById('perfil-bio-edit').value.trim();
 
+  if(!nombre){
+    alert('El nombre de tu negocio no puede quedar vacío.');
+    return;
+  }
   if(!categoria || !ubicacion){
     alert('La categoría y la ubicación no pueden quedar vacías.');
     return;
   }
 
   const { error } = await sb.from('profiles').update({
+    full_name: nombre,
     categoria, location: ubicacion, bio: bio || perfilData.bio,
     avatar_url: perfilData.avatarUrl, banner_url: perfilData.bannerUrl
   }).eq('id', usuarioActual.id);
 
   if(error){ alert('No se pudo guardar el perfil: ' + error.message); return; }
 
+  perfilData.nombre = nombre;
   perfilData.categoria = categoria;
   perfilData.ubicacion = ubicacion;
   perfilData.bio = bio || perfilData.bio;
+  document.getElementById('perfil-nombre').textContent = perfilData.nombre;
 
   perfilEditMode = false;
   applyEditModeUI();
@@ -3074,6 +3106,23 @@ async function refrescarReservasYAgenda(){
 // Primer cálculo al cargar la página, ya que "Inicio" es la vista por defecto.
 renderHomeKPIs();
 updateReqBadge();
+
+// ─── Menú móvil (cajón lateral) ───
+function toggleNav(){ document.body.classList.toggle('nav-open'); }
+function closeNav(){ document.body.classList.remove('nav-open'); }
+// Al tocar cualquier opción de la barra lateral, se cierra el cajón para que
+// se vea el contenido al que llevó.
+document.querySelector('.sidebar')?.addEventListener('click', e => {
+  if(e.target.closest('.side-item')) closeNav();
+});
 </script>
+
+<!-- ═══ ASESOR (agente de ElevenLabs para proveedores) ═══
+     El chat flotante abajo a la derecha, igual que Raymi en el catálogo pero
+     para el proveedor: soporte del panel paso a paso + consejos de venta.
+     El mismo agente va embebido en login.html. -->
+<elevenlabs-convai agent-id="agent_5301kz33f0fbfztb6rpxnr8nxf7z"></elevenlabs-convai>
+<script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+<script src="feedback.js"></script>
 </body>
 </html>

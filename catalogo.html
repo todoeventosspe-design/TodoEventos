@@ -19,13 +19,13 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 #nav{position:sticky;top:0;z-index:200;background:rgba(255,255,255,.96);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
 .nav-i{display:flex;align-items:center;justify-content:space-between;padding:14px 2rem;max-width:1200px;margin:0 auto;gap:1rem;}
 .logo{font-size:17px;font-weight:700;text-decoration:none;flex-shrink:0;}
-.logo .lp{color:var(--pu);}.logo .lo{background:linear-gradient(to right,var(--pu),#9A3412);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}.logo .dot{color:var(--tinta-3);font-weight:400;}
+.logo .lp{color:var(--pu);}.logo .lo{background:linear-gradient(to right,var(--pu),#9A3412);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}.logo .dot{color:var(--tinta-2);font-weight:400;}
 .nav-search{flex:1;max-width:480px;display:flex;align-items:center;background:var(--linea);border:1px solid var(--border);border-radius:10px;padding:8px 14px;gap:8px;}
 .nav-search i{color:var(--sub);font-size:16px;flex-shrink:0;}
 .nav-search input{flex:1;background:transparent;border:none;outline:none;font-family:'Epilogue',sans-serif;font-size:14px;color:var(--fg);}
-.nav-search input::placeholder{color:var(--tinta-3);}
+.nav-search input::placeholder{color:var(--tinta-2);}
 .nav-end{display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.nl-link{color:var(--tinta-2);text-decoration:none;font-size:13.5px;font-weight:500;padding:8px 12px;border-radius:8px;transition:all .18s;}
+.nl-link{color:var(--tinta);text-decoration:none;font-size:13.5px;font-weight:500;padding:8px 12px;border-radius:8px;transition:all .18s;}
 .nl-link:hover{color:var(--fg);background:var(--linea);}
 .btn-login{background:var(--linea);border:1px solid var(--border);color:var(--fg);padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;font-family:'Epilogue',sans-serif;cursor:pointer;}
 .user-menu{position:relative;display:none;align-items:center;}
@@ -58,7 +58,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .f-select{background:var(--linea);border:1px solid var(--border);color:var(--fg);padding:7px 14px;border-radius:8px;font-size:13px;font-family:'Epilogue',sans-serif;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px;transition:border-color .2s;}
 .f-select:focus{border-color:rgba(124,58,237,.4);}
 .f-chip{background:var(--linea);border:1px solid var(--border);color:var(--sub);padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;transition:all .2s;white-space:nowrap;}
-.f-chip:hover,.f-chip.active{background:rgba(124,58,237,.10);border-color:rgba(124,58,237,.3);color:var(--pu);}
+.f-chip:hover,.f-chip.active{background:rgba(124,58,237,.12);border-color:rgba(124,58,237,.3);color:var(--pu);}
 .f-divider{width:1px;height:20px;background:var(--border);margin:0 4px;}
 .filter-results{margin-left:auto;font-size:13px;color:var(--sub);white-space:nowrap;}
 .filter-results span{color:var(--fg);font-weight:700;}
@@ -95,9 +95,17 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .ci-l{background:linear-gradient(135deg,#065f46,#1d4ed8);}
 .pcard-vbdg{position:absolute;top:10px;left:10px;background:rgba(18,14,31,.72);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px;}
 .pcard-price-tag{position:absolute;bottom:10px;right:10px;background:rgba(18,14,31,.72);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;}
-.pcard-fav{position:absolute;top:10px;right:10px;width:30px;height:30px;background:rgba(18,14,31,.16);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .18s;}
+.pcard-fav{position:absolute;top:10px;right:10px;width:30px;height:30px;background:rgba(18,14,31,.68);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .18s;}
 .pcard-fav:hover{background:rgba(124,58,237,.3);}
 .pcard-fav i{font-size:14px;color:var(--tinta-2);}
+/* Fundador: anillo dorado por dentro del banner. Va como box-shadow y no como
+   border para que la foto no se recorte ni la tarjeta cambie de tamaño al
+   pasar de un proveedor normal a uno fundador. */
+.pcard.founder{border-color:rgba(252,211,77,.32);}
+.pcard.founder:hover{border-color:rgba(252,211,77,.55);}
+.pcard.founder .pcard-img{box-shadow:inset 0 0 0 2px rgba(252,211,77,.85);}
+.pcard-fbdg{position:absolute;bottom:10px;left:10px;display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#B45309,#f59e0b);color:#2b1c02;font-size:10px;font-weight:800;padding:4px 10px;border-radius:100px;box-shadow:0 2px 12px rgba(245,158,11,.4);}
+.pcard-fbdg i{font-size:11px;}
 .pcard-body{padding:14px 16px;}
 .pcard-name{font-size:14px;font-weight:700;margin-bottom:5px;}
 .pcard-rat{display:flex;align-items:center;gap:4px;margin-bottom:5px;}
@@ -124,6 +132,14 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 @media(max-width:900px){
   #prov-grid{grid-template-columns:repeat(2,1fr);}
   .nav-search{display:none;}
+  /* El CTA "Para Proveedores" no entra en la barra en celular y empujaba toda
+     la página hacia la derecha. En móvil el catálogo le habla al cliente; el
+     proveedor tiene su acceso desde el inicio. */
+  .btn-prov{display:none;}
+  /* Aligerar la barra en celular: menos padding y sin el link de texto
+     "Nosotros" (está en el pie). Deja lugar para carrito + Ingresar. */
+  .nav-i{padding:12px 16px;}
+  .nl-link{display:none;}
   .filter-inner{overflow-x:auto;flex-wrap:nowrap;}
 }
 @media(max-width:560px){
@@ -131,7 +147,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
   .main{padding:1.25rem;}
 }
 /* ── MODAL: PERFIL PÚBLICO DEL PROVEEDOR ── */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(18,14,31,.16);backdrop-filter:blur(5px);z-index:3000;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(18,14,31,.6);backdrop-filter:blur(5px);z-index:3000;align-items:center;justify-content:center;padding:20px;}
 .modal-overlay.open{display:flex;}
 .pm-box{background:var(--bg2);border:1px solid var(--border);border-radius:20px;width:100%;max-width:560px;max-height:88vh;overflow-y:auto;overflow-x:clip;position:relative;animation:pmIn .2s ease;scrollbar-width:thin;scrollbar-color:rgba(124,58,237,.35) transparent;}
 .pm-box::-webkit-scrollbar{width:8px;}
@@ -154,7 +170,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .pm-name{font-size:19px;font-weight:700;color:var(--fg);line-height:1.3;}
 .pm-meta{font-size:12.5px;color:var(--sub);margin-top:4px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
 .pm-rating{font-size:13px;font-weight:600;color:var(--fg);margin-top:7px;display:flex;align-items:center;gap:5px;}
-.pm-verified{background:rgba(124,58,237,.10);border:1px solid rgba(124,58,237,.3);color:var(--pu);font-size:11px;font-weight:700;padding:5px 11px;border-radius:100px;white-space:nowrap;flex-shrink:0;}
+.pm-verified{background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);color:var(--pu);font-size:11px;font-weight:700;padding:5px 11px;border-radius:100px;white-space:nowrap;flex-shrink:0;}
 .pm-bio{font-size:13px;line-height:1.65;color:var(--sub);padding:14px;background:var(--linea);border:1px solid var(--border);border-radius:12px;margin-bottom:20px;}
 .pm-section-title{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--sub);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
 .pm-services{display:flex;flex-direction:column;gap:10px;margin-bottom:22px;}
@@ -194,7 +210,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .cart-badge.empty{display:none;}
 
 /* ── PANEL LATERAL DEL CARRITO ── */
-.cart-overlay{display:none;position:fixed;inset:0;background:rgba(18,14,31,.16);backdrop-filter:blur(4px);z-index:4000;}
+.cart-overlay{display:none;position:fixed;inset:0;background:rgba(18,14,31,.6);backdrop-filter:blur(4px);z-index:4000;}
 .cart-overlay.open{display:block;}
 .cart-panel{position:absolute;top:0;right:0;height:100%;width:100%;max-width:420px;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;animation:cartIn .22s ease;}
 @keyframes cartIn{from{transform:translateX(100%);}to{transform:translateX(0);}}
@@ -283,7 +299,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .sd-list.req li::before{content:'•';color:var(--or);font-size:16px;top:4px;}
 .sd-actions{display:flex;gap:10px;}
 .sd-btn-outline{flex:1;background:transparent;border:1.5px solid rgba(124,58,237,.4);color:var(--pu);padding:13px;border-radius:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .16s;}
-.sd-btn-outline:hover{background:rgba(124,58,237,.10);}
+.sd-btn-outline:hover{background:rgba(124,58,237,.12);}
 .sd-btn-solid{flex:1;background:var(--or);border:none;color:#fff;padding:13px;border-radius:11px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;transition:opacity .16s;}
 .sd-btn-solid:hover{opacity:.9;}
 .sd-btn-solid.added{background:#15803D;}
@@ -353,18 +369,13 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .rq-field textarea{resize:vertical;}
 .rq-field input[type="date"]{color-scheme:dark;}
 
-/* En movil todo se toca con el dedo: 44px minimo por control.
-   Solo sube areas, no cambia colores ni estructura. */
+/* En movil todo se toca con el dedo: 44px minimo por control. */
 @media(max-width:760px){
   .nl-link,.btn-login,.btn-prov,.cart-icon-btn{min-height:44px;display:inline-flex;align-items:center;justify-content:center;}
   .f-select{min-height:44px;}
   .pcard-btn-outline,.pcard-btn-solid{min-height:44px;}
-  .pcard-fav{width:40px;height:40px;}
-  .cat-tab{min-height:44px;}
-  /* El breadcrumb no tiene clase y su altura viene de un style inline,
-     por eso hace falta !important para ganarle en movil. */
-  a[href="index.html"]{min-height:44px!important;}
   .pcard-fav{width:44px;height:44px;}
+  .cat-tab{min-height:44px;}
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -571,10 +582,17 @@ function badgeParaRating(rating){
 
 async function cargarProvidersReales(){
   if(!sb) return;
-  const { data, error } = await sb
+  // is_founder la agrega fundador.sql. Si esa migración todavía no se corrió,
+  // Postgres rechaza el select entero por columna inexistente y el catálogo se
+  // queda vacío, así que se reintenta sin ella: preferimos el catálogo sin
+  // badges antes que un catálogo en blanco.
+  const consulta = campoFundador => sb
     .from('services')
-    .select('id, name, description, price, category, image_url, imagenes, provider_id, profiles!services_provider_id_fkey(full_name, location, rating, reviews_count)')
+    .select(`id, name, description, price, category, image_url, imagenes, provider_id, profiles!services_provider_id_fkey(full_name, location, rating, reviews_count${campoFundador})`)
     .eq('active', true);
+
+  let { data, error } = await consulta(', is_founder');
+  if(error) ({ data, error } = await consulta(''));
 
   if(error){ console.error('Error cargando el catálogo:', error); return; }
 
@@ -595,6 +613,10 @@ async function cargarProvidersReales(){
         rating: Number(s.profiles.rating) || 0,
         reviews,
         esNuevo,
+        // Uno de los primeros proveedores del programa fundador. Solo un admin
+        // puede marcarlo: el trigger de la base revierte el campo si lo intenta
+        // el propio proveedor.
+        esFundador: s.profiles.is_founder === true,
         district: (s.profiles.location || 'Lima').split(',')[0].trim(),
         tags: [],
         // Portada + galería reales: las fotos que el proveedor subió a este
@@ -641,12 +663,16 @@ function render() {
     data = data.filter(p => p.name.toLowerCase().includes(q) || p.tags.some(t => t.toLowerCase().includes(q)) || p.district.toLowerCase().includes(q));
   }
 
-  // Sort
+  // Sort. Los fundadores van SIEMPRE primero (es la contraparte del badge: se
+  // les prometió prioridad en el catálogo), y dentro de cada grupo se aplica el
+  // orden que el usuario eligió. Number() porque esFundador es booleano.
   const sort = document.getElementById('sort-select').value;
-  if (sort === 'price-asc') data.sort((a,b) => a.price - b.price);
-  else if (sort === 'price-desc') data.sort((a,b) => b.price - a.price);
-  else if (sort === 'rating') data.sort((a,b) => b.rating - a.rating);
-  else if (sort === 'reviews') data.sort((a,b) => b.reviews - a.reviews);
+  let cmp;
+  if (sort === 'price-asc') cmp = (a,b) => a.price - b.price;
+  else if (sort === 'price-desc') cmp = (a,b) => b.price - a.price;
+  else if (sort === 'reviews') cmp = (a,b) => b.reviews - a.reviews;
+  else cmp = (a,b) => b.rating - a.rating; // 'rating' y por defecto
+  data.sort((a,b) => (Number(b.esFundador) - Number(a.esFundador)) || cmp(a,b));
 
   const grid = document.getElementById('prov-grid');
   const noRes = document.getElementById('no-results');
@@ -657,7 +683,7 @@ function render() {
     noRes.style.display = 'block';
     document.getElementById('count').textContent = '0';
     document.getElementById('results-title').textContent = catNames[currentCat] || 'Resultados';
-    document.getElementById('results-sub').textContent = 'Sin resultados — intenta con otros filtros';
+    document.getElementById('results-sub').textContent = 'Sin resultados, intenta con otros filtros';
     return;
   }
 
@@ -668,12 +694,13 @@ function render() {
 
   data.forEach(p => {
     const card = document.createElement('div');
-    card.className = 'pcard';
+    card.className = p.esFundador ? 'pcard founder' : 'pcard';
     card.innerHTML = `
       <div class="pcard-clickable" onclick="openServiceDetail(${p.id})">
         <div class="pcard-img ${p.foto ? '' : 'ci-' + p.img}" ${p.foto ? `style="background-image:url('${esc(p.foto)}');background-size:cover;background-position:center;"` : ''}>
           ${p.foto ? '' : `<i class="ti ${p.icon}"></i>`}
           <span class="pcard-vbdg">${p.badge}</span>
+          ${p.esFundador ? `<span class="pcard-fbdg"><i class="ti ti-crown"></i> Fundador</span>` : ''}
           <span class="pcard-price-tag">desde S/. ${p.price}</span>
           <button class="pcard-fav" onclick="event.stopPropagation();"><i class="ti ti-heart"></i></button>
         </div>
@@ -972,7 +999,7 @@ function quickHire(providerId){
   if(!p) return;
   if(!exigirLogin('Necesitas una cuenta para armar tu presupuesto.')) return;
 
-  const servicioNombre = 'Servicio base — ' + (catNames[p.cat] || 'Evento');
+  const servicioNombre = 'Servicio base: ' + (catNames[p.cat] || 'Evento');
   const yaExiste = cart.some(it => it.proveedorId === p.providerId && it.servicio === servicioNombre);
   if(yaExiste){ openCart(); return; }  // ya lo tiene: que lo vea en el carrito
 
@@ -1787,5 +1814,6 @@ async function confirmarReserva(){
     </div>
   </div>
 </div>
+<script src="feedback.js"></script>
 </body>
 </html>
