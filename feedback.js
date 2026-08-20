@@ -12,9 +12,10 @@
 
   var css = ''
     + '#fbk-tab{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:99990;'
-    + 'background:linear-gradient(135deg,#7c3aed,#f97316);color:#fff;border:none;cursor:pointer;'
+    + 'background:#F97316;color:#fff;border:none;cursor:pointer;'
     + 'font-family:inherit;font-size:12px;font-weight:700;padding:14px 9px;border-radius:10px 0 0 10px;'
-    + 'writing-mode:vertical-rl;text-orientation:mixed;letter-spacing:.06em;box-shadow:-2px 4px 16px rgba(0,0,0,.32);transition:padding .15s;}'
+    + 'writing-mode:vertical-rl;text-orientation:mixed;letter-spacing:.06em;box-shadow:-4px 8px 24px rgba(249,115,22,.48);transition:padding .15s,background .15s;}'
+    + '#fbk-tab:hover{padding-right:13px;background:#C2410C;}'
     + '#fbk-tab:hover{padding-right:13px;}'
     + '#fbk-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99991;display:none;align-items:center;justify-content:center;padding:20px;}'
     + '#fbk-ov.open{display:flex;}'
@@ -26,7 +27,8 @@
     + '#fbk-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:2px;}'
     + '#fbk-actions button{border:none;border-radius:9px;padding:10px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;}'
     + '#fbk-cancel{background:transparent;color:#b4aac9;}'
-    + '#fbk-send{background:linear-gradient(135deg,#7c3aed,#f97316);color:#fff;}'
+    + '#fbk-send{background:#F97316;color:#fff;}'
+    + '#fbk-send:hover{background:#C2410C;}'
     + '#fbk-send:disabled{opacity:.6;}'
     + '#fbk-ok{color:#34d399;font-size:14px;text-align:center;padding:14px 0;display:none;}';
 
