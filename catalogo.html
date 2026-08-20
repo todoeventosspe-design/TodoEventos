@@ -451,6 +451,10 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
       <span class="cat-tab-icon"><i class="ti ti-sparkles"></i></span>
       <span class="cat-tab-label">Decoración</span>
     </div>
+    <div class="cat-tab" onclick="setCategory('inflables',this)">
+      <span class="cat-tab-icon"><i class="ti ti-balloon"></i></span>
+      <span class="cat-tab-label">Inflables y juegos</span>
+    </div>
     <div class="cat-tab" onclick="setCategory('bar',this)">
       <span class="cat-tab-icon"><i class="ti ti-glass-cocktail"></i></span>
       <span class="cat-tab-label">Bar Móvil</span>
@@ -566,12 +570,12 @@ let providers = [];
 
 const CAT_ICON = {
   musica:'ti-music', catering:'ti-tools-kitchen-2', fotografia:'ti-camera', locales:'ti-building',
-  animadores:'ti-confetti', decoracion:'ti-sparkles', bar:'ti-glass-cocktail', pasteleria:'ti-cake',
+  animadores:'ti-confetti', decoracion:'ti-sparkles', inflables:'ti-balloon', bar:'ti-glass-cocktail', pasteleria:'ti-cake',
   transporte:'ti-bus', seguridad:'ti-shield-check'
 };
 const CAT_IMG = {
   musica:'b', catering:'a', fotografia:'c', locales:'d', animadores:'f',
-  decoracion:'e', bar:'e', pasteleria:'g', transporte:'l', seguridad:'l'
+  decoracion:'e', inflables:'f', bar:'e', pasteleria:'g', transporte:'l', seguridad:'l'
 };
 
 function badgeParaRating(rating){
@@ -641,7 +645,7 @@ let currentSort = 'rating';
 let currentDistrict = 'all';
 let searchQuery = '';
 
-const catNames = {all:'Todos los servicios',musica:'Música & DJs',catering:'Catering',fotografia:'Fotografía & Video',locales:'Locales & Salones',animadores:'Animadores',decoracion:'Decoración',bar:'Bar Móvil',pasteleria:'Pastelería',transporte:'Transporte',seguridad:'Seguridad'};
+const catNames = {all:'Todos los servicios',musica:'Música & DJs',catering:'Catering',fotografia:'Fotografía & Video',locales:'Locales & Salones',animadores:'Animadores',decoracion:'Decoración',inflables:'Inflables y juegos',bar:'Bar Móvil',pasteleria:'Pastelería',transporte:'Transporte',seguridad:'Seguridad'};
 
 // ─── RENDER ───
 function render() {
