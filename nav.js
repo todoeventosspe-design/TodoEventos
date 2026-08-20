@@ -45,18 +45,19 @@ try {
 // ── CHROME ──────────────────────────────────────────────────────────────
 
 const CHROME_NAV = `
-<div id="topbar"><div class="topbar-in">
-  <span class="tb"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg> Cada proveedor pasa por revisión</span>
-  <span class="tb"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Reserva tu fecha al toque</span>
-</div></div>
 <header id="nav"><div class="nav-in">
   <a href="index.html" class="logo"><span class="a">Todo</span><span class="b">Eventos</span></a>
+  <nav class="nav-links">
+    <a href="index.html" class="nlink">Inicio</a>
+    <a href="catalogo.html" class="nlink">Marketplace</a>
+    <a href="nosotros.html" class="nlink">Nosotros</a>
+  </nav>
   <form class="navsearch" onsubmit="goSearch(); return false;">
     <input type="search" id="nav-q" placeholder="Busca DJ, catering, fotógrafo, local…" aria-label="Buscar proveedores">
     <button type="submit" aria-label="Buscar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
   </form>
   <div class="nav-end">
-    <a href="login.html?v=2" class="nlink" id="btn-ingresar">Ingresar</a>
+    <a href="login.html?v=2" class="btn-ingresar" id="btn-ingresar">Ingresar</a>
     <div class="user-menu" id="user-menu">
       <button class="user-avatar" id="user-avatar-btn" onclick="toggleUserDropdown()"></button>
       <div class="user-dropdown" id="user-dropdown">
@@ -67,7 +68,6 @@ const CHROME_NAV = `
         <button class="salir" onclick="cerrarSesion()">Cerrar sesión</button>
       </div>
     </div>
-    <a href="login.html?modo=registro&rol=proveedor" class="nprov"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5M4 9v11h16V9M9 20v-6h6v6"/></svg> Soy proveedor</a>
   </div>
 </div></header>`;
 

@@ -51,7 +51,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
 .nav-in{max-width:1240px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:16px;}
 .logo{font-family:'Anton',sans-serif;font-size:25px;text-transform:uppercase;letter-spacing:-.01em;flex-shrink:0;line-height:1;}
 .logo .a{color:var(--morado);}
-.logo .b{color:var(--naranja-osc);}
+.logo .b{color:var(--naranja);}
 .navsearch{flex:1;max-width:560px;display:flex;background:var(--hueso);border:2px solid var(--linea);border-radius:8px;overflow:hidden;transition:border-color .16s;}
 .navsearch:focus-within{border-color:var(--morado);background:#fff;}
 .navsearch input{flex:1;background:transparent;border:none;outline:none;font-family:inherit;font-size:15px;font-weight:500;padding:12px 16px;color:var(--tinta);min-width:0;}
@@ -59,10 +59,18 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
 .navsearch button{background:var(--morado);color:#fff;padding:0 20px;display:flex;align-items:center;transition:background .16s;}
 .navsearch button:hover{background:var(--morado-med);}
 .nav-end{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.nav-links{display:flex;gap:24px;margin-left:32px;flex:1;align-items:center;}
+.nav-links a{font-size:15px;font-weight:700;color:var(--tinta-2);padding:11px 0;border-bottom:2px solid transparent;transition:color .16s,border-color .16s;}
+.nav-links a:hover{color:var(--tinta);border-bottom-color:var(--morado);}
 .nlink{padding:11px 14px;font-size:15px;font-weight:700;color:var(--tinta-2);border-radius:8px;transition:background .16s;}
 .nlink:hover{background:var(--hueso);color:var(--tinta);}
-.nprov{background:var(--naranja-osc);color:#fff;padding:12px 20px;border-radius:8px;font-weight:800;font-size:15px;display:inline-flex;align-items:center;gap:7px;transition:background .16s;}
-.nprov:hover{background:var(--naranja);}
+.nprov{background:var(--naranja);color:#fff;padding:12px 20px;border-radius:8px;font-weight:800;font-size:15px;display:inline-flex;align-items:center;gap:7px;transition:background .16s;}
+.nprov:hover{background:var(--naranja-osc);}
+/* Ingresar es la unica accion del nav que lleva a una cuenta: tiene que
+   distinguirse de un link de navegacion comun, por eso lleva relleno propio
+   en vez del estilo .nlink plano. */
+.btn-ingresar{background:var(--morado);color:#fff;padding:11px 22px;border-radius:8px;font-weight:800;font-size:15px;transition:background .16s;}
+.btn-ingresar:hover{background:var(--morado-med);}
 
 /* ── HERO BANNER ── */
 /* padding:0 anula la regla generica de section: el banner es exactamente el grid */
@@ -78,8 +86,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
 .hero-h1 .ama{color:var(--amarillo);}
 .hero-p{font-size:clamp(16px,1.4vw,19px);color:rgba(255,255,255,.93);max-width:466px;margin-bottom:28px;font-weight:500;}
 .hero-btns{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
-.btn-xl{background:var(--naranja-osc);color:#fff;font-family:'Anton',sans-serif;text-transform:uppercase;font-size:21px;letter-spacing:.02em;padding:19px 38px;border-radius:9px;display:inline-flex;align-items:center;gap:11px;box-shadow:0 5px 0 #9A3412;transition:transform .14s,box-shadow .14s;}
-.btn-xl:hover{background:var(--naranja);transform:translateY(-2px);box-shadow:0 7px 0 #9A3412;}
+.btn-xl{background:var(--naranja);color:#fff;font-family:'Anton',sans-serif;text-transform:uppercase;font-size:21px;letter-spacing:.02em;padding:19px 38px;border-radius:9px;display:inline-flex;align-items:center;gap:11px;box-shadow:0 5px 0 #9A3412;transition:transform .14s,box-shadow .14s,background .14s;}
+.btn-xl:hover{background:var(--naranja-osc);transform:translateY(-2px);box-shadow:0 7px 0 #9A3412;}
 .btn-xl:active{transform:translateY(3px);box-shadow:0 2px 0 #C2410C;}
 .btn-ghost{color:#fff;font-weight:700;font-size:16px;padding:19px 22px;border:2px solid rgba(255,255,255,.42);border-radius:9px;transition:background .16s,border-color .16s;}
 .btn-ghost:hover{background:rgba(255,255,255,.14);border-color:#fff;}
@@ -178,7 +186,7 @@ section{padding:52px 0;}
 #cta{padding:0 0 52px;}
 /* Todo el degradado tiene que aguantar texto blanco: el tono mas claro
    manda, y el naranja de marca sobre blanco se queda en 3.5. */
-.ctabox{background:linear-gradient(96deg,#7C2D12,#9A3412 58%,var(--naranja-osc));border-radius:18px;padding:44px 46px;display:flex;align-items:center;gap:34px;color:#fff;position:relative;overflow:hidden;}
+.ctabox{background:linear-gradient(96deg,#7C2D12,#9A3412 58%,var(--naranja));border-radius:18px;padding:44px 46px;display:flex;align-items:center;gap:34px;color:#fff;position:relative;overflow:hidden;}
 .ctabox::after{content:'';position:absolute;right:-40px;bottom:-90px;width:290px;height:290px;border-radius:50%;background:rgba(255,255,255,.13);}
 .cta-l{flex:1;position:relative;z-index:1;min-width:0;}
 .cta-tag{display:inline-block;background:#fff;color:var(--naranja-osc);font-size:12px;font-weight:800;padding:6px 13px;border-radius:5px;margin-bottom:14px;text-transform:uppercase;letter-spacing:.04em;}

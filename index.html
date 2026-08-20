@@ -18,12 +18,37 @@
 /* El hero va sin foto: se centra en vez de dejar una columna vacia a la
    derecha, y el aire que sobra se llena con anillos decorativos (mismo
    truco que el fondo del banner, sin depender de ninguna imagen) y una
-   franja de confianza corta debajo del boton. */
+   franja de confianza corta debajo del boton.
+
+   Jerarquia de color a proposito: el nombre lleva los mismos dos colores
+   de marca que el logo del nav (morado + naranja). El morado solido del
+   logo (#7C3AED) se pierde sobre el fondo morado del hero, por eso "Todo"
+   usa una lavanda clara de la misma familia: sigue leyendose morado pero
+   contrasta contra el fondo. El boton se queda con naranja solido, y
+   amarillo solo marca la palabra clave del slogan. Una rayita amarilla
+   entre nombre y slogan los liga como un solo bloque en vez de dejar
+   que el titulo gigante tape al slogan. */
 .hero-in{grid-template-columns:1fr;min-height:0;}
-.hero-txt{padding:76px 0 40px;max-width:700px;margin:0 auto;text-align:center;align-items:center;}
-.badge-amarillo{margin-left:auto;margin-right:auto;}
-.hero-p{margin-left:auto;margin-right:auto;}
+.hero-txt{padding:72px 0 0;max-width:780px;margin:0 auto;text-align:center;align-items:center;position:relative;z-index:3;}
+.hero-h1{font-size:clamp(48px,7.6vw,92px);margin-bottom:0;color:var(--morado);text-shadow:0 1px 0 rgba(255,255,255,.4),0 2px 20px rgba(0,0,0,.18);}
+.hero-h1 .ev{color:var(--naranja);}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:800;padding:7px 15px;border-radius:99px;margin-bottom:18px;text-transform:uppercase;letter-spacing:.05em;}
+.hero-eyebrow svg{color:var(--amarillo);flex-shrink:0;}
+.hero-tag{font-size:clamp(20px,2.3vw,27px);font-weight:700;color:rgba(255,255,255,.95);margin:0 auto 36px;padding-top:20px;position:relative;}
+.hero-tag::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:44px;height:3px;border-radius:2px;background:var(--amarillo);}
+.hero-tag .ama{color:var(--amarillo);}
 .hero-btns{justify-content:center;}
+
+/* Carrusel del hero: 3 mensajes que rotan solos (referencia: jorgitoluna.com).
+   display:none/block en vez de absolute+stacking -> mas simple, sin bugs
+   de solapamiento; el salto de alto entre slides es minimo (todas miden
+   3 lineas mas boton) asi que no hace falta fijar min-height a mano. */
+.hslide{display:none;}
+.hslide.on{display:block;animation:hfade .45s ease;}
+@keyframes hfade{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.hdots{display:flex;justify-content:center;gap:8px;margin-top:28px;}
+.hdot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.32);border:none;padding:0;cursor:pointer;transition:all .25s;}
+.hdot.on{width:24px;border-radius:20px;background:var(--amarillo);}
 
 .hero-rings{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1;}
 .hero-rings i{position:absolute;border:1.5px solid rgba(255,255,255,.14);border-radius:50%;}
@@ -31,15 +56,16 @@
 .hero-rings i:nth-child(2){width:420px;height:420px;top:-180px;right:-40px;border-color:rgba(255,255,255,.09);}
 .hero-rings i:nth-child(3){width:520px;height:520px;bottom:-340px;left:-220px;}
 
-.hero-mini{padding:20px 0 64px;position:relative;z-index:2;}
-.hero-mini-in{max-width:700px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:28px;flex-wrap:wrap;}
-.hero-mini-it{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:rgba(255,255,255,.92);}
-.hero-mini-it svg{color:var(--amarillo);flex-shrink:0;}
+/* Franja de confianza: una sola linea muda debajo del boton, en vez de
+   los 3 bloques sueltos que habia antes. */
+.hero-trust{display:flex;justify-content:center;gap:26px;flex-wrap:wrap;padding:26px 0 54px;position:relative;z-index:3;}
+.hero-trust span{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:rgba(255,255,255,.78);}
+.hero-trust svg{color:rgba(255,255,255,.6);flex-shrink:0;}
+
 @media(max-width:620px){
-  .hero-txt{padding:56px 0 32px;}
-  .hero-mini{padding:16px 0 44px;}
-  .hero-mini-in{gap:16px;}
+  .hero-txt{padding:60px 0 0;}
   .hero-rings i:nth-child(1),.hero-rings i:nth-child(2),.hero-rings i:nth-child(3){display:none;}
+  .hero-trust{gap:14px 20px;padding:20px 0 40px;}
 }
 </style>
 </head>
@@ -52,42 +78,44 @@
   <div class="hero-rings" aria-hidden="true"><i></i><i></i><i></i></div>
   <div class="hero-in">
     <div class="hero-txt">
-      <span class="badge-amarillo"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4.5 13H11l-1 9 8.5-11H12z"/></svg> Ver precios no te cuesta nada</span>
-      <h1 class="display hero-h1">Todo para tu evento,<br><span class="ama">con precios a la vista</span></h1>
-      <p class="hero-p">Proveedores de Lima que ya publicaron cuánto cobran y qué fechas tienen libres.</p>
-      <div class="hero-btns">
-        <a href="catalogo.html" class="btn-xl">Ver proveedores <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <div class="hslide on" data-slide="0">
+        <span class="hero-eyebrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4.5 13H11l-1 9 8.5-11H12z"/></svg> El marketplace de eventos en Lima</span>
+        <h1 class="display hero-h1">Todo<span class="ev">Eventos</span></h1>
+        <p class="hero-tag">Tu evento ideal <span class="ama">en minutos</span></p>
+        <div class="hero-btns">
+          <a href="catalogo.html" class="btn-xl">Ir al marketplace <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+      </div>
+      <div class="hslide" data-slide="1">
+        <span class="hero-eyebrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg> Sin costo por mirar</span>
+        <h1 class="display hero-h1">Precios <span class="ev">a la vista</span></h1>
+        <p class="hero-tag">Compara proveedores <span class="ama">sin llamar a nadie</span></p>
+        <div class="hero-btns">
+          <a href="catalogo.html" class="btn-xl">Ver proveedores <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+      </div>
+      <div class="hslide" data-slide="2">
+        <span class="hero-eyebrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5M4 9v11h16V9M9 20v-6h6v6"/></svg> Para proveedores</span>
+        <h1 class="display hero-h1">Tu negocio, <span class="ev">visible</span></h1>
+        <p class="hero-tag">Publica tus servicios <span class="ama">gratis y sin comisión</span></p>
+        <div class="hero-btns">
+          <a href="login.html?modo=registro&rol=proveedor" class="btn-xl">Registra tu negocio <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+      </div>
+      <div class="hdots" role="tablist" aria-label="Mensajes destacados">
+        <button class="hdot on" data-go="0" aria-label="Mensaje 1"></button>
+        <button class="hdot" data-go="1" aria-label="Mensaje 2"></button>
+        <button class="hdot" data-go="2" aria-label="Mensaje 3"></button>
       </div>
     </div>
   </div>
-  <div class="hero-mini">
-    <div class="hero-mini-in">
-      <span class="hero-mini-it"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg> Revisados uno por uno</span>
-      <span class="hero-mini-it"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Agenda a la vista</span>
-      <span class="hero-mini-it"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Sin costo por mirar</span>
-    </div>
+  <div class="hero-trust">
+    <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg> Los mejores servicios de Lima</span>
+    <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Reserva tu fecha al toque</span>
+    <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Sin costo por mirar</span>
   </div>
 </section>
 
-<!-- ═══ ACCESOS RÁPIDOS ═══ -->
-<div id="accesos"><div class="wrap"><div class="acc-grid">
-  <a href="catalogo.html" class="acc">
-    <div class="acc-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div>
-    <div class="acc-t">Todo el catálogo</div>
-  </a>
-  <a href="catalogo.html" class="acc">
-    <div class="acc-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 15 9l7 .5-5.5 4.5 1.8 6.9L12 17l-6.3 3.9L7.5 14 2 9.5 9 9z"/></svg></div>
-    <div class="acc-t">Mejor calificados</div>
-  </a>
-  <a href="catalogo.html" class="acc">
-    <div class="acc-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 8.5-8.5 8.38 8.38 0 0 1 8.5 8.5z"/></svg></div>
-    <div class="acc-t">Hablar con Raymi</div>
-  </a>
-  <a href="login.html?modo=registro&rol=proveedor" class="acc">
-    <div class="acc-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5M4 9v11h16V9M9 20v-6h6v6"/></svg></div>
-    <div class="acc-t">Publica tu negocio</div>
-  </a>
-</div></div></div>
 
 <!-- ═══ TIRA DE CATEGORÍAS ═══ -->
 <nav id="catbar" aria-label="Categorías"><div class="catbar-in">
@@ -125,7 +153,6 @@
 <section id="cta" style="padding:44px 0;">
   <div class="wrap"><div class="ctabox">
     <div class="cta-l">
-      <span class="cta-tag">Gratis para los primeros 20</span>
       <h2>¿Trabajas en eventos?<br>Saca tu negocio del cuaderno.</h2>
       <p>Publica tus servicios y lleva tu agenda y tus cotizaciones desde el mismo panel. Todavía no cobramos comisión.</p>
     </div>
@@ -244,6 +271,26 @@ async function cargarGondolas(){
   document.getElementById('gondolas').innerHTML = html.join('');
 }
 cargarGondolas();
+
+// ─── CARRUSEL DEL HERO ──────────────────────────────────────────────────
+(function heroCarrusel(){
+  const slides = document.querySelectorAll('.hslide');
+  const dots = document.querySelectorAll('.hdot');
+  if (!slides.length) return;
+  let i = 0, timer;
+
+  function ir(n){
+    i = (n + slides.length) % slides.length;
+    slides.forEach((s, idx) => s.classList.toggle('on', idx === i));
+    dots.forEach((d, idx) => d.classList.toggle('on', idx === i));
+  }
+  function reiniciar(){
+    clearInterval(timer);
+    timer = setInterval(() => ir(i + 1), 5000);
+  }
+  dots.forEach(d => d.addEventListener('click', () => { ir(+d.dataset.go); reiniciar(); }));
+  reiniciar();
+})();
 </script>
 <script src="feedback.js"></script>
 </body>
