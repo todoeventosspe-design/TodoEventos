@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Epilogue:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="estilo.css">
 <style>
-:root{--bg:var(--app-bg);--bg2:#fff;--bg3:#fff;--fg:var(--tinta);--sub:var(--tinta-2);--pu:#7C3AED;--ind:#6D28D9;--gold:#B45309;--or:#C2410C;--border:var(--linea);}
+:root{--bg:var(--app-bg);--bg2:#fff;--bg3:#fff;--fg:var(--tinta);--sub:var(--tinta-2);--pu:#7C3AED;--ind:#6D28D9;--gold:#B45309;--or:#EA580C;--border:var(--linea);}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(--fg);overflow-x:clip;padding-bottom:80px;}
@@ -37,7 +37,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .user-dropdown a,.user-dropdown button{width:100%;text-align:left;display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--fg);font-size:13px;font-family:'Epilogue',sans-serif;padding:9px 10px;border-radius:8px;cursor:pointer;text-decoration:none;}
 .user-dropdown a:hover,.user-dropdown button:hover{background:var(--linea);}
 .user-dropdown .salir{color:#B91C1C;}
-.btn-prov{background:linear-gradient(135deg,#C2410C,#9A3412);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;font-family:'Epilogue',sans-serif;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
+.btn-prov{background:linear-gradient(135deg,var(--naranja),var(--naranja-osc));color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;font-family:'Epilogue',sans-serif;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
 @keyframes pulse-glow{0%,100%{box-shadow:0 0 0 0 rgba(234,88,12,.45);}70%{box-shadow:0 0 0 10px rgba(234,88,12,0);}}
 .btn-prov{animation:pulse-glow 2.5s ease infinite;}
 
@@ -92,7 +92,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .ci-d{background:linear-gradient(135deg,#059669,#0ea5e9);}
 .ci-e{background:linear-gradient(135deg,#9333ea,#f59e0b);}
 .ci-f{background:linear-gradient(135deg,#dc2626,#9333ea);}
-.ci-g{background:linear-gradient(135deg,#be185d,#C2410C);}
+.ci-g{background:linear-gradient(135deg,#be185d,#9A3412);}
 .ci-h{background:linear-gradient(135deg,#1d4ed8,#7c3aed);}
 .ci-i{background:linear-gradient(135deg,#047857,#0ea5e9);}
 .ci-j{background:linear-gradient(135deg,#92400e,#dc2626);}
@@ -395,7 +395,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
         <i class="ti ti-arrow-left" style="font-size:14px;"></i> Inicio
       </a>
       <span style="color:rgba(255,255,255,.12);font-size:18px;">|</span>
-      <span class="logo"><span class="lp">Todo</span><span class="lo">Eventos</span><span class="dot">.pe</span></span>
+      <span class="logo"><span class="lp">Todo</span><span class="lo">Eventos</span></span>
     </div>
     <div class="nav-search">
       <i class="ti ti-search"></i>

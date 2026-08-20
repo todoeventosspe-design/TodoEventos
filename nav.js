@@ -53,8 +53,8 @@ const CHROME_NAV = `
     <a href="nosotros.html" class="nlink">Nosotros</a>
   </nav>
   <form class="navsearch" onsubmit="goSearch(); return false;">
+    <button type="submit" aria-label="Buscar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
     <input type="search" id="nav-q" placeholder="Busca DJ, catering, fotógrafo, local…" aria-label="Buscar proveedores">
-    <button type="submit" aria-label="Buscar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
   </form>
   <div class="nav-end">
     <a href="login.html?modo=registro&rol=proveedor" class="nprov">Para proveedores</a>

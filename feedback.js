@@ -26,8 +26,8 @@
     + '#fbk-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:2px;}'
     + '#fbk-actions button{border:none;border-radius:9px;padding:10px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;}'
     + '#fbk-cancel{background:transparent;color:#b4aac9;}'
-    + '#fbk-send{background:#F97316;color:#fff;}'
-    + '#fbk-send:hover{background:#C2410C;}'
+    + '#fbk-send{background:#EA580C;color:#fff;}'
+    + '#fbk-send:hover{background:#9A3412;}'
     + '#fbk-send:disabled{opacity:.6;}'
     + '#fbk-ok{color:#34d399;font-size:14px;text-align:center;padding:14px 0;display:none;}';
 
