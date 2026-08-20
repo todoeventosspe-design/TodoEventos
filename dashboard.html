@@ -1626,7 +1626,7 @@ function addCotizadorItem(){
   const subtotal = cant * precio;
   const tbody = document.getElementById('cot-items-tbody');
   const tr = document.createElement('tr');
-  tr.innerHTML = `<td>${nombre}</td><td>${cant}</td><td>${fmtMoneyCot(precio)}</td><td class="money">${fmtMoneyCot(subtotal)}</td><td><button class="btn-remove-item" onclick="removeCotizadorItem(this)" title="Quitar ítem"><i class="ti ti-trash"></i></button></td>`;
+  tr.innerHTML = `<td>${esc(nombre)}</td><td>${cant}</td><td>${fmtMoneyCot(precio)}</td><td class="money">${fmtMoneyCot(subtotal)}</td><td><button class="btn-remove-item" onclick="removeCotizadorItem(this)" title="Quitar ítem"><i class="ti ti-trash"></i></button></td>`;
   tbody.appendChild(tr);
 
   nombreEl.value = ''; cantEl.value = ''; precioEl.value = '';
