@@ -75,7 +75,12 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .sort-btn:hover,.sort-btn.active{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.25);color:var(--pu);}
 
 /* PROVIDER GRID */
-#prov-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;}
+/* flex, no grid: con pocos resultados (catalogo recien empezando) una
+   grilla de 3 columnas deja 2 columnas vacias fantasma junto a la unica
+   card. Con flex + flex-basis fijo, la card ocupa su tercio real y el
+   resto es fondo de pagina normal, no una columna de grid en blanco. */
+#prov-grid{display:flex;flex-wrap:wrap;gap:1.25rem;}
+#prov-grid .pcard{flex:0 1 calc((100% - 2*1.25rem)/3);}
 .pcard{background:var(--bg3);border:1px solid var(--border);border-radius:18px;overflow:hidden;transition:transform .22s,border-color .22s;cursor:pointer;}
 .pcard:hover{transform:translateY(-4px);border-color:rgba(124,58,237,.3);}
 .pcard[data-hidden="true"]{display:none;}
@@ -125,12 +130,12 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 #empty-state p{font-size:14px;color:var(--sub);}
 
 /* No results */
-.no-results{display:none;text-align:center;padding:4rem 2rem;grid-column:1/-1;}
+.no-results{display:none;text-align:center;padding:4rem 2rem;flex-basis:100%;}
 .no-results i{font-size:3rem;color:var(--linea);display:block;margin-bottom:1rem;}
 
 /* RESPONSIVE */
 @media(max-width:900px){
-  #prov-grid{grid-template-columns:repeat(2,1fr);}
+  #prov-grid .pcard{flex-basis:calc((100% - 1.25rem)/2);}
   .nav-search{display:none;}
   /* El CTA "Para Proveedores" no entra en la barra en celular y empujaba toda
      la página hacia la derecha. En móvil el catálogo le habla al cliente; el
@@ -143,7 +148,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
   .filter-inner{overflow-x:auto;flex-wrap:nowrap;}
 }
 @media(max-width:560px){
-  #prov-grid{grid-template-columns:1fr;}
+  #prov-grid .pcard{flex-basis:100%;}
   .main{padding:1.25rem;}
 }
 /* ── MODAL: PERFIL PÚBLICO DEL PROVEEDOR ── */

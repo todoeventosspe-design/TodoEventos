@@ -64,13 +64,15 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
 .nav-links a:hover{color:var(--tinta);border-bottom-color:var(--morado);}
 .nlink{padding:11px 14px;font-size:15px;font-weight:700;color:var(--tinta-2);border-radius:8px;transition:background .16s;}
 .nlink:hover{background:var(--hueso);color:var(--tinta);}
-.nprov{background:var(--naranja);color:#fff;padding:12px 20px;border-radius:8px;font-weight:800;font-size:15px;display:inline-flex;align-items:center;gap:7px;transition:background .16s;}
-.nprov:hover{background:var(--naranja-osc);}
+.nprov{background:var(--naranja);color:#fff;padding:12px 20px;border-radius:8px;font-weight:800;font-size:15px;display:inline-flex;align-items:center;gap:7px;box-shadow:0 2px 0 var(--naranja-osc);transition:background .16s,transform .12s,box-shadow .12s;}
+.nprov:hover{background:var(--naranja-osc);transform:translateY(-1px);box-shadow:0 3px 0 #9A3412;}
+.nprov:active{transform:translateY(1px);box-shadow:0 1px 0 var(--naranja-osc);}
 /* Ingresar es la unica accion del nav que lleva a una cuenta: tiene que
    distinguirse de un link de navegacion comun, por eso lleva relleno propio
    en vez del estilo .nlink plano. */
-.btn-ingresar{background:var(--morado);color:#fff;padding:11px 22px;border-radius:8px;font-weight:800;font-size:15px;transition:background .16s;}
-.btn-ingresar:hover{background:var(--morado-med);}
+.btn-ingresar{background:var(--morado);color:#fff;padding:11px 22px;border-radius:8px;font-weight:800;font-size:15px;box-shadow:0 2px 0 var(--morado-osc);transition:background .16s,transform .12s,box-shadow .12s;}
+.btn-ingresar:hover{background:var(--morado-med);transform:translateY(-1px);box-shadow:0 3px 0 var(--morado-osc);}
+.btn-ingresar:active{transform:translateY(1px);box-shadow:0 1px 0 var(--morado-osc);}
 
 /* ── HERO BANNER ── */
 /* padding:0 anula la regla generica de section: el banner es exactamente el grid */
