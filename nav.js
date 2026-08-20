@@ -57,6 +57,7 @@ const CHROME_NAV = `
     <button type="submit" aria-label="Buscar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
   </form>
   <div class="nav-end">
+    <a href="login.html?modo=registro&rol=proveedor" class="nprov">Para proveedores</a>
     <a href="login.html?v=2" class="btn-ingresar" id="btn-ingresar">Ingresar</a>
     <div class="user-menu" id="user-menu">
       <button class="user-avatar" id="user-avatar-btn" onclick="toggleUserDropdown()"></button>

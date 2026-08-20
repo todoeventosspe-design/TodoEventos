@@ -1262,6 +1262,12 @@ document.querySelector('elevenlabs-convai')
     const bcEl = document.getElementById('breadcrumb-cat');
     if(bcEl && catNames[cat]) bcEl.textContent = catNames[cat];
   }
+  // "Hablar con Raymi" del home linkea con ?raymi=1: abrimos el widget
+  // del asistente directo, en vez de dejarlo cerrado esperando un click aparte.
+  if(p.get('raymi')){
+    const raymi = document.querySelector('elevenlabs-convai');
+    if(raymi) raymi.setAttribute('default-expanded', 'true');
+  }
 })();
 
 render();
