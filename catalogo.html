@@ -636,6 +636,11 @@ async function cargarProvidersReales(){
     });
 
   render();
+
+  // Si venimos de un link directo a un servicio (ej: card del home,
+  // catalogo.html?service=123), abrimos su detalle apenas carga la data.
+  const svcId = new URLSearchParams(window.location.search).get('service');
+  if(svcId) openServiceDetail(Number(svcId));
 }
 
 // ─── STATE ───
