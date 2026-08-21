@@ -1001,8 +1001,12 @@ verificarAccesoDashboard();
       <input type="text" id="service-nombre" placeholder="Ej. Paquete Boda Premium">
     </div>
     <div class="field">
-      <label>Precio S/.</label>
+      <label>Precio base (S/.)</label>
       <input type="number" id="service-precio" min="0" placeholder="0.00">
+      <small style="display:block;margin-top:4px;color:var(--sub,#6b7280);font-size:12px;">
+        Es el "desde" que ve el cliente en el catálogo. Si tu servicio varía según lo que pida
+        (combos, cantidad, extras), pon el precio de tu combinación más económica y detalla el resto abajo.
+      </small>
     </div>
     <div class="field">
       <label>Categoría</label>
@@ -1013,6 +1017,7 @@ verificarAccesoDashboard();
         <option value="locales">Locales & Salones</option>
         <option value="animadores">Animadores</option>
         <option value="decoracion">Decoración</option>
+        <option value="inflables">Inflables y juegos</option>
         <option value="bar">Bar Móvil</option>
         <option value="pasteleria">Pastelería</option>
         <option value="transporte">Transporte</option>
