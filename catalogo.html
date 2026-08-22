@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Marketplace de TodoEventos.pe</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -100,9 +101,12 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .ci-l{background:linear-gradient(135deg,#065f46,#1d4ed8);}
 .pcard-vbdg{position:absolute;top:10px;left:10px;background:rgba(18,14,31,.72);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px;}
 .pcard-price-tag{position:absolute;bottom:10px;right:10px;background:rgba(18,14,31,.72);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;}
-.pcard-fav{position:absolute;top:10px;right:10px;width:30px;height:30px;background:rgba(18,14,31,.68);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .18s;}
+.pcard-fav{position:absolute;top:10px;right:10px;width:30px;height:30px;background:rgba(18,14,31,.68);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .18s,transform .12s;}
 .pcard-fav:hover{background:rgba(124,58,237,.3);}
-.pcard-fav i{font-size:14px;color:var(--tinta-2);}
+.pcard-fav:active{transform:scale(.85);}
+.pcard-fav i{font-size:14px;color:#fff;transition:color .18s;}
+.pcard-fav.on{background:rgba(234,88,12,.92);}
+.pcard-fav.on i{color:#fff;}
 /* Fundador: anillo dorado por dentro del banner. Va como box-shadow y no como
    border para que la foto no se recorte ni la tarjeta cambie de tamaño al
    pasar de un proveedor normal a uno fundador. */
@@ -382,6 +386,29 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
   .pcard-fav{width:44px;height:44px;}
   .cat-tab{min-height:44px;}
 }
+
+/* ─── Modal propio (reemplaza los confirm/alert nativos de Chrome) ─── */
+.te-modal-ov{display:none;position:fixed;inset:0;background:rgba(18,14,31,.55);backdrop-filter:blur(4px);z-index:5000;align-items:center;justify-content:center;padding:22px;}
+.te-modal-ov.open{display:flex;}
+.te-modal{background:#fff;border:1px solid var(--border);border-top:4px solid var(--pu);border-radius:18px;max-width:400px;width:100%;padding:26px 24px 22px;box-shadow:0 24px 64px rgba(18,14,31,.3);animation:pmIn .18s ease;text-align:left;}
+.te-modal-ico{width:46px;height:46px;border-radius:50%;background:var(--morado-claro);color:var(--pu);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:14px;}
+.te-modal h3{font-size:18px;font-weight:800;color:var(--fg);margin-bottom:6px;}
+.te-modal p{font-size:14px;color:var(--sub);line-height:1.55;margin-bottom:20px;white-space:pre-line;}
+.te-modal-acts{display:flex;gap:10px;justify-content:flex-end;}
+.te-modal-acts button{border:none;border-radius:10px;padding:11px 18px;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;transition:background .15s,transform .1s;}
+.te-modal-acts button:active{transform:translateY(1px);}
+.te-btn-cancel{background:#F2EEFA;color:var(--sub);}
+.te-btn-cancel:hover{background:#E8E1F6;}
+.te-btn-ok{background:var(--pu);color:#fff;box-shadow:0 2px 0 var(--ind);}
+.te-btn-ok:hover{background:var(--ind);}
+
+/* ─── Visor de fotos ampliadas (lightbox) ─── */
+.pm-gallery img,.pm-svc-gallery img{cursor:zoom-in;}
+.te-lb-ov{display:none;position:fixed;inset:0;background:rgba(10,7,18,.9);z-index:5200;align-items:center;justify-content:center;padding:24px;cursor:zoom-out;}
+.te-lb-ov.open{display:flex;}
+.te-lb-ov img{max-width:94vw;max-height:90vh;border-radius:12px;box-shadow:0 30px 80px rgba(0,0,0,.6);animation:pmIn .18s ease;cursor:default;}
+.te-lb-close{position:absolute;top:18px;right:20px;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.te-lb-close:hover{background:rgba(255,255,255,.26);}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -566,6 +593,22 @@ function fotoSegura(url){
 // Postgres devuelve los "numeric" como texto, por eso el Number().
 function money(n){ return 'S/. ' + Number(n || 0).toLocaleString('es-PE'); }
 
+// ─── Favoritos: se recuerdan en este navegador (localStorage) ───
+function favSet(){ try{ return new Set(JSON.parse(localStorage.getItem('te_favs') || '[]')); }catch(e){ return new Set(); } }
+function favGuardar(set){ try{ localStorage.setItem('te_favs', JSON.stringify([...set])); }catch(e){} }
+function favActivo(id){ return favSet().has(String(id)); }
+function toggleFav(ev, id, btn){
+  ev.stopPropagation();
+  var set = favSet(); id = String(id);
+  var activo = set.has(id);
+  if(activo){ set.delete(id); } else { set.add(id); }
+  favGuardar(set);
+  btn.classList.toggle('on', !activo);
+  var i = btn.querySelector('i');
+  if(i) i.className = 'ti ' + (!activo ? 'ti-heart-filled' : 'ti-heart');
+  btn.setAttribute('aria-label', !activo ? 'Quitar de favoritos' : 'Guardar como favorito');
+}
+
 // ─── DATA ───
 // Datos reales de Supabase (tablas "services" + "profiles"). Se llenan en
 // cargarProvidersReales(), al inicio. Empieza vacio hasta que la consulta
@@ -715,7 +758,7 @@ function render() {
           <span class="pcard-vbdg">${p.badge}</span>
           ${p.esFundador ? `<span class="pcard-fbdg"><i class="ti ti-crown"></i> Fundador</span>` : ''}
           <span class="pcard-price-tag">desde S/. ${p.price}</span>
-          <button class="pcard-fav" onclick="event.stopPropagation();"><i class="ti ti-heart"></i></button>
+          <button class="pcard-fav${favActivo(p.id) ? ' on' : ''}" aria-label="${favActivo(p.id) ? 'Quitar de favoritos' : 'Guardar como favorito'}" onclick="toggleFav(event, ${p.id}, this)"><i class="ti ${favActivo(p.id) ? 'ti-heart-filled' : 'ti-heart'}"></i></button>
         </div>
         <div class="pcard-body-top">
           <div class="pcard-name">${esc(p.name)}</div>
@@ -1002,7 +1045,7 @@ function goToRequest(){
   const servicio = providers.find(p => p.providerId === primero.proveedorId);
   closeCart();
   if(servicio) abrirReserva(servicio.id);
-  else alert('Abre el servicio que quieras reservar y elige tu fecha en su calendario.');
+  else teAviso('Elige tu fecha', 'Abre el servicio que quieras reservar y elige tu fecha en su calendario.', 'ti-calendar');
 }
 
 
@@ -1411,8 +1454,14 @@ let reservaFechaSel = null;   // 'YYYY-MM-DD'
 // Puerta de entrada: sin cuenta no se reserva ni se arma presupuesto.
 function exigirLogin(mensaje){
   if(sesionUsuario) return true;
-  const seguir = confirm(mensaje + '\n\n¿Quieres iniciar sesión o crear tu cuenta ahora?');
-  if(seguir) window.location.href = 'login.html?modo=registro&rol=cliente';
+  teConfirm({
+    titulo: 'Necesitas una cuenta',
+    mensaje: mensaje + '\n\n¿Quieres iniciar sesión o crear tu cuenta ahora?',
+    icono: 'ti-user-plus',
+    ok: 'Entrar / crear cuenta',
+    cancel: 'Ahora no',
+    onOk: function(){ window.location.href = 'login.html?modo=registro&rol=cliente'; }
+  });
   return false;
 }
 
@@ -1423,7 +1472,7 @@ async function abrirReserva(serviceId){
   if(!exigirLogin('Necesitas una cuenta para reservar un servicio.')) return;
 
   if(perfilUsuario && perfilUsuario.role === 'proveedor'){
-    alert('Estás con una cuenta de proveedor. Para reservar servicios necesitas una cuenta de cliente.');
+    teAviso('Cuenta de proveedor', 'Estás con una cuenta de proveedor. Para reservar servicios necesitas una cuenta de cliente.', 'ti-alert-circle');
     return;
   }
 
@@ -1615,9 +1664,11 @@ async function confirmarReserva(){
   cerrarReserva();
 
   const [y,m,d] = reservaFechaSel.split('-').map(Number);
-  alert('¡Reserva confirmada!\n\n' + reservaServicio.name +
+  teAviso('¡Reserva confirmada!',
+        reservaServicio.name +
         '\n' + d + ' de ' + MESES_BK[m-1] + ' de ' + y + ', ' + horaIni + ' – ' + horaFin +
-        '\n\nPuedes verla en "Mi cuenta". El proveedor ya tiene el bloque reservado en su agenda.');
+        '\n\nPuedes verla en "Mi cuenta". El proveedor ya tiene el bloque reservado en su agenda.',
+        'ti-calendar-check');
 }
 </script>
 <!-- ─── MODAL: Perfil Público del Proveedor ─── -->
@@ -1833,6 +1884,76 @@ async function confirmarReserva(){
     </div>
   </div>
 </div>
+<!-- ─── Modal propio + visor de fotos ─── -->
+<div class="te-modal-ov" id="te-modal-ov">
+  <div class="te-modal" role="dialog" aria-modal="true">
+    <div class="te-modal-ico" id="te-modal-ico"><i class="ti ti-user-circle"></i></div>
+    <h3 id="te-modal-title">—</h3>
+    <p id="te-modal-msg">—</p>
+    <div class="te-modal-acts" id="te-modal-acts"></div>
+  </div>
+</div>
+<div class="te-lb-ov" id="te-lb-ov">
+  <button class="te-lb-close" id="te-lb-close" aria-label="Cerrar"><i class="ti ti-x"></i></button>
+  <img id="te-lb-img" src="" alt="Foto ampliada">
+</div>
+
+<script>
+/* ═══ Modal propio: reemplaza confirm()/alert() nativos del navegador ═══ */
+(function(){
+  var ov = document.getElementById('te-modal-ov');
+  var acts = document.getElementById('te-modal-acts');
+  function cerrar(){ ov.classList.remove('open'); }
+  // Aviso simple (un solo botón "Entendido")
+  window.teAviso = function(titulo, mensaje, icono){
+    document.getElementById('te-modal-title').textContent = titulo;
+    document.getElementById('te-modal-msg').textContent = mensaje || '';
+    document.getElementById('te-modal-ico').innerHTML = '<i class="ti ' + (icono || 'ti-info-circle') + '"></i>';
+    acts.innerHTML = '';
+    var ok = document.createElement('button');
+    ok.className = 'te-btn-ok'; ok.textContent = 'Entendido';
+    ok.onclick = cerrar;
+    acts.appendChild(ok);
+    ov.classList.add('open');
+  };
+  // Confirmación (Cancelar + botón de acción). onOk se llama si acepta.
+  window.teConfirm = function(opts){
+    document.getElementById('te-modal-title').textContent = opts.titulo || '¿Continuar?';
+    document.getElementById('te-modal-msg').textContent = opts.mensaje || '';
+    document.getElementById('te-modal-ico').innerHTML = '<i class="ti ' + (opts.icono || 'ti-help-circle') + '"></i>';
+    acts.innerHTML = '';
+    var cancel = document.createElement('button');
+    cancel.className = 'te-btn-cancel'; cancel.textContent = opts.cancel || 'Cancelar';
+    cancel.onclick = cerrar;
+    var ok = document.createElement('button');
+    ok.className = 'te-btn-ok'; ok.textContent = opts.ok || 'Aceptar';
+    ok.onclick = function(){ cerrar(); if(opts.onOk) opts.onOk(); };
+    acts.appendChild(cancel); acts.appendChild(ok);
+    ov.classList.add('open');
+  };
+  ov.addEventListener('click', function(e){ if(e.target === ov) cerrar(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && ov.classList.contains('open')) cerrar(); });
+})();
+
+/* ═══ Visor de fotos: clic en cualquier foto de galería la amplía ═══ */
+(function(){
+  var lb = document.getElementById('te-lb-ov');
+  var img = document.getElementById('te-lb-img');
+  function abrir(src){ img.src = src; lb.classList.add('open'); }
+  function cerrar(){ lb.classList.remove('open'); img.src = ''; }
+  // Delegación: sirve para galerías que se pintan después (modal proveedor, etc.)
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    if(t && t.tagName === 'IMG' && t.closest('.pm-gallery,.pm-svc-gallery,.sd-galeria')){
+      e.stopPropagation();
+      abrir(t.currentSrc || t.src);
+    }
+  });
+  document.getElementById('te-lb-close').addEventListener('click', cerrar);
+  lb.addEventListener('click', function(e){ if(e.target !== img) cerrar(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && lb.classList.contains('open')) cerrar(); });
+})();
+</script>
 <script src="feedback.js"></script>
 </body>
 </html>

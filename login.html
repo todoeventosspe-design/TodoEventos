@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ingresar a TodoEventos.pe</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -68,7 +69,10 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .field-plain label{display:block;font-size:12.5px;color:var(--sub);margin-bottom:7px;font-weight:500;}
 .field-plain input,.field-plain select,.field-plain textarea{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:11px 13px;color:var(--fg);font-size:13.5px;font-family:inherit;}
 .field-plain input:focus,.field-plain select:focus,.field-plain textarea:focus{outline:none;border-color:var(--ac-line);}
-.field-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+/* align-items:end alinea los inputs de la fila aunque un label ocupe 2
+   lineas y el otro 1 (ej. "Años de experiencia" vs "Instagram / Web"):
+   los campos quedan siempre parejos por abajo. */
+.field-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end;}
 .campos-proveedor-title{font-size:12.5px;font-weight:700;color:var(--ac);margin:18px 0 14px;padding-top:14px;border-top:1px dashed var(--line);display:flex;align-items:center;gap:6px;}
 
 .row-between{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;font-size:12.5px;}
