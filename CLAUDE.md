@@ -70,6 +70,18 @@ por Resend, dominio propio con HTTPS y auto-deploy, seguridad (pentest 19/19).
 Registro de proveedor con nombre = negocio, edición de perfil, y subida de
 2–8 fotos que el admin ve al aprobar.
 
+Correcciones del feedback de un amigo (programador/marketing) ya aplicadas:
+favicon de marca en todas las páginas (`favicon.svg`); alto del hero fijo (los
+3 slides se apilan en la misma celda de grid, ya no salta); form de registro
+de proveedor con inputs alineados aunque el label ocupe 2 líneas; popups
+propios (`teConfirm`/`teAviso`) en lugar de los `confirm/alert` nativos de
+Chrome en el flujo de reserva del catálogo; visor de fotos (lightbox) al hacer
+clic en cualquier galería del catálogo; botón de favorito funcional (se marca
+y se recuerda en `localStorage`); modal de feedback reestilizada al tema claro
+(antes quedó oscura del tema viejo). La barra de categorías ya estaba unificada
+entre index y catálogo (12 categorías idénticas). Los `alert/confirm` internos
+del dashboard y admin se dejaron nativos a propósito (herramientas internas).
+
 ## Pendientes (revisar y priorizar con el humano)
 
 - **ElevenLabs (config de panel):** declarar las 3 client tools de Raymi (para

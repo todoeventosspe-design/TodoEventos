@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TodoEventos.pe: proveedores para eventos en Lima</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta name="description" content="Encuentra DJ, catering, fotografía, locales y más para tu evento en Lima. Precios publicados y agenda a la vista.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,12 +42,13 @@
 .hero-btns{justify-content:center;}
 
 /* Carrusel del hero: 3 mensajes que rotan solos (referencia: jorgitoluna.com).
-   display:none/block en vez de absolute+stacking -> mas simple, sin bugs
-   de solapamiento; el salto de alto entre slides es minimo (todas miden
-   3 lineas mas boton) asi que no hace falta fijar min-height a mano. */
-.hslide{display:none;}
-.hslide.on{display:block;animation:hfade .45s ease;}
-@keyframes hfade{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+   Los 3 slides se apilan en la MISMA celda de grid, asi el contenedor
+   siempre mide lo que el slide mas alto y el hero NO cambia de alto ni
+   salta la pagina al rotar (uno de los slides no lleva la etiqueta de
+   arriba y antes quedaba mas bajo). Se muestran/ocultan con opacidad. */
+.hero-slides{display:grid;}
+.hslide{grid-area:1/1;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(10px);transition:opacity .45s ease,transform .45s ease;}
+.hslide.on{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0);}
 .hdots{display:flex;justify-content:center;gap:8px;margin-top:28px;}
 .hdot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.32);border:none;padding:0;cursor:pointer;transition:all .25s;}
 .hdot.on{width:24px;border-radius:20px;background:var(--amarillo);}
@@ -79,6 +81,7 @@
   <div class="hero-rings" aria-hidden="true"><i></i><i></i><i></i></div>
   <div class="hero-in">
     <div class="hero-txt">
+      <div class="hero-slides">
       <div class="hslide on" data-slide="0">
         <span class="hero-eyebrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4.5 13H11l-1 9 8.5-11H12z"/></svg> El marketplace de eventos en Lima</span>
         <h1 class="display hero-h1">Todo<span class="ev">Eventos</span></h1>
@@ -101,6 +104,7 @@
         <div class="hero-btns">
           <a href="login.html?modo=registro&rol=proveedor" class="btn-xl">Registra tu negocio <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         </div>
+      </div>
       </div>
       <div class="hdots" role="tablist" aria-label="Mensajes destacados">
         <button class="hdot on" data-go="0" aria-label="Mensaje 1"></button>
