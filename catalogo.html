@@ -380,7 +380,9 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 
 /* En movil todo se toca con el dedo: 44px minimo por control. */
 @media(max-width:760px){
-  .nl-link,.btn-login,.btn-prov,.cart-icon-btn{min-height:44px;display:inline-flex;align-items:center;justify-content:center;}
+  /* Ojo: .nl-link y .btn-prov se ocultan en celular (arriba). No van acá o
+     este display:inline-flex los volvería a mostrar y desbordan la barra. */
+  .btn-login,.cart-icon-btn{min-height:44px;display:inline-flex;align-items:center;justify-content:center;}
   .f-select{min-height:44px;}
   .pcard-btn-outline,.pcard-btn-solid{min-height:44px;}
   .pcard-fav{width:44px;height:44px;}
