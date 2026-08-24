@@ -82,6 +82,26 @@ y se recuerda en `localStorage`); modal de feedback reestilizada al tema claro
 entre index y catálogo (12 categorías idénticas). Los `alert/confirm` internos
 del dashboard y admin se dejaron nativos a propósito (herramientas internas).
 
+Fix de móvil (barra de navegación): la barra del nav (logo + links + buscador
++ 2 botones) no entraba en celular y se desbordaba a la derecha; eso hacía que
+el celular encogiera toda la página (shrink-to-fit) con la franja blanca a la
+derecha. Arreglado en `estilo.css` (nav compacto en ≤760px: se ocultan los
+links de texto y el buscador, quedan logo + "Para proveedores" + "Ingresar")
+y en `catalogo.html` (una media query de touch-targets volvía a mostrar
+`.btn-prov`/`.nl-link` que estaban ocultos). También se colapsó la franja de
+confianza (`.tbar`) a 1 columna en móvil (una regla sin media query la dejaba
+siempre en 3). OJO con Vercel: si la web en vivo se ve distinta al repo (hero
+viejo de 2 columnas), es un deploy viejo — hay que asegurar que Vercel
+despliegue el `main` actual.
+
+Repaso de móvil completo (todas las páginas verificadas renderizando a 360/390px,
+el ancho del documento queda igual al viewport, sin scroll horizontal): inicio,
+catálogo (+ modales de proveedor, reserva y carrito), login, cuenta, nosotros,
+para-proveedores. En el dashboard del proveedor las tablas de 5 columnas ahora
+se deslizan de lado dentro de `.tbl-scroll` en vez de apretujarse, el sidebar ya
+era un cajón con hamburguesa (`toggleNav`) en ≤720px, y stat-grid colapsa a 1
+columna en móvil.
+
 ## Pendientes (revisar y priorizar con el humano)
 
 - **ElevenLabs (config de panel):** declarar las 3 client tools de Raymi (para

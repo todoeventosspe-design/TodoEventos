@@ -75,6 +75,27 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
 .btn-ingresar:hover{background:var(--morado-med);transform:translateY(-1px);box-shadow:0 3px 0 var(--morado-osc);}
 .btn-ingresar:active{transform:translateY(1px);box-shadow:0 1px 0 var(--morado-osc);}
 
+/* ── NAV EN CELULAR ──────────────────────────────────────────────────────
+   En pantallas chicas la barra completa (logo + links + buscador + 2
+   botones) no entra y se desbordaba a la derecha: eso hacía que el celular
+   encogiera toda la página (shrink-to-fit) dejando la franja blanca a la
+   derecha. Solución: en móvil dejamos solo el logo y los 2 botones de
+   acción (que es a lo que la gente entra), compactos. El buscador y los
+   links "Inicio/Marketplace/Nosotros" siguen accesibles desde la barra de
+   categorías, el hero y el footer. */
+@media(max-width:760px){
+  .nav-in{padding:11px 15px;gap:9px;}
+  .nav-links{display:none;}
+  .navsearch{display:none;}
+  .nav-end{gap:7px;}
+  .nprov{padding:8px 12px;font-size:12px;gap:4px;}
+  .btn-ingresar{padding:8px 13px;font-size:12px;}
+}
+@media(max-width:360px){
+  .nprov{padding:7px 10px;font-size:11.5px;}
+  .btn-ingresar{padding:7px 11px;font-size:11.5px;}
+}
+
 /* ── HERO BANNER ── */
 /* padding:0 anula la regla generica de section: el banner es exactamente el grid */
 #hero{background:var(--morado-med);position:relative;overflow:hidden;padding:0;}
@@ -326,9 +347,12 @@ footer .logo .b{color:var(--naranja);}
 .gond{padding:44px 0 10px;}
 .acc-grid{grid-template-columns:repeat(4,1fr);}
 .acc{padding:20px 14px;}
-@media(max-width:1060px){ .pgrid{grid-template-columns:repeat(2,1fr);} }
+/* .tbar se vuelve a declarar arriba (repeat(3)) DESPUES de sus media queries,
+   así que hay que re-colapsarla acá o se queda en 3 columnas apretadas en
+   celular. 2 columnas en tablet, 1 sola en móvil. */
+@media(max-width:1060px){ .pgrid{grid-template-columns:repeat(2,1fr);} .tbar{grid-template-columns:repeat(2,1fr);} }
 /* dos por fila en movil: una sola columna dejaba la pagina larguisima */
-@media(max-width:600px){ .pgrid{grid-template-columns:1fr 1fr;gap:11px;} .gond{padding:30px 0 6px;} }
+@media(max-width:600px){ .pgrid{grid-template-columns:1fr 1fr;gap:11px;} .gond{padding:30px 0 6px;} .tbar{grid-template-columns:1fr;gap:14px;} }
 
 
 /* ── MENU DE USUARIO EN EL NAV (sesion iniciada) ── */
