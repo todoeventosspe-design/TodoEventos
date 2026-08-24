@@ -94,6 +94,14 @@ siempre en 3). OJO con Vercel: si la web en vivo se ve distinta al repo (hero
 viejo de 2 columnas), es un deploy viejo — hay que asegurar que Vercel
 despliegue el `main` actual.
 
+Repaso de móvil completo (todas las páginas verificadas renderizando a 360/390px,
+el ancho del documento queda igual al viewport, sin scroll horizontal): inicio,
+catálogo (+ modales de proveedor, reserva y carrito), login, cuenta, nosotros,
+para-proveedores. En el dashboard del proveedor las tablas de 5 columnas ahora
+se deslizan de lado dentro de `.tbl-scroll` en vez de apretujarse, el sidebar ya
+era un cajón con hamburguesa (`toggleNav`) en ≤720px, y stat-grid colapsa a 1
+columna en móvil.
+
 ## Pendientes (revisar y priorizar con el humano)
 
 - **ElevenLabs (config de panel):** declarar las 3 client tools de Raymi (para

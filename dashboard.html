@@ -116,6 +116,9 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 
 /* tables */
 .tbl{width:100%;border-collapse:collapse;font-size:13px;}
+/* En celular la tabla de 5 columnas no entra: en vez de apretujar el texto,
+   la dejamos deslizar de lado dentro de su propio contenedor. */
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .tbl th{text-align:left;padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--sub);border-bottom:1px solid var(--line);font-weight:600;}
 .tbl td{padding:12px;border-bottom:1px solid var(--line);}
 .tbl tr:last-child td{border-bottom:none;}
@@ -276,6 +279,10 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 @media(max-width:640px){
   .services-grid{grid-template-columns:1fr;}
   .gallery-grid{grid-template-columns:repeat(2,1fr);}
+  /* la tabla mantiene columnas legibles y se desliza dentro de .tbl-scroll */
+  .tbl{min-width:460px;}
+  .stat-grid{grid-template-columns:1fr;}
+  .service-img-grid{grid-template-columns:repeat(3,1fr);}
 }
 /* ── SOLICITUDES / REQUESTS ── */
 .req-badge{background:#ef4444;color:#fff;font-size:10.5px;font-weight:800;min-width:19px;height:19px;border-radius:100px;display:inline-flex;align-items:center;justify-content:center;padding:0 5px;margin-left:auto;}
@@ -557,10 +564,10 @@ verificarAccesoDashboard();
       </div>
       <div class="panel">
         <div class="panel-title"><i class="ti ti-list"></i> Próximos eventos</div>
-        <table class="tbl">
+        <div class="tbl-scroll"><table class="tbl">
           <thead><tr><th>Fecha</th><th>Cliente</th><th>Evento</th><th>Distrito</th><th>Estado</th></tr></thead>
           <tbody id="agenda-proximos-tbody"></tbody>
-        </table>
+        </table></div>
       </div>
     </section>
 
@@ -715,11 +722,11 @@ verificarAccesoDashboard();
       </div>
       <div class="panel">
         <div class="panel-title"><i class="ti ti-list-details"></i> Ítems del presupuesto</div>
-        <table class="tbl">
+        <div class="tbl-scroll"><table class="tbl">
           <thead><tr><th>Servicio</th><th>Cantidad</th><th>Precio unit.</th><th>Subtotal</th><th></th></tr></thead>
           <tbody id="cot-items-tbody">
           </tbody>
-        </table>
+        </table></div>
         <div class="row3" style="margin-top:16px;">
           <div class="field" style="margin:0;"><input type="text" id="new-item-nombre" placeholder="Nuevo servicio…"></div>
           <div class="field" style="margin:0;"><input type="text" id="new-item-cant" placeholder="Cant."></div>
@@ -752,10 +759,10 @@ verificarAccesoDashboard();
       </div>
       <div class="panel">
         <div class="panel-title"><i class="ti ti-receipt"></i> Movimientos recientes</div>
-        <table class="tbl">
+        <div class="tbl-scroll"><table class="tbl">
           <thead><tr><th>Fecha</th><th>Concepto</th><th>Tipo</th><th>Monto</th><th></th></tr></thead>
           <tbody id="caja-tbody"></tbody>
-        </table>
+        </table></div>
         <div class="add-row">
           <button class="btn-or" onclick="openCajaModal('Ingreso')"><i class="ti ti-plus"></i> Registrar ingreso</button>
           <button class="btn-ghost" onclick="openCajaModal('Gasto')"><i class="ti ti-minus"></i> Registrar gasto</button>
