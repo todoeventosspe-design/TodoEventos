@@ -106,6 +106,20 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--or-line);}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .row3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px;}
+
+/* ── Constructor de opciones de precio del servicio ── */
+.opcion-builder{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px;}
+.opcion-modos{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.opcion-modo{background:var(--card);border:1px solid var(--line);color:var(--sub);border-radius:9px;padding:11px 10px;font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .15s;text-align:center;line-height:1.25;}
+.opcion-modo:hover{border-color:var(--or-line);color:var(--fg);}
+.opcion-modo.active{background:var(--or-soft);border-color:var(--or);color:#9A3412;}
+.opcion-chip-titulo{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--sub);margin-bottom:8px;}
+.opcion-chip{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card2);border:1px solid var(--line);border-left:3px solid var(--or);border-radius:10px;padding:10px 12px;margin-bottom:8px;}
+.opcion-chip-n{font-size:13.5px;font-weight:700;color:var(--fg);}
+.opcion-chip-d{font-size:12px;color:var(--sub);margin-top:2px;}
+.opcion-chip-x{background:transparent;border:none;color:var(--sub);cursor:pointer;font-size:16px;flex-shrink:0;width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.opcion-chip-x:hover{background:rgba(239,68,68,.12);color:#ef4444;}
+@media(max-width:600px){ .opcion-modos{grid-template-columns:1fr;} }
 .btn-or{background:var(--or);color:#fff;border:none;padding:11px 20px;border-radius:9px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:7px;transition:opacity .16s;}
 .btn-or:hover{opacity:.9;}
 .btn-ghost{background:var(--card2);color:var(--fg);border:1px solid var(--line);padding:11px 18px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;}
@@ -998,7 +1012,7 @@ verificarAccesoDashboard();
 
 <!-- ─── MODAL: Crear / Editar / Eliminar servicio del perfil ─── -->
 <div class="modal-overlay" id="service-modal-overlay" onclick="if(event.target===this) closeServiceModal()">
-  <div class="modal-box">
+  <div class="modal-box" style="max-width:560px;max-height:88vh;overflow-y:auto;">
     <div class="modal-head">
       <div class="modal-title" id="service-modal-title">Añadir nuevo servicio</div>
       <button class="modal-close" onclick="closeServiceModal()"><i class="ti ti-x"></i></button>
@@ -1037,6 +1051,60 @@ verificarAccesoDashboard();
       <textarea id="service-descripcion" rows="3" placeholder="Breve descripción de lo que incluye"></textarea>
     </div>
 
+    <!-- ─── OPCIONES DE PRECIO ─── -->
+    <div class="field">
+      <label>Opciones de precio <span style="color:var(--sub);font-weight:400;">(opcional)</span></label>
+      <small style="display:block;margin:-2px 0 12px;color:var(--sub);font-size:12px;line-height:1.5;">
+        Para lo que cobras por unidad, por paquete, o con un mínimo (sillas, platos, horas extra…).
+        Todo lo numérico es libre: pones lo que quieras, nada viene fijo. El precio base de arriba
+        sigue siendo el "desde" que ve el cliente.
+      </small>
+
+      <div id="opciones-lista"></div>
+
+      <div class="opcion-builder">
+        <div class="opcion-modos">
+          <button type="button" class="opcion-modo active" data-modo="simple" onclick="setOpcionModo('simple')">Precio por unidad o por paquete</button>
+          <button type="button" class="opcion-modo" data-modo="minimo" onclick="setOpcionModo('minimo')">Mínimo + extra por unidad</button>
+        </div>
+
+        <div class="field" style="margin-bottom:10px;">
+          <label>Nombre del ítem</label>
+          <input type="text" id="opcion-nombre" placeholder="Ej. Sillas Tiffany">
+        </div>
+
+        <div id="opcion-modo-simple">
+          <div class="field" style="margin-bottom:8px;">
+            <label>Precio (S/.)</label>
+            <input type="number" id="opcion-precio" min="0" step="0.01" placeholder="Ej. 8">
+            <small style="display:block;margin-top:4px;color:var(--sub);font-size:11.5px;">Lo que cobras por cada unidad, o por el paquete completo.</small>
+          </div>
+        </div>
+
+        <div id="opcion-modo-minimo" style="display:none;">
+          <div class="row3">
+            <div class="field" style="margin-bottom:8px;">
+              <label>Precio del mínimo (S/.)</label>
+              <input type="number" id="opcion-precio-min" min="0" step="0.01" placeholder="Ej. 300">
+              <small style="display:block;margin-top:4px;color:var(--sub);font-size:11.5px;">Cuánto cobras por el paquete mínimo completo, no por unidad.</small>
+            </div>
+            <div class="field" style="margin-bottom:8px;">
+              <label>Cantidad mínima</label>
+              <input type="number" id="opcion-cant-min" min="0" step="1" placeholder="Ej. 50">
+              <small style="display:block;margin-top:4px;color:var(--sub);font-size:11.5px;">El pedido más chico que aceptas de este ítem.</small>
+            </div>
+            <div class="field" style="margin-bottom:8px;">
+              <label>Precio c/u extra (S/.)</label>
+              <input type="number" id="opcion-precio-extra" min="0" step="0.01" placeholder="Ej. 6">
+              <small style="display:block;margin-top:4px;color:var(--sub);font-size:11.5px;">Lo que cobras por cada unidad adicional arriba del mínimo.</small>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="btn-or" onclick="agregarOpcionServicio()" style="margin-top:4px;"><i class="ti ti-plus"></i> Agregar opción al servicio</button>
+      </div>
+    </div>
+
     <div class="field">
       <label>Fotos de este servicio <span id="service-img-count" style="color:var(--sub);font-weight:400;"></span></label>
       <div class="service-img-grid" id="service-img-grid"></div>
@@ -1058,6 +1126,7 @@ verificarAccesoDashboard();
     </div>
     <div class="modal-date" id="viewer-precio">—</div>
     <div class="profile-bio" id="viewer-descripcion" style="margin-bottom:16px;"></div>
+    <div id="viewer-opciones"></div>
     <div class="panel-title" style="font-size:12.5px;"><i class="ti ti-photo"></i> Fotos de este servicio</div>
     <div class="gallery-grid" id="viewer-img-grid"></div>
     <div class="panel-title" style="font-size:12.5px;margin-top:16px;"><i class="ti ti-star"></i> Reseñas de este servicio <span id="viewer-resenas-count"></span></div>
@@ -2434,7 +2503,7 @@ async function cargarPerfilDesdeSupabase(){
   const p = perfilRowInicial;
 
   const [{ data: servicios }, { data: resenas }, { data: comentarios }, { data: feedFotos }] = await Promise.all([
-    sb.from('services').select('id, name, price, category, description, imagenes, active').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true }),
+    sb.from('services').select('id, name, price, category, description, imagenes, active, opciones').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true }),
     sb.from('reviews').select('id, service_id, rating, comment, created_at, client_name').eq('provider_id', usuarioActual.id).order('created_at', { ascending: false }),
     sb.from('comentarios_perfil').select('id, comment, created_at, client_name').eq('provider_id', usuarioActual.id).order('created_at', { ascending: false }),
     sb.from('feed_photos').select('id, url').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true })
@@ -2461,7 +2530,7 @@ async function cargarPerfilDesdeSupabase(){
     bannerUrl: p.banner_url || '',
     ratingReal: p.rating || 0,
     reviews_count: p.reviews_count || 0,
-    servicios: (servicios || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, categoria: s.category || 'musica', descripcion: s.description || '', imagenes: s.imagenes || [], activo: s.active === true })),
+    servicios: (servicios || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, categoria: s.category || 'musica', descripcion: s.description || '', imagenes: s.imagenes || [], opciones: Array.isArray(s.opciones) ? s.opciones : [], activo: s.active === true })),
     resenasPorServicio,
     // "Comentarios" del perfil: sobre el proveedor como persona/negocio,
     // distintos de las reseñas de un servicio puntual.
@@ -2770,6 +2839,64 @@ function changeProfileImage(target){
 const SERVICIO_IMG_MAX = 20;
 let servicioImagenesDraft = [];
 
+// ─── Opciones de precio del servicio (unidad / paquete / mínimo + extra) ───
+let opcionesDraft = [];
+let opcionModoActual = 'simple';
+
+function setOpcionModo(m){
+  opcionModoActual = m;
+  document.querySelectorAll('.opcion-modo').forEach(b => b.classList.toggle('active', b.dataset.modo === m));
+  document.getElementById('opcion-modo-simple').style.display = (m === 'simple') ? 'block' : 'none';
+  document.getElementById('opcion-modo-minimo').style.display = (m === 'minimo') ? 'block' : 'none';
+}
+
+function precioLegible(n){ return 'S/. ' + Number(n || 0).toLocaleString('es-PE'); }
+
+function renderOpcionesDraft(){
+  const cont = document.getElementById('opciones-lista');
+  if(!cont) return;
+  if(!opcionesDraft.length){ cont.innerHTML = ''; return; }
+  cont.innerHTML = opcionesDraft.map((o, i) => {
+    let detalle;
+    if(o.tipo === 'minimo'){
+      detalle = 'Mínimo' + (o.cant_min ? ' ' + o.cant_min + ' u.' : '') + ' por ' + precioLegible(o.precio_min) +
+                ' · c/u extra ' + precioLegible(o.precio_extra);
+    } else {
+      detalle = precioLegible(o.precio);
+    }
+    return `<div class="opcion-chip">
+      <div><div class="opcion-chip-n">${esc(o.nombre)}</div><div class="opcion-chip-d">${esc(detalle)}</div></div>
+      <button type="button" class="opcion-chip-x" onclick="removerOpcion(${i})" title="Quitar"><i class="ti ti-x"></i></button>
+    </div>`;
+  }).join('');
+}
+
+function agregarOpcionServicio(){
+  const nombre = document.getElementById('opcion-nombre').value.trim();
+  if(!nombre){ alert('Ponle un nombre al ítem (ej. "Sillas Tiffany").'); return; }
+
+  if(opcionModoActual === 'simple'){
+    const precio = parseFloat(document.getElementById('opcion-precio').value);
+    if(isNaN(precio) || precio < 0){ alert('Pon un precio válido para la opción.'); return; }
+    opcionesDraft.push({ tipo:'simple', nombre, precio });
+  } else {
+    const precio_min = parseFloat(document.getElementById('opcion-precio-min').value);
+    const cantRaw = document.getElementById('opcion-cant-min').value;
+    const cant_min = cantRaw === '' ? null : parseInt(cantRaw, 10);
+    const precio_extra = parseFloat(document.getElementById('opcion-precio-extra').value);
+    if(isNaN(precio_min) || precio_min < 0){ alert('Pon cuánto cobras por el mínimo.'); return; }
+    if(isNaN(precio_extra) || precio_extra < 0){ alert('Pon cuánto cobras por cada unidad extra.'); return; }
+    opcionesDraft.push({ tipo:'minimo', nombre, precio_min, cant_min: (cant_min !== null && !isNaN(cant_min)) ? cant_min : null, precio_extra });
+  }
+
+  ['opcion-nombre','opcion-precio','opcion-precio-min','opcion-cant-min','opcion-precio-extra']
+    .forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  document.getElementById('opcion-nombre').focus();
+  renderOpcionesDraft();
+}
+
+function removerOpcion(i){ opcionesDraft.splice(i, 1); renderOpcionesDraft(); }
+
 function openServiceModal(id){
   servicioEditingId = id || null;
   const existing = id ? perfilData.servicios.find(s => s.id === id) : null;
@@ -2784,6 +2911,11 @@ function openServiceModal(id){
   servicioImagenesDraft = existing && Array.isArray(existing.imagenes) ? existing.imagenes.slice() : [];
   renderServiceModalImages();
 
+  // Opciones de precio: se cargan las que ya tenga el servicio.
+  opcionesDraft = existing && Array.isArray(existing.opciones) ? existing.opciones.map(o => ({ ...o })) : [];
+  setOpcionModo('simple');
+  renderOpcionesDraft();
+
   document.getElementById('service-modal-overlay').classList.add('open');
 }
 
@@ -2791,6 +2923,7 @@ function closeServiceModal(){
   document.getElementById('service-modal-overlay').classList.remove('open');
   servicioEditingId = null;
   servicioImagenesDraft = [];
+  opcionesDraft = [];
 }
 
 function renderServiceModalImages(){
@@ -2840,25 +2973,27 @@ async function saveService(){
 
   const imagenes = servicioImagenesDraft.slice();
 
+  const opciones = opcionesDraft.map(o => ({ ...o }));
+
   if(servicioEditingId){
     const { error } = await sb.from('services').update({
       name: nombre, price: precio, category: categoria, description: descripcion, imagenes,
-      image_url: imagenes[0] || null
+      image_url: imagenes[0] || null, opciones
     }).eq('id', servicioEditingId).eq('provider_id', usuarioActual.id);
     if(error){ alert('No se pudo guardar el servicio: ' + error.message); return; }
 
     const idx = perfilData.servicios.findIndex(s => s.id === servicioEditingId);
-    if(idx >= 0) perfilData.servicios[idx] = { ...perfilData.servicios[idx], nombre, precio, categoria, descripcion, imagenes };
+    if(idx >= 0) perfilData.servicios[idx] = { ...perfilData.servicios[idx], nombre, precio, categoria, descripcion, imagenes, opciones };
   } else {
     // Un servicio nuevo nace como BORRADOR: no aparece en el catálogo hasta
     // que el proveedor lo lanza al mercado a propósito.
     const { data, error } = await sb.from('services').insert({
       provider_id: usuarioActual.id, name: nombre, price: precio, category: categoria, description: descripcion,
-      imagenes, image_url: imagenes[0] || null, active: false
+      imagenes, image_url: imagenes[0] || null, active: false, opciones
     }).select('id').single();
     if(error){ alert('No se pudo crear el servicio: ' + error.message); return; }
 
-    perfilData.servicios.push({ id: data.id, nombre, precio, categoria, descripcion, imagenes, activo: false });
+    perfilData.servicios.push({ id: data.id, nombre, precio, categoria, descripcion, imagenes, opciones, activo: false });
   }
 
   closeServiceModal();
@@ -2886,6 +3021,19 @@ function openServiceViewer(id){
   document.getElementById('viewer-nombre').textContent = s.nombre;
   document.getElementById('viewer-precio').textContent = 'S/. ' + Number(s.precio).toLocaleString('es-PE');
   document.getElementById('viewer-descripcion').textContent = s.descripcion;
+
+  // Opciones de precio (así como las verá el cliente en el catálogo).
+  const opc = Array.isArray(s.opciones) ? s.opciones : [];
+  const opcCont = document.getElementById('viewer-opciones');
+  opcCont.innerHTML = opc.length ? ('<div class="opcion-chip-titulo">Opciones y precios</div>' + opc.map(o => {
+    let detalle;
+    if(o.tipo === 'minimo'){
+      detalle = 'Mínimo' + (o.cant_min ? ' ' + o.cant_min + ' u.' : '') + ' por ' + precioLegible(o.precio_min) + ' · c/u extra ' + precioLegible(o.precio_extra);
+    } else {
+      detalle = precioLegible(o.precio);
+    }
+    return `<div class="opcion-chip"><div><div class="opcion-chip-n">${esc(o.nombre)}</div><div class="opcion-chip-d">${esc(detalle)}</div></div></div>`;
+  }).join('')) : '';
 
   const imgs = s.imagenes || [];
   const grid = document.getElementById('viewer-img-grid');

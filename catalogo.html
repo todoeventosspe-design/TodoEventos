@@ -202,6 +202,13 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .pm-svc-chev{font-size:14px;color:var(--sub);transition:transform .2s;margin-left:4px;vertical-align:middle;}
 .pm-service.open .pm-svc-chev{transform:rotate(180deg);color:var(--pu);}
 .pm-svc-detail{display:none;padding:0 14px 14px;border-top:1px solid var(--border);}
+.pm-opciones{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin:12px 0;}
+.pm-opc-titulo{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--sub);margin-bottom:8px;}
+.pm-opc-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px dashed var(--border);}
+.pm-opc-row:last-child{border-bottom:none;}
+.pm-opc-n{font-size:13.5px;font-weight:600;color:var(--fg);}
+.pm-opc-d{font-size:13px;font-weight:700;color:var(--pu);text-align:right;white-space:nowrap;}
+.pm-opc-extra{display:block;font-size:11.5px;font-weight:600;color:var(--sub);}
 .pm-service.open .pm-svc-detail{display:block;animation:svcIn .18s ease;}
 @keyframes svcIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:translateY(0);}}
 .pm-svc-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0;}
@@ -595,6 +602,24 @@ function fotoSegura(url){
 // Postgres devuelve los "numeric" como texto, por eso el Number().
 function money(n){ return 'S/. ' + Number(n || 0).toLocaleString('es-PE'); }
 
+// Opciones de precio de un servicio (unidad / paquete / mínimo + extra), tal
+// como las arma el proveedor en su panel. Se muestran al cliente dentro del
+// detalle del servicio para que sepa cómo se cobra, sin tener que preguntar.
+function opcionesServicioHtml(opciones){
+  if(!Array.isArray(opciones) || !opciones.length) return '';
+  const filas = opciones.map(o => {
+    let detalle;
+    if(o && o.tipo === 'minimo'){
+      detalle = 'Mínimo' + (o.cant_min ? ' ' + o.cant_min + ' u.' : '') + ' · ' + money(o.precio_min) +
+                ' <span class="pm-opc-extra">+ ' + money(o.precio_extra) + ' c/u extra</span>';
+    } else {
+      detalle = money(o && o.precio);
+    }
+    return `<div class="pm-opc-row"><span class="pm-opc-n">${esc(o && o.nombre || '')}</span><span class="pm-opc-d">${detalle}</span></div>`;
+  }).join('');
+  return `<div class="pm-opciones"><div class="pm-opc-titulo">Opciones y precios</div>${filas}</div>`;
+}
+
 // ─── Favoritos: se recuerdan en este navegador (localStorage) ───
 function favSet(){ try{ return new Set(JSON.parse(localStorage.getItem('te_favs') || '[]')); }catch(e){ return new Set(); } }
 function favGuardar(set){ try{ localStorage.setItem('te_favs', JSON.stringify([...set])); }catch(e){} }
@@ -820,7 +845,7 @@ async function openProvider(providerId) {
 
   const [{ data: perfilReal }, { data: serviciosReal }, { data: feedReal }, { data: comentariosReal }] = await Promise.all([
     sb.from('profiles').select('full_name, categoria, location, bio, avatar_url, banner_url, rating, reviews_count').eq('id', providerId).single(),
-    sb.from('services').select('id, name, price, description, imagenes').eq('provider_id', providerId).eq('active', true),
+    sb.from('services').select('id, name, price, description, imagenes, opciones').eq('provider_id', providerId).eq('active', true),
     sb.from('feed_photos').select('url').eq('provider_id', providerId),
     sb.from('comentarios_perfil').select('client_name, comment, created_at').eq('provider_id', providerId).order('created_at', { ascending: false })
   ]);
@@ -836,7 +861,7 @@ async function openProvider(providerId) {
   const rating = Number(perfilReal.rating) || 0;
   const reviews = perfilReal.reviews_count || 0;
   const esNuevo = reviews === 0;
-  const servicios = (serviciosReal || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, descripcion: s.description, imagenes: (s.imagenes || []).map(fotoSegura).filter(Boolean) }));
+  const servicios = (serviciosReal || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, descripcion: s.description, imagenes: (s.imagenes || []).map(fotoSegura).filter(Boolean), opciones: Array.isArray(s.opciones) ? s.opciones : [] }));
   let galeria = [];
   servicios.forEach(s => { (s.imagenes||[]).forEach(u => galeria.push(u)); });
   galeria = galeria.concat((feedReal || []).map(f => fotoSegura(f.url)).filter(Boolean));
@@ -867,6 +892,7 @@ async function openProvider(providerId) {
     const galeriaHtml = imgs.length
       ? `<div class="pm-svc-gallery">${imgs.slice(0,6).map(u => `<img src="${esc(u)}" alt="${esc(s.nombre)}">`).join('')}</div>`
       : `<div class="pm-svc-nofotos">Este paquete aún no tiene fotos.</div>`;
+    const opcionesHtml = opcionesServicioHtml(s.opciones);
     return `
     <div class="pm-service" id="pm-svc-${i}">
       <div class="pm-service-main" onclick="toggleServiceDetail(${i})">
@@ -878,6 +904,7 @@ async function openProvider(providerId) {
       </div>
       <div class="pm-svc-detail" id="pm-svc-detail-${i}">
         ${galeriaHtml}
+        ${opcionesHtml}
         <button class="pm-add-cart" onclick="event.stopPropagation(); addToCart(${i})">
           <i class="ti ti-shopping-cart"></i> Añadir al carrito
         </button>
