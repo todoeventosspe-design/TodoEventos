@@ -51,7 +51,8 @@ caja, CRM, inventario, reportes); el marketplace viene de yapa.
   deshace nada; los cambios quedan en la base. El editor es solo un borrador.
   - Ya corridos: `fundador.sql`, `pentest.sql`, `seguridad-correo.sql`,
     `programa-fundador.sql`, la columna `solicitudes_proveedor.fotos`, la
-    política de lectura de solicitudes para el admin.
+    política de lectura de solicitudes para el admin, y `opciones-servicio.sql`
+    (columna `services.opciones jsonb`, aplicada vía MCP el 2026-08-26).
   - `pentest.sql` termina en un "error" a propósito; si dice `OK_PENTEST :: 19
     checks` está todo bien.
 - **Seguridad ya montada:** RLS por `provider_id`; trigger
@@ -93,6 +94,14 @@ confianza (`.tbar`) a 1 columna en móvil (una regla sin media query la dejaba
 siempre en 3). OJO con Vercel: si la web en vivo se ve distinta al repo (hero
 viejo de 2 columnas), es un deploy viejo — hay que asegurar que Vercel
 despliegue el `main` actual.
+
+Opciones de precio por servicio: en "Editar servicio" del dashboard el
+proveedor arma opciones con dos modos — "Precio por unidad o por paquete"
+(nombre + precio) y "Mínimo + extra por unidad" (nombre + precio del mínimo +
+cantidad mínima + precio c/u extra). Se guardan en `services.opciones` (jsonb,
+hereda el RLS de services) y se muestran al cliente dentro del detalle de cada
+servicio en el catálogo (sección "Opciones y precios"). El precio base sigue
+siendo el "desde" del catálogo.
 
 Repaso de móvil completo (todas las páginas verificadas renderizando a 360/390px,
 el ancho del documento queda igual al viewport, sin scroll horizontal): inicio,
