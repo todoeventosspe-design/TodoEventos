@@ -650,7 +650,7 @@ async function doRegister(){
   // (en esta pestaña) y mostramos la pantalla para ingresar el código.
   // La solicitud de proveedor se guarda DESPUÉS de verificar el código,
   // porque hasta ese momento no existe una sesión activa todavía.
-  sessionStorage.setItem('te_pending_verification', JSON.stringify({
+  localStorage.setItem('te_pending_verification', JSON.stringify({
     email, nombre, role: currentRole, datosProveedor
   }));
   mostrarPantallaCodigo(email);
@@ -681,7 +681,7 @@ function mostrarPantallaCodigo(email){
 }
 
 function volverALogin(){
-  sessionStorage.removeItem('te_pending_verification');
+  localStorage.removeItem('te_pending_verification');
   document.getElementById('vista-codigo').style.display = 'none';
   document.getElementById('vista-form').style.display = 'block';
   authMode = 'login';
@@ -696,7 +696,7 @@ async function verificarCodigo(){
     return;
   }
 
-  const raw = sessionStorage.getItem('te_pending_verification');
+  const raw = localStorage.getItem('te_pending_verification');
   if(!raw){
     showErrorCodigo('No encontramos tu registro pendiente. Vuelve a intentar el registro.');
     return;
@@ -729,7 +729,7 @@ async function verificarCodigo(){
     }
   }
 
-  sessionStorage.removeItem('te_pending_verification');
+  localStorage.removeItem('te_pending_verification');
   localStorage.setItem('te_remember', 'true');
   window.location.href = REDIRECT_MAP[pendiente.role] || 'index.html';
 }
@@ -756,7 +756,7 @@ async function recuperarPassword(){
 
 async function reenviarCodigo(){
   ocultarMensajesCodigo();
-  const raw = sessionStorage.getItem('te_pending_verification');
+  const raw = localStorage.getItem('te_pending_verification');
   if(!raw){
     showErrorCodigo('No encontramos tu registro pendiente. Vuelve a intentar el registro.');
     return;
@@ -785,7 +785,7 @@ document.addEventListener('keydown', function(e){
 
 // Si recargaste la página a medio verificar el código, retómalo donde quedó
 (function inicializarSegunPendiente(){
-  const raw = sessionStorage.getItem('te_pending_verification');
+  const raw = localStorage.getItem('te_pending_verification');
   if(raw){
     try {
       const pendiente = JSON.parse(raw);
