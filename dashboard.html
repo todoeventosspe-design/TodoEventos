@@ -415,6 +415,10 @@ async function verificarAccesoDashboard(){
   }
 
   if(perfil.verification_status === 'pendiente'){
+    // Red de seguridad: si por lo que sea la solicitud no se creó en el
+    // registro (p. ej. confirmó por el enlace del correo), la creamos ahora
+    // que el proveedor está en su panel, para que el admin SIEMPRE la vea.
+    await asegurarSolicitudProveedor(usuario, perfil);
     mostrarCandado('ti-clock-hour-4', 'Tu cuenta está en revisión',
       'Estamos revisando la información de tu negocio. Vuelve a entrar más tarde para ver si ya quedó aprobada. Normalmente lo revisamos en un par de días.');
     return;
@@ -436,6 +440,47 @@ async function verificarAccesoDashboard(){
   usuarioActual = usuario;
   perfilRowInicial = perfil;
   if(typeof onAccesoDashboardOk === 'function') onAccesoDashboardOk();
+}
+
+// Crea la solicitud del proveedor si todavía no existe. Es la red de seguridad
+// para los casos en que el registro no la insertó (confirmó por el enlace del
+// correo, cerró la pestaña, etc.). Idempotente: si ya hay una, no hace nada.
+// Usa los datos guardados en el registro (localStorage) si son de esta cuenta;
+// si no, arma una solicitud básica con lo que hay en el perfil, para que el
+// admin al menos la vea y pueda aprobarla.
+async function asegurarSolicitudProveedor(usuario, perfil){
+  try {
+    const { data: existe } = await sb.from('solicitudes_proveedor')
+      .select('id').eq('user_id', usuario.id).maybeSingle();
+    if(existe) return;
+
+    let datos = null;
+    try {
+      const raw = localStorage.getItem('te_pending_verification');
+      if(raw){
+        const pend = JSON.parse(raw);
+        if(pend && pend.datosProveedor &&
+           (pend.email || '').toLowerCase() === (usuario.email || '').toLowerCase()){
+          datos = pend.datosProveedor;
+        }
+      }
+    } catch(e){}
+
+    const payload = datos ? { user_id: usuario.id, ...datos } : {
+      user_id: usuario.id,
+      nombre_negocio: (perfil && perfil.full_name) || ('Negocio de ' + usuario.email),
+      categoria: (perfil && perfil.categoria) || 'Otro',
+      ruc_dni: 'Pendiente',
+      telefono: 'Pendiente',
+      distrito: (perfil && perfil.location) || 'Lima',
+      descripcion: 'Registro confirmado por el enlace del correo; datos por completar.'
+    };
+
+    const { error } = await sb.from('solicitudes_proveedor').insert(payload);
+    if(!error && datos) localStorage.removeItem('te_pending_verification');
+  } catch(e){
+    console.error('No se pudo asegurar la solicitud del proveedor:', e);
+  }
 }
 
 verificarAccesoDashboard();
