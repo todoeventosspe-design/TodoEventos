@@ -155,6 +155,15 @@ async function verificarSesion(){
     document.body.classList.add('role-' + perfil.role);
   }
 
+  // Red de seguridad: si el proveedor confirmó su correo por el ENLACE del mail
+  // (no tecleando el código en la pestaña del registro), la solicitud nunca se
+  // llegó a insertar y el admin no la veía. Acá, con la sesión ya activa, la
+  // creamos desde los datos que dejamos guardados en el registro. Es
+  // idempotente: si ya existe una solicitud, no hace nada.
+  if(perfil && perfil.role === 'proveedor'){
+    await asegurarSolicitudProveedor(usuario);
+  }
+
   const mensajePorRol = {
     cliente: 'Ya puedes entrar al catálogo y armar tu evento.',
     proveedor: 'Ya puedes manejar tu negocio desde tu panel.'
@@ -173,6 +182,40 @@ async function verificarSesion(){
     btn.href = destino;
     btn.innerHTML = '<i class="ti ti-arrow-right"></i> ' +
       (perfil.role === 'proveedor' ? 'Ir a mi dashboard' : 'Ir al marketplace');
+  }
+}
+
+// Crea la solicitud de proveedor si todavía no existe (caso: confirmó por el
+// enlace del correo, así que el registro nunca la insertó). Los datos del
+// negocio quedaron guardados en localStorage durante el registro. Las fotos no
+// se rescatan por esta vía (se subieron solo si tecleó el código en la pestaña
+// original); el admin igual ve la solicitud y puede aprobarla.
+async function asegurarSolicitudProveedor(usuario){
+  try {
+    const { data: existente } = await sb
+      .from('solicitudes_proveedor')
+      .select('id')
+      .eq('user_id', usuario.id)
+      .maybeSingle();
+    if(existente) return; // ya hay solicitud: nada que hacer
+
+    const raw = localStorage.getItem('te_pending_verification');
+    if(!raw) return;
+    let pendiente;
+    try { pendiente = JSON.parse(raw); } catch(e){ return; }
+
+    // Solo si los datos guardados son de ESTA cuenta y traen info de negocio.
+    const emailSesion = (usuario.email || '').toLowerCase();
+    if(!pendiente || (pendiente.email || '').toLowerCase() !== emailSesion) return;
+    if(pendiente.role !== 'proveedor' || !pendiente.datosProveedor) return;
+
+    const { error } = await sb
+      .from('solicitudes_proveedor')
+      .insert({ user_id: usuario.id, ...pendiente.datosProveedor });
+    if(!error) localStorage.removeItem('te_pending_verification');
+    else console.error('No se pudo crear la solicitud de proveedor:', error);
+  } catch(e){
+    console.error('Error asegurando la solicitud de proveedor:', e);
   }
 }
 
