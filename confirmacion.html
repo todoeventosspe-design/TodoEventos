@@ -129,10 +129,21 @@ async function verificarSesion(){
     return;
   }
 
+  // Recuperación de contraseña: Supabase manda type=recovery en el hash del
+  // enlace del correo. Antes esta pantalla no lo distinguía del enlace normal
+  // de "cuenta confirmada" y mandaba directo al dashboard, así que el usuario
+  // nunca llegaba al formulario para poner su contraseña nueva.
+  const esRecovery = new URLSearchParams(window.location.hash.replace(/^#/, '')).get('type') === 'recovery';
+
   // El SDK de Supabase detecta automáticamente el token que viene en la URL
-  // (#access_token=...) y crea la sesión. Aquí solo la leemos para
-  // personalizar el mensaje de bienvenida.
+  // (#access_token=...) y crea la sesión. La esperamos aquí antes de decidir
+  // adónde mandar al usuario, para que la sesión ya haya quedado guardada.
   const { data, error } = await sb.auth.getSession();
+
+  if(esRecovery && data.session){
+    window.location.replace('cuenta.html?reset=1');
+    return;
+  }
 
   if(error || !data.session){
     // No había token en la URL, o no era válido: no es necesariamente un

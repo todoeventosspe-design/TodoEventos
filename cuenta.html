@@ -171,7 +171,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--app-bg);color:
   </div>
 
   <!-- Cambiar contraseña -->
-  <div class="card">
+  <div class="card" id="card-password">
     <div class="card-title"><i class="ti ti-lock"></i> Cambiar contraseña</div>
     <div class="row2">
       <div class="field">
@@ -357,6 +357,16 @@ async function init(){
 
   document.getElementById('loading-screen').style.display = 'none';
   document.getElementById('contenido').style.display = 'block';
+
+  // Si venimos de un enlace de "olvidé mi contraseña" (confirmacion.html nos
+  // manda acá con ?reset=1), llevamos directo a la tarjeta de cambiar
+  // contraseña en vez de dejar que se pierda entre el resto del perfil.
+  if(new URLSearchParams(window.location.search).get('reset') === '1'){
+    const card = document.getElementById('card-password');
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.style.boxShadow = '0 0 0 3px var(--ac-glow)';
+    document.getElementById('input-pass1').focus();
+  }
 }
 
 async function guardarInfo(){
