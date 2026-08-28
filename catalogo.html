@@ -44,7 +44,8 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 
 /* ── CATEGORY BAR ── */
 #catbar{position:sticky;top:57px;z-index:100;background:rgba(255,255,255,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);}
-.catbar-inner{max-width:1200px;margin:0 auto;padding:0 2rem;display:flex;align-items:center;gap:0;overflow-x:auto;scrollbar-width:none;}
+.catbar-inner{max-width:1200px;margin:0 auto;padding:0 2rem;display:flex;align-items:center;justify-content:center;gap:0;overflow-x:auto;scrollbar-width:none;}
+@media (max-width:900px){.catbar-inner{justify-content:flex-start;}}
 .catbar-inner::-webkit-scrollbar{display:none;}
 .cat-tab{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 20px;cursor:pointer;border-bottom:2px solid transparent;flex-shrink:0;transition:all .2s;color:var(--sub);white-space:nowrap;}
 .cat-tab:hover{color:var(--fg);}
@@ -105,8 +106,15 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .pcard-fav:hover{background:rgba(124,58,237,.3);}
 .pcard-fav:active{transform:scale(.85);}
 .pcard-fav i{font-size:14px;color:#fff;transition:color .18s;}
-.pcard-fav.on{background:rgba(234,88,12,.92);}
-.pcard-fav.on i{color:#fff;}
+.pcard-fav.activo{background:var(--or,#EA580C);}
+.pcard-fav.activo i{color:#fff;}
+#fav-modal-overlay{display:none;position:fixed;inset:0;background:rgba(18,14,31,.55);z-index:200;align-items:center;justify-content:center;padding:20px;}
+#fav-modal-overlay.open{display:flex;}
+.fav-modal{background:var(--bg2,#fff);border-radius:16px;padding:24px;max-width:820px;width:100%;max-height:85vh;overflow-y:auto;}
+.fav-modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.fav-modal-head h3{font-size:18px;font-weight:700;}
+.fav-modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--sub);}
+#fav-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;}
 /* Fundador: anillo dorado por dentro del banner. Va como box-shadow y no como
    border para que la foto no se recorte ni la tarjeta cambie de tamaño al
    pasar de un proveedor normal a uno fundador. */
@@ -449,6 +457,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
         <div class="user-dropdown" id="user-dropdown">
           <div class="user-dropdown-name" id="user-dropdown-name"></div>
           <a href="#" id="link-mi-espacio"><i class="ti ti-layout-dashboard" style="font-size:15px;"></i> <span id="link-mi-espacio-texto">Ir al marketplace</span></a>
+          <a href="#" onclick="event.preventDefault();abrirFavoritos();"><i class="ti ti-heart" style="font-size:15px;"></i> Mis favoritos</a>
           <a href="cuenta.html"><i class="ti ti-user-circle" style="font-size:15px;"></i> Mi cuenta</a>
           <a href="admin.html" id="link-admin" style="display:none;"><i class="ti ti-shield-lock" style="font-size:15px;"></i> Panel de admin</a>
           <button class="salir" onclick="cerrarSesion()"><i class="ti ti-logout-2" style="font-size:15px;"></i> Cerrar sesión</button>
@@ -576,6 +585,17 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
   </div>
 </div>
 
+<!-- ═══ MODAL DE FAVORITOS ═══ -->
+<div id="fav-modal-overlay" onclick="if(event.target===this)closeFavoritos();">
+  <div class="fav-modal">
+    <div class="fav-modal-head">
+      <h3><i class="ti ti-heart"></i> Mis favoritos</h3>
+      <button class="fav-modal-close" onclick="closeFavoritos();"><i class="ti ti-x"></i></button>
+    </div>
+    <div id="fav-grid"></div>
+  </div>
+</div>
+
 <!-- ═══ ASISTENTE ═══
      El agente vive en ElevenLabs; acá solo va el widget. Las funciones que le
      dan acceso al catálogo real están al final del bloque de JavaScript. -->
@@ -618,22 +638,6 @@ function opcionesServicioHtml(opciones){
     return `<div class="pm-opc-row"><span class="pm-opc-n">${esc(o && o.nombre || '')}</span><span class="pm-opc-d">${detalle}</span></div>`;
   }).join('');
   return `<div class="pm-opciones"><div class="pm-opc-titulo">Opciones y precios</div>${filas}</div>`;
-}
-
-// ─── Favoritos: se recuerdan en este navegador (localStorage) ───
-function favSet(){ try{ return new Set(JSON.parse(localStorage.getItem('te_favs') || '[]')); }catch(e){ return new Set(); } }
-function favGuardar(set){ try{ localStorage.setItem('te_favs', JSON.stringify([...set])); }catch(e){} }
-function favActivo(id){ return favSet().has(String(id)); }
-function toggleFav(ev, id, btn){
-  ev.stopPropagation();
-  var set = favSet(); id = String(id);
-  var activo = set.has(id);
-  if(activo){ set.delete(id); } else { set.add(id); }
-  favGuardar(set);
-  btn.classList.toggle('on', !activo);
-  var i = btn.querySelector('i');
-  if(i) i.className = 'ti ' + (!activo ? 'ti-heart-filled' : 'ti-heart');
-  btn.setAttribute('aria-label', !activo ? 'Quitar de favoritos' : 'Guardar como favorito');
 }
 
 // ─── DATA ───
@@ -785,7 +789,7 @@ function render() {
           <span class="pcard-vbdg">${p.badge}</span>
           ${p.esFundador ? `<span class="pcard-fbdg"><i class="ti ti-crown"></i> Fundador</span>` : ''}
           <span class="pcard-price-tag">desde S/. ${p.price}</span>
-          <button class="pcard-fav${favActivo(p.id) ? ' on' : ''}" aria-label="${favActivo(p.id) ? 'Quitar de favoritos' : 'Guardar como favorito'}" onclick="toggleFav(event, ${p.id}, this)"><i class="ti ${favActivo(p.id) ? 'ti-heart-filled' : 'ti-heart'}"></i></button>
+          <button class="pcard-fav${favoritos.has(p.id) ? ' activo' : ''}" aria-label="${favoritos.has(p.id) ? 'Quitar de favoritos' : 'Guardar como favorito'}" onclick="event.stopPropagation();toggleFavorito(${p.id}, this);"><i class="ti ${favoritos.has(p.id) ? 'ti-heart-filled' : 'ti-heart'}"></i></button>
         </div>
         <div class="pcard-body-top">
           <div class="pcard-name">${esc(p.name)}</div>
@@ -1436,7 +1440,71 @@ async function verificarSesionNav(){
   document.getElementById('link-mi-espacio-texto').textContent = textoLink;
 }
 
-verificarSesionNav();
+verificarSesionNav().then(() => cargarFavoritos().then(render));
+
+/* ─── Favoritos: ids de servicios guardados por el usuario logueado ─── */
+let favoritos = new Set();
+
+async function cargarFavoritos(){
+  if(!sb || !sesionUsuario) { favoritos = new Set(); return; }
+  const { data, error } = await sb.from('favoritos').select('service_id').eq('user_id', sesionUsuario.id);
+  if(error){ console.error('No se pudieron cargar los favoritos:', error); return; }
+  favoritos = new Set((data || []).map(f => f.service_id));
+}
+
+async function toggleFavorito(serviceId, btn){
+  if(!sb || !sesionUsuario){
+    alert('Ingresa a tu cuenta para guardar favoritos.');
+    window.location.href = 'login.html';
+    return;
+  }
+  const yaEsFav = favoritos.has(serviceId);
+  btn.classList.toggle('activo', !yaEsFav); // respuesta visual inmediata
+  btn.setAttribute('aria-label', yaEsFav ? 'Guardar como favorito' : 'Quitar de favoritos');
+  const icono = btn.querySelector('i');
+  if(icono) icono.className = 'ti ' + (yaEsFav ? 'ti-heart' : 'ti-heart-filled');
+  if(yaEsFav){
+    favoritos.delete(serviceId);
+    const { error } = await sb.from('favoritos').delete().eq('user_id', sesionUsuario.id).eq('service_id', serviceId);
+    if(error){ favoritos.add(serviceId); btn.classList.add('activo'); if(icono) icono.className = 'ti ti-heart-filled'; console.error(error); }
+  } else {
+    favoritos.add(serviceId);
+    const { error } = await sb.from('favoritos').insert({ user_id: sesionUsuario.id, service_id: serviceId });
+    if(error){ favoritos.delete(serviceId); btn.classList.remove('activo'); if(icono) icono.className = 'ti ti-heart'; console.error(error); }
+  }
+}
+
+function abrirFavoritos(){
+  document.getElementById('user-dropdown').classList.remove('open');
+  if(!sesionUsuario){ alert('Ingresa a tu cuenta para ver tus favoritos.'); return; }
+  const cont = document.getElementById('fav-grid');
+  const guardados = providers.filter(p => favoritos.has(p.id));
+  cont.innerHTML = guardados.length
+    ? guardados.map(p => `
+      <div class="pcard">
+        <div class="pcard-clickable" onclick="closeFavoritos();openServiceDetail(${p.id})">
+          <div class="pcard-img ${p.foto ? '' : 'ci-' + p.img}" ${p.foto ? `style="background-image:url('${esc(p.foto)}');background-size:cover;background-position:center;"` : ''}>
+            ${p.foto ? '' : `<i class="ti ${p.icon}"></i>`}
+            <span class="pcard-price-tag">desde S/. ${p.price}</span>
+            <button class="pcard-fav activo" onclick="event.stopPropagation();toggleFavorito(${p.id}, this);quitarDeVistaFavoritos(${p.id});"><i class="ti ti-heart-filled"></i></button>
+          </div>
+          <div class="pcard-body-top">
+            <div class="pcard-name">${esc(p.name)}</div>
+            <div class="pcard-loc"><i class="ti ti-map-pin" style="font-size:12px;"></i> ${esc(p.district)}, Lima</div>
+          </div>
+        </div>
+      </div>`).join('')
+    : '<div style="color:var(--sub);padding:24px 0;">Todavía no guardaste ningún servicio. Toca el corazón en una card para agregarlo aquí.</div>';
+  document.getElementById('fav-modal-overlay').classList.add('open');
+}
+
+function quitarDeVistaFavoritos(serviceId){
+  setTimeout(() => { if(!favoritos.has(serviceId)) abrirFavoritos(); }, 0);
+}
+
+function closeFavoritos(){
+  document.getElementById('fav-modal-overlay').classList.remove('open');
+}
 
 // Carga real de Supabase (debe ir despues de que "sb" ya este inicializado
 // arriba; moverla antes revienta con "Cannot access sb before initialization").
