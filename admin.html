@@ -78,6 +78,37 @@ h1{font-size:22px;font-weight:700;margin:22px 0 4px;}
 .sol-foto{width:86px;height:86px;border-radius:10px;overflow:hidden;border:1px solid var(--line);display:block;}
 .sol-foto img{width:100%;height:100%;object-fit:cover;display:block;}
 .sol-fotos-lbl{font-size:11.5px;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin:0 0 7px;font-weight:600;}
+
+/* ── Publicar servicio por proveedor: modal + selector ── */
+.prov-picker{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;}
+.prov-chip{padding:8px 15px;border-radius:100px;border:1px solid var(--line);background:var(--card);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--fg);}
+.prov-chip.active{background:var(--or);color:#fff;border-color:var(--or);}
+.svc-mini{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;}
+.svc-mini-name{font-weight:700;font-size:13.5px;}
+.svc-mini-meta{font-size:11.5px;color:var(--sub);}
+.btn-outline-or{background:transparent;color:var(--or);border:2px solid var(--or);padding:9px 16px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+.btn-outline-or:hover{background:var(--or);color:#fff;}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(18,14,31,.6);backdrop-filter:blur(4px);z-index:2000;align-items:center;justify-content:center;padding:20px;overflow-y:auto;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;width:100%;max-width:460px;margin:auto;}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.modal-title{font-size:16px;font-weight:700;}
+.modal-close{background:var(--card2);border:1px solid var(--line);color:var(--sub);width:30px;height:30px;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.modal-close:hover{color:var(--fg);border-color:var(--or-line);}
+.modal-actions{display:flex;gap:10px;margin-top:6px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:12px;color:var(--sub);margin-bottom:6px;font-weight:500;}
+.field input,.field select,.field textarea{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:9px;padding:11px 13px;color:var(--fg);font-size:13.5px;font-family:inherit;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--or-line);}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.gallery-remove{position:absolute;top:6px;right:6px;width:26px;height:26px;background:rgba(18,14,31,.68);border:1px solid rgba(255,255,255,.2);border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;}
+.service-img-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px;}
+.service-img-item{position:relative;border-radius:9px;overflow:hidden;aspect-ratio:1;background:var(--card2);}
+.service-img-item img{width:100%;height:100%;object-fit:cover;display:block;}
+.service-img-item .gallery-remove{width:20px;height:20px;top:3px;right:3px;font-size:10px;}
+.service-img-add{display:flex;align-items:center;justify-content:center;border:2px dashed var(--line);border-radius:9px;aspect-ratio:1;cursor:pointer;color:var(--sub);font-size:20px;}
+.service-img-add:hover{border-color:var(--or-line);color:var(--or);}
 </style>
 </head>
 <body>
@@ -99,11 +130,79 @@ h1{font-size:22px;font-weight:700;margin:22px 0 4px;}
     <button class="tab" id="tab-aprobados" onclick="cambiarTab('aprobado')">Aprobados</button>
     <button class="tab" id="tab-rechazados" onclick="cambiarTab('rechazado')">Rechazados</button>
     <button class="tab" id="tab-feedback" onclick="cambiarTab('feedback')"><i class="ti ti-message-2"></i> Feedback</button>
+    <button class="tab" id="tab-publicar" onclick="cambiarTab('publicar')"><i class="ti ti-upload"></i> Publicar por proveedor</button>
   </div>
 
   <div class="fund-info" id="fund-info"></div>
   <div id="lista-solicitudes"></div>
+
+  <div id="panel-publicar" style="display:none;">
+    <p class="sub" style="margin-bottom:14px;">Elige un proveedor aprobado y publica o edita sus servicios en su nombre (para cuando no tiene tiempo de hacerlo él mismo).</p>
+    <div class="prov-picker" id="prov-picker"></div>
+    <div id="panel-publicar-vacio" class="vacio"><i class="ti ti-user-question"></i>Elige un proveedor arriba para ver y publicar sus servicios.</div>
+    <div id="panel-publicar-lista" style="display:none;">
+      <button class="btn btn-aprobar" style="margin-bottom:14px;" onclick="abrirAdmSvcModal(null)"><i class="ti ti-plus"></i> Nuevo servicio</button>
+      <div id="admsvc-lista"></div>
+    </div>
+  </div>
 </div>
+
+<!-- ═══ PUBLICAR SERVICIO POR UN PROVEEDOR ═══ -->
+<div class="modal-overlay" id="admsvc-modal-overlay" onclick="if(event.target===this) closeAdmSvcModal()">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title" id="admsvc-modal-title">Servicio</div>
+      <button class="modal-close" onclick="closeAdmSvcModal()"><i class="ti ti-x"></i></button>
+    </div>
+
+    <div class="field">
+      <label>Nombre del servicio</label>
+      <input type="text" id="admsvc-nombre" placeholder="Ej. Catering para 100 personas">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Precio desde (S/.)</label>
+        <input type="number" id="admsvc-precio" min="0" step="0.01">
+      </div>
+      <div class="field">
+        <label>Categoría</label>
+        <select id="admsvc-categoria">
+          <option value="musica">Música & DJs</option>
+          <option value="catering">Catering</option>
+          <option value="fotografia">Fotografía & Video</option>
+          <option value="locales">Locales & Salones</option>
+          <option value="animadores">Animadores</option>
+          <option value="decoracion">Decoración</option>
+          <option value="inflables">Inflables y juegos</option>
+          <option value="bar">Bar Móvil</option>
+          <option value="pasteleria">Pastelería</option>
+          <option value="transporte">Transporte</option>
+          <option value="seguridad">Seguridad</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Descripción</label>
+      <textarea id="admsvc-descripcion" rows="3" placeholder="Qué incluye el servicio"></textarea>
+    </div>
+    <div class="field">
+      <label>Fotos <span id="admsvc-img-count" style="color:var(--sub);font-weight:400;"></span></label>
+      <div class="service-img-grid" id="admsvc-img-grid"></div>
+    </div>
+    <div class="field">
+      <label>Video <span style="color:var(--sub);font-weight:400;">(opcional, máx. 50MB)</span></label>
+      <div id="admsvc-video-box"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-aprobar" style="flex:1;justify-content:center;" onclick="guardarServicioAdmin()"><i class="ti ti-check"></i> Guardar</button>
+      <button class="btn btn-rechazar" id="admsvc-delete-btn" style="display:none;" onclick="borrarServicioAdmin()"><i class="ti ti-trash"></i></button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="admsvc-file-picker" accept="image/png,image/jpeg" style="display:none;">
+<input type="file" id="admsvc-video-picker" accept="video/mp4,video/webm,video/quicktime" style="display:none;">
 
 <script>
 const SUPABASE_URL = 'https://vqnyaozauljtashpjfoo.supabase.co';
@@ -255,6 +354,16 @@ function cambiarTab(tab){
   document.getElementById('tab-aprobados').classList.toggle('active', tab === 'aprobado');
   document.getElementById('tab-rechazados').classList.toggle('active', tab === 'rechazado');
   document.getElementById('tab-feedback').classList.toggle('active', tab === 'feedback');
+  document.getElementById('tab-publicar').classList.toggle('active', tab === 'publicar');
+
+  document.getElementById('lista-solicitudes').style.display = tab === 'publicar' ? 'none' : 'block';
+  document.getElementById('panel-publicar').style.display = tab === 'publicar' ? 'block' : 'none';
+
+  if(tab === 'publicar'){
+    document.getElementById('fund-info').style.display = 'none';
+    if(proveedoresAprobados === null){ cargarProveedoresAprobados().then(renderProvPicker); }
+    return;
+  }
   if(tab === 'feedback' && feedbackData === null){ cargarFeedback().then(render); return; }
   render();
 }
@@ -429,6 +538,231 @@ async function toggleFundador(userId, marcar){
     return;
   }
   await cargarSolicitudes();
+}
+
+// ─── PUBLICAR SERVICIO POR UN PROVEEDOR ────────────────────────────────────
+// Para proveedores sin tiempo de publicar ellos mismos: el admin elige uno
+// (aprobado) y le crea/edita/borra servicios, apoyado en la politica RLS
+// "admin gestiona cualquier servicio" (es_admin()), que existe ademas de la
+// normal de cada proveedor sobre lo suyo.
+let proveedoresAprobados = null;
+let proveedorAdminSeleccionado = null; // { id, nombre }
+let serviciosProveedorAdmin = [];
+let admsvcEditingId = null;
+let admsvcImagenesDraft = [];
+let admsvcVideoDraft = null;
+
+async function cargarProveedoresAprobados(){
+  const { data, error } = await sb.from('profiles')
+    .select('id, full_name')
+    .eq('role', 'proveedor')
+    .eq('verification_status', 'aprobado')
+    .order('full_name', { ascending: true });
+  proveedoresAprobados = error ? [] : (data || []);
+}
+
+function renderProvPicker(){
+  const cont = document.getElementById('prov-picker');
+  if(!proveedoresAprobados.length){
+    cont.innerHTML = '<div class="vacio"><i class="ti ti-users"></i>Todavía no hay proveedores aprobados.</div>';
+    return;
+  }
+  cont.innerHTML = proveedoresAprobados.map(p =>
+    `<button class="prov-chip${proveedorAdminSeleccionado && proveedorAdminSeleccionado.id === p.id ? ' active' : ''}" onclick="seleccionarProveedorAdmin('${p.id}', this)">${esc(p.full_name || 'Proveedor')}</button>`
+  ).join('');
+}
+
+async function seleccionarProveedorAdmin(id){
+  const p = proveedoresAprobados.find(x => x.id === id);
+  if(!p) return;
+  proveedorAdminSeleccionado = { id: p.id, nombre: p.full_name || 'Proveedor' };
+  renderProvPicker();
+
+  document.getElementById('panel-publicar-vacio').style.display = 'none';
+  document.getElementById('panel-publicar-lista').style.display = 'block';
+  document.getElementById('admsvc-lista').innerHTML = '<div class="vacio" style="padding:20px;"><span class="spinner"></span></div>';
+
+  const { data, error } = await sb.from('services')
+    .select('id, name, price, category, description, imagenes, video_url, active')
+    .eq('provider_id', id)
+    .order('created_at', { ascending: true });
+
+  serviciosProveedorAdmin = error ? [] : (data || []);
+  renderAdmSvcLista();
+}
+
+function renderAdmSvcLista(){
+  const cont = document.getElementById('admsvc-lista');
+  if(!serviciosProveedorAdmin.length){
+    cont.innerHTML = '<div class="vacio"><i class="ti ti-package-off"></i>Este proveedor todavía no tiene servicios. Crea el primero arriba.</div>';
+    return;
+  }
+  cont.innerHTML = serviciosProveedorAdmin.map(s => `
+    <div class="svc-mini">
+      <div>
+        <div class="svc-mini-name">${esc(s.name)}</div>
+        <div class="svc-mini-meta">S/. ${Number(s.price).toLocaleString('es-PE')} · ${s.active ? 'Publicado' : 'Borrador'}</div>
+      </div>
+      <div class="btns">
+        <button class="btn btn-fundador" onclick="abrirAdmSvcModal('${s.id}')"><i class="ti ti-edit"></i></button>
+        <button class="btn btn-fundador" onclick="toggleAdmSvcActivo('${s.id}', ${!s.active})"><i class="ti ti-${s.active ? 'eye-off' : 'eye'}"></i></button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function toggleAdmSvcActivo(id, activar){
+  if(activar){
+    const s = serviciosProveedorAdmin.find(x => x.id === id);
+    if(!s || !Array.isArray(s.imagenes) || !s.imagenes.length){
+      alert('Agrega al menos una foto antes de publicar este servicio.');
+      return;
+    }
+  }
+  const { error } = await sb.from('services').update({ active: activar }).eq('id', id);
+  if(error){ alert('No se pudo actualizar: ' + error.message); return; }
+  const s = serviciosProveedorAdmin.find(x => x.id === id);
+  if(s) s.active = activar;
+  renderAdmSvcLista();
+}
+
+function abrirAdmSvcModal(id){
+  admsvcEditingId = id || null;
+  const existing = id ? serviciosProveedorAdmin.find(s => s.id === id) : null;
+
+  document.getElementById('admsvc-modal-title').textContent = existing
+    ? 'Editar servicio de ' + proveedorAdminSeleccionado.nombre
+    : 'Nuevo servicio para ' + proveedorAdminSeleccionado.nombre;
+  document.getElementById('admsvc-nombre').value = existing ? existing.name : '';
+  document.getElementById('admsvc-precio').value = existing ? existing.price : '';
+  document.getElementById('admsvc-categoria').value = existing ? (existing.category || 'musica') : 'musica';
+  document.getElementById('admsvc-descripcion').value = existing ? (existing.description || '') : '';
+  document.getElementById('admsvc-delete-btn').style.display = existing ? 'flex' : 'none';
+
+  admsvcImagenesDraft = existing && Array.isArray(existing.imagenes) ? existing.imagenes.slice() : [];
+  renderAdmSvcImages();
+  admsvcVideoDraft = existing ? (existing.video_url || null) : null;
+  renderAdmSvcVideo();
+
+  document.getElementById('admsvc-modal-overlay').classList.add('open');
+}
+
+function closeAdmSvcModal(){
+  document.getElementById('admsvc-modal-overlay').classList.remove('open');
+  admsvcEditingId = null;
+  admsvcImagenesDraft = [];
+  admsvcVideoDraft = null;
+}
+
+function renderAdmSvcImages(){
+  const grid = document.getElementById('admsvc-img-grid');
+  let html = admsvcImagenesDraft.map((url, i) => `
+    <div class="service-img-item">
+      <img src="${esc(url)}" alt="Foto ${i+1}">
+      <button class="gallery-remove" onclick="admsvcImagenesDraft.splice(${i},1);renderAdmSvcImages();"><i class="ti ti-x"></i></button>
+    </div>`).join('');
+  if(admsvcImagenesDraft.length < 20){
+    html += `<div class="service-img-add" onclick="elegirFotoAdmin()" title="Agregar foto"><i class="ti ti-plus"></i></div>`;
+  }
+  grid.innerHTML = html;
+  document.getElementById('admsvc-img-count').textContent = '(' + admsvcImagenesDraft.length + '/20)';
+}
+
+function renderAdmSvcVideo(){
+  const box = document.getElementById('admsvc-video-box');
+  box.innerHTML = admsvcVideoDraft
+    ? `<div style="position:relative;max-width:280px;">
+        <video src="${esc(admsvcVideoDraft)}" controls style="width:100%;border-radius:10px;display:block;"></video>
+        <button class="gallery-remove" onclick="admsvcVideoDraft=null;renderAdmSvcVideo();" style="position:absolute;top:8px;right:8px;"><i class="ti ti-x"></i></button>
+      </div>`
+    : `<button type="button" class="btn-outline-or" onclick="elegirVideoAdmin()"><i class="ti ti-video-plus"></i> Subir video</button>`;
+}
+
+// Subida de archivos: misma carpeta que usaria el proveedor (su propio id,
+// no el del admin), asi las politicas RLS de storage lo aceptan igual que
+// si lo hubiera subido el.
+function elegirFotoAdmin(){
+  document.getElementById('admsvc-file-picker').value = '';
+  document.getElementById('admsvc-file-picker').click();
+}
+document.getElementById('admsvc-file-picker').addEventListener('change', async function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  if(!['image/png','image/jpeg'].includes(file.type)){ alert('Solo se aceptan imágenes PNG o JPG.'); return; }
+  if(file.size > 5 * 1024 * 1024){ alert('La imagen no puede pesar más de 5MB.'); return; }
+
+  const ext = file.type === 'image/png' ? 'png' : 'jpg';
+  const ruta = proveedorAdminSeleccionado.id + '/' + Date.now() + '_' + Math.random().toString(36).slice(2,8) + '.' + ext;
+  const { error } = await sb.storage.from('fotos-servicios').upload(ruta, file, { contentType: file.type });
+  if(error){ alert('No se pudo subir la foto: ' + error.message); return; }
+  const { data } = sb.storage.from('fotos-servicios').getPublicUrl(ruta);
+  admsvcImagenesDraft.push(data.publicUrl);
+  renderAdmSvcImages();
+});
+
+function elegirVideoAdmin(){
+  document.getElementById('admsvc-video-picker').value = '';
+  document.getElementById('admsvc-video-picker').click();
+}
+document.getElementById('admsvc-video-picker').addEventListener('change', async function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  if(!['video/mp4','video/webm','video/quicktime'].includes(file.type)){ alert('Solo se aceptan videos MP4, WEBM o MOV.'); return; }
+  if(file.size > 50 * 1024 * 1024){ alert('El video no puede pesar más de 50MB.'); return; }
+
+  const ext = { 'video/mp4':'mp4', 'video/webm':'webm', 'video/quicktime':'mov' }[file.type];
+  const ruta = proveedorAdminSeleccionado.id + '/' + Date.now() + '_' + Math.random().toString(36).slice(2,8) + '.' + ext;
+  const { error } = await sb.storage.from('videos-servicios').upload(ruta, file, { contentType: file.type });
+  if(error){ alert('No se pudo subir el video: ' + error.message); return; }
+  const { data } = sb.storage.from('videos-servicios').getPublicUrl(ruta);
+  admsvcVideoDraft = data.publicUrl;
+  renderAdmSvcVideo();
+});
+
+async function guardarServicioAdmin(){
+  const nombre = document.getElementById('admsvc-nombre').value.trim();
+  const precio = parseFloat(document.getElementById('admsvc-precio').value);
+  const categoria = document.getElementById('admsvc-categoria').value;
+  const descripcion = document.getElementById('admsvc-descripcion').value.trim();
+
+  if(!nombre || isNaN(precio) || precio < 0){
+    alert('Escribe un nombre y un precio válido para el servicio.');
+    return;
+  }
+
+  const imagenes = admsvcImagenesDraft.slice();
+  const payload = {
+    name: nombre, price: precio, category: categoria, description: descripcion,
+    imagenes, image_url: imagenes[0] || null, video_url: admsvcVideoDraft || null
+  };
+
+  if(admsvcEditingId){
+    const { error } = await sb.from('services').update(payload).eq('id', admsvcEditingId);
+    if(error){ alert('No se pudo guardar el servicio: ' + error.message); return; }
+    const idx = serviciosProveedorAdmin.findIndex(s => s.id === admsvcEditingId);
+    if(idx >= 0) serviciosProveedorAdmin[idx] = { ...serviciosProveedorAdmin[idx], name: nombre, price: precio, category: categoria, description: descripcion, imagenes, video_url: admsvcVideoDraft || null };
+  } else {
+    // Nace como borrador, igual que cuando lo crea el propio proveedor: el
+    // admin lo revisa y lo publica con el ojito cuando ya está listo.
+    const { data, error } = await sb.from('services').insert({
+      provider_id: proveedorAdminSeleccionado.id, ...payload, active: false
+    }).select('id').single();
+    if(error){ alert('No se pudo crear el servicio: ' + error.message); return; }
+    serviciosProveedorAdmin.push({ id: data.id, name: nombre, price: precio, category: categoria, description: descripcion, imagenes, video_url: admsvcVideoDraft || null, active: false });
+  }
+
+  closeAdmSvcModal();
+  renderAdmSvcLista();
+}
+
+async function borrarServicioAdmin(){
+  if(!admsvcEditingId) return;
+  if(!confirm('¿Borrar este servicio? No se puede deshacer.')) return;
+  const { error } = await sb.from('services').delete().eq('id', admsvcEditingId);
+  if(error){ alert('No se pudo borrar: ' + error.message); return; }
+  serviciosProveedorAdmin = serviciosProveedorAdmin.filter(s => s.id !== admsvcEditingId);
+  closeAdmSvcModal();
+  renderAdmSvcLista();
 }
 
 init();
