@@ -14,8 +14,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* Ajustes solo del home: el sistema completo vive en estilo.css */
-.gond-vacia{display:none;}
-#gondolas:empty + #trustbar{margin-top:0;}
 
 /* El hero va sin foto: se centra en vez de dejar una columna vacia a la
    derecha, y el aire que sobra se llena con anillos decorativos (mismo
@@ -165,8 +163,17 @@
   <a href="catalogo.html?cat=seguridad" class="cchip"><i class="ti ti-shield-check"></i><span>Seguridad</span></a>
 </div></nav>
 
-<!-- Góndolas: proveedores reales de Supabase, agrupados por categoría -->
-<div class="wrap" id="gondolas"></div>
+<!-- ═══ ¿PREFIERES QUE TE LO ARMEN? + IR AL MARKETPLACE ═══ -->
+<div class="wrap" style="padding-top:34px;">
+  <div class="promo am">
+    <div><div class="promo-t">¿Prefieres que te lo armen?</div>
+    <div class="promo-p">Cuéntale a Raymi qué evento tienes y te propone proveedores del catálogo.</div></div>
+    <a href="catalogo.html?raymi=1" class="promo-b">Hablar con Raymi <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  </div>
+  <div style="text-align:center;padding:44px 0 54px;">
+    <a href="catalogo.html" class="btn-xl">Ver todo el catálogo <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  </div>
+</div>
 
 <!-- ═══ CONFIANZA ═══ -->
 <div id="trustbar"><div class="wrap">
@@ -209,111 +216,6 @@
 
 <script src="nav.js"></script>
 <script>
-// ─── GÓNDOLAS CON DATOS REALES ──────────────────────────────────────────
-// Misma fuente que el catálogo: tabla services + perfil del proveedor.
-// Acá solo se muestran; toda la interacción (reservar, carrito) vive en
-// catalogo.html, adonde llevan todos los links.
-
-function esc(s){
-  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-const PREFIJO_FOTOS = 'https://vqnyaozauljtashpjfoo.supabase.co/storage/v1/object/public/';
-function fotoSegura(url){
-  return (typeof url === 'string' && url.startsWith(PREFIJO_FOTOS)) ? url : null;
-}
-function money(n){ return 'S/. ' + Number(n || 0).toLocaleString('es-PE'); }
-
-// Etiqueta, color del placeholder e icono por categoría
-const CATS = {
-  musica:     { label: 'Música & DJs',       ph: 'ph1', ico: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>' },
-  catering:   { label: 'Catering',           ph: 'ph2', ico: '<path d="M3 2v7c0 1.1.9 2 2 2h1v11M7 2v7M11 2v20M21 15V2a5 5 0 0 0-3 9v9"/>' },
-  fotografia: { label: 'Fotografía & Video', ph: 'ph3', ico: '<path d="M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.5"/>' },
-  locales:    { label: 'Locales & Salones',  ph: 'ph4', ico: '<path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-5h6v5"/>' },
-  animadores: { label: 'Animadores',         ph: 'ph5', ico: '<path d="m2 22 8-8M14 3l7 7-9 4-2-2z"/><path d="M17 3.5 20.5 7"/>' },
-  decoracion: { label: 'Decoración',         ph: 'ph1', ico: '<path d="M12 3v18M7 8l5-5 5 5M4 14h16"/>' },
-  bar:        { label: 'Bar Móvil',          ph: 'ph6', ico: '<path d="M4 4h16l-8 9v7M9 20h6"/>' },
-  pasteleria: { label: 'Pastelería',         ph: 'ph5', ico: '<path d="M4 21h16v-8H4zM6 13V9a6 6 0 0 1 12 0v4M12 3V1"/>' },
-  transporte: { label: 'Transporte',         ph: 'ph3', ico: '<path d="M8 6v6M16 6v6M2 12h20M4 18h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>' },
-  seguridad:  { label: 'Seguridad',          ph: 'ph4', ico: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>' }
-};
-const ORDEN_CATS = Object.keys(CATS);
-const PIPS = ['', 'na', 've', 'am'];
-
-function tarjeta(s){
-  const cat = CATS[s.cat] || CATS.musica;
-  return `
-  <article class="pcard">
-    <a href="catalogo.html?service=${encodeURIComponent(s.id)}" style="display:block;">
-      <div class="pc-img">
-        ${s.foto
-          ? `<img src="${esc(s.foto)}" alt="${esc(s.name)}">`
-          : `<div class="pc-ph ${cat.ph}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${cat.ico}</svg></div>`}
-        ${s.reviews > 0 ? '' : ''}
-      </div>
-      <div class="pc-b">
-        <div class="pc-cat">${esc(s.provider)}</div>
-        <h3 class="pc-n">${esc(s.name)}</h3>
-        <div class="pc-meta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> ${esc(s.district)}</div>
-        <div class="pc-precio"><small>Desde</small><b>${money(s.price)}</b></div>
-        <span class="pc-btn">Ver y reservar</span>
-      </div>
-    </a>
-  </article>`;
-}
-
-const PROMO = `<div class="promo am">
-  <div><div class="promo-t">¿Prefieres que te lo armen?</div>
-  <div class="promo-p">Cuéntale a Raymi qué evento tienes y te propone proveedores del catálogo.</div></div>
-  <a href="catalogo.html?raymi=1" class="promo-b">Hablar con Raymi <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-</div>`;
-
-async function cargarGondolas(){
-  if(!sb) return;
-  const { data, error } = await sb
-    .from('services')
-    .select('id, name, price, category, image_url, provider_id, profiles!services_provider_id_fkey(full_name, location, rating, reviews_count)')
-    .eq('active', true);
-  if(error){ console.error('Error cargando servicios:', error); return; }
-
-  const servicios = (data || [])
-    .filter(s => s.profiles)
-    .map(s => ({
-      id: s.id,
-      name: s.name,
-      cat: s.category || 'musica',
-      price: Number(s.price) || 0,
-      provider: s.profiles.full_name || 'Proveedor',
-      district: (s.profiles.location || 'Lima').split(',')[0].trim(),
-      reviews: s.profiles.reviews_count || 0,
-      rating: Number(s.profiles.rating) || 0,
-      foto: fotoSegura(s.image_url)
-    }));
-
-  // Una góndola por categoría con datos, mejor calificados primero, 3 por fila
-  const html = ORDEN_CATS.map((cat, i) => {
-    const items = servicios
-      .filter(s => s.cat === cat)
-      .sort((a, b) => b.rating - a.rating || b.reviews - a.reviews)
-      .slice(0, 3);
-    if (!items.length) return '';
-    return `
-    <section class="gond" id="g-${cat}">
-      <div class="gond-head">
-        <h2 class="gond-t ${PIPS[i % PIPS.length]}"><span class="pip"></span>${CATS[cat].label}</h2>
-        <a href="catalogo.html?cat=${cat}" class="svertodo">Ver todos →</a>
-      </div>
-      <div class="pgrid">${items.map(tarjeta).join('')}</div>
-    </section>`;
-  }).filter(Boolean);
-
-  // La banda de Raymi va después de la primera góndola (o sola si no hay datos)
-  if (html.length) html.splice(1, 0, PROMO);
-  else html.push(PROMO);
-
-  document.getElementById('gondolas').innerHTML = html.join('');
-}
-cargarGondolas();
-
 // ─── CONFETI DEL HERO (decorativo, respeta prefers-reduced-motion por CSS) ───
 (function confetiHero(){
   const cont = document.getElementById('confetti');
