@@ -96,6 +96,30 @@
 .cta-tape{position:absolute;top:-6px;left:40px;width:64px;height:26px;background:rgba(252,211,77,.85);transform:rotate(-6deg);box-shadow:0 2px 4px rgba(0,0,0,.15);z-index:2;}
 
 @media(prefers-reduced-motion:reduce){ .confetti i{animation:none;display:none;} }
+
+/* ── Botón "Ver todo el catálogo": el más llamativo de la sección ── */
+.btn-mega{
+  font-size:24px;padding:22px 46px;position:relative;
+  animation:megaPulse 2.2s ease-in-out infinite;
+}
+.btn-mega:hover{animation:megaWiggle .5s ease;}
+@keyframes megaPulse{
+  0%,100%{box-shadow:0 5px 0 #9A3412,0 0 0 0 rgba(234,88,12,.45);}
+  50%{box-shadow:0 5px 0 #9A3412,0 0 0 14px rgba(234,88,12,0);}
+}
+@keyframes megaWiggle{
+  0%,100%{transform:translateY(-2px) rotate(0deg);}
+  25%{transform:translateY(-2px) rotate(-3deg);}
+  75%{transform:translateY(-2px) rotate(3deg);}
+}
+@media(prefers-reduced-motion:reduce){ .btn-mega{animation:none;} .btn-mega:hover{animation:none;} }
+
+/* ── Estallido de confeti al hacer click ── */
+#confetti-burst{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden;}
+#confetti-burst i{position:absolute;display:block;border-radius:2px;animation:burstFly .9s cubic-bezier(.16,.84,.44,1) forwards;}
+@keyframes burstFly{
+  to{ transform:translate(var(--bx), var(--by)) rotate(var(--br)); opacity:0; }
+}
 </style>
 </head>
 <body>
@@ -170,8 +194,8 @@
     <div class="promo-p">Cuéntale a Raymi qué evento tienes y te propone proveedores del catálogo.</div></div>
     <a href="catalogo.html?raymi=1" class="promo-b">Hablar con Raymi <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
   </div>
-  <div style="text-align:center;padding:44px 0 54px;">
-    <a href="catalogo.html" class="btn-xl">Ver todo el catálogo <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  <div style="text-align:center;padding:50px 0 60px;">
+    <a href="catalogo.html" id="btn-marketplace" class="btn-xl btn-mega">Ver todo el catálogo <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
   </div>
 </div>
 
@@ -233,6 +257,48 @@
     d.style.animationDelay = (Math.random() * 10) + 's';
     cont.appendChild(d);
   }
+})();
+
+// ─── ESTALLIDO DE CONFETI al hacer click en "Ver todo el catálogo" ───────
+(function confetiBoton(){
+  const btn = document.getElementById('btn-marketplace');
+  if(!btn) return;
+
+  btn.addEventListener('click', function(e){
+    e.preventDefault();
+    const destino = btn.getAttribute('href');
+    const rect = btn.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+
+    const cont = document.createElement('div');
+    cont.id = 'confetti-burst';
+    document.body.appendChild(cont);
+
+    const colores = ['#FCD34D', '#EA580C', '#7C3AED', '#fff'];
+    const piezas = 60;
+    for(let i = 0; i < piezas; i++){
+      const p = document.createElement('i');
+      const ang = Math.random() * Math.PI * 2;
+      const dist = 160 + Math.random() * 260;
+      const bx = Math.cos(ang) * dist;
+      const by = Math.sin(ang) * dist * 0.7 - 40; // un poco hacia arriba
+      const size = 5 + Math.random() * 6;
+      p.style.left = cx + 'px';
+      p.style.top = cy + 'px';
+      p.style.width = size + 'px';
+      p.style.height = (size * 2.2) + 'px';
+      p.style.background = colores[i % colores.length];
+      p.style.setProperty('--bx', bx + 'px');
+      p.style.setProperty('--by', by + 'px');
+      p.style.setProperty('--br', (Math.random() * 720 - 360) + 'deg');
+      p.style.animationDelay = (Math.random() * 0.08) + 's';
+      cont.appendChild(p);
+    }
+
+    setTimeout(() => { window.location.href = destino; }, 550);
+    setTimeout(() => { cont.remove(); }, 1200);
+  });
 })();
 
 // ─── CARRUSEL DEL HERO ──────────────────────────────────────────────────
