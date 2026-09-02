@@ -849,7 +849,7 @@ async function openProvider(providerId) {
 
   const [{ data: perfilReal }, { data: serviciosReal }, { data: feedReal }, { data: comentariosReal }] = await Promise.all([
     sb.from('profiles').select('full_name, categoria, location, bio, avatar_url, banner_url, rating, reviews_count').eq('id', providerId).single(),
-    sb.from('services').select('id, name, price, description, imagenes, opciones').eq('provider_id', providerId).eq('active', true),
+    sb.from('services').select('id, name, price, description, imagenes, video_url, opciones').eq('provider_id', providerId).eq('active', true),
     sb.from('feed_photos').select('url').eq('provider_id', providerId),
     sb.from('comentarios_perfil').select('client_name, comment, created_at').eq('provider_id', providerId).order('created_at', { ascending: false })
   ]);
@@ -865,7 +865,7 @@ async function openProvider(providerId) {
   const rating = Number(perfilReal.rating) || 0;
   const reviews = perfilReal.reviews_count || 0;
   const esNuevo = reviews === 0;
-  const servicios = (serviciosReal || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, descripcion: s.description, imagenes: (s.imagenes || []).map(fotoSegura).filter(Boolean), opciones: Array.isArray(s.opciones) ? s.opciones : [] }));
+  const servicios = (serviciosReal || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, descripcion: s.description, imagenes: (s.imagenes || []).map(fotoSegura).filter(Boolean), video: fotoSegura(s.video_url), opciones: Array.isArray(s.opciones) ? s.opciones : [] }));
   let galeria = [];
   servicios.forEach(s => { (s.imagenes||[]).forEach(u => galeria.push(u)); });
   galeria = galeria.concat((feedReal || []).map(f => fotoSegura(f.url)).filter(Boolean));
@@ -897,6 +897,7 @@ async function openProvider(providerId) {
       ? `<div class="pm-svc-gallery">${imgs.slice(0,6).map(u => `<img src="${esc(u)}" alt="${esc(s.nombre)}">`).join('')}</div>`
       : `<div class="pm-svc-nofotos">Este paquete aún no tiene fotos.</div>`;
     const opcionesHtml = opcionesServicioHtml(s.opciones);
+    const videoHtml = s.video ? `<video src="${esc(s.video)}" controls style="width:100%;border-radius:10px;margin-bottom:10px;display:block;"></video>` : '';
     return `
     <div class="pm-service" id="pm-svc-${i}">
       <div class="pm-service-main" onclick="toggleServiceDetail(${i})">
@@ -907,6 +908,7 @@ async function openProvider(providerId) {
         <div class="pm-service-price">${money(s.precio)}</div>
       </div>
       <div class="pm-svc-detail" id="pm-svc-detail-${i}">
+        ${videoHtml}
         ${galeriaHtml}
         ${opcionesHtml}
         <button class="pm-add-cart" onclick="event.stopPropagation(); addToCart(${i})">
