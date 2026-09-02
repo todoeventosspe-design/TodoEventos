@@ -36,6 +36,7 @@ caja, CRM, inventario, reportes); el marketplace viene de yapa.
 | `login.html` | Login + registro (cliente y proveedor), verificación por código |
 | `nosotros.html`, `proveedores.html`, `confirmacion.html` | Institucionales / flujo |
 | `feedback.js` | Widget de feedback incluido en todas las páginas |
+| `analytics.js` | Vercel Web Analytics + evento `clic_boton` por cada clic en botón/enlace, incluido en todas las páginas. Falta activar "Web Analytics" en el panel de Vercel (paso del humano). |
 | `*.sql` | Migraciones que se corren A MANO en el SQL editor de Supabase |
 | `MARKETING.md`, `SEGURIDAD.md`, `ASISTENTE.md` | Decisiones de fondo — LEER |
 
