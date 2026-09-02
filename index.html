@@ -101,15 +101,17 @@
    el más llamativo de la sección. Anillo grueso + tapa biselada, como
    el clásico botón rojo bajo una campana de vidrio. ── */
 .btn-nuke{
-  display:inline-flex;align-items:center;gap:12px;font-family:'Anton',sans-serif;
-  text-transform:uppercase;letter-spacing:.02em;font-size:24px;color:#fff;
-  padding:24px 50px;border-radius:100px;position:relative;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.01em;
+  font-size:19px;line-height:1.05;color:#fff;text-align:center;
+  width:230px;height:230px;border-radius:50%;position:relative;cursor:pointer;
   background:radial-gradient(circle at 35% 30%, #ff5252, #d10000 62%, #8c0000 100%);
-  border:5px solid #ffdede;
-  box-shadow:0 9px 0 #6b0000, 0 14px 26px rgba(139,0,0,.5), inset 0 3px 8px rgba(255,255,255,.4);
+  border:7px solid #ffdede;
+  box-shadow:0 10px 0 #6b0000, 0 16px 30px rgba(139,0,0,.5), inset 0 4px 10px rgba(255,255,255,.4);
   animation:nukePulse 1.6s ease-in-out infinite;
   transition:transform .12s, box-shadow .12s;
 }
+.btn-nuke svg{width:26px;height:26px;}
 .btn-nuke:hover{animation:nukeWiggle .4s ease;}
 .btn-nuke:active{
   transform:translateY(7px);
