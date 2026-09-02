@@ -97,22 +97,35 @@
 
 @media(prefers-reduced-motion:reduce){ .confetti i{animation:none;display:none;} }
 
-/* ── Botón "Ver todo el catálogo": el más llamativo de la sección ── */
-.btn-mega{
-  font-size:24px;padding:22px 46px;position:relative;
-  animation:megaPulse 2.2s ease-in-out infinite;
+/* ── Botón "Ver todo el catálogo": boton rojo de "lanzar el misil",
+   el más llamativo de la sección. Anillo grueso + tapa biselada, como
+   el clásico botón rojo bajo una campana de vidrio. ── */
+.btn-nuke{
+  display:inline-flex;align-items:center;gap:12px;font-family:'Anton',sans-serif;
+  text-transform:uppercase;letter-spacing:.02em;font-size:24px;color:#fff;
+  padding:24px 50px;border-radius:100px;position:relative;cursor:pointer;
+  background:radial-gradient(circle at 35% 30%, #ff5252, #d10000 62%, #8c0000 100%);
+  border:5px solid #ffdede;
+  box-shadow:0 9px 0 #6b0000, 0 14px 26px rgba(139,0,0,.5), inset 0 3px 8px rgba(255,255,255,.4);
+  animation:nukePulse 1.6s ease-in-out infinite;
+  transition:transform .12s, box-shadow .12s;
 }
-.btn-mega:hover{animation:megaWiggle .5s ease;}
-@keyframes megaPulse{
-  0%,100%{box-shadow:0 5px 0 #9A3412,0 0 0 0 rgba(234,88,12,.45);}
-  50%{box-shadow:0 5px 0 #9A3412,0 0 0 14px rgba(234,88,12,0);}
+.btn-nuke:hover{animation:nukeWiggle .4s ease;}
+.btn-nuke:active{
+  transform:translateY(7px);
+  box-shadow:0 2px 0 #6b0000, 0 4px 10px rgba(139,0,0,.5), inset 0 3px 8px rgba(255,255,255,.4);
 }
-@keyframes megaWiggle{
-  0%,100%{transform:translateY(-2px) rotate(0deg);}
-  25%{transform:translateY(-2px) rotate(-3deg);}
-  75%{transform:translateY(-2px) rotate(3deg);}
+.btn-nuke-txt{position:relative;}
+@keyframes nukePulse{
+  0%,100%{box-shadow:0 9px 0 #6b0000, 0 14px 26px rgba(139,0,0,.5), inset 0 3px 8px rgba(255,255,255,.4), 0 0 0 0 rgba(209,0,0,.55);}
+  50%{box-shadow:0 9px 0 #6b0000, 0 14px 26px rgba(139,0,0,.5), inset 0 3px 8px rgba(255,255,255,.4), 0 0 0 18px rgba(209,0,0,0);}
 }
-@media(prefers-reduced-motion:reduce){ .btn-mega{animation:none;} .btn-mega:hover{animation:none;} }
+@keyframes nukeWiggle{
+  0%,100%{transform:rotate(0deg) scale(1.03);}
+  25%{transform:rotate(-2.5deg) scale(1.03);}
+  75%{transform:rotate(2.5deg) scale(1.03);}
+}
+@media(prefers-reduced-motion:reduce){ .btn-nuke{animation:none;} .btn-nuke:hover{animation:none;} }
 
 /* ── Estallido de confeti al hacer click ── */
 #confetti-burst{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden;}
@@ -187,20 +200,8 @@
   <a href="catalogo.html?cat=seguridad" class="cchip"><i class="ti ti-shield-check"></i><span>Seguridad</span></a>
 </div></nav>
 
-<!-- ═══ ¿PREFIERES QUE TE LO ARMEN? + IR AL MARKETPLACE ═══ -->
-<div class="wrap" style="padding-top:34px;">
-  <div class="promo am">
-    <div><div class="promo-t">¿Prefieres que te lo armen?</div>
-    <div class="promo-p">Cuéntale a Raymi qué evento tienes y te propone proveedores del catálogo.</div></div>
-    <a href="catalogo.html?raymi=1" class="promo-b">Hablar con Raymi <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-  </div>
-  <div style="text-align:center;padding:50px 0 60px;">
-    <a href="catalogo.html" id="btn-marketplace" class="btn-xl btn-mega">Ver todo el catálogo <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-  </div>
-</div>
-
 <!-- ═══ CONFIANZA ═══ -->
-<div id="trustbar"><div class="wrap">
+<div id="trustbar" style="margin-top:0;"><div class="wrap">
   <div class="trust-h">
     <h2 class="display">Reserva sin sorpresas</h2>
     <p>Tres cosas que cuidamos en cada servicio del catálogo</p>
@@ -220,6 +221,21 @@
   </div>
   </div>
 </div></div>
+
+<!-- ═══ ¿PREFIERES QUE TE LO ARMEN? + IR AL MARKETPLACE ═══ -->
+<div class="wrap" style="padding-top:34px;">
+  <div class="promo am">
+    <div><div class="promo-t">¿Prefieres que te lo armen?</div>
+    <div class="promo-p">Cuéntale a Raymi qué evento tienes y te propone proveedores del catálogo.</div></div>
+    <a href="catalogo.html?raymi=1" class="promo-b">Hablar con Raymi <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  </div>
+  <div style="text-align:center;padding:50px 0 60px;">
+    <a href="catalogo.html" id="btn-marketplace" class="btn-nuke">
+      <span class="btn-nuke-txt">Ver todo el catálogo</span>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+  </div>
+</div>
 
 <!-- ═══ CTA PROVEEDOR ═══ -->
 <section id="cta" style="padding:44px 0;">
@@ -275,15 +291,15 @@
     cont.id = 'confetti-burst';
     document.body.appendChild(cont);
 
-    const colores = ['#FCD34D', '#EA580C', '#7C3AED', '#fff'];
-    const piezas = 60;
+    const colores = ['#FCD34D', '#EA580C', '#7C3AED', '#fff', '#EF4444'];
+    const piezas = 260;
     for(let i = 0; i < piezas; i++){
       const p = document.createElement('i');
       const ang = Math.random() * Math.PI * 2;
-      const dist = 160 + Math.random() * 260;
+      const dist = 220 + Math.random() * 480;
       const bx = Math.cos(ang) * dist;
       const by = Math.sin(ang) * dist * 0.7 - 40; // un poco hacia arriba
-      const size = 5 + Math.random() * 6;
+      const size = 5 + Math.random() * 7;
       p.style.left = cx + 'px';
       p.style.top = cy + 'px';
       p.style.width = size + 'px';
@@ -296,8 +312,8 @@
       cont.appendChild(p);
     }
 
-    setTimeout(() => { window.location.href = destino; }, 550);
-    setTimeout(() => { cont.remove(); }, 1200);
+    setTimeout(() => { window.location.href = destino; }, 750);
+    setTimeout(() => { cont.remove(); }, 1400);
   });
 })();
 
