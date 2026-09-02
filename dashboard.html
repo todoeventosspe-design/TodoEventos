@@ -1093,7 +1093,11 @@ verificarAccesoDashboard();
     </div>
     <div class="field">
       <label>Descripción</label>
-      <textarea id="service-descripcion" rows="3" placeholder="Breve descripción de lo que incluye"></textarea>
+      <textarea id="service-descripcion" rows="3" placeholder="¿Qué estás ofreciendo?"></textarea>
+    </div>
+    <div class="field">
+      <label>Qué NO incluye <span style="color:var(--sub);font-weight:400;">(opcional)</span></label>
+      <textarea id="service-no-incluye" rows="3" placeholder="Ej. No incluye transporte fuera de Lima, ni horas extra"></textarea>
     </div>
 
     <!-- ─── OPCIONES DE PRECIO ─── -->
@@ -1176,6 +1180,7 @@ verificarAccesoDashboard();
     </div>
     <div class="modal-date" id="viewer-precio">—</div>
     <div class="profile-bio" id="viewer-descripcion" style="margin-bottom:16px;"></div>
+    <div id="viewer-no-incluye" style="margin:-8px 0 16px;font-size:13px;color:var(--sub);"></div>
     <div id="viewer-opciones"></div>
     <div id="viewer-video-box"></div>
     <div class="panel-title" style="font-size:12.5px;"><i class="ti ti-photo"></i> Fotos de este servicio</div>
@@ -2596,7 +2601,7 @@ async function cargarPerfilDesdeSupabase(){
   const p = perfilRowInicial;
 
   const [{ data: servicios }, { data: resenas }, { data: comentarios }, { data: feedFotos }] = await Promise.all([
-    sb.from('services').select('id, name, price, category, description, imagenes, video_url, active, opciones').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true }),
+    sb.from('services').select('id, name, price, category, description, no_incluye, imagenes, video_url, active, opciones').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true }),
     sb.from('reviews').select('id, service_id, rating, comment, created_at, client_name').eq('provider_id', usuarioActual.id).order('created_at', { ascending: false }),
     sb.from('comentarios_perfil').select('id, comment, created_at, client_name').eq('provider_id', usuarioActual.id).order('created_at', { ascending: false }),
     sb.from('feed_photos').select('id, url').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true })
@@ -2623,7 +2628,7 @@ async function cargarPerfilDesdeSupabase(){
     bannerUrl: p.banner_url || '',
     ratingReal: p.rating || 0,
     reviews_count: p.reviews_count || 0,
-    servicios: (servicios || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, categoria: s.category || 'musica', descripcion: s.description || '', imagenes: s.imagenes || [], video: s.video_url || null, opciones: Array.isArray(s.opciones) ? s.opciones : [], activo: s.active === true })),
+    servicios: (servicios || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, categoria: s.category || 'musica', descripcion: s.description || '', noIncluye: s.no_incluye || '', imagenes: s.imagenes || [], video: s.video_url || null, opciones: Array.isArray(s.opciones) ? s.opciones : [], activo: s.active === true })),
     resenasPorServicio,
     // "Comentarios" del perfil: sobre el proveedor como persona/negocio,
     // distintos de las reseñas de un servicio puntual.
@@ -3000,6 +3005,7 @@ function openServiceModal(id){
   document.getElementById('service-precio').value = existing ? existing.precio : '';
   document.getElementById('service-categoria').value = existing ? (existing.categoria || 'musica') : 'musica';
   document.getElementById('service-descripcion').value = existing ? existing.descripcion : '';
+  document.getElementById('service-no-incluye').value = existing ? (existing.noIncluye || '') : '';
   document.getElementById('service-delete-btn').style.display = existing ? 'flex' : 'none';
 
   servicioImagenesDraft = existing && Array.isArray(existing.imagenes) ? existing.imagenes.slice() : [];
@@ -3085,6 +3091,7 @@ async function saveService(){
   const precio = parseFloat(document.getElementById('service-precio').value);
   const categoria = document.getElementById('service-categoria').value;
   const descripcion = document.getElementById('service-descripcion').value.trim();
+  const noIncluye = document.getElementById('service-no-incluye').value.trim();
 
   if(!nombre || isNaN(precio) || precio < 0){
     alert('Escribe un nombre y un precio válido para el servicio.');
@@ -3098,23 +3105,23 @@ async function saveService(){
 
   if(servicioEditingId){
     const { error } = await sb.from('services').update({
-      name: nombre, price: precio, category: categoria, description: descripcion, imagenes,
+      name: nombre, price: precio, category: categoria, description: descripcion, no_incluye: noIncluye || null, imagenes,
       image_url: imagenes[0] || null, video_url, opciones
     }).eq('id', servicioEditingId).eq('provider_id', usuarioActual.id);
     if(error){ alert('No se pudo guardar el servicio: ' + error.message); return; }
 
     const idx = perfilData.servicios.findIndex(s => s.id === servicioEditingId);
-    if(idx >= 0) perfilData.servicios[idx] = { ...perfilData.servicios[idx], nombre, precio, categoria, descripcion, imagenes, video: video_url, opciones };
+    if(idx >= 0) perfilData.servicios[idx] = { ...perfilData.servicios[idx], nombre, precio, categoria, descripcion, noIncluye, imagenes, video: video_url, opciones };
   } else {
     // Un servicio nuevo nace como BORRADOR: no aparece en el catálogo hasta
     // que el proveedor lo lanza al mercado a propósito.
     const { data, error } = await sb.from('services').insert({
-      provider_id: usuarioActual.id, name: nombre, price: precio, category: categoria, description: descripcion,
+      provider_id: usuarioActual.id, name: nombre, price: precio, category: categoria, description: descripcion, no_incluye: noIncluye || null,
       imagenes, image_url: imagenes[0] || null, video_url, active: false, opciones
     }).select('id').single();
     if(error){ alert('No se pudo crear el servicio: ' + error.message); return; }
 
-    perfilData.servicios.push({ id: data.id, nombre, precio, categoria, descripcion, imagenes, video: video_url, opciones, activo: false });
+    perfilData.servicios.push({ id: data.id, nombre, precio, categoria, descripcion, noIncluye, imagenes, video: video_url, opciones, activo: false });
   }
 
   closeServiceModal();
@@ -3142,6 +3149,7 @@ function openServiceViewer(id){
   document.getElementById('viewer-nombre').textContent = s.nombre;
   document.getElementById('viewer-precio').textContent = 'S/. ' + Number(s.precio).toLocaleString('es-PE');
   document.getElementById('viewer-descripcion').textContent = s.descripcion;
+  document.getElementById('viewer-no-incluye').textContent = s.noIncluye ? 'No incluye: ' + s.noIncluye : '';
 
   // Opciones de precio (así como las verá el cliente en el catálogo).
   const opc = Array.isArray(s.opciones) ? s.opciones : [];

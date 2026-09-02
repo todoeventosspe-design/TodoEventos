@@ -183,7 +183,11 @@ h1{font-size:22px;font-weight:700;margin:22px 0 4px;}
     </div>
     <div class="field">
       <label>Descripción</label>
-      <textarea id="admsvc-descripcion" rows="3" placeholder="Qué incluye el servicio"></textarea>
+      <textarea id="admsvc-descripcion" rows="3" placeholder="¿Qué estás ofreciendo?"></textarea>
+    </div>
+    <div class="field">
+      <label>Qué NO incluye <span style="color:var(--sub);font-weight:400;">(opcional)</span></label>
+      <textarea id="admsvc-no-incluye" rows="3" placeholder="Ej. No incluye transporte fuera de Lima, ni horas extra"></textarea>
     </div>
     <div class="field">
       <label>Fotos <span id="admsvc-img-count" style="color:var(--sub);font-weight:400;"></span></label>
@@ -583,7 +587,7 @@ async function seleccionarProveedorAdmin(id){
   document.getElementById('admsvc-lista').innerHTML = '<div class="vacio" style="padding:20px;"><span class="spinner"></span></div>';
 
   const { data, error } = await sb.from('services')
-    .select('id, name, price, category, description, imagenes, video_url, active')
+    .select('id, name, price, category, description, no_incluye, imagenes, video_url, active')
     .eq('provider_id', id)
     .order('created_at', { ascending: true });
 
@@ -637,6 +641,7 @@ function abrirAdmSvcModal(id){
   document.getElementById('admsvc-precio').value = existing ? existing.price : '';
   document.getElementById('admsvc-categoria').value = existing ? (existing.category || 'musica') : 'musica';
   document.getElementById('admsvc-descripcion').value = existing ? (existing.description || '') : '';
+  document.getElementById('admsvc-no-incluye').value = existing ? (existing.no_incluye || '') : '';
   document.getElementById('admsvc-delete-btn').style.display = existing ? 'flex' : 'none';
 
   admsvcImagenesDraft = existing && Array.isArray(existing.imagenes) ? existing.imagenes.slice() : [];
@@ -724,6 +729,7 @@ async function guardarServicioAdmin(){
   const precio = parseFloat(document.getElementById('admsvc-precio').value);
   const categoria = document.getElementById('admsvc-categoria').value;
   const descripcion = document.getElementById('admsvc-descripcion').value.trim();
+  const noIncluye = document.getElementById('admsvc-no-incluye').value.trim();
 
   if(!nombre || isNaN(precio) || precio < 0){
     alert('Escribe un nombre y un precio válido para el servicio.');
@@ -732,7 +738,7 @@ async function guardarServicioAdmin(){
 
   const imagenes = admsvcImagenesDraft.slice();
   const payload = {
-    name: nombre, price: precio, category: categoria, description: descripcion,
+    name: nombre, price: precio, category: categoria, description: descripcion, no_incluye: noIncluye || null,
     imagenes, image_url: imagenes[0] || null, video_url: admsvcVideoDraft || null
   };
 
@@ -740,7 +746,7 @@ async function guardarServicioAdmin(){
     const { error } = await sb.from('services').update(payload).eq('id', admsvcEditingId);
     if(error){ alert('No se pudo guardar el servicio: ' + error.message); return; }
     const idx = serviciosProveedorAdmin.findIndex(s => s.id === admsvcEditingId);
-    if(idx >= 0) serviciosProveedorAdmin[idx] = { ...serviciosProveedorAdmin[idx], name: nombre, price: precio, category: categoria, description: descripcion, imagenes, video_url: admsvcVideoDraft || null };
+    if(idx >= 0) serviciosProveedorAdmin[idx] = { ...serviciosProveedorAdmin[idx], name: nombre, price: precio, category: categoria, description: descripcion, no_incluye: noIncluye || null, imagenes, video_url: admsvcVideoDraft || null };
   } else {
     // Nace como borrador, igual que cuando lo crea el propio proveedor: el
     // admin lo revisa y lo publica con el ojito cuando ya está listo.
@@ -748,7 +754,7 @@ async function guardarServicioAdmin(){
       provider_id: proveedorAdminSeleccionado.id, ...payload, active: false
     }).select('id').single();
     if(error){ alert('No se pudo crear el servicio: ' + error.message); return; }
-    serviciosProveedorAdmin.push({ id: data.id, name: nombre, price: precio, category: categoria, description: descripcion, imagenes, video_url: admsvcVideoDraft || null, active: false });
+    serviciosProveedorAdmin.push({ id: data.id, name: nombre, price: precio, category: categoria, description: descripcion, no_incluye: noIncluye || null, imagenes, video_url: admsvcVideoDraft || null, active: false });
   }
 
   closeAdmSvcModal();
