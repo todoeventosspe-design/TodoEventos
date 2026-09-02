@@ -70,6 +70,34 @@
   .hero-rings i:nth-child(1),.hero-rings i:nth-child(2),.hero-rings i:nth-child(3){display:none;}
   .hero-trust{gap:14px 20px;padding:20px 0 40px;}
 }
+
+/* ── Telón: borde perforado del hero (como el de un boleto de evento) ── */
+#hero{position:relative;}
+#hero::after{
+  content:'';position:absolute;left:0;right:0;bottom:-1px;height:22px;z-index:4;
+  background:radial-gradient(circle at 11px 0, transparent 10.5px, #fff 11px) -11px 0/22px 22px repeat-x;
+}
+
+/* ── Confeti sutil cayendo, decorativo ── */
+.confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1;}
+.confetti i{position:absolute;display:block;border-radius:2px;opacity:.5;animation:confettiDrift linear infinite;}
+@keyframes confettiDrift{ from{transform:translateY(-40px) rotate(0deg);} to{transform:translateY(640px) rotate(320deg);} }
+
+/* ── Confianza como boletos: icono + texto separados por perforación ── */
+.trust-h{text-align:center;margin-bottom:26px;}
+.trust-h h2{font-size:clamp(22px,2.6vw,30px);}
+.trust-h p{color:var(--tinta-2);margin-top:6px;font-size:14px;}
+.ticket{background:#fff;border-radius:14px;display:flex;align-items:stretch;box-shadow:0 10px 26px -18px rgba(18,14,31,.28);overflow:hidden;}
+.ticket-i{width:70px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--morado-claro);color:var(--morado);position:relative;}
+.tbar>.ticket:nth-child(2) .ticket-i{background:var(--naranja-claro);color:var(--naranja-osc);}
+.tbar>.ticket:nth-child(3) .ticket-i{background:#FEF6DC;color:#B45309;}
+.ticket-i::after{content:'';position:absolute;right:-1px;top:0;bottom:0;border-right:2px dashed var(--linea);}
+.ticket-txt{padding:14px 16px;}
+
+/* ── Cinta en la esquina del cartel del proveedor ── */
+.cta-tape{position:absolute;top:-6px;left:40px;width:64px;height:26px;background:rgba(252,211,77,.85);transform:rotate(-6deg);box-shadow:0 2px 4px rgba(0,0,0,.15);z-index:2;}
+
+@media(prefers-reduced-motion:reduce){ .confetti i{animation:none;display:none;} }
 </style>
 </head>
 <body>
@@ -79,6 +107,7 @@
 <!-- ═══ HERO ═══ -->
 <section id="hero">
   <div class="hero-rings" aria-hidden="true"><i></i><i></i><i></i></div>
+  <div class="confetti" id="confetti" aria-hidden="true"></div>
   <div class="hero-in">
     <div class="hero-txt">
       <div class="hero-slides">
@@ -140,24 +169,31 @@
 <div class="wrap" id="gondolas"></div>
 
 <!-- ═══ CONFIANZA ═══ -->
-<div id="trustbar"><div class="wrap"><div class="tbar">
-  <div class="tbi">
-    <div class="tbi-i"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div>
-    <div><div class="tbi-h">Revisados uno por uno</div><div class="tbi-p">Miramos quién es cada proveedor antes de publicarlo</div></div>
+<div id="trustbar"><div class="wrap">
+  <div class="trust-h">
+    <h2 class="display">Reserva sin sorpresas</h2>
+    <p>Tres cosas que cuidamos en cada servicio del catálogo</p>
   </div>
-  <div class="tbi">
-    <div class="tbi-i"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 15 9l7 .5-5.5 4.5 1.8 6.9L12 17l-6.3 3.9L7.5 14 2 9.5 9 9z"/></svg></div>
-    <div><div class="tbi-h">Las reseñas no se compran</div><div class="tbi-p">Califica solo el cliente que reservó por acá</div></div>
+  <div class="tbar">
+  <div class="ticket">
+    <div class="ticket-i"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div>
+    <div class="ticket-txt"><div class="tbi-h">Revisados uno por uno</div><div class="tbi-p">Miramos quién es cada proveedor antes de publicarlo</div></div>
   </div>
-  <div class="tbi">
-    <div class="tbi-i"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg></div>
-    <div><div class="tbi-h">La agenda es la de verdad</div><div class="tbi-p">Eliges un horario libre y queda bloqueado al toque</div></div>
+  <div class="ticket">
+    <div class="ticket-i"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 15 9l7 .5-5.5 4.5 1.8 6.9L12 17l-6.3 3.9L7.5 14 2 9.5 9 9z"/></svg></div>
+    <div class="ticket-txt"><div class="tbi-h">Las reseñas no se compran</div><div class="tbi-p">Califica solo el cliente que reservó por acá</div></div>
   </div>
-</div></div></div>
+  <div class="ticket">
+    <div class="ticket-i"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg></div>
+    <div class="ticket-txt"><div class="tbi-h">La agenda es la de verdad</div><div class="tbi-p">Eliges un horario libre y queda bloqueado al toque</div></div>
+  </div>
+  </div>
+</div></div>
 
 <!-- ═══ CTA PROVEEDOR ═══ -->
 <section id="cta" style="padding:44px 0;">
   <div class="wrap"><div class="ctabox">
+    <div class="cta-tape"></div>
     <div class="cta-l">
       <h2>¿Trabajas en eventos?<br>Saca tu negocio del cuaderno.</h2>
       <p>Publica tus servicios y lleva tu agenda y tus cotizaciones desde el mismo panel. Todavía no cobramos comisión.</p>
@@ -277,6 +313,25 @@ async function cargarGondolas(){
   document.getElementById('gondolas').innerHTML = html.join('');
 }
 cargarGondolas();
+
+// ─── CONFETI DEL HERO (decorativo, respeta prefers-reduced-motion por CSS) ───
+(function confetiHero(){
+  const cont = document.getElementById('confetti');
+  if(!cont) return;
+  const colores = ['#FCD34D', '#fff', '#EA580C'];
+  for(let i = 0; i < 14; i++){
+    const d = document.createElement('i');
+    const size = 4 + Math.random() * 5;
+    d.style.width = size + 'px';
+    d.style.height = (size * 2.2) + 'px';
+    d.style.left = Math.random() * 100 + '%';
+    d.style.top = (-40 - Math.random() * 200) + 'px';
+    d.style.background = colores[i % colores.length];
+    d.style.animationDuration = (9 + Math.random() * 7) + 's';
+    d.style.animationDelay = (Math.random() * 10) + 's';
+    cont.appendChild(d);
+  }
+})();
 
 // ─── CARRUSEL DEL HERO ──────────────────────────────────────────────────
 (function heroCarrusel(){
