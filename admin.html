@@ -169,13 +169,13 @@ h1{font-size:22px;font-weight:700;margin:22px 0 4px;}
     </div>
 
     <div class="field">
-      <label>Nombre del servicio</label>
+      <label>Nombre del servicio <span style="color:var(--red);">*</span></label>
       <input type="text" id="admsvc-nombre" placeholder="Ej. Catering para 100 personas">
     </div>
     <div class="row2">
       <div class="field">
-        <label>Precio desde (S/.)</label>
-        <input type="number" id="admsvc-precio" min="0" step="0.01">
+        <label>Precio desde (S/.) <span style="color:var(--red);">*</span></label>
+        <input type="number" id="admsvc-precio" min="0" step="0.01" placeholder="Ej. 250">
       </div>
       <div class="field">
         <label>Categoría</label>
@@ -863,8 +863,18 @@ async function guardarServicioAdmin(){
   const descripcion = document.getElementById('admsvc-descripcion').value.trim();
   const noIncluye = document.getElementById('admsvc-no-incluye').value.trim();
 
-  if(!nombre || isNaN(precio) || precio < 0){
-    alert('Escribe un nombre y un precio válido para el servicio.');
+  // "Nombre del servicio" y "Precio desde" son obligatorios en la base
+  // (NOT NULL): si faltan, no hay nada que guardar. Se avisa senalando el
+  // campo exacto para no confundirlo con el nombre/precio de una opcion
+  // de precio (esos son de un item suelto, no del servicio).
+  if(!nombre){
+    alert('Falta el "Nombre del servicio" (arriba del todo). Sin eso no se puede guardar.');
+    document.getElementById('admsvc-nombre').focus();
+    return;
+  }
+  if(isNaN(precio) || precio < 0){
+    alert('Falta el "Precio desde" del servicio (no el de una opción de precio). Sin eso no se puede guardar.');
+    document.getElementById('admsvc-precio').focus();
     return;
   }
 
