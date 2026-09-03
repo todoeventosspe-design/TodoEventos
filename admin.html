@@ -715,7 +715,7 @@ async function seleccionarProveedorAdmin(id){
   const { data, error } = await sb.from('services')
     .select('id, name, price, category, description, no_incluye, imagenes, video_url, active, opciones')
     .eq('provider_id', id)
-    .order('created_at', { ascending: true });
+    .order('created_at', { ascending: false });
 
   serviciosProveedorAdmin = error ? [] : (data || []);
   renderAdmSvcLista();
@@ -897,7 +897,7 @@ async function guardarServicioAdmin(){
       provider_id: proveedorAdminSeleccionado.id, ...payload, active: false
     }).select('id').single();
     if(error){ alert('No se pudo crear el servicio: ' + error.message); return; }
-    serviciosProveedorAdmin.push({ id: data.id, name: nombre, price: precio, category: categoria, description: descripcion, no_incluye: noIncluye || null, imagenes, video_url: admsvcVideoDraft || null, opciones, active: false });
+    serviciosProveedorAdmin.unshift({ id: data.id, name: nombre, price: precio, category: categoria, description: descripcion, no_incluye: noIncluye || null, imagenes, video_url: admsvcVideoDraft || null, opciones, active: false });
   }
 
   closeAdmSvcModal();
