@@ -103,6 +103,18 @@ h1{font-size:22px;font-weight:700;margin:22px 0 4px;}
 .field textarea{resize:none;overflow:hidden;}
 .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--or-line);}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.row3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px;}
+.opcion-modos{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.opcion-modo{background:var(--card);border:1px solid var(--line);color:var(--sub);border-radius:9px;padding:11px 10px;font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .15s;text-align:center;line-height:1.25;}
+.opcion-modo:hover{border-color:var(--or-line);color:var(--fg);}
+.opcion-modo.active{background:var(--or-soft);border-color:var(--or);color:#9A3412;}
+.opcion-builder{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px;}
+.opcion-chip{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card2);border:1px solid var(--line);border-left:3px solid var(--or);border-radius:10px;padding:10px 12px;margin-bottom:8px;}
+.opcion-chip-n{font-size:13.5px;font-weight:700;color:var(--fg);}
+.opcion-chip-d{font-size:12px;color:var(--sub);margin-top:2px;}
+.opcion-chip-x{background:transparent;border:none;color:var(--sub);cursor:pointer;font-size:16px;flex-shrink:0;width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.opcion-chip-x:hover{background:rgba(239,68,68,.12);color:#ef4444;}
+@media(max-width:600px){ .row2,.row3,.opcion-modos{grid-template-columns:1fr;} }
 .gallery-remove{position:absolute;top:6px;right:6px;width:26px;height:26px;background:rgba(18,14,31,.68);border:1px solid rgba(255,255,255,.2);border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;}
 .service-img-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px;}
 .service-img-item{position:relative;border-radius:9px;overflow:hidden;aspect-ratio:1;background:var(--card2);}
@@ -189,6 +201,53 @@ h1{font-size:22px;font-weight:700;margin:22px 0 4px;}
     <div class="field">
       <label>Qué NO incluye <span style="color:var(--sub);font-weight:400;">(opcional)</span></label>
       <textarea id="admsvc-no-incluye" rows="3" placeholder="Ej. No incluye transporte fuera de Lima, ni horas extra"></textarea>
+    </div>
+    <div class="field">
+      <label>Opciones de precio <span style="color:var(--sub);font-weight:400;">(opcional)</span></label>
+      <small style="display:block;margin:-2px 0 12px;color:var(--sub);font-size:12px;line-height:1.5;">
+        Para lo que cobra por unidad, por paquete, o con un mínimo (sillas, platos, horas extra…).
+        El precio base de arriba sigue siendo el "desde" que ve el cliente.
+      </small>
+
+      <div id="admsvc-opciones-lista"></div>
+
+      <div class="opcion-builder">
+        <div class="opcion-modos">
+          <button type="button" class="opcion-modo active" data-modo="simple" onclick="setAdmOpcionModo('simple')">Precio por unidad o por paquete</button>
+          <button type="button" class="opcion-modo" data-modo="minimo" onclick="setAdmOpcionModo('minimo')">Mínimo + extra por unidad</button>
+        </div>
+
+        <div class="field" style="margin-bottom:10px;">
+          <label>Nombre del ítem</label>
+          <input type="text" id="admopcion-nombre" placeholder="Ej. Sillas Tiffany">
+        </div>
+
+        <div id="admopcion-modo-simple">
+          <div class="field" style="margin-bottom:8px;">
+            <label>Precio (S/.)</label>
+            <input type="number" id="admopcion-precio" min="0" step="0.01" placeholder="Ej. 8">
+          </div>
+        </div>
+
+        <div id="admopcion-modo-minimo" style="display:none;">
+          <div class="row3">
+            <div class="field" style="margin-bottom:8px;">
+              <label>Precio del mínimo (S/.)</label>
+              <input type="number" id="admopcion-precio-min" min="0" step="0.01" placeholder="Ej. 300">
+            </div>
+            <div class="field" style="margin-bottom:8px;">
+              <label>Cantidad mínima</label>
+              <input type="number" id="admopcion-cant-min" min="0" step="1" placeholder="Ej. 50">
+            </div>
+            <div class="field" style="margin-bottom:8px;">
+              <label>Precio c/u extra (S/.)</label>
+              <input type="number" id="admopcion-precio-extra" min="0" step="0.01" placeholder="Ej. 6">
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-fundador" onclick="agregarAdmOpcionServicio()" style="margin-top:4px;"><i class="ti ti-plus"></i> Agregar opción al servicio</button>
+      </div>
     </div>
     <div class="field">
       <label>Fotos <span id="admsvc-img-count" style="color:var(--sub);font-weight:400;"></span></label>
@@ -564,6 +623,65 @@ let admsvcEditingId = null;
 let admsvcImagenesDraft = [];
 let admsvcVideoDraft = null;
 
+// ─── Opciones de precio del servicio (unidad / paquete / mínimo + extra) ───
+// Mismo modelo que usa el proveedor en su propio dashboard.
+let admOpcionesDraft = [];
+let admOpcionModoActual = 'simple';
+
+function setAdmOpcionModo(m){
+  admOpcionModoActual = m;
+  document.querySelectorAll('#admsvc-modal-overlay .opcion-modo').forEach(b => b.classList.toggle('active', b.dataset.modo === m));
+  document.getElementById('admopcion-modo-simple').style.display = (m === 'simple') ? 'block' : 'none';
+  document.getElementById('admopcion-modo-minimo').style.display = (m === 'minimo') ? 'block' : 'none';
+}
+
+function precioLegible(n){ return 'S/. ' + Number(n || 0).toLocaleString('es-PE'); }
+
+function renderAdmOpcionesDraft(){
+  const cont = document.getElementById('admsvc-opciones-lista');
+  if(!cont) return;
+  if(!admOpcionesDraft.length){ cont.innerHTML = ''; return; }
+  cont.innerHTML = admOpcionesDraft.map((o, i) => {
+    let detalle;
+    if(o.tipo === 'minimo'){
+      detalle = 'Mínimo' + (o.cant_min ? ' ' + o.cant_min + ' u.' : '') + ' por ' + precioLegible(o.precio_min) +
+                ' · c/u extra ' + precioLegible(o.precio_extra);
+    } else {
+      detalle = precioLegible(o.precio);
+    }
+    return `<div class="opcion-chip">
+      <div><div class="opcion-chip-n">${esc(o.nombre)}</div><div class="opcion-chip-d">${esc(detalle)}</div></div>
+      <button type="button" class="opcion-chip-x" onclick="removerAdmOpcion(${i})" title="Quitar"><i class="ti ti-x"></i></button>
+    </div>`;
+  }).join('');
+}
+
+function agregarAdmOpcionServicio(){
+  const nombre = document.getElementById('admopcion-nombre').value.trim();
+  if(!nombre){ alert('Ponle un nombre al ítem (ej. "Sillas Tiffany").'); return; }
+
+  if(admOpcionModoActual === 'simple'){
+    const precio = parseFloat(document.getElementById('admopcion-precio').value);
+    if(isNaN(precio) || precio < 0){ alert('Pon un precio válido para la opción.'); return; }
+    admOpcionesDraft.push({ tipo:'simple', nombre, precio });
+  } else {
+    const precio_min = parseFloat(document.getElementById('admopcion-precio-min').value);
+    const cantRaw = document.getElementById('admopcion-cant-min').value;
+    const cant_min = cantRaw === '' ? null : parseInt(cantRaw, 10);
+    const precio_extra = parseFloat(document.getElementById('admopcion-precio-extra').value);
+    if(isNaN(precio_min) || precio_min < 0){ alert('Pon cuánto cobras por el mínimo.'); return; }
+    if(isNaN(precio_extra) || precio_extra < 0){ alert('Pon cuánto cobras por cada unidad extra.'); return; }
+    admOpcionesDraft.push({ tipo:'minimo', nombre, precio_min, cant_min: (cant_min !== null && !isNaN(cant_min)) ? cant_min : null, precio_extra });
+  }
+
+  ['admopcion-nombre','admopcion-precio','admopcion-precio-min','admopcion-cant-min','admopcion-precio-extra']
+    .forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  document.getElementById('admopcion-nombre').focus();
+  renderAdmOpcionesDraft();
+}
+
+function removerAdmOpcion(i){ admOpcionesDraft.splice(i, 1); renderAdmOpcionesDraft(); }
+
 async function cargarProveedoresAprobados(){
   const { data, error } = await sb.from('profiles')
     .select('id, full_name')
@@ -595,7 +713,7 @@ async function seleccionarProveedorAdmin(id){
   document.getElementById('admsvc-lista').innerHTML = '<div class="vacio" style="padding:20px;"><span class="spinner"></span></div>';
 
   const { data, error } = await sb.from('services')
-    .select('id, name, price, category, description, no_incluye, imagenes, video_url, active')
+    .select('id, name, price, category, description, no_incluye, imagenes, video_url, active, opciones')
     .eq('provider_id', id)
     .order('created_at', { ascending: true });
 
@@ -657,6 +775,10 @@ function abrirAdmSvcModal(id){
   admsvcVideoDraft = existing ? (existing.video_url || null) : null;
   renderAdmSvcVideo();
 
+  admOpcionesDraft = existing && Array.isArray(existing.opciones) ? existing.opciones.map(o => ({ ...o })) : [];
+  setAdmOpcionModo('simple');
+  renderAdmOpcionesDraft();
+
   document.getElementById('admsvc-modal-overlay').classList.add('open');
   document.querySelectorAll('#admsvc-descripcion, #admsvc-no-incluye').forEach(autoGrow);
 }
@@ -666,6 +788,7 @@ function closeAdmSvcModal(){
   admsvcEditingId = null;
   admsvcImagenesDraft = [];
   admsvcVideoDraft = null;
+  admOpcionesDraft = [];
 }
 
 function renderAdmSvcImages(){
@@ -746,16 +869,17 @@ async function guardarServicioAdmin(){
   }
 
   const imagenes = admsvcImagenesDraft.slice();
+  const opciones = admOpcionesDraft.map(o => ({ ...o }));
   const payload = {
     name: nombre, price: precio, category: categoria, description: descripcion, no_incluye: noIncluye || null,
-    imagenes, image_url: imagenes[0] || null, video_url: admsvcVideoDraft || null
+    imagenes, image_url: imagenes[0] || null, video_url: admsvcVideoDraft || null, opciones
   };
 
   if(admsvcEditingId){
     const { error } = await sb.from('services').update(payload).eq('id', admsvcEditingId);
     if(error){ alert('No se pudo guardar el servicio: ' + error.message); return; }
     const idx = serviciosProveedorAdmin.findIndex(s => s.id === admsvcEditingId);
-    if(idx >= 0) serviciosProveedorAdmin[idx] = { ...serviciosProveedorAdmin[idx], name: nombre, price: precio, category: categoria, description: descripcion, no_incluye: noIncluye || null, imagenes, video_url: admsvcVideoDraft || null };
+    if(idx >= 0) serviciosProveedorAdmin[idx] = { ...serviciosProveedorAdmin[idx], name: nombre, price: precio, category: categoria, description: descripcion, no_incluye: noIncluye || null, imagenes, video_url: admsvcVideoDraft || null, opciones };
   } else {
     // Nace como borrador, igual que cuando lo crea el propio proveedor: el
     // admin lo revisa y lo publica con el ojito cuando ya está listo.
@@ -763,7 +887,7 @@ async function guardarServicioAdmin(){
       provider_id: proveedorAdminSeleccionado.id, ...payload, active: false
     }).select('id').single();
     if(error){ alert('No se pudo crear el servicio: ' + error.message); return; }
-    serviciosProveedorAdmin.push({ id: data.id, name: nombre, price: precio, category: categoria, description: descripcion, no_incluye: noIncluye || null, imagenes, video_url: admsvcVideoDraft || null, active: false });
+    serviciosProveedorAdmin.push({ id: data.id, name: nombre, price: precio, category: categoria, description: descripcion, no_incluye: noIncluye || null, imagenes, video_url: admsvcVideoDraft || null, opciones, active: false });
   }
 
   closeAdmSvcModal();
