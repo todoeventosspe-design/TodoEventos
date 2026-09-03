@@ -102,6 +102,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .field{margin-bottom:14px;}
 .field label{display:block;font-size:12px;color:var(--sub);margin-bottom:6px;font-weight:500;}
 .field input,.field select,.field textarea{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:9px;padding:11px 13px;color:var(--fg);font-size:13.5px;font-family:inherit;}
+.field textarea{resize:none;overflow:hidden;}
 .field input[type="date"],.field input[type="time"]{color-scheme:dark;cursor:pointer;}
 .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--or-line);}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
@@ -360,6 +361,14 @@ let usuarioActual = null;
 function esc(s){
   return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+
+// Los textarea del modal de servicio crecen solos con el contenido en vez
+// de dejar arrastrar el borde (eso se salia del popup).
+function autoGrow(el){ el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+document.querySelectorAll('#service-descripcion, #service-no-incluye').forEach(t => {
+  t.addEventListener('input', () => autoGrow(t));
+});
+
 let perfilRowInicial = null; // fila cruda de "profiles", leida una sola vez al verificar acceso
 try {
   const storageAdapter = {
@@ -3020,6 +3029,7 @@ function openServiceModal(id){
   renderOpcionesDraft();
 
   document.getElementById('service-modal-overlay').classList.add('open');
+  document.querySelectorAll('#service-descripcion, #service-no-incluye').forEach(autoGrow);
 }
 
 function closeServiceModal(){
