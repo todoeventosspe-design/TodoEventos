@@ -734,8 +734,8 @@ function renderAdmSvcLista(){
         <div class="svc-mini-meta">S/. ${Number(s.price).toLocaleString('es-PE')} · ${s.active ? 'Publicado' : 'Borrador'}</div>
       </div>
       <div class="btns">
-        <button class="btn btn-fundador" onclick="abrirAdmSvcModal('${s.id}')"><i class="ti ti-edit"></i></button>
-        <button class="btn btn-fundador" onclick="toggleAdmSvcActivo('${s.id}', ${!s.active})"><i class="ti ti-${s.active ? 'eye-off' : 'eye'}"></i></button>
+        <button class="btn btn-fundador" onclick="abrirAdmSvcModal(${s.id})"><i class="ti ti-edit"></i></button>
+        <button class="btn btn-fundador" onclick="toggleAdmSvcActivo(${s.id}, ${!s.active})"><i class="ti ti-${s.active ? 'eye-off' : 'eye'}"></i></button>
       </div>
     </div>
   `).join('');
