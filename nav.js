@@ -159,6 +159,8 @@ async function verificarSesionNav() {
   const nombre = (perfil && perfil.full_name) ? perfil.full_name : usuario.email;
   const rol = perfil ? perfil.role : 'cliente';
 
+  if (typeof window.teIdentify === 'function') window.teIdentify(usuario, rol);
+
   if (perfil && perfil.is_admin) {
     const linkAdmin = document.getElementById('link-admin');
     if (linkAdmin) linkAdmin.style.display = 'flex';

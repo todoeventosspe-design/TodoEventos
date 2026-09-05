@@ -446,6 +446,7 @@ async function verificarAccesoDashboard(){
   }
 
   // verification_status === 'aprobado': acceso normal, no se muestra el overlay
+  if(typeof window.teIdentify === 'function') window.teIdentify(usuario, perfil.role);
   usuarioActual = usuario;
   perfilRowInicial = perfil;
   if(typeof onAccesoDashboardOk === 'function') onAccesoDashboardOk();
@@ -1326,6 +1327,7 @@ function goHome(){
 }
 
 function openTool(tool){
+  if(typeof window.teTrack === 'function') window.teTrack('herramienta_abierta', { herramienta: tool });
   hideAllViews();
   const view = document.getElementById('view-' + tool);
   if(view) view.classList.add('active');
@@ -2084,6 +2086,9 @@ function exportCotizacionPDF(){
   doc.text(pieLines, pageW / 2, y, { align: 'center' });
 
   const nombreArchivo = 'Cotizacion_' + (pl.negocio || 'TodoEventos').replace(/[^a-zA-Z0-9]+/g,'_') + '_' + (cliente.replace(/[^a-zA-Z0-9]+/g,'_') || 'Cliente') + '.pdf';
+
+  if(typeof window.teTrack === 'function') window.teTrack('cotizacion_pdf_generada', { items: items.length });
+
   doc.save(nombreArchivo);
 }
 
