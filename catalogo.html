@@ -857,6 +857,10 @@ async function openProvider(providerId) {
 
   if(!perfilReal) return;
 
+  if(typeof window.teTrack === 'function'){
+    window.teTrack('ver_perfil_proveedor', { proveedor_id: providerId, proveedor_nombre: perfilReal.full_name || 'Proveedor' });
+  }
+
   const nombre = perfilReal.full_name || 'Proveedor';
   const categoria = perfilReal.categoria || 'Servicios para eventos';
   const ubicacion = perfilReal.location || 'Lima';
@@ -994,6 +998,13 @@ function addToCart(servicioIndex){
   // Evita duplicar exactamente el mismo servicio del mismo proveedor
   const yaExiste = cart.some(it => it.proveedorId === currentModalProvider.id && it.servicio === s.nombre);
   if(yaExiste){ openCart(); return; }  // ya lo tiene: que lo vea en el carrito
+
+  if(typeof window.teTrack === 'function'){
+    window.teTrack('presupuesto_item_agregado', {
+      proveedor_id: currentModalProvider.id, proveedor_nombre: currentModalProvider.nombre,
+      servicio_nombre: s.nombre, precio: Number(s.precio)
+    });
+  }
 
   cart.push({
     id: 'ci' + Date.now(),
@@ -1427,6 +1438,8 @@ async function verificarSesionNav(){
   const nombre = (perfil && perfil.full_name) ? perfil.full_name : usuario.email;
   const rol = perfil ? perfil.role : 'cliente';
 
+  if(typeof window.teIdentify === 'function') window.teIdentify(usuario, rol);
+
   // El acceso al panel de admin solo aparece si la cuenta es administradora
   if(perfil && perfil.is_admin){
     const linkAdmin = document.getElementById('link-admin');
@@ -1580,6 +1593,10 @@ async function abrirReserva(serviceId){
 
   const s = providers.find(x => x.id === serviceId);
   if(!s) return;
+
+  if(typeof window.teTrack === 'function'){
+    window.teTrack('reserva_iniciada', { servicio_id: s.id, servicio_nombre: s.name, proveedor_id: s.providerId });
+  }
 
   reservaServicio = s;
   reservaFechaSel = null;
@@ -1761,6 +1778,13 @@ async function confirmarReserva(){
       : 'No se pudo confirmar la reserva: ' + error.message;
     if(error.message.includes('agenda_no_overlap')) seleccionarDiaReserva(reservaFechaSel);
     return;
+  }
+
+  if(typeof window.teTrack === 'function'){
+    window.teTrack('reserva_confirmada', {
+      servicio_id: reservaServicio.id, servicio_nombre: reservaServicio.name,
+      proveedor_id: reservaServicio.providerId, precio: reservaServicio.price
+    });
   }
 
   cerrarReserva();
