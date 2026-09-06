@@ -1134,7 +1134,7 @@ function openServiceDetail(providerId){
   document.getElementById('sd-categoria').textContent = catNames[p.cat] || 'Servicio';
   document.getElementById('sd-district').textContent = p.district + ', Lima';
   document.getElementById('sd-rating').textContent = p.esNuevo ? 'Nuevo · sin reseñas' : p.rating.toFixed(1) + ' (' + p.reviews + ')';
-  document.getElementById('sd-price').textContent = money(p.price);
+  document.getElementById('sd-price').textContent = p.precioACotizar ? 'A cotizar' : money(p.price);
   document.getElementById('sd-badge').textContent = p.badge || '✓ Verificado';
   // Descripción real que el proveedor escribió al crear el servicio (no un texto genérico por categoría)
   document.getElementById('sd-desc').textContent = p.desc || 'Este proveedor todavía no agregó una descripción para este servicio.';
