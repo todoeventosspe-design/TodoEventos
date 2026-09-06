@@ -123,8 +123,6 @@ h1{font-size:22px;font-weight:700;margin:22px 0 4px;}
 .service-img-item .gallery-remove{width:20px;height:20px;top:3px;right:3px;font-size:10px;}
 .img-cover-badge{position:absolute;top:3px;left:3px;background:rgba(234,88,12,.92);color:#fff;font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:100px;display:flex;align-items:center;gap:3px;pointer-events:none;}
 .img-cover-badge i{font-size:10px;}
-.img-cover-btn{position:absolute;top:3px;left:3px;width:20px;height:20px;background:rgba(18,14,31,.68);border:1px solid rgba(255,255,255,.2);border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;}
-.img-cover-btn:hover{background:rgba(234,88,12,.85);}
 .service-img-add{display:flex;align-items:center;justify-content:center;border:2px dashed var(--line);border-radius:9px;aspect-ratio:1;cursor:pointer;color:var(--sub);font-size:20px;}
 .service-img-add:hover{border-color:var(--or-line);color:var(--or);}
 </style>
@@ -824,9 +822,7 @@ function renderAdmSvcImages(){
         ondragover="event.preventDefault();"
         ondrop="event.preventDefault();moveAdmSvcImage(dragAdmImgIndex, ${i});">
       <img src="${esc(url)}" alt="Foto ${i+1}">
-      ${i === 0
-        ? `<span class="img-cover-badge"><i class="ti ti-star-filled"></i> Portada</span>`
-        : `<button class="img-cover-btn" onclick="moveAdmSvcImage(${i}, 0)" title="Hacer portada"><i class="ti ti-star"></i></button>`}
+      ${i === 0 ? `<span class="img-cover-badge"><i class="ti ti-star-filled"></i> Portada</span>` : ''}
       <button class="gallery-remove" onclick="admsvcImagenesDraft.splice(${i},1);renderAdmSvcImages();"><i class="ti ti-x"></i></button>
     </div>`).join('');
   if(admsvcImagenesDraft.length < 20){
