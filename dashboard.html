@@ -1083,6 +1083,10 @@ verificarAccesoDashboard();
         Es el "desde" que ve el cliente en el catálogo. Si tu servicio varía según lo que pida
         (combos, cantidad, extras), pon el precio de tu combinación más económica y detalla el resto abajo.
       </small>
+      <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-weight:500;font-size:13px;cursor:pointer;">
+        <input type="checkbox" id="service-precio-cotizar" onchange="toggleServicePrecioCotizar()" style="width:auto;">
+        Precio a cotizar (varía según el pedido, no tengo un "desde" fijo)
+      </label>
     </div>
     <div class="field">
       <label>Categoría</label>
@@ -2610,7 +2614,7 @@ async function cargarPerfilDesdeSupabase(){
   const p = perfilRowInicial;
 
   const [{ data: servicios }, { data: resenas }, { data: comentarios }, { data: feedFotos }] = await Promise.all([
-    sb.from('services').select('id, name, price, category, description, no_incluye, imagenes, video_url, active, opciones').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true }),
+    sb.from('services').select('id, name, price, precio_a_cotizar, category, description, no_incluye, imagenes, video_url, active, opciones').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true }),
     sb.from('reviews').select('id, service_id, rating, comment, created_at, client_name').eq('provider_id', usuarioActual.id).order('created_at', { ascending: false }),
     sb.from('comentarios_perfil').select('id, comment, created_at, client_name').eq('provider_id', usuarioActual.id).order('created_at', { ascending: false }),
     sb.from('feed_photos').select('id, url').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true })
@@ -2637,7 +2641,7 @@ async function cargarPerfilDesdeSupabase(){
     bannerUrl: p.banner_url || '',
     ratingReal: p.rating || 0,
     reviews_count: p.reviews_count || 0,
-    servicios: (servicios || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, categoria: s.category || 'musica', descripcion: s.description || '', noIncluye: s.no_incluye || '', imagenes: s.imagenes || [], video: s.video_url || null, opciones: Array.isArray(s.opciones) ? s.opciones : [], activo: s.active === true })),
+    servicios: (servicios || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, precioACotizar: s.precio_a_cotizar === true, categoria: s.category || 'musica', descripcion: s.description || '', noIncluye: s.no_incluye || '', imagenes: s.imagenes || [], video: s.video_url || null, opciones: Array.isArray(s.opciones) ? s.opciones : [], activo: s.active === true })),
     resenasPorServicio,
     // "Comentarios" del perfil: sobre el proveedor como persona/negocio,
     // distintos de las reseñas de un servicio puntual.
@@ -2799,7 +2803,7 @@ function renderServiciosGrid(){
         <div style="margin-bottom:8px;">${estadoBadge}</div>
         <div class="service-name">${esc(s.nombre)}</div>
         <div class="service-desc">${esc(s.descripcion)}</div>
-        <div class="service-price">S/. ${Number(s.precio).toLocaleString('es-PE')}</div>
+        <div class="service-price">${s.precioACotizar ? 'A cotizar' : 'S/. ' + Number(s.precio).toLocaleString('es-PE')}</div>
         <div style="font-size:11px;color:var(--sub);margin-top:8px;"><i class="ti ti-photo" style="font-size:12px;"></i> ${imgs.length} foto${imgs.length===1?'':'s'}</div>
         ${btnLanzar}
       </div>
@@ -3012,6 +3016,8 @@ function openServiceModal(id){
   document.getElementById('service-modal-title').textContent = existing ? 'Editar servicio' : 'Añadir nuevo servicio';
   document.getElementById('service-nombre').value = existing ? existing.nombre : '';
   document.getElementById('service-precio').value = existing ? existing.precio : '';
+  document.getElementById('service-precio-cotizar').checked = existing ? !!existing.precioACotizar : false;
+  toggleServicePrecioCotizar();
   document.getElementById('service-categoria').value = existing ? (existing.categoria || 'musica') : 'musica';
   document.getElementById('service-descripcion').value = existing ? existing.descripcion : '';
   document.getElementById('service-no-incluye').value = existing ? (existing.noIncluye || '') : '';
@@ -3096,15 +3102,27 @@ function removeServiceModalVideo(){
   renderServiceModalVideo();
 }
 
+// El precio deja de ser obligatorio cuando el proveedor marca "a cotizar":
+// hay rubros (catering a medida, por ejemplo) donde no existe un "desde"
+// real porque todo depende de lo que pida el cliente.
+function toggleServicePrecioCotizar(){
+  const cotiza = document.getElementById('service-precio-cotizar').checked;
+  const input = document.getElementById('service-precio');
+  input.disabled = cotiza;
+  input.style.opacity = cotiza ? '.5' : '1';
+  if(cotiza) input.value = '';
+}
+
 async function saveService(){
   const nombre = document.getElementById('service-nombre').value.trim();
-  const precio = parseFloat(document.getElementById('service-precio').value);
+  const precioACotizar = document.getElementById('service-precio-cotizar').checked;
+  const precio = precioACotizar ? 0 : parseFloat(document.getElementById('service-precio').value);
   const categoria = document.getElementById('service-categoria').value;
   const descripcion = document.getElementById('service-descripcion').value.trim();
   const noIncluye = document.getElementById('service-no-incluye').value.trim();
 
-  if(!nombre || isNaN(precio) || precio < 0){
-    alert('Escribe un nombre y un precio válido para el servicio.');
+  if(!nombre || (!precioACotizar && (isNaN(precio) || precio < 0))){
+    alert('Escribe un nombre y un precio válido para el servicio (o marca "Precio a cotizar").');
     return;
   }
 
@@ -3115,23 +3133,23 @@ async function saveService(){
 
   if(servicioEditingId){
     const { error } = await sb.from('services').update({
-      name: nombre, price: precio, category: categoria, description: descripcion, no_incluye: noIncluye || null, imagenes,
+      name: nombre, price: precio, precio_a_cotizar: precioACotizar, category: categoria, description: descripcion, no_incluye: noIncluye || null, imagenes,
       image_url: imagenes[0] || null, video_url, opciones
     }).eq('id', servicioEditingId).eq('provider_id', usuarioActual.id);
     if(error){ alert('No se pudo guardar el servicio: ' + error.message); return; }
 
     const idx = perfilData.servicios.findIndex(s => s.id === servicioEditingId);
-    if(idx >= 0) perfilData.servicios[idx] = { ...perfilData.servicios[idx], nombre, precio, categoria, descripcion, noIncluye, imagenes, video: video_url, opciones };
+    if(idx >= 0) perfilData.servicios[idx] = { ...perfilData.servicios[idx], nombre, precio, precioACotizar, categoria, descripcion, noIncluye, imagenes, video: video_url, opciones };
   } else {
     // Un servicio nuevo nace como BORRADOR: no aparece en el catálogo hasta
     // que el proveedor lo lanza al mercado a propósito.
     const { data, error } = await sb.from('services').insert({
-      provider_id: usuarioActual.id, name: nombre, price: precio, category: categoria, description: descripcion, no_incluye: noIncluye || null,
+      provider_id: usuarioActual.id, name: nombre, price: precio, precio_a_cotizar: precioACotizar, category: categoria, description: descripcion, no_incluye: noIncluye || null,
       imagenes, image_url: imagenes[0] || null, video_url, active: false, opciones
     }).select('id').single();
     if(error){ alert('No se pudo crear el servicio: ' + error.message); return; }
 
-    perfilData.servicios.push({ id: data.id, nombre, precio, categoria, descripcion, noIncluye, imagenes, video: video_url, opciones, activo: false });
+    perfilData.servicios.push({ id: data.id, nombre, precio, precioACotizar, categoria, descripcion, noIncluye, imagenes, video: video_url, opciones, activo: false });
   }
 
   closeServiceModal();
@@ -3157,7 +3175,7 @@ function openServiceViewer(id){
   viewerServicioId = id;
 
   document.getElementById('viewer-nombre').textContent = s.nombre;
-  document.getElementById('viewer-precio').textContent = 'S/. ' + Number(s.precio).toLocaleString('es-PE');
+  document.getElementById('viewer-precio').textContent = s.precioACotizar ? 'Precio a cotizar' : 'S/. ' + Number(s.precio).toLocaleString('es-PE');
   document.getElementById('viewer-descripcion').textContent = s.descripcion;
   document.getElementById('viewer-no-incluye').textContent = s.noIncluye ? 'No incluye: ' + s.noIncluye : '';
 

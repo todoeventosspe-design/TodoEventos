@@ -174,8 +174,12 @@ h1{font-size:22px;font-weight:700;margin:22px 0 4px;}
     </div>
     <div class="row2">
       <div class="field">
-        <label>Precio desde (S/.) <span style="color:var(--red);">*</span></label>
+        <label>Precio desde (S/.) <span id="admsvc-precio-req" style="color:var(--red);">*</span></label>
         <input type="number" id="admsvc-precio" min="0" step="0.01" placeholder="Ej. 250">
+        <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-weight:500;font-size:12.5px;cursor:pointer;">
+          <input type="checkbox" id="admsvc-precio-cotizar" onchange="toggleAdmPrecioCotizar()" style="width:auto;">
+          A cotizar (varía según el pedido)
+        </label>
       </div>
       <div class="field">
         <label>Categoría</label>
@@ -298,6 +302,16 @@ function esc(s){
 // Los textarea del modal de servicio crecen solos con el contenido en vez
 // de dejar arrastrar el borde (eso se salia del popup).
 function autoGrow(el){ el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+
+// Rubros como catering a medida no tienen un "desde" real: todo depende
+// de lo que pida el cliente. Marcar esto libera al precio de ser obligatorio.
+function toggleAdmPrecioCotizar(){
+  const cotiza = document.getElementById('admsvc-precio-cotizar').checked;
+  const input = document.getElementById('admsvc-precio');
+  input.disabled = cotiza;
+  input.style.opacity = cotiza ? '.5' : '1';
+  if(cotiza) input.value = '';
+}
 document.querySelectorAll('#admsvc-descripcion, #admsvc-no-incluye').forEach(t => {
   t.addEventListener('input', () => autoGrow(t));
 });
@@ -713,7 +727,7 @@ async function seleccionarProveedorAdmin(id){
   document.getElementById('admsvc-lista').innerHTML = '<div class="vacio" style="padding:20px;"><span class="spinner"></span></div>';
 
   const { data, error } = await sb.from('services')
-    .select('id, name, price, category, description, no_incluye, imagenes, video_url, active, opciones')
+    .select('id, name, price, precio_a_cotizar, category, description, no_incluye, imagenes, video_url, active, opciones')
     .eq('provider_id', id)
     .order('created_at', { ascending: false });
 
@@ -731,7 +745,7 @@ function renderAdmSvcLista(){
     <div class="svc-mini">
       <div>
         <div class="svc-mini-name">${esc(s.name)}</div>
-        <div class="svc-mini-meta">S/. ${Number(s.price).toLocaleString('es-PE')} · ${s.active ? 'Publicado' : 'Borrador'}</div>
+        <div class="svc-mini-meta">${s.precio_a_cotizar ? 'A cotizar' : 'S/. ' + Number(s.price).toLocaleString('es-PE')} · ${s.active ? 'Publicado' : 'Borrador'}</div>
       </div>
       <div class="btns">
         <button class="btn btn-fundador" onclick="abrirAdmSvcModal(${s.id})"><i class="ti ti-edit"></i></button>
@@ -765,6 +779,8 @@ function abrirAdmSvcModal(id){
     : 'Nuevo servicio para ' + proveedorAdminSeleccionado.nombre;
   document.getElementById('admsvc-nombre').value = existing ? existing.name : '';
   document.getElementById('admsvc-precio').value = existing ? existing.price : '';
+  document.getElementById('admsvc-precio-cotizar').checked = existing ? !!existing.precio_a_cotizar : false;
+  toggleAdmPrecioCotizar();
   document.getElementById('admsvc-categoria').value = existing ? (existing.category || 'musica') : 'musica';
   document.getElementById('admsvc-descripcion').value = existing ? (existing.description || '') : '';
   document.getElementById('admsvc-no-incluye').value = existing ? (existing.no_incluye || '') : '';
@@ -858,7 +874,8 @@ document.getElementById('admsvc-video-picker').addEventListener('change', async 
 
 async function guardarServicioAdmin(){
   const nombre = document.getElementById('admsvc-nombre').value.trim();
-  const precio = parseFloat(document.getElementById('admsvc-precio').value);
+  const precioACotizar = document.getElementById('admsvc-precio-cotizar').checked;
+  const precio = precioACotizar ? 0 : parseFloat(document.getElementById('admsvc-precio').value);
   const categoria = document.getElementById('admsvc-categoria').value;
   const descripcion = document.getElementById('admsvc-descripcion').value.trim();
   const noIncluye = document.getElementById('admsvc-no-incluye').value.trim();
@@ -866,14 +883,15 @@ async function guardarServicioAdmin(){
   // "Nombre del servicio" y "Precio desde" son obligatorios en la base
   // (NOT NULL): si faltan, no hay nada que guardar. Se avisa senalando el
   // campo exacto para no confundirlo con el nombre/precio de una opcion
-  // de precio (esos son de un item suelto, no del servicio).
+  // de precio (esos son de un item suelto, no del servicio). Marcar
+  // "a cotizar" libera al precio de esta exigencia.
   if(!nombre){
     alert('Falta el "Nombre del servicio" (arriba del todo). Sin eso no se puede guardar.');
     document.getElementById('admsvc-nombre').focus();
     return;
   }
-  if(isNaN(precio) || precio < 0){
-    alert('Falta el "Precio desde" del servicio (no el de una opción de precio). Sin eso no se puede guardar.');
+  if(!precioACotizar && (isNaN(precio) || precio < 0)){
+    alert('Falta el "Precio desde" del servicio (no el de una opción de precio). Si no tiene un precio fijo, marca "A cotizar".');
     document.getElementById('admsvc-precio').focus();
     return;
   }
@@ -881,7 +899,7 @@ async function guardarServicioAdmin(){
   const imagenes = admsvcImagenesDraft.slice();
   const opciones = admOpcionesDraft.map(o => ({ ...o }));
   const payload = {
-    name: nombre, price: precio, category: categoria, description: descripcion, no_incluye: noIncluye || null,
+    name: nombre, price: precio, precio_a_cotizar: precioACotizar, category: categoria, description: descripcion, no_incluye: noIncluye || null,
     imagenes, image_url: imagenes[0] || null, video_url: admsvcVideoDraft || null, opciones
   };
 
@@ -889,7 +907,7 @@ async function guardarServicioAdmin(){
     const { error } = await sb.from('services').update(payload).eq('id', admsvcEditingId);
     if(error){ alert('No se pudo guardar el servicio: ' + error.message); return; }
     const idx = serviciosProveedorAdmin.findIndex(s => s.id === admsvcEditingId);
-    if(idx >= 0) serviciosProveedorAdmin[idx] = { ...serviciosProveedorAdmin[idx], name: nombre, price: precio, category: categoria, description: descripcion, no_incluye: noIncluye || null, imagenes, video_url: admsvcVideoDraft || null, opciones };
+    if(idx >= 0) serviciosProveedorAdmin[idx] = { ...serviciosProveedorAdmin[idx], name: nombre, price: precio, precio_a_cotizar: precioACotizar, category: categoria, description: descripcion, no_incluye: noIncluye || null, imagenes, video_url: admsvcVideoDraft || null, opciones };
   } else {
     // Nace como borrador, igual que cuando lo crea el propio proveedor: el
     // admin lo revisa y lo publica con el ojito cuando ya está listo.
@@ -897,7 +915,7 @@ async function guardarServicioAdmin(){
       provider_id: proveedorAdminSeleccionado.id, ...payload, active: false
     }).select('id').single();
     if(error){ alert('No se pudo crear el servicio: ' + error.message); return; }
-    serviciosProveedorAdmin.unshift({ id: data.id, name: nombre, price: precio, category: categoria, description: descripcion, no_incluye: noIncluye || null, imagenes, video_url: admsvcVideoDraft || null, opciones, active: false });
+    serviciosProveedorAdmin.unshift({ id: data.id, name: nombre, price: precio, precio_a_cotizar: precioACotizar, category: categoria, description: descripcion, no_incluye: noIncluye || null, imagenes, video_url: admsvcVideoDraft || null, opciones, active: false });
   }
 
   closeAdmSvcModal();

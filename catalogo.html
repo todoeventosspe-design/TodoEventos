@@ -671,7 +671,7 @@ async function cargarProvidersReales(){
   // badges antes que un catálogo en blanco.
   const consulta = campoFundador => sb
     .from('services')
-    .select(`id, name, description, price, category, image_url, imagenes, provider_id, profiles!services_provider_id_fkey(full_name, location, rating, reviews_count${campoFundador})`)
+    .select(`id, name, description, price, precio_a_cotizar, category, image_url, imagenes, provider_id, profiles!services_provider_id_fkey(full_name, location, rating, reviews_count${campoFundador})`)
     .eq('active', true);
 
   let { data, error } = await consulta(', is_founder');
@@ -693,6 +693,7 @@ async function cargarProvidersReales(){
         name: s.name,
         cat: s.category || 'musica',
         price: Number(s.price) || 0,
+        precioACotizar: s.precio_a_cotizar === true,
         rating: Number(s.profiles.rating) || 0,
         reviews,
         esNuevo,
@@ -789,7 +790,7 @@ function render() {
           ${p.foto ? '' : `<i class="ti ${p.icon}"></i>`}
           <span class="pcard-vbdg">${p.badge}</span>
           ${p.esFundador ? `<span class="pcard-fbdg"><i class="ti ti-crown"></i> Fundador</span>` : ''}
-          <span class="pcard-price-tag">desde S/. ${p.price}</span>
+          <span class="pcard-price-tag">${p.precioACotizar ? 'A cotizar' : 'desde S/. ' + p.price}</span>
           <button class="pcard-fav${favoritos.has(p.id) ? ' activo' : ''}" aria-label="${favoritos.has(p.id) ? 'Quitar de favoritos' : 'Guardar como favorito'}" onclick="event.stopPropagation();toggleFavorito(${p.id}, this);"><i class="ti ${favoritos.has(p.id) ? 'ti-heart-filled' : 'ti-heart'}"></i></button>
         </div>
         <div class="pcard-body-top">
@@ -850,7 +851,7 @@ async function openProvider(providerId) {
 
   const [{ data: perfilReal }, { data: serviciosReal }, { data: feedReal }, { data: comentariosReal }] = await Promise.all([
     sb.from('profiles').select('full_name, categoria, location, bio, avatar_url, banner_url, rating, reviews_count').eq('id', providerId).single(),
-    sb.from('services').select('id, name, price, description, no_incluye, imagenes, video_url, opciones').eq('provider_id', providerId).eq('active', true),
+    sb.from('services').select('id, name, price, precio_a_cotizar, description, no_incluye, imagenes, video_url, opciones').eq('provider_id', providerId).eq('active', true),
     sb.from('feed_photos').select('url').eq('provider_id', providerId),
     sb.from('comentarios_perfil').select('client_name, comment, created_at').eq('provider_id', providerId).order('created_at', { ascending: false })
   ]);
@@ -866,7 +867,7 @@ async function openProvider(providerId) {
   const rating = Number(perfilReal.rating) || 0;
   const reviews = perfilReal.reviews_count || 0;
   const esNuevo = reviews === 0;
-  const servicios = (serviciosReal || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, descripcion: s.description, noIncluye: s.no_incluye || '', imagenes: (s.imagenes || []).map(fotoSegura).filter(Boolean), video: fotoSegura(s.video_url), opciones: Array.isArray(s.opciones) ? s.opciones : [] }));
+  const servicios = (serviciosReal || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, precioACotizar: s.precio_a_cotizar === true, descripcion: s.description, noIncluye: s.no_incluye || '', imagenes: (s.imagenes || []).map(fotoSegura).filter(Boolean), video: fotoSegura(s.video_url), opciones: Array.isArray(s.opciones) ? s.opciones : [] }));
   let galeria = [];
   servicios.forEach(s => { (s.imagenes||[]).forEach(u => galeria.push(u)); });
   galeria = galeria.concat((feedReal || []).map(f => fotoSegura(f.url)).filter(Boolean));
@@ -907,7 +908,7 @@ async function openProvider(providerId) {
           <div class="pm-service-name">${esc(s.nombre)} <i class="ti ti-chevron-down pm-svc-chev" id="pm-svc-chev-${i}"></i></div>
           <div class="pm-service-desc">${esc(s.descripcion || '')}</div>
         </div>
-        <div class="pm-service-price">${money(s.precio)}</div>
+        <div class="pm-service-price">${s.precioACotizar ? 'A cotizar' : money(s.precio)}</div>
       </div>
       <div class="pm-svc-detail" id="pm-svc-detail-${i}">
         ${videoHtml}
@@ -1490,7 +1491,7 @@ function abrirFavoritos(){
         <div class="pcard-clickable" onclick="closeFavoritos();openServiceDetail(${p.id})">
           <div class="pcard-img ${p.foto ? '' : 'ci-' + p.img}" ${p.foto ? `style="background-image:url('${esc(p.foto)}');background-size:cover;background-position:center;"` : ''}>
             ${p.foto ? '' : `<i class="ti ${p.icon}"></i>`}
-            <span class="pcard-price-tag">desde S/. ${p.price}</span>
+            <span class="pcard-price-tag">${p.precioACotizar ? 'A cotizar' : 'desde S/. ' + p.price}</span>
             <button class="pcard-fav activo" onclick="event.stopPropagation();toggleFavorito(${p.id}, this);quitarDeVistaFavoritos(${p.id});"><i class="ti ti-heart-filled"></i></button>
           </div>
           <div class="pcard-body-top">
