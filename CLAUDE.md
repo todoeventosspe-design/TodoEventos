@@ -36,7 +36,7 @@ caja, CRM, inventario, reportes); el marketplace viene de yapa.
 | `login.html` | Login + registro (cliente y proveedor), verificación por código |
 | `nosotros.html`, `proveedores.html`, `confirmacion.html` | Institucionales / flujo |
 | `feedback.js` | Widget de feedback incluido en todas las páginas |
-| `analytics.js` | Vercel Web Analytics + evento `clic_boton` por cada clic en botón/enlace, incluido en todas las páginas. Falta activar "Web Analytics" en el panel de Vercel (paso del humano). |
+| `analytics.js` | Vercel Web Analytics (visitas/páginas) + PostHog (comportamiento: autocapture de clics, embudos e identidad). Expone `window.teTrack(evento, props)` y `window.teIdentify(usuario, rol)`, usados en login/catálogo/dashboard/nav.js. Falta activar "Web Analytics" en Vercel y pegar la Project API Key + host de PostHog (pasos del humano). |
 | `*.sql` | Migraciones que se corren A MANO en el SQL editor de Supabase |
 | `MARKETING.md`, `SEGURIDAD.md`, `ASISTENTE.md` | Decisiones de fondo — LEER |
 
@@ -112,6 +112,19 @@ se deslizan de lado dentro de `.tbl-scroll` en vez de apretujarse, el sidebar ya
 era un cajón con hamburguesa (`toggleNav`) en ≤720px, y stat-grid colapsa a 1
 columna en móvil.
 
+Analítica de embudos (PostHog, vía `analytics.js`): eventos con nombre ya
+instrumentados — `registro_iniciado`/`registro_completado` {rol} y
+`login_exitoso` {rol} en login.html; `ver_perfil_proveedor`
+{proveedor_id, proveedor_nombre}, `reserva_iniciada`/`reserva_confirmada`
+{servicio_id, proveedor_id, precio} y `presupuesto_item_agregado`
+{proveedor_id, servicio_nombre, precio} en catalogo.html; `herramienta_abierta`
+{herramienta} (cubre "cotizador" y las otras 5 herramientas) y
+`cotizacion_pdf_generada` {items} en dashboard.html. `window.teIdentify(usuario,
+rol)` liga la navegación anónima a la cuenta real en login/catálogo/dashboard/
+nav.js. Si se agrega un botón o flujo nuevo importante, seguir el mismo patrón
+(`window.teTrack('nombre_evento', {datos})`, guardado con
+`typeof window.teTrack === 'function'`) en vez de crear un mecanismo aparte.
+
 ## Pendientes (revisar y priorizar con el humano)
 
 - **ElevenLabs (config de panel):** declarar las 3 client tools de Raymi (para
@@ -122,6 +135,9 @@ columna en móvil.
 - **Foto de Vicente** en Nosotros (la de Julián ya está optimizada en WebP).
 - **Pagos** (necesita RUC/pasarela) — desbloquea mensajería, adelantos, SEO.
 - **Protección de contraseñas filtradas:** requiere plan Pro de Supabase.
+- **Activar PostHog:** crear cuenta gratis en posthog.com, y pegar la Project
+  API Key + host en `analytics.js` (PH_PROJECT_KEY / PH_API_HOST). También
+  activar "Web Analytics" en el panel de Vercel del proyecto.
 
 ## Detalle largo
 

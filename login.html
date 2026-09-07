@@ -541,6 +541,9 @@ async function doLogin(){
     return;
   }
 
+  if(typeof window.teTrack === 'function') window.teTrack('login_exitoso', { rol: perfil.role });
+  if(typeof window.teIdentify === 'function') window.teIdentify(data.user, perfil.role);
+
   window.location.href = REDIRECT_MAP[perfil.role] || 'index.html';
 }
 
@@ -601,6 +604,8 @@ async function doRegister(){
   setBusy(true);
   showLoading('Creando tu cuenta…');
 
+  if(typeof window.teTrack === 'function') window.teTrack('registro_iniciado', { rol: currentRole });
+
   // Le pasamos nombre y rol como "metadata" del registro: la función
   // automática de la base de datos (handle_new_user) los toma de aquí
   // para crear tu fila en "profiles" sin que nosotros tengamos que
@@ -627,6 +632,8 @@ async function doRegister(){
   }
 
   if(data.session){
+    if(typeof window.teTrack === 'function') window.teTrack('registro_completado', { rol: currentRole });
+    if(typeof window.teIdentify === 'function') window.teIdentify(data.user, currentRole);
     // El proyecto no exige confirmar el correo: ya hay sesión activa,
     // así que podemos registrar la solicitud de proveedor de una vez.
     if(currentRole === 'proveedor' && data.user){
@@ -714,6 +721,9 @@ async function verificarCodigo(){
     showErrorCodigo('Código incorrecto o vencido. Revísalo bien, o pide uno nuevo.');
     return;
   }
+
+  if(typeof window.teTrack === 'function') window.teTrack('registro_completado', { rol: pendiente.role });
+  if(typeof window.teIdentify === 'function') window.teIdentify(data.user, pendiente.role);
 
   // Ahora sí hay sesión activa: si es proveedor, recién aquí guardamos su solicitud
   if(pendiente.role === 'proveedor' && data.user){
