@@ -112,6 +112,27 @@ se deslizan de lado dentro de `.tbl-scroll` en vez de apretujarse, el sidebar ya
 era un cajón con hamburguesa (`toggleNav`) en ≤720px, y stat-grid colapsa a 1
 columna en móvil.
 
+Fix de "no me deja cambiar la foto del servicio" (dashboard, Editar servicio):
+dos bugs distintos, ambos arreglados.
+1. Las miniaturas de foto tenían `draggable="true"` (reordenar arrastrando,
+   feature de otra sesión) — el drag nativo es SOLO de mouse, pero en celular
+   (sobre todo iOS Safari) el navegador igual "atrapaba" el gesto del dedo
+   pensando que era el inicio de un drag, bloqueando el scroll de la modal
+   justo al llegar a las fotos. Arreglado: `touch-action:pan-y` en
+   `.service-img-item`, y `draggable` ya no se pone en pantallas táctiles
+   (detectado con `esDispositivoTactil()`, `matchMedia('(pointer: coarse)')`).
+2. El bug real detrás de "subí la foto nueva pero la que se ve sigue siendo la
+   vieja": quitar la portada (foto 1) y agregar una nueva la manda al FINAL
+   del arreglo, no al frente — y la portada (`image_url`, la que se ve en el
+   marketplace) es siempre `imagenes[0]`. La única forma de cambiar cuál foto
+   quedaba de portada era arrastrar, que en celular no funcionaba para nada
+   (ver punto 1) y en computadora no era evidente. Arreglado: botón directo
+   "Hacer portada" en cada foto que no es la portada (`hacerPortadaServicioImagen`),
+   funciona igual con clic o con tap. El arreglo se probó de punta a punta con
+   Playwright (quitar + agregar + hacer portada + guardar), casos de 1 foto y
+   de varias, y en modo táctil — sin errores, el `image_url` final queda
+   correcto en los 3 casos.
+
 ## Pendientes (revisar y priorizar con el humano)
 
 - **ElevenLabs (config de panel):** declarar las 3 client tools de Raymi (para

@@ -285,12 +285,26 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .gallery-add:hover{border-color:var(--or-line);color:var(--or);}
 
 .service-img-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px;}
-.service-img-item{position:relative;border-radius:9px;overflow:hidden;aspect-ratio:1;background:var(--card2);cursor:grab;}
+/* touch-action:pan-y deja que el dedo siga pudiendo hacer scroll vertical
+   sobre la foto aunque tenga draggable="true" para mouse; sin esto, en
+   celular (sobre todo iOS Safari) el navegador "atrapaba" el gesto pensando
+   que era el inicio de un drag, y la modal quedaba trabada sin poder
+   scrollear justo al llegar a las fotos. */
+.service-img-item{position:relative;border-radius:9px;overflow:hidden;aspect-ratio:1;background:var(--card2);cursor:grab;touch-action:pan-y;}
 .service-img-item:active{cursor:grabbing;}
 .img-cover-badge{position:absolute;top:3px;left:3px;background:rgba(234,88,12,.92);color:#fff;font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:100px;display:flex;align-items:center;gap:3px;pointer-events:none;}
 .img-cover-badge i{font-size:10px;}
 .service-img-item img{width:100%;height:100%;object-fit:cover;display:block;}
 .service-img-item .gallery-remove{width:20px;height:20px;top:3px;right:3px;font-size:10px;}
+/* "Hacer portada": un solo toque/clic para que ESA foto sea la que se ve
+   por defecto en el marketplace. Antes la única forma de cambiar cuál era
+   la portada era arrastrar, que en celular nunca funcionaba (el drag nativo
+   es solo de mouse) y en computadora era poco evidente; por eso "cambiar la
+   foto" (quitar la vieja + subir la nueva) no bastaba: la nueva quedaba al
+   final de la galería y el marketplace seguía mostrando otra como portada. */
+.service-img-portada{position:absolute;left:3px;right:3px;bottom:3px;background:rgba(18,14,31,.72);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:6px;font-size:9.5px;font-weight:700;padding:3px 0;display:flex;align-items:center;justify-content:center;gap:3px;cursor:pointer;font-family:inherit;width:100%;}
+.service-img-portada:hover{background:rgba(234,88,12,.85);}
+.service-img-portada i{font-size:10px;}
 .service-img-add{display:flex;align-items:center;justify-content:center;border:2px dashed var(--line);border-radius:9px;aspect-ratio:1;cursor:pointer;color:var(--sub);font-size:20px;transition:all .16s;}
 .service-img-add:hover{border-color:var(--or-line);color:var(--or);}
 
@@ -3052,18 +3066,33 @@ function closeServiceModal(){
 // Arrastrar para reordenar: la primera foto del arreglo es siempre la
 // "portada" (la que se usa como image_url en el catalogo), asi que
 // reordenar aca decide cual se ve primero.
+//
+// El drag nativo (draggable="true") es SOLO de mouse: en celular no se activa
+// nunca, pero de todos modos el navegador (sobre todo iOS Safari) puede
+// "atrapar" el gesto del dedo pensando que empieza un drag, y bloquear el
+// scroll justo sobre las fotos. Por eso en pantallas tactiles no se pone
+// draggable para nada; para elegir portada esta ademas el boton directo
+// "Hacer portada" (hacerPortadaServicioImagen), que funciona igual con mouse
+// o con el dedo, sin depender de arrastrar.
 let dragServiceImgIndex = null;
+function esDispositivoTactil(){
+  return !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+}
 
 function renderServiceModalImages(){
   const grid = document.getElementById('service-img-grid');
+  const tactil = esDispositivoTactil();
   let html = '';
   servicioImagenesDraft.forEach((url, i) => {
-    html += `<div class="service-img-item" draggable="true"
+    const dragAttrs = tactil ? '' : `draggable="true"
         ondragstart="dragServiceImgIndex=${i};event.dataTransfer.effectAllowed='move';"
         ondragover="event.preventDefault();"
-        ondrop="event.preventDefault();moveServiceModalImage(dragServiceImgIndex, ${i});">
+        ondrop="event.preventDefault();moveServiceModalImage(dragServiceImgIndex, ${i});"`;
+    html += `<div class="service-img-item" ${dragAttrs}>
       <img src="${esc(url)}" alt="Foto ${i+1}">
-      ${i === 0 ? `<span class="img-cover-badge"><i class="ti ti-star-filled"></i> Portada</span>` : ''}
+      ${i === 0
+        ? `<span class="img-cover-badge"><i class="ti ti-star-filled"></i> Portada</span>`
+        : `<button type="button" class="service-img-portada" onclick="hacerPortadaServicioImagen(${i})" title="Usar como portada"><i class="ti ti-star"></i> Hacer portada</button>`}
       <button class="gallery-remove" onclick="removeServiceModalImage(${i})"><i class="ti ti-x"></i></button>
     </div>`;
   });
@@ -3078,9 +3107,21 @@ function renderServiceModalImages(){
 
 function moveServiceModalImage(from, to){
   if(from === null || from === undefined || from === to) return;
+  if(to < 0 || to >= servicioImagenesDraft.length) return;
   const [img] = servicioImagenesDraft.splice(from, 1);
   servicioImagenesDraft.splice(to, 0, img);
   dragServiceImgIndex = null;
+  renderServiceModalImages();
+}
+
+// Un solo toque/clic: la foto que se elija pasa al frente y se vuelve la
+// portada del servicio (la que se ve por defecto en el marketplace). Es el
+// arreglo directo a "subí la foto nueva pero la que se ve seguía siendo la
+// vieja": antes solo se podía cambiar arrastrando.
+function hacerPortadaServicioImagen(i){
+  if(i <= 0 || i >= servicioImagenesDraft.length) return;
+  const [img] = servicioImagenesDraft.splice(i, 1);
+  servicioImagenesDraft.unshift(img);
   renderServiceModalImages();
 }
 
