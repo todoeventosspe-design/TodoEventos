@@ -307,6 +307,16 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .service-img-portada i{font-size:10px;}
 .service-img-add{display:flex;align-items:center;justify-content:center;border:2px dashed var(--line);border-radius:9px;aspect-ratio:1;cursor:pointer;color:var(--sub);font-size:20px;transition:all .16s;}
 .service-img-add:hover{border-color:var(--or-line);color:var(--or);}
+.service-img-item img{cursor:zoom-in;}
+
+/* ── Ajustar/recortar foto: vista previa + arrastre para elegir que parte
+   se ve como portada (3:2, la proporcion de la tarjeta del marketplace) o
+   en galeria (1:1, cuadrada, como se ve en el resto del sitio). ── */
+.recorte-marco{width:100%;border-radius:10px;overflow:hidden;background:#0c0a12;margin-bottom:14px;touch-action:none;cursor:grab;position:relative;}
+.recorte-marco:active{cursor:grabbing;}
+.recorte-marco canvas{display:block;width:100%;height:auto;}
+.recorte-zoom-row{display:flex;align-items:center;gap:10px;color:var(--sub);font-size:17px;margin-bottom:6px;}
+.recorte-zoom-row input[type=range]{flex:1;accent-color:var(--or);}
 
 @media(max-width:640px){
   .services-grid{grid-template-columns:1fr;}
@@ -1186,6 +1196,7 @@ verificarAccesoDashboard();
 
     <div class="field">
       <label>Fotos de este servicio <span id="service-img-count" style="color:var(--sub);font-weight:400;"></span></label>
+      <small style="display:block;margin:-2px 0 8px;color:var(--sub);font-size:11.5px;">Toca una foto para ver cómo quedaría y ajustar qué parte se ve.</small>
       <div class="service-img-grid" id="service-img-grid"></div>
     </div>
 
@@ -1201,12 +1212,45 @@ verificarAccesoDashboard();
   </div>
 </div>
 
+<!-- ─── AJUSTAR/RECORTAR FOTO: vista previa de cómo se ve + arrastrar/zoom
+     para elegir qué parte queda visible (portada del marketplace, o
+     galería). Al guardar, sube la version recortada y reemplaza esa foto. ─── -->
+<div class="modal-overlay" id="recorte-overlay">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-head">
+      <div class="modal-title">Ajustar foto</div>
+      <button class="modal-close" onclick="cerrarRecorteFoto()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="tool-desc" id="recorte-desc" style="margin-bottom:12px;"></div>
+    <div class="recorte-marco" id="recorte-marco"><canvas id="recorte-canvas"></canvas></div>
+    <div class="recorte-zoom-row">
+      <i class="ti ti-zoom-out"></i>
+      <input type="range" id="recorte-zoom" min="100" max="300" value="100">
+      <i class="ti ti-zoom-in"></i>
+    </div>
+    <div class="tool-desc" style="margin:0 0 16px;">Arrastra la foto para moverla dentro del marco.</div>
+    <div class="modal-actions">
+      <button class="btn-ghost" style="flex:1;justify-content:center;" onclick="cerrarRecorteFoto()">Cancelar</button>
+      <button class="btn-or" style="flex:1;justify-content:center;" onclick="guardarRecorteFoto()"><i class="ti ti-check"></i> Guardar recorte</button>
+    </div>
+  </div>
+</div>
+
 <!-- ─── VISOR DE SERVICIO: solo lectura, muestra las fotos de ese servicio ─── -->
 <div class="modal-overlay" id="service-viewer-overlay" onclick="if(event.target===this) closeServiceViewer()">
-  <div class="modal-box" style="max-width:480px;">
+  <!-- max-height + overflow-y: sin esto el visor se salía de la pantalla (por
+       arriba Y por abajo) cuando el servicio tenía varias fotos/opciones, y
+       no había forma de scrollear para leer el resto ni de llegar al botón
+       de editar. -->
+  <div class="modal-box" style="max-width:480px;max-height:88vh;overflow-y:auto;">
     <div class="modal-head">
       <div class="modal-title" id="viewer-nombre">Servicio</div>
-      <button class="modal-close" onclick="closeServiceViewer()"><i class="ti ti-x"></i></button>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <!-- Acceso directo a editar ESTE servicio, visible apenas se abre el
+             visor (sin tener que scrollear hasta el botón de abajo). -->
+        <button class="btn-outline-or" style="padding:6px 12px;font-size:12px;" onclick="editarServicioDesdeVisor()" title="Editar este servicio"><i class="ti ti-edit"></i> Editar</button>
+        <button class="modal-close" onclick="closeServiceViewer()"><i class="ti ti-x"></i></button>
+      </div>
     </div>
     <div class="modal-date" id="viewer-precio">—</div>
     <div class="profile-bio" id="viewer-descripcion" style="margin-bottom:16px;"></div>
@@ -3089,7 +3133,7 @@ function renderServiceModalImages(){
         ondragover="event.preventDefault();"
         ondrop="event.preventDefault();moveServiceModalImage(dragServiceImgIndex, ${i});"`;
     html += `<div class="service-img-item" ${dragAttrs}>
-      <img src="${esc(url)}" alt="Foto ${i+1}">
+      <img src="${esc(url)}" alt="Foto ${i+1}" onclick="abrirRecorteFoto(${i})" title="Ver cómo quedaría y ajustar el recorte">
       ${i === 0
         ? `<span class="img-cover-badge"><i class="ti ti-star-filled"></i> Portada</span>`
         : `<button type="button" class="service-img-portada" onclick="hacerPortadaServicioImagen(${i})" title="Usar como portada"><i class="ti ti-star"></i> Hacer portada</button>`}
@@ -3123,6 +3167,171 @@ function hacerPortadaServicioImagen(i){
   const [img] = servicioImagenesDraft.splice(i, 1);
   servicioImagenesDraft.unshift(img);
   renderServiceModalImages();
+}
+
+// ─── AJUSTAR/RECORTAR FOTO ───────────────────────────────────────────────
+// Vista previa de cómo se ve la foto ya recortada (portada = 3:2, la
+// proporción de la tarjeta del marketplace; cualquier otra foto = 1:1,
+// cuadrada, como se ve en las galerías del sitio), con arrastre y zoom para
+// elegir qué parte queda visible. Al guardar, se genera una imagen nueva ya
+// recortada y se sube; la foto original se reemplaza por esa (no se
+// modifica en el servidor, es un archivo nuevo — la vieja queda huérfana en
+// Storage, igual que cuando se "quita" una foto).
+let recorteIndexActual = null;
+let recorteImg = null;
+let recorteRatio = { w: 3, h: 2 };
+let recorteFrameW = 360, recorteFrameH = 240;
+let recorteZoom = 1;
+let recorteOffX = 0, recorteOffY = 0;
+
+function abrirRecorteFoto(i){
+  const url = servicioImagenesDraft[i];
+  if(!url) return;
+  recorteIndexActual = i;
+  recorteRatio = (i === 0) ? { w: 3, h: 2 } : { w: 1, h: 1 };
+
+  const base = 360;
+  recorteFrameW = base;
+  recorteFrameH = Math.round(base * recorteRatio.h / recorteRatio.w);
+
+  document.getElementById('recorte-desc').textContent = (i === 0)
+    ? 'Así se vería como portada de tu servicio en el catálogo.'
+    : 'Así se vería esta foto en la galería.';
+
+  const canvas = document.getElementById('recorte-canvas');
+  canvas.width = recorteFrameW;
+  canvas.height = recorteFrameH;
+
+  recorteZoom = 1;
+  document.getElementById('recorte-zoom').value = 100;
+  recorteOffX = 0; recorteOffY = 0;
+  recorteImg = null;
+
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = function(){
+    recorteImg = img;
+    // centrado por defecto dentro del marco
+    const escala = escalaBaseRecorte();
+    recorteOffX = (recorteFrameW - img.naturalWidth * escala) / 2;
+    recorteOffY = (recorteFrameH - img.naturalHeight * escala) / 2;
+    dibujarRecorte();
+  };
+  img.onerror = function(){
+    alert('No se pudo cargar la foto para ajustarla. Revisa tu conexión e intenta de nuevo.');
+    cerrarRecorteFoto();
+  };
+  img.src = url;
+
+  document.getElementById('recorte-overlay').classList.add('open');
+}
+
+function cerrarRecorteFoto(){
+  document.getElementById('recorte-overlay').classList.remove('open');
+  recorteIndexActual = null;
+  recorteImg = null;
+}
+
+function escalaBaseRecorte(){
+  // La escala mínima para que la foto "cubra" el marco entero, sin dejar
+  // espacios vacíos (mismo criterio que object-fit:cover).
+  if(!recorteImg) return 1;
+  return Math.max(recorteFrameW / recorteImg.naturalWidth, recorteFrameH / recorteImg.naturalHeight);
+}
+
+function limitarOffsetsRecorte(){
+  const escalaTotal = escalaBaseRecorte() * recorteZoom;
+  const dispW = recorteImg.naturalWidth * escalaTotal;
+  const dispH = recorteImg.naturalHeight * escalaTotal;
+  const minX = recorteFrameW - dispW, minY = recorteFrameH - dispH;
+  recorteOffX = Math.min(0, Math.max(minX, recorteOffX));
+  recorteOffY = Math.min(0, Math.max(minY, recorteOffY));
+}
+
+function dibujarRecorte(){
+  if(!recorteImg) return;
+  limitarOffsetsRecorte();
+  const escalaTotal = escalaBaseRecorte() * recorteZoom;
+  const canvas = document.getElementById('recorte-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, recorteFrameW, recorteFrameH);
+  ctx.drawImage(recorteImg, recorteOffX, recorteOffY,
+    recorteImg.naturalWidth * escalaTotal, recorteImg.naturalHeight * escalaTotal);
+}
+
+// Arrastrar (mouse y táctil a la vez, con Pointer Events).
+(function initArrastreRecorte(){
+  const marco = document.getElementById('recorte-marco');
+  if(!marco) return;
+  let arrastrando = false, inicioX = 0, inicioY = 0, offInicioX = 0, offInicioY = 0;
+
+  marco.addEventListener('pointerdown', (e) => {
+    if(!recorteImg) return;
+    arrastrando = true;
+    marco.setPointerCapture(e.pointerId);
+    inicioX = e.clientX; inicioY = e.clientY;
+    offInicioX = recorteOffX; offInicioY = recorteOffY;
+  });
+  marco.addEventListener('pointermove', (e) => {
+    if(!arrastrando || !recorteImg) return;
+    // El canvas se ve escalado por CSS (width:100%): convertimos el
+    // movimiento de pantalla al espacio real del canvas.
+    const rect = marco.getBoundingClientRect();
+    const factor = recorteFrameW / rect.width;
+    recorteOffX = offInicioX + (e.clientX - inicioX) * factor;
+    recorteOffY = offInicioY + (e.clientY - inicioY) * factor;
+    dibujarRecorte();
+  });
+  const soltar = () => { arrastrando = false; };
+  marco.addEventListener('pointerup', soltar);
+  marco.addEventListener('pointercancel', soltar);
+  marco.addEventListener('pointerleave', soltar);
+})();
+
+document.getElementById('recorte-zoom').addEventListener('input', function(){
+  recorteZoom = Number(this.value) / 100;
+  dibujarRecorte();
+});
+
+async function guardarRecorteFoto(){
+  if(recorteIndexActual === null || !recorteImg) return;
+  const btn = document.querySelector('#recorte-overlay .btn-or');
+  const original = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = 'Guardando…';
+
+  try{
+    const escalaTotal = escalaBaseRecorte() * recorteZoom;
+    // Rectángulo visible dentro del marco, en píxeles reales de la foto
+    // original (no de la pantalla), para exportar en buena resolución.
+    const sx = -recorteOffX / escalaTotal;
+    const sy = -recorteOffY / escalaTotal;
+    const sw = recorteFrameW / escalaTotal;
+    const sh = recorteFrameH / escalaTotal;
+
+    const outW = recorteRatio.w === 3 ? 960 : 800;
+    const outH = Math.round(outW * recorteRatio.h / recorteRatio.w);
+    const salida = document.createElement('canvas');
+    salida.width = outW; salida.height = outH;
+    salida.getContext('2d').drawImage(recorteImg, sx, sy, sw, sh, 0, 0, outW, outH);
+
+    const blob = await new Promise(res => salida.toBlob(res, 'image/jpeg', 0.87));
+    if(!blob) throw new Error('No se pudo generar la imagen recortada.');
+
+    const ruta = usuarioActual.id + '/' + Date.now() + '_' + Math.random().toString(36).slice(2,8) + '_recorte.jpg';
+    const { error } = await sb.storage.from('fotos-servicios').upload(ruta, blob, { contentType: 'image/jpeg' });
+    if(error) throw error;
+
+    const { data } = sb.storage.from('fotos-servicios').getPublicUrl(ruta);
+    servicioImagenesDraft[recorteIndexActual] = data.publicUrl;
+    renderServiceModalImages();
+    cerrarRecorteFoto();
+  } catch(e){
+    alert('No se pudo guardar el recorte: ' + (e && e.message ? e.message : 'intenta de nuevo.'));
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = original;
+  }
 }
 
 function addServiceModalImage(){
