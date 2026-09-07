@@ -133,6 +133,31 @@ dos bugs distintos, ambos arreglados.
    de varias, y en modo táctil — sin errores, el `image_url` final queda
    correcto en los 3 casos.
 
+Visor de servicio (dashboard, "Mi Perfil" → clic en un servicio) y recortador
+de fotos: mismo bug de fondo que el punto anterior — `#service-viewer-overlay`
+no tenía `max-height`/`overflow-y`, así que con varias fotos/opciones se salía
+de la pantalla por arriba Y por abajo, sin forma de scrollear ni de llegar al
+botón "Editar este servicio". Arreglado igual que el modal de editar (88vh +
+overflow-y:auto), y se agregó un botón "Editar" compacto arriba junto al
+título (visible apenas se abre, sin scrollear) además del que ya había abajo.
+
+Nuevo: recortador/preview de foto (`abrirRecorteFoto`, dentro de "Editar
+servicio" → clic en cualquier foto). Muestra la foto en un marco con la
+proporción real de donde se usa — 3:2 para la portada (como se ve la tarjeta
+del catálogo), 1:1 para las demás (como se ven en las galerías) — con
+arrastre (Pointer Events, mouse y táctil) y zoom (slider) para elegir qué
+parte queda visible. Al guardar, recorta con `<canvas>` en el navegador,
+sube el resultado como una foto NUEVA a `fotos-servicios` y reemplaza esa URL
+en el arreglo (la original queda huérfana en Storage, mismo comportamiento ya
+existente al "quitar" una foto — no se borra nada del bucket). Requiere que
+el bucket sirva con CORS abierto para que `canvas.toBlob()` no falle por
+"tainted canvas" (los buckets públicos de Supabase Storage lo hacen por
+default; no se pudo probar contra el proyecto real desde este entorno, avisar
+si en producción tira error de seguridad al recortar). Probado de punta a
+punta con Playwright: centrado inicial correcto, arrastre cambia el offset y
+lo limita bien en los extremos, el zoom cambia la escala, y guardar sube el
+blob y reemplaza la foto correcta en el arreglo — sin errores.
+
 ## Pendientes (revisar y priorizar con el humano)
 
 - **ElevenLabs (config de panel):** declarar las 3 client tools de Raymi (para
