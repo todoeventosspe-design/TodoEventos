@@ -305,9 +305,11 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .sd-box{background:var(--bg2);border:1px solid var(--border);border-radius:20px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;position:relative;animation:pmIn .2s ease;}
 .sd-box::-webkit-scrollbar{width:8px;}
 .sd-box::-webkit-scrollbar-thumb{background:rgba(124,58,237,.3);border-radius:100px;border:2px solid var(--bg2);}
-.sd-hero{aspect-ratio:16/9;height:auto;position:relative;display:flex;align-items:center;justify-content:center;}
-.sd-hero i{font-size:44px;color:var(--tinta-2);}
-.sd-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 50%,var(--bg2) 100%);}
+.sd-hero{aspect-ratio:16/9;height:auto;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#18151f;}
+.sd-hero i{font-size:44px;color:var(--tinta-2);position:relative;z-index:1;}
+.sd-hero-bg{position:absolute;inset:-20px;background-size:cover;background-position:center;filter:blur(22px) brightness(.55);transform:scale(1.1);}
+.sd-hero-img{position:relative;z-index:1;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:none;}
+.sd-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 50%,var(--bg2) 100%);z-index:2;}
 .sd-content{padding:0 24px 24px;}
 .sd-name{font-size:19px;font-weight:700;color:var(--fg);margin-bottom:4px;}
 .sd-meta{font-size:12.5px;color:var(--sub);display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
@@ -1139,16 +1141,22 @@ function openServiceDetail(providerId){
   // Descripción real que el proveedor escribió al crear el servicio (no un texto genérico por categoría)
   document.getElementById('sd-desc').textContent = p.desc || 'Este proveedor todavía no agregó una descripción para este servicio.';
   const sdHero = document.getElementById('sd-hero');
+  const sdHeroBg = document.getElementById('sd-hero-bg');
+  const sdHeroImg = document.getElementById('sd-hero-img');
   const sdHeroIcon = document.getElementById('sd-hero-icon');
   if(p.foto){
+    // Se ve la foto completa (object-fit:contain), sin recortarla en un
+    // ángulo raro. El desenfoque de fondo solo rellena el aire sobrante.
     sdHero.className = 'sd-hero';
-    sdHero.style.backgroundImage = `url('${esc(p.foto)}')`;
-    sdHero.style.backgroundSize = 'cover';
-    sdHero.style.backgroundPosition = 'top center';
+    sdHeroBg.style.backgroundImage = `url('${esc(p.foto)}')`;
+    sdHeroImg.src = p.foto;
+    sdHeroImg.style.display = 'block';
     sdHeroIcon.style.display = 'none';
   } else {
     sdHero.className = 'sd-hero ci-' + p.img;
-    sdHero.style.backgroundImage = '';
+    sdHeroBg.style.backgroundImage = '';
+    sdHeroImg.style.display = 'none';
+    sdHeroImg.src = '';
     sdHeroIcon.className = 'ti ' + p.icon;
     sdHeroIcon.style.display = '';
   }
@@ -1924,7 +1932,11 @@ async function confirmarReserva(){
 <div class="modal-overlay" id="sd-overlay" onclick="if(event.target===this) closeServiceDetail()">
   <div class="sd-box">
     <button class="pm-close" onclick="closeServiceDetail()"><i class="ti ti-x"></i></button>
-    <div class="sd-hero" id="sd-hero"><i class="ti ti-music" id="sd-hero-icon"></i></div>
+    <div class="sd-hero" id="sd-hero">
+      <div class="sd-hero-bg" id="sd-hero-bg"></div>
+      <img class="sd-hero-img" id="sd-hero-img" alt="">
+      <i class="ti ti-music" id="sd-hero-icon"></i>
+    </div>
     <div class="sd-content">
       <div class="sd-name" id="sd-name">—</div>
       <div class="sd-meta">
