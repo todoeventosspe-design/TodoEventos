@@ -3136,7 +3136,7 @@ function renderServiceModalImages(){
       <img src="${esc(url)}" alt="Foto ${i+1}" onclick="abrirRecorteFoto(${i})" title="Ver cómo quedaría y ajustar el recorte">
       ${i === 0
         ? `<span class="img-cover-badge"><i class="ti ti-star-filled"></i> Portada</span>`
-        : `<button type="button" class="service-img-portada" onclick="hacerPortadaServicioImagen(${i})" title="Usar como portada"><i class="ti ti-star"></i> Hacer portada</button>`}
+        : (tactil ? `<button type="button" class="service-img-portada" onclick="hacerPortadaServicioImagen(${i})" title="Usar como portada"><i class="ti ti-star"></i> Hacer portada</button>` : '')}
       <button class="gallery-remove" onclick="removeServiceModalImage(${i})"><i class="ti ti-x"></i></button>
     </div>`;
   });
