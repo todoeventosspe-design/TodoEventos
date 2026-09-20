@@ -1751,7 +1751,7 @@ async function confirmarReserva(){
   // precio, comision, status y datos del cliente los decide el trigger del
   // servidor (blindar_reserva) — el navegador solo manda lo que el cliente
   // eligio. La agenda del proveedor tambien la bloquea un trigger aparte.
-  const { error } = await sb.from('requests').insert({
+  const { data, error } = await sb.from('requests').insert({
     provider_id: reservaServicio.providerId,
     service_id: reservaServicio.id,
     event_date: reservaFechaSel,
@@ -1759,7 +1759,7 @@ async function confirmarReserva(){
     end_time: horaFin,
     event_type: document.getElementById('bk-tipo').value,
     message: document.getElementById('bk-mensaje').value.trim() || null
-  }).select('id').single();
+  }).select('id, status').single();
 
   btn.disabled = false;
   btn.innerHTML = '<i class="ti ti-calendar-check"></i> Confirmar reserva';
@@ -1775,11 +1775,22 @@ async function confirmarReserva(){
   cerrarReserva();
 
   const [y,m,d] = reservaFechaSel.split('-').map(Number);
-  teAviso('¡Reserva confirmada!',
-        reservaServicio.name +
-        '\n' + d + ' de ' + MESES_BK[m-1] + ' de ' + y + ', ' + horaIni + ' – ' + horaFin +
-        '\n\nPuedes verla en "Mi cuenta". El proveedor ya tiene el bloque reservado en su agenda.',
-        'ti-calendar-check');
+  const fechaTxt = d + ' de ' + MESES_BK[m-1] + ' de ' + y + ', ' + horaIni + ' – ' + horaFin;
+
+  // El mensaje se adapta al estado real que devolvió la base: "pendiente" si
+  // el proveedor tiene que aceptarla primero, "confirmada" si quedó blindada
+  // de una. Así el aviso nunca miente sobre si ya está confirmado o no.
+  if(data && data.status === 'pendiente'){
+    teAviso('¡Solicitud enviada!',
+          reservaServicio.name + '\n' + fechaTxt +
+          '\n\nLe avisamos al proveedor para que la acepte o la rechace. Puedes ver el estado en "Mi cuenta".',
+          'ti-calendar-check');
+  } else {
+    teAviso('¡Reserva confirmada!',
+          reservaServicio.name + '\n' + fechaTxt +
+          '\n\nPuedes verla en "Mi cuenta". El proveedor ya tiene el bloque reservado en su agenda.',
+          'ti-calendar-check');
+  }
 }
 </script>
 <!-- ─── MODAL: Perfil Público del Proveedor ─── -->

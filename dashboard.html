@@ -3624,8 +3624,9 @@ async function renderSolicitudes(){
   updateReqBadge();
 }
 
-// Flujo antiguo (solicitud que el proveedor aprueba). Se mantiene para las
-// reservas que quedaron en estado "pendiente"; las nuevas nacen confirmadas.
+// El proveedor acepta una solicitud pendiente: la pasa a "confirmada" (mismo
+// nombre de estado que usan el badge, la lista y el resto del dashboard) y
+// bloquea la fecha en su agenda si todavía no estaba bloqueada.
 async function aceptarSolicitud(id){
   const r = solicitudes.find(x => x.id === id);
   if(!r) return;
@@ -3636,7 +3637,7 @@ async function aceptarSolicitud(id){
     if(!seguir) return;
   }
 
-  const { error } = await sb.from('requests').update({ status: 'aceptada' }).eq('id', id).eq('provider_id', usuarioActual.id);
+  const { error } = await sb.from('requests').update({ status: 'confirmada' }).eq('id', id).eq('provider_id', usuarioActual.id);
   if(error){ alert('No se pudo aceptar: ' + error.message); return; }
 
   await bloquearFechaEnAgenda(r);
@@ -3652,6 +3653,10 @@ async function rechazarSolicitud(id){
 
   const { error } = await sb.from('requests').update({ status: 'rechazada' }).eq('id', id).eq('provider_id', usuarioActual.id);
   if(error){ alert('No se pudo rechazar: ' + error.message); return; }
+
+  // La solicitud (mientras esperaba respuesta) ya tenía la fecha tomada en la
+  // agenda para que nadie más la reserve encima; al rechazar hay que soltarla.
+  await sb.from('agenda').delete().eq('request_id', id).eq('provider_id', usuarioActual.id);
 
   await refrescarReservasYAgenda();
 }
