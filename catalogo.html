@@ -318,6 +318,9 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .sd-price-val{font-size:20px;font-weight:800;color:var(--or);}
 .sd-block{margin-bottom:20px;}
 .sd-block-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--sub);margin-bottom:9px;display:flex;align-items:center;gap:6px;}
+.sd-website-btn{display:flex;align-items:center;gap:8px;background:var(--pu-soft,rgba(124,58,237,.08));border:1.5px solid var(--pu-line,rgba(124,58,237,.28));color:var(--pu);text-decoration:none;font-size:13.5px;font-weight:700;padding:12px 14px;border-radius:12px;margin-bottom:20px;transition:background .16s;}
+.sd-website-btn:hover{background:var(--pu-soft-strong,rgba(124,58,237,.16));}
+.sd-website-btn i:first-child{font-size:17px;}
 .sd-no-incluye-box{background:rgba(220,38,38,.07);border:1.5px solid rgba(220,38,38,.28);border-radius:12px;padding:14px 16px;}
 .sd-no-incluye-box .sd-block-title{color:#B91C1C;font-size:13px;margin-bottom:6px;}
 .sd-no-incluye-box .sd-block-title i{font-size:17px;}
@@ -626,6 +629,14 @@ function fotoSegura(url){
   return (typeof url === 'string' && url.startsWith(PREFIJO_FOTOS)) ? url : null;
 }
 
+// El link a la web del proveedor es un dominio externo cualquiera (no del
+// Storage), así que aquí no se puede exigir un prefijo fijo. Se exige en
+// cambio que empiece por http(s):// para que nunca sea "javascript:" ni
+// "data:" — esos nunca abren una web, solo ejecutan código.
+function linkSeguro(url){
+  return (typeof url === 'string' && /^https?:\/\//i.test(url)) ? url : null;
+}
+
 // Postgres devuelve los "numeric" como texto, por eso el Number().
 function money(n){ return 'S/. ' + Number(n || 0).toLocaleString('es-PE'); }
 
@@ -677,7 +688,7 @@ async function cargarProvidersReales(){
   // badges antes que un catálogo en blanco.
   const consulta = campoFundador => sb
     .from('services')
-    .select(`id, name, description, no_incluye, price, precio_a_cotizar, category, image_url, imagenes, provider_id, profiles!services_provider_id_fkey(full_name, location, rating, reviews_count${campoFundador})`)
+    .select(`id, name, description, no_incluye, website_url, price, precio_a_cotizar, category, image_url, imagenes, provider_id, profiles!services_provider_id_fkey(full_name, location, rating, reviews_count${campoFundador})`)
     .eq('active', true);
 
   let { data, error } = await consulta(', is_founder');
@@ -718,7 +729,8 @@ async function cargarProvidersReales(){
         icon: CAT_ICON[s.category] || 'ti-star',
         badge: esNuevo ? 'Nuevo' : badgeParaRating(Number(s.profiles.rating) || 0),
         desc: s.description || '',
-        noIncluye: s.no_incluye || ''
+        noIncluye: s.no_incluye || '',
+        website: linkSeguro(s.website_url)
       };
     });
 
@@ -858,7 +870,7 @@ async function openProvider(providerId) {
 
   const [{ data: perfilReal }, { data: serviciosReal }, { data: feedReal }, { data: comentariosReal }] = await Promise.all([
     sb.from('profiles').select('full_name, categoria, location, bio, avatar_url, banner_url, rating, reviews_count').eq('id', providerId).single(),
-    sb.from('services').select('id, name, price, precio_a_cotizar, description, no_incluye, imagenes, video_url, opciones').eq('provider_id', providerId).eq('active', true),
+    sb.from('services').select('id, name, price, precio_a_cotizar, description, no_incluye, website_url, imagenes, video_url, opciones').eq('provider_id', providerId).eq('active', true),
     sb.from('feed_photos').select('url').eq('provider_id', providerId),
     sb.from('comentarios_perfil').select('client_name, comment, created_at').eq('provider_id', providerId).order('created_at', { ascending: false })
   ]);
@@ -874,7 +886,7 @@ async function openProvider(providerId) {
   const rating = Number(perfilReal.rating) || 0;
   const reviews = perfilReal.reviews_count || 0;
   const esNuevo = reviews === 0;
-  const servicios = (serviciosReal || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, precioACotizar: s.precio_a_cotizar === true, descripcion: s.description, noIncluye: s.no_incluye || '', imagenes: (s.imagenes || []).map(fotoSegura).filter(Boolean), video: fotoSegura(s.video_url), opciones: Array.isArray(s.opciones) ? s.opciones : [] }));
+  const servicios = (serviciosReal || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, precioACotizar: s.precio_a_cotizar === true, descripcion: s.description, noIncluye: s.no_incluye || '', website: linkSeguro(s.website_url), imagenes: (s.imagenes || []).map(fotoSegura).filter(Boolean), video: fotoSegura(s.video_url), opciones: Array.isArray(s.opciones) ? s.opciones : [] }));
   let galeria = [];
   servicios.forEach(s => { (s.imagenes||[]).forEach(u => galeria.push(u)); });
   galeria = galeria.concat((feedReal || []).map(f => fotoSegura(f.url)).filter(Boolean));
@@ -908,6 +920,7 @@ async function openProvider(providerId) {
     const opcionesHtml = opcionesServicioHtml(s.opciones);
     const videoHtml = s.video ? `<video src="${esc(s.video)}" controls style="width:100%;border-radius:10px;margin-bottom:10px;display:block;"></video>` : '';
     const noIncluyeHtml = s.noIncluye ? `<div class="pm-svc-no-incluye"><b>No incluye:</b> ${esc(s.noIncluye)}</div>` : '';
+    const websiteHtml = s.website ? `<a href="${esc(s.website)}" target="_blank" rel="noopener noreferrer" class="sd-website-btn" onclick="event.stopPropagation();"><i class="ti ti-world"></i> Visitar página web <i class="ti ti-external-link" style="margin-left:auto;"></i></a>` : '';
     return `
     <div class="pm-service" id="pm-svc-${i}">
       <div class="pm-service-main" onclick="toggleServiceDetail(${i})">
@@ -922,6 +935,7 @@ async function openProvider(providerId) {
         ${galeriaHtml}
         ${opcionesHtml}
         ${noIncluyeHtml}
+        ${websiteHtml}
         <button class="pm-add-cart" onclick="event.stopPropagation(); addToCart(${i})">
           <i class="ti ti-shopping-cart"></i> Añadir al carrito
         </button>
@@ -1147,6 +1161,10 @@ function openServiceDetail(providerId){
   document.getElementById('sd-desc').textContent = p.desc || 'Este proveedor todavía no agregó una descripción para este servicio.';
   document.getElementById('sd-no-incluye-block').style.display = p.noIncluye ? 'block' : 'none';
   document.getElementById('sd-no-incluye').textContent = p.noIncluye || '';
+
+  const sdWebsite = document.getElementById('sd-website');
+  if(p.website){ sdWebsite.href = p.website; sdWebsite.style.display = 'flex'; }
+  else { sdWebsite.style.display = 'none'; sdWebsite.removeAttribute('href'); }
   const sdHero = document.getElementById('sd-hero');
   const sdHeroBg = document.getElementById('sd-hero-bg');
   const sdHeroImg = document.getElementById('sd-hero-img');
@@ -1970,6 +1988,10 @@ async function confirmarReserva(){
         </div>
         <span class="pm-verified" id="sd-badge">✓ Verificado</span>
       </div>
+
+      <a href="#" id="sd-website" target="_blank" rel="noopener noreferrer" class="sd-website-btn" style="display:none;">
+        <i class="ti ti-world"></i> Visitar página web del proveedor <i class="ti ti-external-link" style="margin-left:auto;"></i>
+      </a>
 
       <div class="sd-block">
         <div class="sd-block-title"><i class="ti ti-file-description"></i> Descripción del servicio</div>

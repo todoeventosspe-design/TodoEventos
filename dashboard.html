@@ -1139,6 +1139,13 @@ verificarAccesoDashboard();
       <label>Qué NO incluye <span style="color:var(--sub);font-weight:400;">(opcional)</span></label>
       <textarea id="service-no-incluye" rows="3" placeholder="Ej. No incluye transporte fuera de Lima, ni horas extra"></textarea>
     </div>
+    <div class="field">
+      <label>Link de tu página web <span style="color:var(--sub);font-weight:400;">(opcional)</span></label>
+      <input type="url" id="service-website" placeholder="https://tunegocio.com">
+      <small style="display:block;margin-top:4px;color:var(--sub,#6b7280);font-size:12px;">
+        Si lo pones, el cliente verá un botón para ir directo a tu web desde el catálogo.
+      </small>
+    </div>
 
     <!-- ─── OPCIONES DE PRECIO ─── -->
     <div class="field">
@@ -2675,7 +2682,7 @@ async function cargarPerfilDesdeSupabase(){
   const p = perfilRowInicial;
 
   const [{ data: servicios }, { data: resenas }, { data: comentarios }, { data: feedFotos }] = await Promise.all([
-    sb.from('services').select('id, name, price, precio_a_cotizar, category, description, no_incluye, imagenes, video_url, active, opciones').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true }),
+    sb.from('services').select('id, name, price, precio_a_cotizar, category, description, no_incluye, website_url, imagenes, video_url, active, opciones').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true }),
     sb.from('reviews').select('id, service_id, rating, comment, created_at, client_name').eq('provider_id', usuarioActual.id).order('created_at', { ascending: false }),
     sb.from('comentarios_perfil').select('id, comment, created_at, client_name').eq('provider_id', usuarioActual.id).order('created_at', { ascending: false }),
     sb.from('feed_photos').select('id, url').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true })
@@ -2702,7 +2709,7 @@ async function cargarPerfilDesdeSupabase(){
     bannerUrl: p.banner_url || '',
     ratingReal: p.rating || 0,
     reviews_count: p.reviews_count || 0,
-    servicios: (servicios || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, precioACotizar: s.precio_a_cotizar === true, categoria: s.category || 'musica', descripcion: s.description || '', noIncluye: s.no_incluye || '', imagenes: s.imagenes || [], video: s.video_url || null, opciones: Array.isArray(s.opciones) ? s.opciones : [], activo: s.active === true })),
+    servicios: (servicios || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, precioACotizar: s.precio_a_cotizar === true, categoria: s.category || 'musica', descripcion: s.description || '', noIncluye: s.no_incluye || '', websiteUrl: s.website_url || '', imagenes: s.imagenes || [], video: s.video_url || null, opciones: Array.isArray(s.opciones) ? s.opciones : [], activo: s.active === true })),
     resenasPorServicio,
     // "Comentarios" del perfil: sobre el proveedor como persona/negocio,
     // distintos de las reseñas de un servicio puntual.
@@ -3082,6 +3089,7 @@ function openServiceModal(id){
   document.getElementById('service-categoria').value = existing ? (existing.categoria || 'musica') : 'musica';
   document.getElementById('service-descripcion').value = existing ? existing.descripcion : '';
   document.getElementById('service-no-incluye').value = existing ? (existing.noIncluye || '') : '';
+  document.getElementById('service-website').value = existing ? (existing.websiteUrl || '') : '';
   document.getElementById('service-delete-btn').style.display = existing ? 'flex' : 'none';
 
   servicioImagenesDraft = existing && Array.isArray(existing.imagenes) ? existing.imagenes.slice() : [];
@@ -3391,6 +3399,12 @@ async function saveService(){
   const descripcion = document.getElementById('service-descripcion').value.trim();
   const noIncluye = document.getElementById('service-no-incluye').value.trim();
 
+  // Link opcional a la web del proveedor. Si escribe sin "http(s)://" se lo
+  // agregamos (si no, el navegador del cliente interpreta "tunegocio.com"
+  // como una ruta relativa del propio catalogo, no como un sitio externo).
+  let websiteUrl = document.getElementById('service-website').value.trim();
+  if(websiteUrl && !/^https?:\/\//i.test(websiteUrl)) websiteUrl = 'https://' + websiteUrl;
+
   if(!nombre || (!precioACotizar && (isNaN(precio) || precio < 0))){
     alert('Escribe un nombre y un precio válido para el servicio (o marca "Precio a cotizar").');
     return;
@@ -3403,23 +3417,23 @@ async function saveService(){
 
   if(servicioEditingId){
     const { error } = await sb.from('services').update({
-      name: nombre, price: precio, precio_a_cotizar: precioACotizar, category: categoria, description: descripcion, no_incluye: noIncluye || null, imagenes,
+      name: nombre, price: precio, precio_a_cotizar: precioACotizar, category: categoria, description: descripcion, no_incluye: noIncluye || null, website_url: websiteUrl || null, imagenes,
       image_url: imagenes[0] || null, video_url, opciones
     }).eq('id', servicioEditingId).eq('provider_id', usuarioActual.id);
     if(error){ alert('No se pudo guardar el servicio: ' + error.message); return; }
 
     const idx = perfilData.servicios.findIndex(s => s.id === servicioEditingId);
-    if(idx >= 0) perfilData.servicios[idx] = { ...perfilData.servicios[idx], nombre, precio, precioACotizar, categoria, descripcion, noIncluye, imagenes, video: video_url, opciones };
+    if(idx >= 0) perfilData.servicios[idx] = { ...perfilData.servicios[idx], nombre, precio, precioACotizar, categoria, descripcion, noIncluye, websiteUrl, imagenes, video: video_url, opciones };
   } else {
     // Un servicio nuevo nace como BORRADOR: no aparece en el catálogo hasta
     // que el proveedor lo lanza al mercado a propósito.
     const { data, error } = await sb.from('services').insert({
-      provider_id: usuarioActual.id, name: nombre, price: precio, precio_a_cotizar: precioACotizar, category: categoria, description: descripcion, no_incluye: noIncluye || null,
+      provider_id: usuarioActual.id, name: nombre, price: precio, precio_a_cotizar: precioACotizar, category: categoria, description: descripcion, no_incluye: noIncluye || null, website_url: websiteUrl || null,
       imagenes, image_url: imagenes[0] || null, video_url, active: false, opciones
     }).select('id').single();
     if(error){ alert('No se pudo crear el servicio: ' + error.message); return; }
 
-    perfilData.servicios.push({ id: data.id, nombre, precio, precioACotizar, categoria, descripcion, noIncluye, imagenes, video: video_url, opciones, activo: false });
+    perfilData.servicios.push({ id: data.id, nombre, precio, precioACotizar, categoria, descripcion, noIncluye, websiteUrl, imagenes, video: video_url, opciones, activo: false });
   }
 
   closeServiceModal();
