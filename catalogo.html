@@ -221,8 +221,8 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .pm-svc-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0;}
 .pm-svc-gallery img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;background:#1a1626;}
 .pm-svc-nofotos{font-size:12px;color:var(--sub);margin:12px 0;}
-.pm-svc-no-incluye{font-size:12.5px;color:var(--sub);margin:10px 0;line-height:1.5;}
-.pm-svc-no-incluye b{color:var(--fg);}
+.pm-svc-no-incluye{font-size:12.5px;color:#7f1d1d;font-weight:500;line-height:1.5;margin:10px 0;background:rgba(220,38,38,.07);border:1.5px solid rgba(220,38,38,.28);border-radius:10px;padding:10px 12px;}
+.pm-svc-no-incluye b{color:#B91C1C;text-transform:uppercase;font-size:11px;letter-spacing:.04em;display:block;margin-bottom:3px;}
 .pm-add-cart{width:100%;background:rgba(194,65,12,.12);border:1px solid rgba(194,65,12,.35);color:var(--or);padding:10px;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-family:inherit;transition:all .16s;}
 .pm-add-cart:hover{background:var(--or);color:#fff;}
 .pm-add-cart.added{background:rgba(74,222,128,.15);border-color:rgba(74,222,128,.4);color:#15803D;}
@@ -318,6 +318,10 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .sd-price-val{font-size:20px;font-weight:800;color:var(--or);}
 .sd-block{margin-bottom:20px;}
 .sd-block-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--sub);margin-bottom:9px;display:flex;align-items:center;gap:6px;}
+.sd-no-incluye-box{background:rgba(220,38,38,.07);border:1.5px solid rgba(220,38,38,.28);border-radius:12px;padding:14px 16px;}
+.sd-no-incluye-box .sd-block-title{color:#B91C1C;font-size:13px;margin-bottom:6px;}
+.sd-no-incluye-box .sd-block-title i{font-size:17px;}
+.sd-no-incluye-box .sd-text{color:#7f1d1d;font-weight:500;}
 .sd-block-title i{color:var(--pu);}
 .sd-text{font-size:13px;line-height:1.65;color:var(--sub);}
 .sd-list{list-style:none;padding:0;margin:0;}
@@ -1972,8 +1976,8 @@ async function confirmarReserva(){
         <div class="sd-text" id="sd-desc">—</div>
       </div>
 
-      <div class="sd-block" id="sd-no-incluye-block" style="display:none;">
-        <div class="sd-block-title"><i class="ti ti-circle-x"></i> Qué NO incluye</div>
+      <div class="sd-block sd-no-incluye-box" id="sd-no-incluye-block" style="display:none;">
+        <div class="sd-block-title"><i class="ti ti-alert-triangle-filled"></i> Qué NO incluye</div>
         <div class="sd-text" id="sd-no-incluye">—</div>
       </div>
 
