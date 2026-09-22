@@ -673,7 +673,7 @@ async function cargarProvidersReales(){
   // badges antes que un catálogo en blanco.
   const consulta = campoFundador => sb
     .from('services')
-    .select(`id, name, description, price, precio_a_cotizar, category, image_url, imagenes, provider_id, profiles!services_provider_id_fkey(full_name, location, rating, reviews_count${campoFundador})`)
+    .select(`id, name, description, no_incluye, price, precio_a_cotizar, category, image_url, imagenes, provider_id, profiles!services_provider_id_fkey(full_name, location, rating, reviews_count${campoFundador})`)
     .eq('active', true);
 
   let { data, error } = await consulta(', is_founder');
@@ -713,7 +713,8 @@ async function cargarProvidersReales(){
         img: CAT_IMG[s.category] || 'a',
         icon: CAT_ICON[s.category] || 'ti-star',
         badge: esNuevo ? 'Nuevo' : badgeParaRating(Number(s.profiles.rating) || 0),
-        desc: s.description || ''
+        desc: s.description || '',
+        noIncluye: s.no_incluye || ''
       };
     });
 
@@ -1140,6 +1141,8 @@ function openServiceDetail(providerId){
   document.getElementById('sd-badge').textContent = p.badge || '✓ Verificado';
   // Descripción real que el proveedor escribió al crear el servicio (no un texto genérico por categoría)
   document.getElementById('sd-desc').textContent = p.desc || 'Este proveedor todavía no agregó una descripción para este servicio.';
+  document.getElementById('sd-no-incluye-block').style.display = p.noIncluye ? 'block' : 'none';
+  document.getElementById('sd-no-incluye').textContent = p.noIncluye || '';
   const sdHero = document.getElementById('sd-hero');
   const sdHeroBg = document.getElementById('sd-hero-bg');
   const sdHeroImg = document.getElementById('sd-hero-img');
@@ -1967,6 +1970,11 @@ async function confirmarReserva(){
       <div class="sd-block">
         <div class="sd-block-title"><i class="ti ti-file-description"></i> Descripción del servicio</div>
         <div class="sd-text" id="sd-desc">—</div>
+      </div>
+
+      <div class="sd-block" id="sd-no-incluye-block" style="display:none;">
+        <div class="sd-block-title"><i class="ti ti-circle-x"></i> Qué NO incluye</div>
+        <div class="sd-text" id="sd-no-incluye">—</div>
       </div>
 
       <div class="sd-block" id="sd-galeria-block" style="display:none;">
