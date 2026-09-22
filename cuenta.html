@@ -101,6 +101,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--app-bg);color:
 .btn-comentario{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:9px;font-size:12.5px;font-weight:700;border:1px solid var(--line);color:var(--sub);background:transparent;cursor:pointer;font-family:inherit;white-space:nowrap;}
 .btn-comentario:hover{background:var(--card2);color:var(--fg);}
 .comentario-hecho{display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--sub);white-space:nowrap;}
+.sol-pendiente{display:flex;align-items:center;gap:5px;font-size:12.5px;color:#B45309;font-weight:600;white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -457,9 +458,9 @@ async function cargarContratados(){
 
   const { data: solicitudes, error } = await sb
     .from('requests')
-    .select('id, event_date, provider_id, service_id, services(name), profiles!requests_provider_id_fkey(full_name)')
+    .select('id, event_date, status, provider_id, service_id, services(name), profiles!requests_provider_id_fkey(full_name)')
     .eq('client_id', usuarioActual.id)
-    .eq('status', 'aceptada')
+    .in('status', ['confirmada', 'pendiente'])
     .order('event_date', { ascending: false });
 
   if(error){
@@ -502,6 +503,16 @@ async function cargarContratados(){
 
     const acciones = document.createElement('div');
     acciones.className = 'contratado-acciones';
+
+    if(s.status === 'pendiente'){
+      const badge = document.createElement('div');
+      badge.className = 'sol-pendiente';
+      badge.innerHTML = '<i class="ti ti-clock-hour-4"></i> Esperando que el proveedor confirme';
+      acciones.appendChild(badge);
+      item.appendChild(acciones);
+      cont.appendChild(item);
+      return;
+    }
 
     if(yaReseno){
       const badge = document.createElement('div');
