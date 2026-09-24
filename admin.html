@@ -210,6 +210,10 @@ h1{font-size:22px;font-weight:700;margin:22px 0 4px;}
       <textarea id="admsvc-no-incluye" rows="3" placeholder="Ej. No incluye transporte fuera de Lima, ni horas extra"></textarea>
     </div>
     <div class="field">
+      <label>Link de su página web <span style="color:var(--sub);font-weight:400;">(opcional)</span></label>
+      <input type="url" id="admsvc-website" placeholder="https://sunegocio.com">
+    </div>
+    <div class="field">
       <label>Opciones de precio <span style="color:var(--sub);font-weight:400;">(opcional)</span></label>
       <small style="display:block;margin:-2px 0 12px;color:var(--sub);font-size:12px;line-height:1.5;">
         Para lo que cobra por unidad, por paquete, o con un mínimo (sillas, platos, horas extra…).
@@ -730,7 +734,7 @@ async function seleccionarProveedorAdmin(id){
   document.getElementById('admsvc-lista').innerHTML = '<div class="vacio" style="padding:20px;"><span class="spinner"></span></div>';
 
   const { data, error } = await sb.from('services')
-    .select('id, name, price, precio_a_cotizar, category, description, no_incluye, imagenes, video_url, active, opciones')
+    .select('id, name, price, precio_a_cotizar, category, description, no_incluye, website_url, imagenes, video_url, active, opciones')
     .eq('provider_id', id)
     .order('created_at', { ascending: false });
 
@@ -787,6 +791,7 @@ function abrirAdmSvcModal(id){
   document.getElementById('admsvc-categoria').value = existing ? (existing.category || 'musica') : 'musica';
   document.getElementById('admsvc-descripcion').value = existing ? (existing.description || '') : '';
   document.getElementById('admsvc-no-incluye').value = existing ? (existing.no_incluye || '') : '';
+  document.getElementById('admsvc-website').value = existing ? (existing.website_url || '') : '';
   document.getElementById('admsvc-delete-btn').style.display = existing ? 'flex' : 'none';
 
   admsvcImagenesDraft = existing && Array.isArray(existing.imagenes) ? existing.imagenes.slice() : [];
@@ -898,6 +903,8 @@ async function guardarServicioAdmin(){
   const categoria = document.getElementById('admsvc-categoria').value;
   const descripcion = document.getElementById('admsvc-descripcion').value.trim();
   const noIncluye = document.getElementById('admsvc-no-incluye').value.trim();
+  let websiteUrl = document.getElementById('admsvc-website').value.trim();
+  if(websiteUrl && !/^https?:\/\//i.test(websiteUrl)) websiteUrl = 'https://' + websiteUrl;
 
   // "Nombre del servicio" y "Precio desde" son obligatorios en la base
   // (NOT NULL): si faltan, no hay nada que guardar. Se avisa senalando el
@@ -918,7 +925,7 @@ async function guardarServicioAdmin(){
   const imagenes = admsvcImagenesDraft.slice();
   const opciones = admOpcionesDraft.map(o => ({ ...o }));
   const payload = {
-    name: nombre, price: precio, precio_a_cotizar: precioACotizar, category: categoria, description: descripcion, no_incluye: noIncluye || null,
+    name: nombre, price: precio, precio_a_cotizar: precioACotizar, category: categoria, description: descripcion, no_incluye: noIncluye || null, website_url: websiteUrl || null,
     imagenes, image_url: imagenes[0] || null, video_url: admsvcVideoDraft || null, opciones
   };
 
@@ -926,7 +933,7 @@ async function guardarServicioAdmin(){
     const { error } = await sb.from('services').update(payload).eq('id', admsvcEditingId);
     if(error){ alert('No se pudo guardar el servicio: ' + error.message); return; }
     const idx = serviciosProveedorAdmin.findIndex(s => s.id === admsvcEditingId);
-    if(idx >= 0) serviciosProveedorAdmin[idx] = { ...serviciosProveedorAdmin[idx], name: nombre, price: precio, precio_a_cotizar: precioACotizar, category: categoria, description: descripcion, no_incluye: noIncluye || null, imagenes, video_url: admsvcVideoDraft || null, opciones };
+    if(idx >= 0) serviciosProveedorAdmin[idx] = { ...serviciosProveedorAdmin[idx], name: nombre, price: precio, precio_a_cotizar: precioACotizar, category: categoria, description: descripcion, no_incluye: noIncluye || null, website_url: websiteUrl || null, imagenes, video_url: admsvcVideoDraft || null, opciones };
   } else {
     // Nace como borrador, igual que cuando lo crea el propio proveedor: el
     // admin lo revisa y lo publica con el ojito cuando ya está listo.
@@ -934,7 +941,7 @@ async function guardarServicioAdmin(){
       provider_id: proveedorAdminSeleccionado.id, ...payload, active: false
     }).select('id').single();
     if(error){ alert('No se pudo crear el servicio: ' + error.message); return; }
-    serviciosProveedorAdmin.unshift({ id: data.id, name: nombre, price: precio, precio_a_cotizar: precioACotizar, category: categoria, description: descripcion, no_incluye: noIncluye || null, imagenes, video_url: admsvcVideoDraft || null, opciones, active: false });
+    serviciosProveedorAdmin.unshift({ id: data.id, name: nombre, price: precio, precio_a_cotizar: precioACotizar, category: categoria, description: descripcion, no_incluye: noIncluye || null, website_url: websiteUrl || null, imagenes, video_url: admsvcVideoDraft || null, opciones, active: false });
   }
 
   closeAdmSvcModal();
