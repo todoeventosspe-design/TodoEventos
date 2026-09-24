@@ -52,9 +52,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
    la barra grande de antes. */
 #nav{position:sticky;top:0;z-index:200;background:rgba(255,255,255,.96);backdrop-filter:blur(20px);border-bottom:1px solid var(--linea);}
 .nav-in{max-width:1200px;margin:0 auto;padding:14px 2rem;display:flex;align-items:center;gap:16px;}
-.logo{font-family:'Epilogue',sans-serif;font-size:17px;font-weight:700;flex-shrink:0;line-height:1;}
-.logo .a{color:var(--morado);}
-.logo .b{background:linear-gradient(to right,var(--morado),var(--naranja-osc));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo{font-family:'Epilogue',sans-serif;font-size:17px;font-weight:700;flex-shrink:0;line-height:1;display:inline-flex;align-items:center;}
+.logo-img{height:38px;width:auto;display:block;border-radius:8px;}
 .navsearch{flex:1;max-width:480px;display:flex;align-items:center;background:var(--hueso);border:1px solid var(--linea);border-radius:10px;padding:8px 14px;gap:8px;transition:border-color .16s;}
 .navsearch:focus-within{border-color:var(--morado);}
 .navsearch svg{color:var(--tinta-3);flex-shrink:0;}

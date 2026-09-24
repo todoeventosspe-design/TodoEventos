@@ -46,7 +46,7 @@ try {
 
 const CHROME_NAV = `
 <header id="nav"><div class="nav-in">
-  <a href="index.html" class="logo"><span class="a">Todo</span><span class="b">Eventos</span></a>
+  <a href="index.html" class="logo"><img src="logo.png" alt="TodoEventos" class="logo-img"></a>
   <nav class="nav-links">
     <a href="index.html" class="nlink">Inicio</a>
     <a href="catalogo.html" class="nlink">Marketplace</a>
@@ -77,7 +77,7 @@ const CHROME_FOOTER = `
   <div class="wrap">
     <div class="f-top">
       <div>
-        <span class="logo"><span class="a" style="color:#A78BFA">Todo</span><span class="b">Eventos</span></span>
+        <span class="logo"><img src="logo.png" alt="TodoEventos" class="logo-img"></span>
         <p class="f-desc">El marketplace de servicios para eventos en Lima, Perú.</p>
       </div>
       <div class="f-col"><h5>Marketplace</h5>
