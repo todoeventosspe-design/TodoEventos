@@ -158,6 +158,45 @@ body{font-family:'Epilogue',system-ui,sans-serif;color:var(--tinta);-webkit-font
 .marco .visor{overflow:hidden;position:relative;background:#fff;}
 .marco .visor img{position:absolute;top:0;left:0;will-change:transform;transform-origin:0 0;}
 
+/* ── Panel de Raymi (el asistente del catálogo) ───────────
+   Reconstruido acá porque el widget real es de ElevenLabs y no se puede
+   renderizar en este entorno. Los textos reflejan lo que hacen las tres
+   client tools que ya están en catalogo.html. */
+.raymi{position:absolute;right:26px;bottom:18px;width:498px;max-height:692px;background:#fff;border-radius:22px;
+  box-shadow:0 30px 80px rgba(20,10,40,.42), 0 0 0 1px rgba(20,10,40,.08);overflow:hidden;}
+.raymi-top{display:flex;align-items:center;gap:12px;padding:13px 18px;
+  background:linear-gradient(120deg,var(--morado-osc),var(--morado) 58%,var(--naranja));}
+.raymi-top .bola{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.22);
+  display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.raymi-top .n{font-size:17px;font-weight:800;color:#fff;line-height:1.2;}
+.raymi-top .e{font-size:12.5px;color:rgba(255,255,255,.80);display:flex;align-items:center;gap:6px;margin-top:2px;}
+.raymi-top .e i{width:7px;height:7px;border-radius:50%;background:#4ADE80;display:block;}
+.raymi-cuerpo{padding:15px 16px 13px;display:flex;flex-direction:column;gap:9px;}
+.rb{max-width:88%;padding:10px 15px;border-radius:17px;font-size:15.5px;line-height:1.4;will-change:opacity,transform;}
+.rb.el{align-self:flex-start;background:#F3EEFF;color:#2A2140;border-bottom-left-radius:6px;}
+.rb.yo{align-self:flex-end;background:var(--morado);color:#fff;border-bottom-right-radius:6px;}
+/* La llamada a buscar_proveedores, que es lo que evita que invente precios */
+.rb.tool{align-self:flex-start;background:#FFF1E6;color:var(--naranja-osc);font-size:13.5px;
+  font-weight:700;padding:8px 14px;border-radius:9px;display:flex;align-items:center;gap:9px;max-width:100%;}
+.rb.tool code{font-family:ui-monospace,monospace;font-size:13px;background:rgba(234,88,12,.14);padding:2px 7px;border-radius:5px;}
+/* La propuesta que arma: tres proveedores reales del catálogo + total */
+.propuesta{align-self:stretch;background:#fff;border:1.5px solid var(--linea);border-radius:14px;
+  padding:12px 14px;will-change:opacity,transform;}
+.propuesta .pt{font-size:12px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--tinta-3);margin-bottom:8px;}
+.propuesta .fl{display:flex;align-items:center;gap:10px;padding:5px 0;}
+.propuesta .fl .ic{width:30px;height:30px;border-radius:9px;background:var(--morado-claro);
+  display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.propuesta .fl .nm{flex:1;min-width:0;font-size:14.5px;color:var(--tinta);font-weight:600;line-height:1.25;}
+.propuesta .fl .nm em{display:block;font-style:normal;font-size:12px;color:var(--tinta-3);font-weight:500;}
+.propuesta .fl .pr{font-size:14.5px;font-weight:800;color:var(--tinta);flex-shrink:0;}
+.propuesta .tot{display:flex;justify-content:space-between;align-items:baseline;
+  border-top:1.5px solid var(--linea);margin-top:7px;padding-top:9px;}
+.propuesta .tot b{font-size:15px;}
+.propuesta .tot span{font-size:21px;font-weight:800;color:var(--naranja);}
+.raymi-pie{border-top:1px solid #F1F1F4;padding:10px 16px 13px;}
+.raymi-pie div{height:39px;border-radius:21px;background:var(--hueso);display:flex;align-items:center;
+  padding:0 17px;font-size:14.5px;color:var(--tinta-3);border:1px solid var(--linea);}
+
 /* Pie de texto sobre las capturas */
 .pie{position:absolute;left:0;right:0;text-align:center;color:#fff;}
 .pie .g{font-size:48px;}
@@ -295,6 +334,16 @@ body{font-family:'Epilogue',system-ui,sans-serif;color:var(--tinta);-webkit-font
         <div class="barra"><em></em><em></em><em></em><span class="url" id="e4-url">todoeventos.website</span></div>
         <div class="visor" id="e4-visor" style="height:730px;">
           <img id="e4-img" src="capturas/catalogo-grilla.png" alt="">
+
+          <!-- Raymi, sobre el catálogo, igual que en el sitio -->
+          <div class="raymi" id="e4-raymi" style="opacity:0;">
+            <div class="raymi-top">
+              <span class="bola">✦</span>
+              <span><span class="n">Raymi</span><span class="e"><i></i> Asistente de TodoEventos</span></span>
+            </div>
+            <div class="raymi-cuerpo" id="e4-raymi-chat"></div>
+            <div class="raymi-pie"><div>Escríbele a Raymi…</div></div>
+          </div>
         </div>
       </div>
 
@@ -328,7 +377,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;color:var(--tinta);-webkit-font
    la única entrada: el script de captura la llama fotograma a
    fotograma, así el render es idéntico en cada pasada.
    ============================================================ */
-const DURACION = 112;
+const DURACION = 118;
 
 const lim   = (v,a,b) => v < a ? a : (v > b ? b : v);
 const suave = p => p < .5 ? 4*p*p*p : 1 - Math.pow(-2*p+2,3)/2;   // easeInOutCubic
@@ -509,12 +558,12 @@ function medirFocos(){
 
 /* ── Marcas de tiempo de cada bloque ──────────────────────── */
 const B = {
-  apertura: [0,   7],
-  cliente:  [7,   42],
-  proveedor:[42,  72],
-  brecha:   [72,  80],
-  solucion: [80,  104],
-  cierre:   [104, 112]
+  apertura: [0,   6],
+  cliente:  [6,   40],
+  proveedor:[40,  67],
+  brecha:   [67,  74],
+  solucion: [74,  110],
+  cierre:   [110, 118]
 };
 
 function visible(id, t, a, b){
@@ -528,30 +577,30 @@ function visible(id, t, a, b){
 /* ══ BLOQUE 0 · APERTURA ═══════════════════════════════════ */
 function apertura(t){
   const l = t - B.apertura[0];
-  camara(document.getElementById('e0-l'), mezcla(1, 1.07, suave(tramo(l,0,7))), 960, 540);
-  pon(document.getElementById('e0-a'), { o: velo(l,.2,1.4, 3.1,3.7), y: mezcla(26,0,salida(tramo(l,.2,1.4))) });
-  pon(document.getElementById('e0-b'), { o: velo(l,3.5,4.6), y: mezcla(26,0,salida(tramo(l,3.5,4.6))) });
+  camara(document.getElementById('e0-l'), mezcla(1, 1.07, suave(tramo(l,0,6))), 960, 540);
+  pon(document.getElementById('e0-a'), { o: velo(l,.2,1.3, 2.7,3.3), y: mezcla(26,0,salida(tramo(l,.2,1.3))) });
+  pon(document.getElementById('e0-b'), { o: velo(l,3.1,4.1), y: mezcla(26,0,salida(tramo(l,3.1,4.1))) });
 }
 
 /* ══ BLOQUE 1 · CLIENTE ════════════════════════════════════ */
 function cliente(t){
-  const l = t - B.cliente[0];                 // 0 … 35
+  const l = t - B.cliente[0];                 // 0 … 34
   const lz = document.getElementById('e1-l');
 
-  entra(document.getElementById('e1-rot'), l, .2, .8, 18, 28.4, 29);
-  entra(document.getElementById('e1-h1'),  l, .5, 1.0, 30, 28.4, 29);
-  entra(document.getElementById('e1-p'),   l, 1.0, 1.0, 26, 28.4, 29);
+  entra(document.getElementById('e1-rot'), l, .2, .8, 18, 27.9, 28.5);
+  entra(document.getElementById('e1-h1'),  l, .5, 1.0, 30, 27.9, 28.5);
+  entra(document.getElementById('e1-p'),   l, 1.0, 1.0, 26, 27.9, 28.5);
 
   // El teléfono sube a cuadro y se queda todo el bloque de chats
   const tel = document.getElementById('e1-tel');
   const pe = salida(tramo(l,1.2,2.4));
-  pon(tel, { o: pe * (1 - salida(tramo(l,28.4,29.2))), y: mezcla(70,0,pe), s: mezcla(.94,1,pe) });
+  pon(tel, { o: pe * (1 - salida(tramo(l,27.9,28.7))), y: mezcla(70,0,pe), s: mezcla(.94,1,pe) });
 
   // ── Qué chat se ve y cuándo aparece cada burbuja ──
   const GUION = [
     { id:'a', desde:2.4,  hasta:11.4, burbujas:[3.0, 4.1, 6.2] },
     { id:'b', desde:11.9, hasta:21.0, burbujas:[12.4, 13.6, 15.2, 16.2, 17.6] },
-    { id:'c', desde:21.5, hasta:28.4, burbujas:[22.0, 23.3, 25.0] }
+    { id:'c', desde:21.5, hasta:27.9, burbujas:[22.0, 23.2, 24.6] }
   ];
   GUION.forEach(g => {
     const ch = document.getElementById('chat-' + g.id);
@@ -570,7 +619,7 @@ function cliente(t){
   const ZOOMS = [
     { a:7.0,  b:11.2, s:1.52, f:FOCO.visto    },   // "Visto hace 2 días"
     { a:18.0, b:20.8, s:1.52, f:FOCO.silencio },   // "3 días después" + "Visto"
-    { a:25.4, b:28.2, s:1.58, f:FOCO.precio   }    // el precio que cambió
+    { a:25.0, b:27.7, s:1.58, f:FOCO.precio   }    // el precio que cambió
   ];
   let esc = 1, cx = 960, cy = 540;
   ZOOMS.forEach(z => {
@@ -584,7 +633,7 @@ function cliente(t){
   const NOTAS = [
     { a:7.6,  b:11.0, tx:'Dos días después, sigue sin respuesta.' },
     { a:18.4, b:20.6, tx:'“Te paso la info” y nunca llega.' },
-    { a:25.8, b:28.0, tx:'Y cuando llega un precio, cambia.' }
+    { a:25.4, b:27.5, tx:'Y cuando llega un precio, cambia.' }
   ];
   const pieza = document.getElementById('e1-pieza');
   let notaTxt = '', notaO = 0;
@@ -596,62 +645,62 @@ function cliente(t){
   pieza.style.opacity = notaO;
 
   // ── Rejilla de conversaciones muertas + marcador ──
-  entra(document.getElementById('e1-rot2'), l, 28.9, .8, 20, 32.8, 33.4);
+  entra(document.getElementById('e1-rot2'), l, 28.4, .8, 20, 31.8, 32.4);
   const rej = document.getElementById('e1-rejilla');
-  rej.style.opacity = velo(l, 29.0, 29.8, 32.8, 33.4);
+  rej.style.opacity = velo(l, 28.5, 29.3, 31.8, 32.4);
   MINIS.forEach((m,i) => {
-    const p = salida(tramo(l, 29.2 + i*0.13, 29.2 + i*0.13 + .45));
+    const p = salida(tramo(l, 28.7 + i*0.12, 28.7 + i*0.12 + .45));
     pon(document.getElementById('mini-'+i), { o: p, y: mezcla(30,0,p) });
   });
   const mar = document.getElementById('e1-marcador');
-  mar.style.opacity = velo(l, 29.6, 30.4, 32.8, 33.4);
+  mar.style.opacity = velo(l, 29.1, 29.9, 31.8, 32.4);
   const cuenta = (hasta, a, b) => Math.round(mezcla(0, hasta, salida(tramo(l,a,b))));
   const np = document.getElementById('n-prov'), nr = document.getElementById('n-resp'), nx = document.getElementById('n-precio');
-  if(np) np.textContent = cuenta(9, 29.8, 31.4);
-  if(nr) nr.textContent = cuenta(3, 30.2, 31.8);
-  if(nx) nx.textContent = cuenta(0, 30.6, 32.2);
+  if(np) np.textContent = cuenta(9, 29.3, 30.7);
+  if(nr) nr.textContent = cuenta(3, 29.7, 31.1);
+  if(nx) nx.textContent = cuenta(0, 30.1, 31.5);
 
   // ── Remate del bloque ──
   const rem = document.getElementById('e1-remate');
-  rem.style.opacity = velo(l, 33.4, 34.1, 34.7, 35);
-  pon(rem, { o: rem.style.opacity, s: mezcla(.96, 1, salida(tramo(l,33.4,34.4))) });
+  rem.style.opacity = velo(l, 32.4, 33.1, 33.7, 34);
+  pon(rem, { o: rem.style.opacity, s: mezcla(.96, 1, salida(tramo(l,32.4,33.4))) });
 }
 
 /* ══ BLOQUE 2 · PROVEEDOR ══════════════════════════════════ */
 function proveedor(t){
-  const l = t - B.proveedor[0];               // 0 … 30
+  const l = t - B.proveedor[0];               // 0 … 27
   const lz = document.getElementById('e2-l');
 
-  entra(document.getElementById('e2-rot'), l, .2, .8, 18, 25.4, 26);
-  entra(document.getElementById('e2-h1'),  l, .5, 1.0, 30, 25.4, 26);
-  entra(document.getElementById('e2-p'),   l, 1.0, 1.0, 26, 19.0, 19.6);
+  entra(document.getElementById('e2-rot'), l, .2, .8, 18, 23.0, 23.6);
+  entra(document.getElementById('e2-h1'),  l, .5, 1.0, 30, 23.0, 23.6);
+  entra(document.getElementById('e2-p'),   l, 1.0, 1.0, 26, 17.4, 18.0);
 
   // Bandeja: 8 mensajes sin responder cayendo uno tras otro
   const tel = document.getElementById('e2-tel');
   const pe = salida(tramo(l,1.2,2.4));
-  pon(tel, { o: pe * (1 - salida(tramo(l,9.4,10.2))), y: mezcla(70,0,pe), s: mezcla(.94,1,pe) });
+  pon(tel, { o: pe * (1 - salida(tramo(l,8.8,9.6))), y: mezcla(70,0,pe), s: mezcla(.94,1,pe) });
   BANDEJA.forEach((f,i) => {
-    const p = salida(tramo(l, 2.4 + i*0.28, 2.4 + i*0.28 + .4));
+    const p = salida(tramo(l, 2.4 + i*0.26, 2.4 + i*0.26 + .4));
     pon(document.getElementById('fila-'+i), { o: p, y: mezcla(22,0,p) });
   });
 
   // Libreta: entra cuando el teléfono sale
   const lib = document.getElementById('e2-libreta');
-  const pl = salida(tramo(l,10.0,11.4));
-  pon(lib, { o: pl * (1 - salida(tramo(l,19.0,19.8))), y: mezcla(50,0,pl), r: mezcla(2.4,0,pl) });
+  const pl = salida(tramo(l,9.4,10.7));
+  pon(lib, { o: pl * (1 - salida(tramo(l,17.4,18.2))), y: mezcla(50,0,pl), r: mezcla(2.4,0,pl) });
   LIBRETA.forEach((x,i) => {
-    const p = salida(tramo(l, 11.4 + i*0.32, 11.4 + i*0.32 + .3));
+    const p = salida(tramo(l, 10.7 + i*0.28, 10.7 + i*0.28 + .3));
     document.getElementById('lin-'+i).style.opacity = p;
   });
   // Sello de CRUCE sobre los dos eventos del mismo sábado
   const sel = document.getElementById('e2-sello');
-  const ps = salida(tramo(l,16.6,17.1));
-  pon(sel, { o: ps * (1 - salida(tramo(l,19.0,19.6))), s: mezcla(1.7,1,ps), r: -11 });
+  const ps = salida(tramo(l,15.2,15.7));
+  pon(sel, { o: ps * (1 - salida(tramo(l,17.4,18.0))), s: mezcla(1.7,1,ps), r: -11 });
 
   // Empujes de cámara
   const ZOOMS = [
-    { a:5.4,  b:9.2,  s:1.50, f:FOCO.bandeja },   // la bandeja llena
-    { a:15.0, b:18.8, s:1.52, f:FOCO.cruce   }    // las dos fechas que chocan
+    { a:5.0,  b:8.6,  s:1.50, f:FOCO.bandeja },   // la bandeja llena
+    { a:13.6, b:17.2, s:1.52, f:FOCO.cruce   }    // las dos fechas que chocan
   ];
   let esc = 1, cx = 960, cy = 540;
   ZOOMS.forEach(z => {
@@ -661,8 +710,8 @@ function proveedor(t){
   camara(lz, esc, cx, cy);
 
   const NOTAS = [
-    { a:6.0,  b:9.0,  tx:'14 personas preguntando precio.\nTodas por chat, todas distintas.' },
-    { a:16.9, b:18.6, tx:'Dos eventos el mismo sábado.\nNada se lo avisó.' }
+    { a:5.6,  b:8.4,  tx:'14 personas preguntando precio.\nTodas por chat, todas distintas.' },
+    { a:15.5, b:17.0, tx:'Dos eventos el mismo sábado.\nNada se lo avisó.' }
   ];
   const pieza = document.getElementById('e2-pieza');
   let notaTxt = '', notaO = 0;
@@ -675,15 +724,15 @@ function proveedor(t){
 
   // Tres tarjetas con el diagnóstico
   const tar = document.getElementById('e2-tarjetas');
-  tar.style.opacity = velo(l, 19.8, 20.6, 25.4, 26.0);
+  tar.style.opacity = velo(l, 18.2, 19.0, 23.0, 23.6);
   TARJETAS.forEach((x,i) => {
-    const p = salida(tramo(l, 20.0 + i*0.30, 20.0 + i*0.30 + .55));
+    const p = salida(tramo(l, 18.4 + i*0.28, 18.4 + i*0.28 + .55));
     pon(document.getElementById('tj-'+i), { o: p, y: mezcla(34,0,p) });
   });
 
   const rem = document.getElementById('e2-remate');
-  const ro = velo(l, 26.2, 27.0, 29.5, 30);
-  pon(rem, { o: ro, s: mezcla(.96, 1, salida(tramo(l,26.2,27.2))) });
+  const ro = velo(l, 23.6, 24.4, 26.6, 27);
+  pon(rem, { o: ro, s: mezcla(.96, 1, salida(tramo(l,23.6,24.6))) });
 }
 
 /* ══ BLOQUE 3 · LA BRECHA ══════════════════════════════════ */
@@ -737,36 +786,84 @@ function prepararBrecha(){
 const VISOR_W = 1500, VISOR_H = 730, CAPTURA_DPR = 2;
 
 const TOMAS = [
-  { a:4.0,  b:9.6,  img:'capturas/catalogo-grilla.png',        url:'todoeventos.website/catalogo',
+  // ── Lado del cliente ──
+  { a:3.4,  b:8.2,  img:'capturas/catalogo-grilla.png',        url:'todoeventos.website/catalogo',
     de:{x:0,   y:130, w:1600}, a2:{x:280, y:225, w:1320},
     tit:'Todos los proveedores, con precio',
     pie:'Filtras por categoría, distrito y presupuesto. El precio está a la vista antes de escribirle a nadie.' },
 
-  { a:9.6,  b:14.4, img:'capturas/panel-agenda.png',           url:'todoeventos.website/dashboard',
+  { a:8.2,  b:15.8, img:'capturas/catalogo-grilla.png',        url:'todoeventos.website/catalogo',
+    de:{x:0,   y:150, w:1560}, a2:{x:70,  y:195, w:1430}, raymi:true,
+    tit:'Y si no quieres buscar, te lo arman',
+    pie:'Raymi lee el catálogo real y propone proveedores, precios y total. No inventa: los precios salen de la base.' },
+
+  // ── Lado del proveedor ──
+  { a:15.8, b:21.2, img:'capturas/panel-solicitudes.png',      url:'todoeventos.website/dashboard',
+    de:{x:0,   y:80,  w:1600}, a2:{x:300, y:200, w:1290},
+    tit:'Al proveedor le llega la demanda',
+    pie:'Las reservas entran solas desde el marketplace, con la fecha, el precio ya acordado y lo que recibe, sin perseguir a nadie.' },
+
+  { a:21.2, b:25.6, img:'capturas/panel-agenda.png',           url:'todoeventos.website/dashboard',
     de:{x:0,   y:80,  w:1600}, a2:{x:300, y:430, w:1300},
     tit:'Su agenda, sin cruces',
     pie:'Cada reserva confirmada cae sola en el calendario. La base de datos rechaza dos eventos a la misma hora.' },
 
-  { a:14.4, b:19.0, img:'capturas/panel-cotizador-total.png',  url:'todoeventos.website/dashboard',
+  { a:25.6, b:30.0, img:'capturas/panel-cotizador-total.png',  url:'todoeventos.website/dashboard',
     de:{x:0,   y:0,   w:1600}, a2:{x:400, y:682, w:1180},
     tit:'Cotización en PDF, en dos minutos',
     pie:'Los mismos datos, siempre. Se descarga en PDF con su marca y se manda por donde el cliente prefiera.' },
 
-  { a:19.0, b:23.4, img:'capturas/panel-reportes.png',         url:'todoeventos.website/dashboard',
+  { a:30.0, b:34.4, img:'capturas/panel-reportes.png',         url:'todoeventos.website/dashboard',
     de:{x:0,   y:80,  w:1600}, a2:{x:300, y:170, w:1300},
     tit:'Por fin sabe cuánto ganó',
     pie:'Caja, ingresos por mes y ticket promedio. Números, no cálculos de memoria.' }
 ];
 
+/* La conversación de Raymi. Los proveedores y los precios son los mismos del
+   catálogo de demostración, y las cuentas cierran: es lo que devolvería
+   buscar_proveedores. `t` es el segundo, relativo al inicio de su toma. */
+const RAYMI = [
+  { t:0.15, tipo:'el',   tx:'Hola 👋 Cuéntame qué evento tienes y te armo la propuesta.' },
+  { t:1.10, tipo:'yo',   tx:'Quinceañero el 18 de octubre, en Miraflores. 120 personas, presupuesto S/. 8,000.' },
+  { t:2.05, tipo:'tool', tx:'Buscando en el catálogo · <code>buscar_proveedores</code>' },
+  { t:2.85, tipo:'el',   tx:'Con ese presupuesto te alcanza para los tres:' },
+  { t:3.50, tipo:'card' },
+  { t:5.45, tipo:'el',   tx:'Te sobran S/. 1,290 para decoración.' }
+];
+
+const PROPUESTA = [
+  ['♪',  'Sonido Marco · DJ & Luces', 'DJ + sonido, 5 horas',   'S/. 1,200'],
+  ['🍽', 'Catering Doña Rosa',        'S/. 38 × 120 personas',  'S/. 4,560'],
+  ['◉',  'Estudio Lente Azul',        '4 horas de fotografía',  'S/. 950']
+];
+
+function dibujarRaymi(){
+  const cont = document.getElementById('e4-raymi-chat');
+  cont.innerHTML = RAYMI.map((m, i) => {
+    if(m.tipo === 'card'){
+      return `<div class="propuesta" id="rb-${i}" style="opacity:0;">
+        <div class="pt">Tu quinceañero, armado</div>
+        ${PROPUESTA.map(f => `<div class="fl">
+            <span class="ic">${f[0]}</span>
+            <span class="nm">${f[1]}<em>${f[2]}</em></span>
+            <span class="pr">${f[3]}</span>
+          </div>`).join('')}
+        <div class="tot"><b>Total</b><span>S/. 6,710</span></div>
+      </div>`;
+    }
+    return `<div class="rb ${m.tipo}" id="rb-${i}" style="opacity:0;">${m.tx}</div>`;
+  }).join('');
+}
+
 function solucion(t){
-  const l = t - B.solucion[0];                // 0 … 24
+  const l = t - B.solucion[0];                // 0 … 36
 
   const intro = document.getElementById('e4-intro');
-  pon(intro, { o: velo(l, .3, 1.5, 3.2, 3.9), s: mezcla(.95,1,salida(tramo(l,.3,1.6))) });
+  pon(intro, { o: velo(l, .3, 1.4, 2.7, 3.3), s: mezcla(.95,1,salida(tramo(l,.3,1.5))) });
 
   const marco = document.getElementById('e4-marco');
-  const pm = salida(tramo(l, 3.4, 4.4));
-  pon(marco, { o: pm * (1 - salida(tramo(l, 23.4, 24))), y: mezcla(46,0,pm), s: mezcla(.96,1,pm) });
+  const pm = salida(tramo(l, 2.9, 3.9));
+  pon(marco, { o: pm * (1 - salida(tramo(l, 34.4, 35.2))), y: mezcla(46,0,pm), s: mezcla(.96,1,pm) });
 
   const img = document.getElementById('e4-img');
   const pie = document.getElementById('e4-pie');
@@ -793,6 +890,20 @@ function solucion(t){
     pie.querySelector('.p').textContent = activa.pie;
     pie.style.opacity = po;
   }
+
+  // ── Raymi: el panel aparece sobre el catálogo y la conversación avanza
+  //    mensaje a mensaje dentro de su propia toma.
+  const toma = TOMAS.find(k => k.raymi);
+  const panel = document.getElementById('e4-raymi');
+  const pr = velo(l, toma.a + .15, toma.a + .85, toma.b - .5, toma.b - .05);
+  pon(panel, { o: pr, y: mezcla(30, 0, salida(tramo(l, toma.a + .15, toma.a + .95))) });
+  if(pr > 0.001){
+    const lr = l - toma.a;                    // segundos dentro de la toma
+    RAYMI.forEach((m, i) => {
+      const p = salida(tramo(lr, m.t, m.t + .32));
+      pon(document.getElementById('rb-' + i), { o: p, y: mezcla(14, 0, p) });
+    });
+  }
 }
 
 /* ══ BLOQUE 5 · CIERRE ═════════════════════════════════════ */
@@ -815,6 +926,7 @@ function seek(t){
 window.seek = seek;
 window.DURACION = DURACION;
 
+dibujarRaymi();
 medirFocos();
 prepararBrecha();
 seek(0);

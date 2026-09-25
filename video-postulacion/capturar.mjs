@@ -112,7 +112,7 @@ await page.evaluate(() => goHome());
 await page.waitForTimeout(1200);
 await foto('panel-inicio');
 
-for (const [tool, nombre] of [['agenda', 'panel-agenda'], ['cotizador', 'panel-cotizador'], ['caja', 'panel-caja'], ['analytics', 'panel-reportes'], ['crm', 'panel-crm']]) {
+for (const [tool, nombre] of [['solicitudes', 'panel-solicitudes'], ['agenda', 'panel-agenda'], ['cotizador', 'panel-cotizador'], ['caja', 'panel-caja'], ['analytics', 'panel-reportes'], ['crm', 'panel-crm']]) {
   await page.evaluate(t => {
     window.scrollTo(0, 0);
     // La agenda de demostración vive en el mes siguiente (eventos futuros,

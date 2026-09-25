@@ -85,9 +85,13 @@
       { id: 102, provider_id: UID, name: 'Cabina DJ + luces robóticas', price: 1850, precio_a_cotizar: false, category: 'musica', description: 'Cabina iluminada, 6 luces robóticas y máquina de humo.', no_incluye: 'Transporte fuera de Lima', website_url: null, image_url: null, imagenes: [], video_url: null, active: true, created_at: '2026-01-03', opciones: [] }
     ],
 
+    // Reservas que entran por el marketplace: es la demanda que el proveedor
+    // no tenía que salir a buscar. Mezcla de confirmadas y pendientes.
     requests: [
-      { id: 21, provider_id: UID, event_date: d(3),  start_time: '19:00', end_time: '01:00', status: 'pendiente', message: 'Hola, es para el matrimonio de mi hermana. 120 invitados.', client_name: 'Rosa Medina',   client_phone: '999 111 222', client_email: 'rosa@correo.com',   total_amount: 1200, commission_amount: 120, event_type: 'Boda',        services: { name: 'DJ + Sonido profesional (5 horas)' } },
-      { id: 22, provider_id: UID, event_date: d(8),  start_time: '20:00', end_time: '02:00', status: 'pendiente', message: '¿Incluye luces? Es un quinceañero en San Isidro.',        client_name: 'Carlos Béjar',  client_phone: '988 444 555', client_email: 'carlos@correo.com', total_amount: 1850, commission_amount: 185, event_type: 'Quinceañero', services: { name: 'Cabina DJ + luces robóticas' } }
+      { id: 21, provider_id: UID, event_date: dm(4,  1), start_time: '19:00', end_time: '02:00', status: 'confirmada', message: 'Es el matrimonio de mi hermana, 120 invitados. Ya vi tus fotos, nos encantó.', client_name: 'Valeria Quispe',    client_phone: '987 654 321', client_email: 'valeria@correo.com', total_amount: 1200, commission_amount: 120, event_type: 'Boda',        services: { name: 'DJ + Sonido profesional (5 horas)' } },
+      { id: 22, provider_id: UID, event_date: dm(7,  1), start_time: '20:00', end_time: '01:00', status: 'confirmada', message: '¿Incluye luces robóticas? Es un quinceañero en San Isidro.',               client_name: 'Familia Ramos',     client_phone: '988 444 555', client_email: 'ramos@correo.com',   total_amount: 1850, commission_amount: 185, event_type: 'Quinceañero', services: { name: 'Cabina DJ + luces robóticas' } },
+      { id: 23, provider_id: UID, event_date: dm(11, 1), start_time: '18:00', end_time: '23:00', status: 'pendiente',  message: 'Aniversario de la empresa. Necesitamos sonido para 200 personas.',           client_name: 'Andina S.A.C.',     client_phone: '977 222 333', client_email: 'eventos@andina.pe', total_amount: 2100, commission_amount: 210, event_type: 'Corporativo', services: { name: 'DJ + Sonido profesional (5 horas)' } },
+      { id: 24, provider_id: UID, event_date: dm(14, 1), start_time: '21:00', end_time: '02:00', status: 'pendiente',  message: 'Cumpleaños de 40. ¿Puedes llegar a Surco?',                                  client_name: 'Luis Ferrer',       client_phone: '966 777 888', client_email: 'luis@correo.com',   total_amount: 1200, commission_amount: 120, event_type: 'Cumpleaños',  services: { name: 'DJ + Sonido profesional (5 horas)' } }
     ],
 
     cotizacion_plantillas: [{
