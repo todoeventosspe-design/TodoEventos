@@ -1,7 +1,23 @@
 # TodoEventos.pe — contexto del proyecto
 
-Este archivo lo lee Claude Code al iniciar cada sesión. Es el punto de partida
-para cualquier chat nuevo: léelo entero antes de tocar nada.
+Este archivo lo lee Claude Code al iniciar cada sesión (local o en la nube) —
+se carga solo, no hay que pegarlo a mano. Es el punto de partida para
+cualquier chat nuevo: léelo entero antes de tocar nada.
+
+## Trabajando en local (checklist para empezar)
+
+1. Clonar: `git clone https://github.com/todoeventosspe-design/TodoEventos.git`
+2. `cd TodoEventos`
+3. Correr `claude` ahí adentro — Claude Code lee este archivo solo, al
+   arrancar, sin que haya que copiar/pegar nada.
+4. Si existe `graphify-out/graph.json` (se genera con `graphify . ` o
+   `/graphify`, no se sube al repo — está en `.gitignore` porque cada
+   máquina arma el suyo), usarlo para responder preguntas sobre la
+   arquitectura del proyecto (`graphify query "<pregunta>"`) en vez de leer
+   archivos completos: gasta muchos menos tokens. Si no existe todavía o el
+   código cambió mucho desde que se armó, correr `graphify . --update` para
+   actualizarlo (incremental, solo re-procesa lo que cambió) antes de
+   apoyarse en él.
 
 ## Qué es
 
