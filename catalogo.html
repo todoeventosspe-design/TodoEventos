@@ -221,8 +221,8 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .pm-svc-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0;}
 .pm-svc-gallery img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;background:#1a1626;}
 .pm-svc-nofotos{font-size:12px;color:var(--sub);margin:12px 0;}
-.pm-svc-no-incluye{font-size:12.5px;color:var(--sub);margin:10px 0;line-height:1.5;}
-.pm-svc-no-incluye b{color:var(--fg);}
+.pm-svc-no-incluye{font-size:12.5px;color:#7f1d1d;font-weight:500;line-height:1.5;margin:10px 0;background:rgba(220,38,38,.07);border:1.5px solid rgba(220,38,38,.28);border-radius:10px;padding:10px 12px;}
+.pm-svc-no-incluye b{color:#B91C1C;text-transform:uppercase;font-size:11px;letter-spacing:.04em;display:block;margin-bottom:3px;}
 .pm-add-cart{width:100%;background:rgba(194,65,12,.12);border:1px solid rgba(194,65,12,.35);color:var(--or);padding:10px;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-family:inherit;transition:all .16s;}
 .pm-add-cart:hover{background:var(--or);color:#fff;}
 .pm-add-cart.added{background:rgba(74,222,128,.15);border-color:rgba(74,222,128,.4);color:#15803D;}
@@ -305,9 +305,11 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .sd-box{background:var(--bg2);border:1px solid var(--border);border-radius:20px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;position:relative;animation:pmIn .2s ease;}
 .sd-box::-webkit-scrollbar{width:8px;}
 .sd-box::-webkit-scrollbar-thumb{background:rgba(124,58,237,.3);border-radius:100px;border:2px solid var(--bg2);}
-.sd-hero{height:130px;position:relative;display:flex;align-items:center;justify-content:center;}
-.sd-hero i{font-size:44px;color:var(--tinta-2);}
-.sd-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 50%,var(--bg2) 100%);}
+.sd-hero{aspect-ratio:16/9;height:auto;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#18151f;}
+.sd-hero i{font-size:44px;color:var(--tinta-2);position:relative;z-index:1;}
+.sd-hero-bg{position:absolute;inset:-20px;background-size:cover;background-position:center;filter:blur(22px) brightness(.55);transform:scale(1.1);}
+.sd-hero-img{position:relative;z-index:1;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:none;}
+.sd-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 50%,var(--bg2) 100%);z-index:2;}
 .sd-content{padding:0 24px 24px;}
 .sd-name{font-size:19px;font-weight:700;color:var(--fg);margin-bottom:4px;}
 .sd-meta{font-size:12.5px;color:var(--sub);display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
@@ -316,6 +318,13 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .sd-price-val{font-size:20px;font-weight:800;color:var(--or);}
 .sd-block{margin-bottom:20px;}
 .sd-block-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--sub);margin-bottom:9px;display:flex;align-items:center;gap:6px;}
+.sd-website-btn{display:flex;align-items:center;gap:8px;background:var(--pu-soft,rgba(124,58,237,.08));border:1.5px solid var(--pu-line,rgba(124,58,237,.28));color:var(--pu);text-decoration:none;font-size:13.5px;font-weight:700;padding:12px 14px;border-radius:12px;margin-bottom:20px;transition:background .16s;}
+.sd-website-btn:hover{background:var(--pu-soft-strong,rgba(124,58,237,.16));}
+.sd-website-btn i:first-child{font-size:17px;}
+.sd-no-incluye-box{background:rgba(220,38,38,.07);border:1.5px solid rgba(220,38,38,.28);border-radius:12px;padding:14px 16px;}
+.sd-no-incluye-box .sd-block-title{color:#B91C1C;font-size:13px;margin-bottom:6px;}
+.sd-no-incluye-box .sd-block-title i{font-size:17px;}
+.sd-no-incluye-box .sd-text{color:#7f1d1d;font-weight:500;}
 .sd-block-title i{color:var(--pu);}
 .sd-text{font-size:13px;line-height:1.65;color:var(--sub);}
 .sd-list{list-style:none;padding:0;margin:0;}
@@ -620,6 +629,14 @@ function fotoSegura(url){
   return (typeof url === 'string' && url.startsWith(PREFIJO_FOTOS)) ? url : null;
 }
 
+// El link a la web del proveedor es un dominio externo cualquiera (no del
+// Storage), así que aquí no se puede exigir un prefijo fijo. Se exige en
+// cambio que empiece por http(s):// para que nunca sea "javascript:" ni
+// "data:" — esos nunca abren una web, solo ejecutan código.
+function linkSeguro(url){
+  return (typeof url === 'string' && /^https?:\/\//i.test(url)) ? url : null;
+}
+
 // Postgres devuelve los "numeric" como texto, por eso el Number().
 function money(n){ return 'S/. ' + Number(n || 0).toLocaleString('es-PE'); }
 
@@ -671,7 +688,7 @@ async function cargarProvidersReales(){
   // badges antes que un catálogo en blanco.
   const consulta = campoFundador => sb
     .from('services')
-    .select(`id, name, description, price, category, image_url, imagenes, provider_id, profiles!services_provider_id_fkey(full_name, location, rating, reviews_count${campoFundador})`)
+    .select(`id, name, description, no_incluye, website_url, price, precio_a_cotizar, category, image_url, imagenes, provider_id, profiles!services_provider_id_fkey(full_name, location, rating, reviews_count${campoFundador})`)
     .eq('active', true);
 
   let { data, error } = await consulta(', is_founder');
@@ -693,6 +710,7 @@ async function cargarProvidersReales(){
         name: s.name,
         cat: s.category || 'musica',
         price: Number(s.price) || 0,
+        precioACotizar: s.precio_a_cotizar === true,
         rating: Number(s.profiles.rating) || 0,
         reviews,
         esNuevo,
@@ -710,7 +728,9 @@ async function cargarProvidersReales(){
         img: CAT_IMG[s.category] || 'a',
         icon: CAT_ICON[s.category] || 'ti-star',
         badge: esNuevo ? 'Nuevo' : badgeParaRating(Number(s.profiles.rating) || 0),
-        desc: s.description || ''
+        desc: s.description || '',
+        noIncluye: s.no_incluye || '',
+        website: linkSeguro(s.website_url)
       };
     });
 
@@ -789,7 +809,7 @@ function render() {
           ${p.foto ? '' : `<i class="ti ${p.icon}"></i>`}
           <span class="pcard-vbdg">${p.badge}</span>
           ${p.esFundador ? `<span class="pcard-fbdg"><i class="ti ti-crown"></i> Fundador</span>` : ''}
-          <span class="pcard-price-tag">desde S/. ${p.price}</span>
+          <span class="pcard-price-tag">${p.precioACotizar ? 'A cotizar' : 'desde S/. ' + p.price}</span>
           <button class="pcard-fav${favoritos.has(p.id) ? ' activo' : ''}" aria-label="${favoritos.has(p.id) ? 'Quitar de favoritos' : 'Guardar como favorito'}" onclick="event.stopPropagation();toggleFavorito(${p.id}, this);"><i class="ti ${favoritos.has(p.id) ? 'ti-heart-filled' : 'ti-heart'}"></i></button>
         </div>
         <div class="pcard-body-top">
@@ -850,7 +870,7 @@ async function openProvider(providerId) {
 
   const [{ data: perfilReal }, { data: serviciosReal }, { data: feedReal }, { data: comentariosReal }] = await Promise.all([
     sb.from('profiles').select('full_name, categoria, location, bio, avatar_url, banner_url, rating, reviews_count').eq('id', providerId).single(),
-    sb.from('services').select('id, name, price, description, no_incluye, imagenes, video_url, opciones').eq('provider_id', providerId).eq('active', true),
+    sb.from('services').select('id, name, price, precio_a_cotizar, description, no_incluye, website_url, imagenes, video_url, opciones').eq('provider_id', providerId).eq('active', true),
     sb.from('feed_photos').select('url').eq('provider_id', providerId),
     sb.from('comentarios_perfil').select('client_name, comment, created_at').eq('provider_id', providerId).order('created_at', { ascending: false })
   ]);
@@ -870,7 +890,7 @@ async function openProvider(providerId) {
   const rating = Number(perfilReal.rating) || 0;
   const reviews = perfilReal.reviews_count || 0;
   const esNuevo = reviews === 0;
-  const servicios = (serviciosReal || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, descripcion: s.description, noIncluye: s.no_incluye || '', imagenes: (s.imagenes || []).map(fotoSegura).filter(Boolean), video: fotoSegura(s.video_url), opciones: Array.isArray(s.opciones) ? s.opciones : [] }));
+  const servicios = (serviciosReal || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, precioACotizar: s.precio_a_cotizar === true, descripcion: s.description, noIncluye: s.no_incluye || '', website: linkSeguro(s.website_url), imagenes: (s.imagenes || []).map(fotoSegura).filter(Boolean), video: fotoSegura(s.video_url), opciones: Array.isArray(s.opciones) ? s.opciones : [] }));
   let galeria = [];
   servicios.forEach(s => { (s.imagenes||[]).forEach(u => galeria.push(u)); });
   galeria = galeria.concat((feedReal || []).map(f => fotoSegura(f.url)).filter(Boolean));
@@ -904,6 +924,7 @@ async function openProvider(providerId) {
     const opcionesHtml = opcionesServicioHtml(s.opciones);
     const videoHtml = s.video ? `<video src="${esc(s.video)}" controls style="width:100%;border-radius:10px;margin-bottom:10px;display:block;"></video>` : '';
     const noIncluyeHtml = s.noIncluye ? `<div class="pm-svc-no-incluye"><b>No incluye:</b> ${esc(s.noIncluye)}</div>` : '';
+    const websiteHtml = s.website ? `<a href="${esc(s.website)}" target="_blank" rel="noopener noreferrer" class="sd-website-btn" onclick="event.stopPropagation();"><i class="ti ti-world"></i> Visitar página web <i class="ti ti-external-link" style="margin-left:auto;"></i></a>` : '';
     return `
     <div class="pm-service" id="pm-svc-${i}">
       <div class="pm-service-main" onclick="toggleServiceDetail(${i})">
@@ -911,13 +932,14 @@ async function openProvider(providerId) {
           <div class="pm-service-name">${esc(s.nombre)} <i class="ti ti-chevron-down pm-svc-chev" id="pm-svc-chev-${i}"></i></div>
           <div class="pm-service-desc">${esc(s.descripcion || '')}</div>
         </div>
-        <div class="pm-service-price">${money(s.precio)}</div>
+        <div class="pm-service-price">${s.precioACotizar ? 'A cotizar' : money(s.precio)}</div>
       </div>
       <div class="pm-svc-detail" id="pm-svc-detail-${i}">
         ${videoHtml}
         ${galeriaHtml}
         ${opcionesHtml}
         ${noIncluyeHtml}
+        ${websiteHtml}
         <button class="pm-add-cart" onclick="event.stopPropagation(); addToCart(${i})">
           <i class="ti ti-shopping-cart"></i> Añadir al carrito
         </button>
@@ -1144,21 +1166,33 @@ function openServiceDetail(providerId){
   document.getElementById('sd-categoria').textContent = catNames[p.cat] || 'Servicio';
   document.getElementById('sd-district').textContent = p.district + ', Lima';
   document.getElementById('sd-rating').textContent = p.esNuevo ? 'Nuevo · sin reseñas' : p.rating.toFixed(1) + ' (' + p.reviews + ')';
-  document.getElementById('sd-price').textContent = money(p.price);
+  document.getElementById('sd-price').textContent = p.precioACotizar ? 'A cotizar' : money(p.price);
   document.getElementById('sd-badge').textContent = p.badge || '✓ Verificado';
   // Descripción real que el proveedor escribió al crear el servicio (no un texto genérico por categoría)
   document.getElementById('sd-desc').textContent = p.desc || 'Este proveedor todavía no agregó una descripción para este servicio.';
+  document.getElementById('sd-no-incluye-block').style.display = p.noIncluye ? 'block' : 'none';
+  document.getElementById('sd-no-incluye').textContent = p.noIncluye || '';
+
+  const sdWebsite = document.getElementById('sd-website');
+  if(p.website){ sdWebsite.href = p.website; sdWebsite.style.display = 'flex'; }
+  else { sdWebsite.style.display = 'none'; sdWebsite.removeAttribute('href'); }
   const sdHero = document.getElementById('sd-hero');
+  const sdHeroBg = document.getElementById('sd-hero-bg');
+  const sdHeroImg = document.getElementById('sd-hero-img');
   const sdHeroIcon = document.getElementById('sd-hero-icon');
   if(p.foto){
+    // Se ve la foto completa (object-fit:contain), sin recortarla en un
+    // ángulo raro. El desenfoque de fondo solo rellena el aire sobrante.
     sdHero.className = 'sd-hero';
-    sdHero.style.backgroundImage = `url('${esc(p.foto)}')`;
-    sdHero.style.backgroundSize = 'cover';
-    sdHero.style.backgroundPosition = 'center';
+    sdHeroBg.style.backgroundImage = `url('${esc(p.foto)}')`;
+    sdHeroImg.src = p.foto;
+    sdHeroImg.style.display = 'block';
     sdHeroIcon.style.display = 'none';
   } else {
     sdHero.className = 'sd-hero ci-' + p.img;
-    sdHero.style.backgroundImage = '';
+    sdHeroBg.style.backgroundImage = '';
+    sdHeroImg.style.display = 'none';
+    sdHeroImg.src = '';
     sdHeroIcon.className = 'ti ' + p.icon;
     sdHeroIcon.style.display = '';
   }
@@ -1503,7 +1537,7 @@ function abrirFavoritos(){
         <div class="pcard-clickable" onclick="closeFavoritos();openServiceDetail(${p.id})">
           <div class="pcard-img ${p.foto ? '' : 'ci-' + p.img}" ${p.foto ? `style="background-image:url('${esc(p.foto)}');background-size:cover;background-position:center;"` : ''}>
             ${p.foto ? '' : `<i class="ti ${p.icon}"></i>`}
-            <span class="pcard-price-tag">desde S/. ${p.price}</span>
+            <span class="pcard-price-tag">${p.precioACotizar ? 'A cotizar' : 'desde S/. ' + p.price}</span>
             <button class="pcard-fav activo" onclick="event.stopPropagation();toggleFavorito(${p.id}, this);quitarDeVistaFavoritos(${p.id});"><i class="ti ti-heart-filled"></i></button>
           </div>
           <div class="pcard-body-top">
@@ -1759,7 +1793,7 @@ async function confirmarReserva(){
   // precio, comision, status y datos del cliente los decide el trigger del
   // servidor (blindar_reserva) — el navegador solo manda lo que el cliente
   // eligio. La agenda del proveedor tambien la bloquea un trigger aparte.
-  const { error } = await sb.from('requests').insert({
+  const { data, error } = await sb.from('requests').insert({
     provider_id: reservaServicio.providerId,
     service_id: reservaServicio.id,
     event_date: reservaFechaSel,
@@ -1767,7 +1801,7 @@ async function confirmarReserva(){
     end_time: horaFin,
     event_type: document.getElementById('bk-tipo').value,
     message: document.getElementById('bk-mensaje').value.trim() || null
-  }).select('id').single();
+  }).select('id, status').single();
 
   btn.disabled = false;
   btn.innerHTML = '<i class="ti ti-calendar-check"></i> Confirmar reserva';
@@ -1790,11 +1824,22 @@ async function confirmarReserva(){
   cerrarReserva();
 
   const [y,m,d] = reservaFechaSel.split('-').map(Number);
-  teAviso('¡Reserva confirmada!',
-        reservaServicio.name +
-        '\n' + d + ' de ' + MESES_BK[m-1] + ' de ' + y + ', ' + horaIni + ' – ' + horaFin +
-        '\n\nPuedes verla en "Mi cuenta". El proveedor ya tiene el bloque reservado en su agenda.',
-        'ti-calendar-check');
+  const fechaTxt = d + ' de ' + MESES_BK[m-1] + ' de ' + y + ', ' + horaIni + ' – ' + horaFin;
+
+  // El mensaje se adapta al estado real que devolvió la base: "pendiente" si
+  // el proveedor tiene que aceptarla primero, "confirmada" si quedó blindada
+  // de una. Así el aviso nunca miente sobre si ya está confirmado o no.
+  if(data && data.status === 'pendiente'){
+    teAviso('¡Solicitud enviada!',
+          reservaServicio.name + '\n' + fechaTxt +
+          '\n\nLe avisamos al proveedor para que la acepte o la rechace. Puedes ver el estado en "Mi cuenta".',
+          'ti-calendar-check');
+  } else {
+    teAviso('¡Reserva confirmada!',
+          reservaServicio.name + '\n' + fechaTxt +
+          '\n\nPuedes verla en "Mi cuenta". El proveedor ya tiene el bloque reservado en su agenda.',
+          'ti-calendar-check');
+  }
 }
 </script>
 <!-- ─── MODAL: Perfil Público del Proveedor ─── -->
@@ -1947,7 +1992,11 @@ async function confirmarReserva(){
 <div class="modal-overlay" id="sd-overlay" onclick="if(event.target===this) closeServiceDetail()">
   <div class="sd-box">
     <button class="pm-close" onclick="closeServiceDetail()"><i class="ti ti-x"></i></button>
-    <div class="sd-hero" id="sd-hero"><i class="ti ti-music" id="sd-hero-icon"></i></div>
+    <div class="sd-hero" id="sd-hero">
+      <div class="sd-hero-bg" id="sd-hero-bg"></div>
+      <img class="sd-hero-img" id="sd-hero-img" alt="">
+      <i class="ti ti-music" id="sd-hero-icon"></i>
+    </div>
     <div class="sd-content">
       <div class="sd-name" id="sd-name">—</div>
       <div class="sd-meta">
@@ -1964,9 +2013,18 @@ async function confirmarReserva(){
         <span class="pm-verified" id="sd-badge">✓ Verificado</span>
       </div>
 
+      <a href="#" id="sd-website" target="_blank" rel="noopener noreferrer" class="sd-website-btn" style="display:none;">
+        <i class="ti ti-world"></i> Visitar página web del proveedor <i class="ti ti-external-link" style="margin-left:auto;"></i>
+      </a>
+
       <div class="sd-block">
         <div class="sd-block-title"><i class="ti ti-file-description"></i> Descripción del servicio</div>
         <div class="sd-text" id="sd-desc">—</div>
+      </div>
+
+      <div class="sd-block sd-no-incluye-box" id="sd-no-incluye-block" style="display:none;">
+        <div class="sd-block-title"><i class="ti ti-alert-triangle-filled"></i> Qué NO incluye</div>
+        <div class="sd-text" id="sd-no-incluye">—</div>
       </div>
 
       <div class="sd-block" id="sd-galeria-block" style="display:none;">

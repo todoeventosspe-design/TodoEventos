@@ -285,11 +285,38 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .gallery-add:hover{border-color:var(--or-line);color:var(--or);}
 
 .service-img-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px;}
-.service-img-item{position:relative;border-radius:9px;overflow:hidden;aspect-ratio:1;background:var(--card2);}
+/* touch-action:pan-y deja que el dedo siga pudiendo hacer scroll vertical
+   sobre la foto aunque tenga draggable="true" para mouse; sin esto, en
+   celular (sobre todo iOS Safari) el navegador "atrapaba" el gesto pensando
+   que era el inicio de un drag, y la modal quedaba trabada sin poder
+   scrollear justo al llegar a las fotos. */
+.service-img-item{position:relative;border-radius:9px;overflow:hidden;aspect-ratio:1;background:var(--card2);cursor:grab;touch-action:pan-y;}
+.service-img-item:active{cursor:grabbing;}
+.img-cover-badge{position:absolute;top:3px;left:3px;background:rgba(234,88,12,.92);color:#fff;font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:100px;display:flex;align-items:center;gap:3px;pointer-events:none;}
+.img-cover-badge i{font-size:10px;}
 .service-img-item img{width:100%;height:100%;object-fit:cover;display:block;}
 .service-img-item .gallery-remove{width:20px;height:20px;top:3px;right:3px;font-size:10px;}
+/* "Hacer portada": un solo toque/clic para que ESA foto sea la que se ve
+   por defecto en el marketplace. Antes la única forma de cambiar cuál era
+   la portada era arrastrar, que en celular nunca funcionaba (el drag nativo
+   es solo de mouse) y en computadora era poco evidente; por eso "cambiar la
+   foto" (quitar la vieja + subir la nueva) no bastaba: la nueva quedaba al
+   final de la galería y el marketplace seguía mostrando otra como portada. */
+.service-img-portada{position:absolute;left:3px;right:3px;bottom:3px;background:rgba(18,14,31,.72);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:6px;font-size:9.5px;font-weight:700;padding:3px 0;display:flex;align-items:center;justify-content:center;gap:3px;cursor:pointer;font-family:inherit;width:100%;}
+.service-img-portada:hover{background:rgba(234,88,12,.85);}
+.service-img-portada i{font-size:10px;}
 .service-img-add{display:flex;align-items:center;justify-content:center;border:2px dashed var(--line);border-radius:9px;aspect-ratio:1;cursor:pointer;color:var(--sub);font-size:20px;transition:all .16s;}
 .service-img-add:hover{border-color:var(--or-line);color:var(--or);}
+.service-img-item img{cursor:zoom-in;}
+
+/* ── Ajustar/recortar foto: vista previa + arrastre para elegir que parte
+   se ve como portada (3:2, la proporcion de la tarjeta del marketplace) o
+   en galeria (1:1, cuadrada, como se ve en el resto del sitio). ── */
+.recorte-marco{width:100%;border-radius:10px;overflow:hidden;background:#0c0a12;margin-bottom:14px;touch-action:none;cursor:grab;position:relative;}
+.recorte-marco:active{cursor:grabbing;}
+.recorte-marco canvas{display:block;width:100%;height:auto;}
+.recorte-zoom-row{display:flex;align-items:center;gap:10px;color:var(--sub);font-size:17px;margin-bottom:6px;}
+.recorte-zoom-row input[type=range]{flex:1;accent-color:var(--or);}
 
 @media(max-width:640px){
   .services-grid{grid-template-columns:1fr;}
@@ -1084,6 +1111,10 @@ verificarAccesoDashboard();
         Es el "desde" que ve el cliente en el catálogo. Si tu servicio varía según lo que pida
         (combos, cantidad, extras), pon el precio de tu combinación más económica y detalla el resto abajo.
       </small>
+      <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-weight:500;font-size:13px;cursor:pointer;">
+        <input type="checkbox" id="service-precio-cotizar" onchange="toggleServicePrecioCotizar()" style="width:auto;">
+        Precio a cotizar (varía según el pedido, no tengo un "desde" fijo)
+      </label>
     </div>
     <div class="field">
       <label>Categoría</label>
@@ -1109,7 +1140,6 @@ verificarAccesoDashboard();
       <label>Qué NO incluye <span style="color:var(--sub);font-weight:400;">(opcional)</span></label>
       <textarea id="service-no-incluye" rows="3" placeholder="Ej. No incluye transporte fuera de Lima, ni horas extra"></textarea>
     </div>
-
     <!-- ─── OPCIONES DE PRECIO ─── -->
     <div class="field">
       <label>Opciones de precio <span style="color:var(--sub);font-weight:400;">(opcional)</span></label>
@@ -1166,6 +1196,7 @@ verificarAccesoDashboard();
 
     <div class="field">
       <label>Fotos de este servicio <span id="service-img-count" style="color:var(--sub);font-weight:400;"></span></label>
+      <small style="display:block;margin:-2px 0 8px;color:var(--sub);font-size:11.5px;">Toca una foto para ver cómo quedaría y ajustar qué parte se ve.</small>
       <div class="service-img-grid" id="service-img-grid"></div>
     </div>
 
@@ -1181,12 +1212,45 @@ verificarAccesoDashboard();
   </div>
 </div>
 
+<!-- ─── AJUSTAR/RECORTAR FOTO: vista previa de cómo se ve + arrastrar/zoom
+     para elegir qué parte queda visible (portada del marketplace, o
+     galería). Al guardar, sube la version recortada y reemplaza esa foto. ─── -->
+<div class="modal-overlay" id="recorte-overlay">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-head">
+      <div class="modal-title">Ajustar foto</div>
+      <button class="modal-close" onclick="cerrarRecorteFoto()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="tool-desc" id="recorte-desc" style="margin-bottom:12px;"></div>
+    <div class="recorte-marco" id="recorte-marco"><canvas id="recorte-canvas"></canvas></div>
+    <div class="recorte-zoom-row">
+      <i class="ti ti-zoom-out"></i>
+      <input type="range" id="recorte-zoom" min="100" max="300" value="100">
+      <i class="ti ti-zoom-in"></i>
+    </div>
+    <div class="tool-desc" style="margin:0 0 16px;">Arrastra la foto para moverla dentro del marco.</div>
+    <div class="modal-actions">
+      <button class="btn-ghost" style="flex:1;justify-content:center;" onclick="cerrarRecorteFoto()">Cancelar</button>
+      <button class="btn-or" style="flex:1;justify-content:center;" onclick="guardarRecorteFoto()"><i class="ti ti-check"></i> Guardar recorte</button>
+    </div>
+  </div>
+</div>
+
 <!-- ─── VISOR DE SERVICIO: solo lectura, muestra las fotos de ese servicio ─── -->
 <div class="modal-overlay" id="service-viewer-overlay" onclick="if(event.target===this) closeServiceViewer()">
-  <div class="modal-box" style="max-width:480px;">
+  <!-- max-height + overflow-y: sin esto el visor se salía de la pantalla (por
+       arriba Y por abajo) cuando el servicio tenía varias fotos/opciones, y
+       no había forma de scrollear para leer el resto ni de llegar al botón
+       de editar. -->
+  <div class="modal-box" style="max-width:480px;max-height:88vh;overflow-y:auto;">
     <div class="modal-head">
       <div class="modal-title" id="viewer-nombre">Servicio</div>
-      <button class="modal-close" onclick="closeServiceViewer()"><i class="ti ti-x"></i></button>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <!-- Acceso directo a editar ESTE servicio, visible apenas se abre el
+             visor (sin tener que scrollear hasta el botón de abajo). -->
+        <button class="btn-outline-or" style="padding:6px 12px;font-size:12px;" onclick="editarServicioDesdeVisor()" title="Editar este servicio"><i class="ti ti-edit"></i> Editar</button>
+        <button class="modal-close" onclick="closeServiceViewer()"><i class="ti ti-x"></i></button>
+      </div>
     </div>
     <div class="modal-date" id="viewer-precio">—</div>
     <div class="profile-bio" id="viewer-descripcion" style="margin-bottom:16px;"></div>
@@ -2615,7 +2679,7 @@ async function cargarPerfilDesdeSupabase(){
   const p = perfilRowInicial;
 
   const [{ data: servicios }, { data: resenas }, { data: comentarios }, { data: feedFotos }] = await Promise.all([
-    sb.from('services').select('id, name, price, category, description, no_incluye, imagenes, video_url, active, opciones').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true }),
+    sb.from('services').select('id, name, price, precio_a_cotizar, category, description, no_incluye, website_url, imagenes, video_url, active, opciones').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true }),
     sb.from('reviews').select('id, service_id, rating, comment, created_at, client_name').eq('provider_id', usuarioActual.id).order('created_at', { ascending: false }),
     sb.from('comentarios_perfil').select('id, comment, created_at, client_name').eq('provider_id', usuarioActual.id).order('created_at', { ascending: false }),
     sb.from('feed_photos').select('id, url').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true })
@@ -2642,7 +2706,7 @@ async function cargarPerfilDesdeSupabase(){
     bannerUrl: p.banner_url || '',
     ratingReal: p.rating || 0,
     reviews_count: p.reviews_count || 0,
-    servicios: (servicios || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, categoria: s.category || 'musica', descripcion: s.description || '', noIncluye: s.no_incluye || '', imagenes: s.imagenes || [], video: s.video_url || null, opciones: Array.isArray(s.opciones) ? s.opciones : [], activo: s.active === true })),
+    servicios: (servicios || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, precioACotizar: s.precio_a_cotizar === true, categoria: s.category || 'musica', descripcion: s.description || '', noIncluye: s.no_incluye || '', websiteUrl: s.website_url || '', imagenes: s.imagenes || [], video: s.video_url || null, opciones: Array.isArray(s.opciones) ? s.opciones : [], activo: s.active === true })),
     resenasPorServicio,
     // "Comentarios" del perfil: sobre el proveedor como persona/negocio,
     // distintos de las reseñas de un servicio puntual.
@@ -2804,7 +2868,7 @@ function renderServiciosGrid(){
         <div style="margin-bottom:8px;">${estadoBadge}</div>
         <div class="service-name">${esc(s.nombre)}</div>
         <div class="service-desc">${esc(s.descripcion)}</div>
-        <div class="service-price">S/. ${Number(s.precio).toLocaleString('es-PE')}</div>
+        <div class="service-price">${s.precioACotizar ? 'A cotizar' : 'S/. ' + Number(s.precio).toLocaleString('es-PE')}</div>
         <div style="font-size:11px;color:var(--sub);margin-top:8px;"><i class="ti ti-photo" style="font-size:12px;"></i> ${imgs.length} foto${imgs.length===1?'':'s'}</div>
         ${btnLanzar}
       </div>
@@ -3017,6 +3081,8 @@ function openServiceModal(id){
   document.getElementById('service-modal-title').textContent = existing ? 'Editar servicio' : 'Añadir nuevo servicio';
   document.getElementById('service-nombre').value = existing ? existing.nombre : '';
   document.getElementById('service-precio').value = existing ? existing.precio : '';
+  document.getElementById('service-precio-cotizar').checked = existing ? !!existing.precioACotizar : false;
+  toggleServicePrecioCotizar();
   document.getElementById('service-categoria').value = existing ? (existing.categoria || 'musica') : 'musica';
   document.getElementById('service-descripcion').value = existing ? existing.descripcion : '';
   document.getElementById('service-no-incluye').value = existing ? (existing.noIncluye || '') : '';
@@ -3045,12 +3111,36 @@ function closeServiceModal(){
   opcionesDraft = [];
 }
 
+// Arrastrar para reordenar: la primera foto del arreglo es siempre la
+// "portada" (la que se usa como image_url en el catalogo), asi que
+// reordenar aca decide cual se ve primero.
+//
+// El drag nativo (draggable="true") es SOLO de mouse: en celular no se activa
+// nunca, pero de todos modos el navegador (sobre todo iOS Safari) puede
+// "atrapar" el gesto del dedo pensando que empieza un drag, y bloquear el
+// scroll justo sobre las fotos. Por eso en pantallas tactiles no se pone
+// draggable para nada; para elegir portada esta ademas el boton directo
+// "Hacer portada" (hacerPortadaServicioImagen), que funciona igual con mouse
+// o con el dedo, sin depender de arrastrar.
+let dragServiceImgIndex = null;
+function esDispositivoTactil(){
+  return !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+}
+
 function renderServiceModalImages(){
   const grid = document.getElementById('service-img-grid');
+  const tactil = esDispositivoTactil();
   let html = '';
   servicioImagenesDraft.forEach((url, i) => {
-    html += `<div class="service-img-item">
-      <img src="${esc(url)}" alt="Foto ${i+1}">
+    const dragAttrs = tactil ? '' : `draggable="true"
+        ondragstart="dragServiceImgIndex=${i};event.dataTransfer.effectAllowed='move';"
+        ondragover="event.preventDefault();"
+        ondrop="event.preventDefault();moveServiceModalImage(dragServiceImgIndex, ${i});"`;
+    html += `<div class="service-img-item" ${dragAttrs}>
+      <img src="${esc(url)}" alt="Foto ${i+1}" onclick="abrirRecorteFoto(${i})" title="Ver cómo quedaría y ajustar el recorte">
+      ${i === 0
+        ? `<span class="img-cover-badge"><i class="ti ti-star-filled"></i> Portada</span>`
+        : (tactil ? `<button type="button" class="service-img-portada" onclick="hacerPortadaServicioImagen(${i})" title="Usar como portada"><i class="ti ti-star"></i> Hacer portada</button>` : '')}
       <button class="gallery-remove" onclick="removeServiceModalImage(${i})"><i class="ti ti-x"></i></button>
     </div>`;
   });
@@ -3061,6 +3151,191 @@ function renderServiceModalImages(){
 
   const countEl = document.getElementById('service-img-count');
   if(countEl) countEl.textContent = '(' + servicioImagenesDraft.length + '/' + SERVICIO_IMG_MAX + ')';
+}
+
+function moveServiceModalImage(from, to){
+  if(from === null || from === undefined || from === to) return;
+  if(to < 0 || to >= servicioImagenesDraft.length) return;
+  const [img] = servicioImagenesDraft.splice(from, 1);
+  servicioImagenesDraft.splice(to, 0, img);
+  dragServiceImgIndex = null;
+  renderServiceModalImages();
+}
+
+// Un solo toque/clic: la foto que se elija pasa al frente y se vuelve la
+// portada del servicio (la que se ve por defecto en el marketplace). Es el
+// arreglo directo a "subí la foto nueva pero la que se ve seguía siendo la
+// vieja": antes solo se podía cambiar arrastrando.
+function hacerPortadaServicioImagen(i){
+  if(i <= 0 || i >= servicioImagenesDraft.length) return;
+  const [img] = servicioImagenesDraft.splice(i, 1);
+  servicioImagenesDraft.unshift(img);
+  renderServiceModalImages();
+}
+
+// ─── AJUSTAR/RECORTAR FOTO ───────────────────────────────────────────────
+// Vista previa de cómo se ve la foto ya recortada (portada = 3:2, la
+// proporción de la tarjeta del marketplace; cualquier otra foto = 1:1,
+// cuadrada, como se ve en las galerías del sitio), con arrastre y zoom para
+// elegir qué parte queda visible. Al guardar, se genera una imagen nueva ya
+// recortada y se sube; la foto original se reemplaza por esa (no se
+// modifica en el servidor, es un archivo nuevo — la vieja queda huérfana en
+// Storage, igual que cuando se "quita" una foto).
+let recorteIndexActual = null;
+let recorteImg = null;
+let recorteRatio = { w: 3, h: 2 };
+let recorteFrameW = 360, recorteFrameH = 240;
+let recorteZoom = 1;
+let recorteOffX = 0, recorteOffY = 0;
+
+function abrirRecorteFoto(i){
+  const url = servicioImagenesDraft[i];
+  if(!url) return;
+  recorteIndexActual = i;
+  recorteRatio = (i === 0) ? { w: 3, h: 2 } : { w: 1, h: 1 };
+
+  const base = 360;
+  recorteFrameW = base;
+  recorteFrameH = Math.round(base * recorteRatio.h / recorteRatio.w);
+
+  document.getElementById('recorte-desc').textContent = (i === 0)
+    ? 'Así se vería como portada de tu servicio en el catálogo.'
+    : 'Así se vería esta foto en la galería.';
+
+  const canvas = document.getElementById('recorte-canvas');
+  canvas.width = recorteFrameW;
+  canvas.height = recorteFrameH;
+
+  recorteZoom = 1;
+  document.getElementById('recorte-zoom').value = 100;
+  recorteOffX = 0; recorteOffY = 0;
+  recorteImg = null;
+
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = function(){
+    recorteImg = img;
+    // centrado por defecto dentro del marco
+    const escala = escalaBaseRecorte();
+    recorteOffX = (recorteFrameW - img.naturalWidth * escala) / 2;
+    recorteOffY = (recorteFrameH - img.naturalHeight * escala) / 2;
+    dibujarRecorte();
+  };
+  img.onerror = function(){
+    alert('No se pudo cargar la foto para ajustarla. Revisa tu conexión e intenta de nuevo.');
+    cerrarRecorteFoto();
+  };
+  img.src = url;
+
+  document.getElementById('recorte-overlay').classList.add('open');
+}
+
+function cerrarRecorteFoto(){
+  document.getElementById('recorte-overlay').classList.remove('open');
+  recorteIndexActual = null;
+  recorteImg = null;
+}
+
+function escalaBaseRecorte(){
+  // La escala mínima para que la foto "cubra" el marco entero, sin dejar
+  // espacios vacíos (mismo criterio que object-fit:cover).
+  if(!recorteImg) return 1;
+  return Math.max(recorteFrameW / recorteImg.naturalWidth, recorteFrameH / recorteImg.naturalHeight);
+}
+
+function limitarOffsetsRecorte(){
+  const escalaTotal = escalaBaseRecorte() * recorteZoom;
+  const dispW = recorteImg.naturalWidth * escalaTotal;
+  const dispH = recorteImg.naturalHeight * escalaTotal;
+  const minX = recorteFrameW - dispW, minY = recorteFrameH - dispH;
+  recorteOffX = Math.min(0, Math.max(minX, recorteOffX));
+  recorteOffY = Math.min(0, Math.max(minY, recorteOffY));
+}
+
+function dibujarRecorte(){
+  if(!recorteImg) return;
+  limitarOffsetsRecorte();
+  const escalaTotal = escalaBaseRecorte() * recorteZoom;
+  const canvas = document.getElementById('recorte-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, recorteFrameW, recorteFrameH);
+  ctx.drawImage(recorteImg, recorteOffX, recorteOffY,
+    recorteImg.naturalWidth * escalaTotal, recorteImg.naturalHeight * escalaTotal);
+}
+
+// Arrastrar (mouse y táctil a la vez, con Pointer Events).
+(function initArrastreRecorte(){
+  const marco = document.getElementById('recorte-marco');
+  if(!marco) return;
+  let arrastrando = false, inicioX = 0, inicioY = 0, offInicioX = 0, offInicioY = 0;
+
+  marco.addEventListener('pointerdown', (e) => {
+    if(!recorteImg) return;
+    arrastrando = true;
+    marco.setPointerCapture(e.pointerId);
+    inicioX = e.clientX; inicioY = e.clientY;
+    offInicioX = recorteOffX; offInicioY = recorteOffY;
+  });
+  marco.addEventListener('pointermove', (e) => {
+    if(!arrastrando || !recorteImg) return;
+    // El canvas se ve escalado por CSS (width:100%): convertimos el
+    // movimiento de pantalla al espacio real del canvas.
+    const rect = marco.getBoundingClientRect();
+    const factor = recorteFrameW / rect.width;
+    recorteOffX = offInicioX + (e.clientX - inicioX) * factor;
+    recorteOffY = offInicioY + (e.clientY - inicioY) * factor;
+    dibujarRecorte();
+  });
+  const soltar = () => { arrastrando = false; };
+  marco.addEventListener('pointerup', soltar);
+  marco.addEventListener('pointercancel', soltar);
+  marco.addEventListener('pointerleave', soltar);
+})();
+
+document.getElementById('recorte-zoom').addEventListener('input', function(){
+  recorteZoom = Number(this.value) / 100;
+  dibujarRecorte();
+});
+
+async function guardarRecorteFoto(){
+  if(recorteIndexActual === null || !recorteImg) return;
+  const btn = document.querySelector('#recorte-overlay .btn-or');
+  const original = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = 'Guardando…';
+
+  try{
+    const escalaTotal = escalaBaseRecorte() * recorteZoom;
+    // Rectángulo visible dentro del marco, en píxeles reales de la foto
+    // original (no de la pantalla), para exportar en buena resolución.
+    const sx = -recorteOffX / escalaTotal;
+    const sy = -recorteOffY / escalaTotal;
+    const sw = recorteFrameW / escalaTotal;
+    const sh = recorteFrameH / escalaTotal;
+
+    const outW = recorteRatio.w === 3 ? 960 : 800;
+    const outH = Math.round(outW * recorteRatio.h / recorteRatio.w);
+    const salida = document.createElement('canvas');
+    salida.width = outW; salida.height = outH;
+    salida.getContext('2d').drawImage(recorteImg, sx, sy, sw, sh, 0, 0, outW, outH);
+
+    const blob = await new Promise(res => salida.toBlob(res, 'image/jpeg', 0.87));
+    if(!blob) throw new Error('No se pudo generar la imagen recortada.');
+
+    const ruta = usuarioActual.id + '/' + Date.now() + '_' + Math.random().toString(36).slice(2,8) + '_recorte.jpg';
+    const { error } = await sb.storage.from('fotos-servicios').upload(ruta, blob, { contentType: 'image/jpeg' });
+    if(error) throw error;
+
+    const { data } = sb.storage.from('fotos-servicios').getPublicUrl(ruta);
+    servicioImagenesDraft[recorteIndexActual] = data.publicUrl;
+    renderServiceModalImages();
+    cerrarRecorteFoto();
+  } catch(e){
+    alert('No se pudo guardar el recorte: ' + (e && e.message ? e.message : 'intenta de nuevo.'));
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = original;
+  }
 }
 
 function addServiceModalImage(){
@@ -3101,15 +3376,27 @@ function removeServiceModalVideo(){
   renderServiceModalVideo();
 }
 
+// El precio deja de ser obligatorio cuando el proveedor marca "a cotizar":
+// hay rubros (catering a medida, por ejemplo) donde no existe un "desde"
+// real porque todo depende de lo que pida el cliente.
+function toggleServicePrecioCotizar(){
+  const cotiza = document.getElementById('service-precio-cotizar').checked;
+  const input = document.getElementById('service-precio');
+  input.disabled = cotiza;
+  input.style.opacity = cotiza ? '.5' : '1';
+  if(cotiza) input.value = '';
+}
+
 async function saveService(){
   const nombre = document.getElementById('service-nombre').value.trim();
-  const precio = parseFloat(document.getElementById('service-precio').value);
+  const precioACotizar = document.getElementById('service-precio-cotizar').checked;
+  const precio = precioACotizar ? 0 : parseFloat(document.getElementById('service-precio').value);
   const categoria = document.getElementById('service-categoria').value;
   const descripcion = document.getElementById('service-descripcion').value.trim();
   const noIncluye = document.getElementById('service-no-incluye').value.trim();
 
-  if(!nombre || isNaN(precio) || precio < 0){
-    alert('Escribe un nombre y un precio válido para el servicio.');
+  if(!nombre || (!precioACotizar && (isNaN(precio) || precio < 0))){
+    alert('Escribe un nombre y un precio válido para el servicio (o marca "Precio a cotizar").');
     return;
   }
 
@@ -3120,23 +3407,23 @@ async function saveService(){
 
   if(servicioEditingId){
     const { error } = await sb.from('services').update({
-      name: nombre, price: precio, category: categoria, description: descripcion, no_incluye: noIncluye || null, imagenes,
+      name: nombre, price: precio, precio_a_cotizar: precioACotizar, category: categoria, description: descripcion, no_incluye: noIncluye || null, imagenes,
       image_url: imagenes[0] || null, video_url, opciones
     }).eq('id', servicioEditingId).eq('provider_id', usuarioActual.id);
     if(error){ alert('No se pudo guardar el servicio: ' + error.message); return; }
 
     const idx = perfilData.servicios.findIndex(s => s.id === servicioEditingId);
-    if(idx >= 0) perfilData.servicios[idx] = { ...perfilData.servicios[idx], nombre, precio, categoria, descripcion, noIncluye, imagenes, video: video_url, opciones };
+    if(idx >= 0) perfilData.servicios[idx] = { ...perfilData.servicios[idx], nombre, precio, precioACotizar, categoria, descripcion, noIncluye, imagenes, video: video_url, opciones };
   } else {
     // Un servicio nuevo nace como BORRADOR: no aparece en el catálogo hasta
     // que el proveedor lo lanza al mercado a propósito.
     const { data, error } = await sb.from('services').insert({
-      provider_id: usuarioActual.id, name: nombre, price: precio, category: categoria, description: descripcion, no_incluye: noIncluye || null,
+      provider_id: usuarioActual.id, name: nombre, price: precio, precio_a_cotizar: precioACotizar, category: categoria, description: descripcion, no_incluye: noIncluye || null,
       imagenes, image_url: imagenes[0] || null, video_url, active: false, opciones
     }).select('id').single();
     if(error){ alert('No se pudo crear el servicio: ' + error.message); return; }
 
-    perfilData.servicios.push({ id: data.id, nombre, precio, categoria, descripcion, noIncluye, imagenes, video: video_url, opciones, activo: false });
+    perfilData.servicios.push({ id: data.id, nombre, precio, precioACotizar, categoria, descripcion, noIncluye, imagenes, video: video_url, opciones, activo: false });
   }
 
   closeServiceModal();
@@ -3162,7 +3449,7 @@ function openServiceViewer(id){
   viewerServicioId = id;
 
   document.getElementById('viewer-nombre').textContent = s.nombre;
-  document.getElementById('viewer-precio').textContent = 'S/. ' + Number(s.precio).toLocaleString('es-PE');
+  document.getElementById('viewer-precio').textContent = s.precioACotizar ? 'Precio a cotizar' : 'S/. ' + Number(s.precio).toLocaleString('es-PE');
   document.getElementById('viewer-descripcion').textContent = s.descripcion;
   document.getElementById('viewer-no-incluye').textContent = s.noIncluye ? 'No incluye: ' + s.noIncluye : '';
 
@@ -3341,8 +3628,9 @@ async function renderSolicitudes(){
   updateReqBadge();
 }
 
-// Flujo antiguo (solicitud que el proveedor aprueba). Se mantiene para las
-// reservas que quedaron en estado "pendiente"; las nuevas nacen confirmadas.
+// El proveedor acepta una solicitud pendiente: la pasa a "confirmada" (mismo
+// nombre de estado que usan el badge, la lista y el resto del dashboard) y
+// bloquea la fecha en su agenda si todavía no estaba bloqueada.
 async function aceptarSolicitud(id){
   const r = solicitudes.find(x => x.id === id);
   if(!r) return;
@@ -3353,7 +3641,7 @@ async function aceptarSolicitud(id){
     if(!seguir) return;
   }
 
-  const { error } = await sb.from('requests').update({ status: 'aceptada' }).eq('id', id).eq('provider_id', usuarioActual.id);
+  const { error } = await sb.from('requests').update({ status: 'confirmada' }).eq('id', id).eq('provider_id', usuarioActual.id);
   if(error){ alert('No se pudo aceptar: ' + error.message); return; }
 
   await bloquearFechaEnAgenda(r);
@@ -3369,6 +3657,10 @@ async function rechazarSolicitud(id){
 
   const { error } = await sb.from('requests').update({ status: 'rechazada' }).eq('id', id).eq('provider_id', usuarioActual.id);
   if(error){ alert('No se pudo rechazar: ' + error.message); return; }
+
+  // La solicitud (mientras esperaba respuesta) ya tenía la fecha tomada en la
+  // agenda para que nadie más la reserve encima; al rechazar hay que soltarla.
+  await sb.from('agenda').delete().eq('request_id', id).eq('provider_id', usuarioActual.id);
 
   await refrescarReservasYAgenda();
 }
