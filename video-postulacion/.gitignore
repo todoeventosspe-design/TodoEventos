@@ -1,0 +1,5 @@
+# Se regeneran con render.mjs / vistazo.mjs / ffmpeg: no se versionan.
+fotogramas/
+vistazo/
+*.mp4
+node_modules/

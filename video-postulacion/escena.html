@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>TodoEventos — el problema</title>
+<link rel="stylesheet" href="fuentes.css">
+<style>
+/* ============================================================
+   Escena del video de postulación (1920x1080).
+   Todo el movimiento lo maneja seek(t): no hay animaciones CSS,
+   así cada fotograma se puede fotografiar de forma determinista.
+   Paleta y tipografías: las mismas del sitio (estilo.css).
+   ============================================================ */
+:root{
+  --morado:#7C3AED; --morado-osc:#4C1D95; --morado-med:#6D28D9;
+  --naranja:#EA580C; --naranja-osc:#9A3412; --amarillo:#FCD34D;
+  --tinta:#120E1F; --tinta-2:#4F4863; --tinta-3:#6F6885;
+  --linea:#E5E0F0; --hueso:#F8F6FC; --rojo:#DC2626;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#000;}
+body{font-family:'Epilogue',system-ui,sans-serif;color:var(--tinta);-webkit-font-smoothing:antialiased;}
+.display{font-family:'Anton',Impact,sans-serif;font-weight:400;text-transform:uppercase;line-height:.9;letter-spacing:.005em;}
+.mano{font-family:'Caveat',cursive;}
+
+#escenario{position:relative;width:1920px;height:1080px;overflow:hidden;background:#0B0714;}
+.escena{position:absolute;inset:0;opacity:0;will-change:opacity;}
+.lienzo{position:absolute;inset:0;will-change:transform;transform-origin:50% 50%;}
+/* Capa que NO se mueve con la cámara: rótulos, anotaciones y carteles */
+.fijo{position:absolute;inset:0;}
+
+/* ── Fondos ───────────────────────────────────────────────── */
+.fondo-oscuro{position:absolute;inset:0;background:
+  radial-gradient(ellipse 70% 80% at 30% 20%, rgba(124,58,237,.30), transparent 60%),
+  radial-gradient(ellipse 60% 70% at 80% 80%, rgba(234,88,12,.20), transparent 60%),
+  #0B0714;}
+.fondo-claro{position:absolute;inset:0;background:var(--hueso);}
+.fondo-marca{position:absolute;inset:0;background:
+  radial-gradient(ellipse 80% 100% at 78% 50%, rgba(249,115,22,.45), transparent 62%),
+  linear-gradient(100deg,#3B0F72 0%, var(--morado-med) 46%, #7E22CE 100%);}
+
+/* ── Tipografía de carteles ───────────────────────────────── */
+.cartel{position:absolute;left:0;right:0;text-align:center;color:#fff;}
+.cartel .k{font-size:104px;}
+.cartel .k2{font-size:74px;}
+.sub{font-size:30px;font-weight:500;color:rgba(255,255,255,.80);margin-top:26px;letter-spacing:.01em;}
+.ama{color:var(--amarillo);}
+.nar{color:#FB923C;}
+
+/* Etiqueta de bloque (arriba a la izquierda) */
+.rotulo{position:absolute;top:74px;left:96px;display:flex;align-items:center;gap:16px;}
+.rotulo .pip{width:14px;height:14px;border-radius:50%;background:var(--naranja);}
+.rotulo .txt{font-size:22px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.62);}
+.rotulo.claro .txt{color:var(--tinta-3);}
+.rotulo-h1{position:absolute;top:122px;left:96px;color:#fff;font-size:62px;max-width:760px;}
+.rotulo-p{position:absolute;top:auto;left:96px;color:rgba(255,255,255,.72);font-size:27px;font-weight:500;max-width:660px;line-height:1.45;}
+
+/* ── Teléfono ─────────────────────────────────────────────── */
+.tel{position:absolute;width:470px;height:812px;border-radius:54px;background:#0F0F12;
+  box-shadow:0 44px 120px rgba(0,0,0,.62), 0 0 0 2px rgba(255,255,255,.07);padding:13px;}
+.tel-pantalla{width:100%;height:100%;border-radius:42px;background:#fff;overflow:hidden;position:relative;}
+.tel-barra{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 26px 0 30px;font-size:15px;font-weight:700;color:#111;}
+.tel-barra .der{display:flex;gap:7px;align-items:center;}
+.tel-barra i{display:block;width:17px;height:11px;border:1.6px solid #111;border-radius:3px;}
+
+/* Cabecera del chat */
+.chat-top{display:flex;align-items:center;gap:13px;padding:9px 18px 13px;border-bottom:1px solid #EFEFEF;}
+.chat-top .volver{font-size:25px;color:#111;line-height:1;margin-right:2px;}
+.chat-top .av{width:44px;height:44px;border-radius:50%;padding:2.5px;
+  background:conic-gradient(from 210deg,#F9CE34,#EE2A7B,#6228D7,#F9CE34);flex-shrink:0;}
+.chat-top .av span{display:block;width:100%;height:100%;border-radius:50%;background:#DDD8E8;border:2px solid #fff;}
+.chat-top .quien{display:flex;flex-direction:column;min-width:0;}
+.chat-top .nom{display:block;font-size:16.5px;font-weight:700;color:#111;line-height:1.2;}
+.chat-top .est{display:block;font-size:12.5px;color:#8E8E93;margin-top:2px;}
+
+/* Burbujas */
+.chat-cuerpo{padding:20px 16px;display:flex;flex-direction:column;gap:11px;}
+.bb{max-width:79%;padding:12px 16px;border-radius:22px;font-size:17px;line-height:1.38;will-change:opacity,transform;}
+.bb.yo{align-self:flex-end;background:#7C3AED;color:#fff;border-bottom-right-radius:7px;}
+.bb.ellos{align-self:flex-start;background:#F0EFF4;color:#111;border-bottom-left-radius:7px;}
+.bb.estado{align-self:flex-end;background:none;padding:2px 8px 0;font-size:13.5px;color:#9A94A8;font-weight:600;max-width:100%;}
+.bb.dia{align-self:center;background:none;font-size:13px;color:#A9A3B8;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:14px 0 6px;max-width:100%;}
+.bb .hora{font-size:12px;opacity:.62;margin-left:8px;}
+/* Caja de escribir */
+.chat-pie{position:absolute;bottom:0;left:0;right:0;padding:14px 16px 20px;background:#fff;border-top:1px solid #F1F1F4;}
+.chat-pie div{height:44px;border-radius:22px;background:#F4F3F7;display:flex;align-items:center;padding:0 18px;font-size:15.5px;color:#A9A3B8;}
+
+/* Bandeja de mensajes (lado proveedor) */
+.bandeja-top{padding:12px 20px 14px;border-bottom:1px solid #EFEFEF;}
+.bandeja-top .t{font-size:21px;font-weight:800;color:#111;}
+.bandeja-top .s{font-size:13.5px;color:#8E8E93;margin-top:3px;}
+.fila{display:flex;align-items:center;gap:13px;padding:13px 18px;will-change:opacity,transform;}
+.fila .av{width:47px;height:47px;border-radius:50%;background:#E3DFEC;flex-shrink:0;position:relative;}
+.fila .av.np::after{content:'';position:absolute;top:-1px;right:-1px;width:13px;height:13px;border-radius:50%;background:var(--naranja);border:2.5px solid #fff;}
+.fila .tx{flex:1;min-width:0;}
+.fila .tx b{display:block;font-size:15.5px;color:#111;font-weight:700;}
+.fila .tx span{display:block;font-size:14px;color:#8E8E93;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+.fila.sinleer .tx span{color:#111;font-weight:600;}
+.fila .hh{font-size:12.5px;color:#A9A3B8;flex-shrink:0;}
+
+/* ── Lupa / zoom marcado ──────────────────────────────────── */
+.marca{position:absolute;border:4px solid var(--naranja);border-radius:16px;
+  box-shadow:0 0 0 9999px rgba(11,7,20,.58);will-change:opacity;}
+.pieza{position:absolute;color:#fff;font-size:34px;font-weight:800;line-height:1.3;}
+.pieza.roja{color:#FCA5A5;}
+
+/* ── Rejilla de conversaciones + contador ─────────────────── */
+.rejilla{position:absolute;display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+.mini{background:#fff;border-radius:18px;padding:16px 18px;box-shadow:0 12px 34px rgba(0,0,0,.30);}
+.mini .m-top{display:flex;align-items:center;gap:9px;margin-bottom:11px;}
+.mini .m-av{width:29px;height:29px;border-radius:50%;background:#E3DFEC;}
+.mini .m-nom{font-size:14px;font-weight:700;color:#111;}
+.mini .m-bb{font-size:13.5px;line-height:1.35;padding:8px 11px;border-radius:13px;margin-bottom:6px;}
+.mini .m-bb.yo{background:#7C3AED;color:#fff;}
+.mini .m-bb.no{background:#F0EFF4;color:#8E8E93;font-style:italic;}
+.marcador{position:absolute;display:flex;gap:64px;}
+.marcador .celda .n{font-size:96px;line-height:1;color:#fff;}
+.marcador .celda .l{font-size:21px;font-weight:700;color:rgba(255,255,255,.62);margin-top:12px;letter-spacing:.05em;text-transform:uppercase;}
+
+/* ── Libreta del proveedor ────────────────────────────────── */
+.libreta{position:absolute;width:820px;height:830px;background:#FFFDF5;border-radius:10px;
+  box-shadow:0 40px 110px rgba(0,0,0,.55);padding:54px 56px 40px 104px;
+  background-image:repeating-linear-gradient(#FFFDF5 0 45px,#E7E2D2 45px 46px);}
+.libreta::before{content:'';position:absolute;left:62px;top:0;bottom:0;width:2px;background:#F0A9A9;}
+.libreta .agujero{position:absolute;left:26px;width:19px;height:19px;border-radius:50%;background:#E8E3D3;box-shadow:inset 0 2px 3px rgba(0,0,0,.18);}
+/* width:fit-content para que el tachón mida lo que mide el texto
+   y no se estire hasta el borde de la hoja. */
+.lin{font-family:'Caveat',cursive;font-size:38px;color:#2B2A45;line-height:46px;white-space:nowrap;
+  width:fit-content;will-change:opacity;}
+.lin.tach{position:relative;color:#8B8AA0;}
+.lin.tach::after{content:'';position:absolute;left:-6px;right:-6px;top:52%;height:3px;background:#3B3A55;transform:rotate(-.7deg);}
+.lin .rj{color:#C0392B;}
+.sello{position:absolute;font-family:'Anton',sans-serif;text-transform:uppercase;color:#DC2626;
+  border:6px solid #DC2626;border-radius:12px;padding:8px 22px;font-size:44px;letter-spacing:.05em;
+  transform:rotate(-11deg);opacity:0;will-change:opacity,transform;}
+
+/* ── Tarjetas de dato ─────────────────────────────────────── */
+.tarjetas{position:absolute;display:flex;gap:28px;}
+.tj{width:400px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);
+  border-radius:22px;padding:34px 32px;backdrop-filter:blur(8px);will-change:opacity,transform;}
+.tj .ico{width:56px;height:56px;border-radius:15px;background:rgba(234,88,12,.20);
+  display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:22px;}
+.tj .tt{font-size:27px;font-weight:800;color:#fff;line-height:1.25;margin-bottom:12px;}
+.tj .pp{font-size:20px;color:rgba(255,255,255,.66);line-height:1.5;font-weight:500;}
+
+/* ── Bloque de la brecha ──────────────────────────────────── */
+.mitad{position:absolute;top:0;bottom:0;width:960px;overflow:hidden;}
+.mitad .etq{position:absolute;bottom:88px;left:0;right:0;text-align:center;color:#fff;font-size:30px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;}
+.hendidura{position:absolute;top:0;bottom:0;left:960px;width:4px;background:linear-gradient(180deg,transparent,var(--naranja),transparent);}
+
+/* ── Capturas del producto ────────────────────────────────── */
+.marco{position:absolute;border-radius:16px;overflow:hidden;background:#fff;
+  box-shadow:0 40px 110px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.10);}
+.marco .barra{height:40px;background:#1C1826;display:flex;align-items:center;gap:9px;padding:0 18px;}
+.marco .barra em{width:12px;height:12px;border-radius:50%;background:#3A3448;display:block;}
+.marco .barra .url{margin-left:14px;font-size:14px;color:#8E87A3;font-style:normal;
+  background:#12101A;border-radius:7px;padding:5px 16px;font-weight:600;}
+.marco .visor{overflow:hidden;position:relative;background:#fff;}
+.marco .visor img{position:absolute;top:0;left:0;will-change:transform;transform-origin:0 0;}
+
+/* Pie de texto sobre las capturas */
+.pie{position:absolute;left:0;right:0;text-align:center;color:#fff;}
+.pie .g{font-size:48px;}
+.pie .p{font-size:25px;font-weight:600;color:rgba(255,255,255,.72);margin-top:16px;}
+
+/* ── Logo de cierre ───────────────────────────────────────── */
+.logo-gr{font-family:'Epilogue',sans-serif;font-weight:800;font-size:96px;color:#fff;letter-spacing:-.02em;}
+.logo-gr .pe{color:var(--amarillo);}
+.chip{display:inline-flex;align-items:center;gap:12px;background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.26);border-radius:100px;padding:14px 30px;
+  font-size:24px;font-weight:700;color:#fff;}
+.chip .pt{width:12px;height:12px;border-radius:50%;background:#4ADE80;}
+</style>
+</head>
+<body>
+<div id="escenario">
+
+  <!-- ══ 0 · APERTURA ══════════════════════════════════════ -->
+  <section class="escena" id="e0">
+    <div class="fondo-oscuro"></div>
+    <div class="lienzo" id="e0-l">
+      <div class="cartel" id="e0-a" style="top:372px;">
+        <div class="display k">Organizar un evento</div>
+        <div class="display k nar">en Lima</div>
+      </div>
+      <div class="cartel" id="e0-b" style="top:452px;">
+        <div class="display k2">hoy se hace así</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 1 · EL CAOS DEL CLIENTE ═══════════════════════════ -->
+  <section class="escena" id="e1">
+    <div class="fondo-oscuro"></div>
+
+    <!-- Lo único que se acerca con la cámara es el teléfono -->
+    <div class="lienzo" id="e1-l">
+      <div class="tel" id="e1-tel" style="left:1180px;top:134px;">
+        <div class="tel-pantalla">
+          <div class="tel-barra"><span>21:47</span><span class="der"><i></i></span></div>
+          <div id="e1-chats"></div>
+          <div class="chat-pie"><div>Mensaje…</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Capa fija: el texto nunca se deforma con el zoom -->
+    <div class="fijo">
+      <div class="rotulo" id="e1-rot"><span class="pip"></span><span class="txt">El lado del cliente</span></div>
+      <div class="display rotulo-h1" id="e1-h1">Valeria organiza<br>los 15 de su hija</div>
+      <div class="rotulo-p" id="e1-p" style="top:312px;width:740px;">Faltan tres semanas. Necesita DJ, catering y fotógrafo.
+        Empieza por donde empieza todo el mundo: mandando mensajes.</div>
+
+      <div class="pieza" id="e1-pieza" style="opacity:0;left:96px;top:600px;width:760px;"></div>
+
+      <div id="e1-rot2" style="opacity:0;position:absolute;left:96px;top:118px;">
+        <div class="rotulo" style="position:static;"><span class="pip"></span><span class="txt">Once días después</span></div>
+        <div class="display" style="color:#fff;font-size:52px;margin-top:20px;">Así va la búsqueda</div>
+      </div>
+      <div class="rejilla" id="e1-rejilla" style="opacity:0;left:96px;top:290px;width:1010px;"></div>
+      <div class="marcador" id="e1-marcador" style="opacity:0;left:1220px;top:290px;flex-direction:column;gap:52px;"></div>
+
+      <div class="cartel" id="e1-remate" style="opacity:0;top:430px;">
+        <div class="display k2">Cotizar un evento<br>es perseguir gente por <span class="nar">DM</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 2 · EL CAOS DEL PROVEEDOR ═════════════════════════ -->
+  <section class="escena" id="e2">
+    <div class="fondo-oscuro"></div>
+
+    <div class="lienzo" id="e2-l">
+      <div class="tel" id="e2-tel" style="left:1180px;top:134px;">
+        <div class="tel-pantalla">
+          <div class="tel-barra"><span>21:47</span><span class="der"><i></i></span></div>
+          <div class="bandeja-top"><div class="t">Mensajes</div><div class="s" id="e2-sinleer">14 sin responder</div></div>
+          <div id="e2-bandeja"></div>
+        </div>
+      </div>
+
+      <div class="libreta" id="e2-libreta" style="opacity:0;left:1010px;top:130px;">
+        <div id="e2-lineas"></div>
+        <div class="sello" id="e2-sello" style="left:206px;top:262px;">Cruce el mismo día</div>
+      </div>
+    </div>
+
+    <div class="fijo">
+      <div class="rotulo" id="e2-rot"><span class="pip"></span><span class="txt">El lado del proveedor</span></div>
+      <div class="display rotulo-h1" id="e2-h1">Marco es DJ.<br>Le sobran clientes</div>
+      <div class="rotulo-p" id="e2-p" style="top:312px;width:740px;">Lo que no le sobra es orden. Cotiza por chat, apunta en una libreta
+        y a fin de mes no sabe cuánto ganó.</div>
+
+      <div class="pieza" id="e2-pieza" style="opacity:0;left:96px;top:600px;width:780px;"></div>
+
+      <div class="tarjetas" id="e2-tarjetas" style="opacity:0;left:130px;top:392px;"></div>
+
+      <div class="cartel" id="e2-remate" style="opacity:0;top:430px;">
+        <div class="display k2">No pierde plata por falta<br>de clientes. La pierde por <span class="nar">desorden</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 3 · LA BRECHA ═════════════════════════════════════ -->
+  <section class="escena" id="e3">
+    <div class="fondo-oscuro"></div>
+    <div class="lienzo" id="e3-l">
+      <div class="mitad" id="e3-izq" style="left:0;">
+        <div class="etq">Ella busca</div>
+      </div>
+      <div class="mitad" id="e3-der" style="left:960px;">
+        <div class="etq">Él existe</div>
+      </div>
+      <div class="hendidura" id="e3-hend"></div>
+      <!-- Velo para que el titular se lea sobre el teléfono y la libreta -->
+      <div id="e3-velo" style="position:absolute;left:0;right:0;top:330px;height:420px;
+        background:radial-gradient(ellipse 46% 60% at 50% 50%, rgba(11,7,20,.92) 0%, rgba(11,7,20,.72) 45%, transparent 78%);"></div>
+      <div class="cartel" id="e3-txt" style="top:452px;">
+        <div class="display k">No se cruzan</div>
+        <div class="sub">Ese es el problema que resolvemos.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 4 · LA SOLUCIÓN ═══════════════════════════════════ -->
+  <section class="escena" id="e4">
+    <div class="fondo-marca"></div>
+    <div class="lienzo" id="e4-l">
+      <div class="cartel" id="e4-intro" style="top:400px;">
+        <div class="logo-gr">TodoEventos<span class="pe">.pe</span></div>
+        <div class="sub" style="font-size:34px;">Un solo lugar para los dos lados. Ya está en producción.</div>
+      </div>
+
+      <div class="marco" id="e4-marco" style="opacity:0;left:210px;top:118px;width:1500px;height:770px;">
+        <div class="barra"><em></em><em></em><em></em><span class="url" id="e4-url">todoeventos.website</span></div>
+        <div class="visor" id="e4-visor" style="height:730px;">
+          <img id="e4-img" src="capturas/catalogo-grilla.png" alt="">
+        </div>
+      </div>
+
+      <div class="pie" id="e4-pie" style="opacity:0;bottom:60px;">
+        <div class="display g"></div>
+        <div class="p"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 5 · CIERRE ════════════════════════════════════════ -->
+  <section class="escena" id="e5">
+    <div class="fondo-marca"></div>
+    <div class="lienzo" id="e5-l">
+      <div class="cartel" id="e5-a" style="top:352px;">
+        <div class="logo-gr" style="font-size:120px;">TodoEventos<span class="pe">.pe</span></div>
+        <div class="sub" style="font-size:36px;margin-top:34px;">El marketplace de servicios para eventos de Lima —<br>con las herramientas de gestión gratis para el proveedor.</div>
+      </div>
+      <div class="cartel" id="e5-b" style="top:800px;">
+        <span class="chip"><span class="pt"></span> todoeventos.website · en producción hoy</span>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ============================================================
+   MOTOR
+   Todo se dibuja en función del tiempo t (segundos). seek(t) es
+   la única entrada: el script de captura la llama fotograma a
+   fotograma, así el render es idéntico en cada pasada.
+   ============================================================ */
+const DURACION = 112;
+
+const lim   = (v,a,b) => v < a ? a : (v > b ? b : v);
+const suave = p => p < .5 ? 4*p*p*p : 1 - Math.pow(-2*p+2,3)/2;   // easeInOutCubic
+const salida= p => 1 - Math.pow(1-p,3);                            // easeOutCubic
+/* Progreso 0→1 de t dentro del tramo [a,b] */
+const tramo = (t,a,b) => b <= a ? (t >= b ? 1 : 0) : lim((t-a)/(b-a),0,1);
+/* Aparece en [a,b] y desaparece en [c,d] (c/d opcionales) */
+function velo(t,a,b,c,d){
+  const dentro = salida(tramo(t,a,b));
+  if(c === undefined) return dentro;
+  return dentro * (1 - salida(tramo(t,c,d === undefined ? c+.6 : d)));
+}
+const mezcla = (a,b,p) => a + (b-a)*p;
+
+function pon(el, est){
+  if(!el) return;
+  if(est.o !== undefined) el.style.opacity = est.o;
+  const x = est.x || 0, y = est.y || 0, s = est.s === undefined ? 1 : est.s, r = est.r || 0;
+  el.style.transform = `translate(${x}px,${y}px) scale(${s}) rotate(${r}deg)`;
+}
+/* Empuje de cámara: escala el lienzo hacia un punto (px del escenario) */
+function camara(el, escala, cx, cy){
+  el.style.transformOrigin = `${cx}px ${cy}px`;
+  el.style.transform = `scale(${escala})`;
+}
+/* Entrada estándar: sube y aparece */
+function entra(el, t, a, dur, desp, salida_a, salida_b){
+  const p = salida(tramo(t,a,a+dur));
+  const o = salida_a === undefined ? p : p * (1 - salida(tramo(t,salida_a,salida_b)));
+  pon(el, { o, y: mezcla(desp === undefined ? 34 : desp, 0, p) });
+}
+
+/* ── DATOS DE LAS CONVERSACIONES (ficticias) ──────────────── */
+const CHATS = [
+  { id:'a', nom:'djbeats.lima', est:'DJ & sonido · Lima', msgs:[
+      {de:'yo',    tx:'¡Hola! Vi tu perfil 🙌 ¿Cuánto cobras para un quinceañero?', h:'21:12'},
+      {de:'yo',    tx:'Es el sábado 18, en Miraflores. Somos 120 personas.',        h:'21:12'},
+      {de:'estado',tx:'Visto hace 2 días'}
+  ]},
+  { id:'b', nom:'catering.donarosa', est:'Catering & buffet', msgs:[
+      {de:'yo',    tx:'Buenas, ¿tienen menú para 120 personas?', h:'18:40'},
+      {de:'ellos', tx:'¡Claro! Te paso la info por interno 😊',  h:'18:52'},
+      {de:'dia',   tx:'3 días después'},
+      {de:'yo',    tx:'Hola, ¿sigues ahí? 🙏',                   h:'09:15'},
+      {de:'estado',tx:'Visto'}
+  ]},
+  { id:'c', nom:'estudio.lenteazul', est:'Fotografía & video', msgs:[
+      {de:'yo',    tx:'¿Cuánto por 4 horas de fotos?',                          h:'12:03'},
+      {de:'ellos', tx:'S/. 900 todo incluido',                                  h:'12:31'},
+      {de:'ellos', tx:'Ah no, perdón, ese precio era del año pasado. Ahora está S/. 1,250', h:'12:34'}
+  ]}
+];
+
+function dibujarChats(){
+  const cont = document.getElementById('e1-chats');
+  cont.innerHTML = CHATS.map(c => `
+    <div class="chat" id="chat-${c.id}" style="opacity:0;">
+      <div class="chat-top">
+        <span class="volver">‹</span>
+        <span class="av"><span></span></span>
+        <span class="quien"><span class="nom">${c.nom}</span><span class="est">${c.est}</span></span>
+      </div>
+      <div class="chat-cuerpo">
+        ${c.msgs.map((m,i) => {
+          const cl = m.de === 'yo' ? 'yo' : m.de === 'ellos' ? 'ellos' : m.de;
+          const h  = m.h ? `<span class="hora">${m.h}</span>` : '';
+          return `<div class="bb ${cl}" id="bb-${c.id}-${i}">${m.tx}${h}</div>`;
+        }).join('')}
+      </div>
+    </div>`).join('');
+  // Los chats se apilan en la misma celda: solo uno se ve a la vez.
+  cont.style.position = 'relative';
+  cont.querySelectorAll('.chat').forEach(ch => { ch.style.position='absolute'; ch.style.inset='0'; });
+  cont.style.height = '690px';
+}
+
+/* Bandeja del proveedor: 8 filas visibles, todas pidiendo precio */
+const BANDEJA = [
+  ['rosa.medina',      '¿Cuánto cobras para una boda el 18?', 'ahora'],
+  ['carlos.bejar',     '¿Incluye luces? es un quinceañero',   '19:40'],
+  ['eventos.andina',   'Necesitamos cotización corporativa',  '18:02'],
+  ['mia.herrera',      'Hola! precio para 100 personas?',     '17:15'],
+  ['colegio.sanpablo', '¿Sigue en pie lo de la promoción?',   '15:48'],
+  ['luis.ferrer',      '¿Me pasas el presupuesto por favor?', 'ayer'],
+  ['andrea.ydiego',    'Buenas, ¿estás libre el 21?',         'ayer'],
+  ['grupo.peruretail', '¿Cuánto por 5 horas de sonido?',      'ayer']
+];
+function dibujarBandeja(){
+  document.getElementById('e2-bandeja').innerHTML = BANDEJA.map((f,i) => `
+    <div class="fila sinleer" id="fila-${i}" style="opacity:0;">
+      <span class="av np"></span>
+      <span class="tx"><b>${f[0]}</b><span>${f[1]}</span></span>
+      <span class="hh">${f[2]}</span>
+    </div>`).join('');
+}
+
+/* Libreta: la "agenda" real de Marco */
+const LIBRETA = [
+  { tx:'Sáb 4 — boda Miraflores, 7pm',       tach:false },
+  { tx:'Dom 5 — ¿cumple Luis? confirmar',    tach:true  },
+  { tx:'Vie 10 — corporativo San Borja',     tach:false },
+  { tx:'Sáb 18 — boda Andrea, 6pm',          tach:false, rj:true },
+  { tx:'Sáb 18 — 15 años Ramos, 8pm',        tach:false, rj:true },
+  { tx:'Dom 19 — ¿libre? avisar a Rosa',     tach:true  },
+  { tx:'Vie 24 — promoción colegio',         tach:false },
+  { tx:'cobrar adelanto Andina !!',          tach:false },
+  { tx:'¿cuánto entró este mes?',            tach:false }
+];
+function dibujarLibreta(){
+  document.getElementById('e2-lineas').innerHTML = LIBRETA.map((l,i) =>
+    `<div class="lin ${l.tach?'tach':''} ${l.rj?'rj':''}" id="lin-${i}" style="opacity:0;">${l.tx}</div>`
+  ).join('');
+  const lb = document.getElementById('e2-libreta');
+  [128,196,264,332,400,468,536,604,672].forEach(y => {
+    const a = document.createElement('span'); a.className = 'agujero'; a.style.top = y+'px'; lb.appendChild(a);
+  });
+}
+
+const TARJETAS = [
+  ['✎','Cotiza a mano, cada vez','Reescribe el mismo presupuesto en el chat. Sin plantilla, sin PDF, sin constancia de lo que ofreció.'],
+  ['▦','Su agenda es una libreta','Nada le avisa que aceptó dos eventos el mismo sábado. Se entera el día del evento.'],
+  ['S/','No sabe cuánto ganó','Cobra en efectivo y por Yape. A fin de mes el número es un cálculo de memoria.']
+];
+function dibujarTarjetas(){
+  document.getElementById('e2-tarjetas').innerHTML = TARJETAS.map((t,i) => `
+    <div class="tj" id="tj-${i}" style="opacity:0;">
+      <div class="ico">${t[0]}</div>
+      <div class="tt">${t[1]}</div>
+      <div class="pp">${t[2]}</div>
+    </div>`).join('');
+}
+
+/* Rejilla de 6 conversaciones sin respuesta + marcador */
+const MINIS = [
+  ['dj.sonidolima','¿Precio para el 18?','Sin respuesta'],
+  ['buffet.lasrosas','¿Tienen menú para 120?','Sin respuesta'],
+  ['foto.estudio21','¿Cuánto por 4 horas?','Visto, sin responder'],
+  ['local.losjardines','¿Está libre el sábado 18?','Sin respuesta'],
+  ['animaciones.chispa','¿Hacen shows infantiles?','Visto, sin responder'],
+  ['barmovil.nebula','¿Cuánto por barra libre?','Sin respuesta']
+];
+function dibujarRejilla(){
+  document.getElementById('e1-rejilla').innerHTML = MINIS.map((m,i) => `
+    <div class="mini" id="mini-${i}" style="opacity:0;">
+      <div class="m-top"><span class="m-av"></span><span class="m-nom">${m[0]}</span></div>
+      <div class="m-bb yo">${m[1]}</div>
+      <div class="m-bb no">${m[2]}</div>
+    </div>`).join('');
+  document.getElementById('e1-marcador').innerHTML = [
+    ['n-prov','proveedores escritos'],['n-resp','respuestas'],['n-precio','precios en firme']
+  ].map(c => `<div class="celda"><div class="display n" id="${c[0]}">0</div><div class="l">${c[1]}</div></div>`).join('');
+}
+
+dibujarChats(); dibujarBandeja(); dibujarLibreta(); dibujarTarjetas(); dibujarRejilla();
+
+/* ── Focos de cámara medidos del DOM ──────────────────────────
+   Se miden una sola vez, antes de aplicar ninguna transformación:
+   así los empujes apuntan exactamente al mensaje que toca leer y
+   no a coordenadas calculadas a mano.                           */
+const FOCO = {};
+function centroDe(...sels){
+  let x = 0, y = 0, n = 0;
+  sels.forEach(s => {
+    const el = document.querySelector(s);
+    if(!el) return;
+    const r = el.getBoundingClientRect();
+    x += r.left + r.width/2; y += r.top + r.height/2; n++;
+  });
+  return n ? { x: x/n, y: y/n } : { x: 960, y: 540 };
+}
+function medirFocos(){
+  FOCO.visto      = centroDe('#bb-a-1', '#bb-a-2');            // el "Visto hace 2 días"
+  FOCO.silencio   = centroDe('#bb-b-2', '#bb-b-4');            // "3 días después" → "Visto"
+  FOCO.precio     = centroDe('#bb-c-1', '#bb-c-2');            // el precio que cambia
+  FOCO.bandeja    = centroDe('#fila-1', '#fila-6');            // la bandeja llena
+  FOCO.cruce      = centroDe('#lin-3', '#lin-4');              // los dos eventos del mismo día
+}
+
+/* ── Marcas de tiempo de cada bloque ──────────────────────── */
+const B = {
+  apertura: [0,   7],
+  cliente:  [7,   42],
+  proveedor:[42,  72],
+  brecha:   [72,  80],
+  solucion: [80,  104],
+  cierre:   [104, 112]
+};
+
+function visible(id, t, a, b){
+  // Cada escena entra y sale con un fundido corto de 0.45 s.
+  const el = document.getElementById(id);
+  const o = velo(t, a, a+.45, b-.45, b);
+  el.style.opacity = o;
+  return o > 0.001;
+}
+
+/* ══ BLOQUE 0 · APERTURA ═══════════════════════════════════ */
+function apertura(t){
+  const l = t - B.apertura[0];
+  camara(document.getElementById('e0-l'), mezcla(1, 1.07, suave(tramo(l,0,7))), 960, 540);
+  pon(document.getElementById('e0-a'), { o: velo(l,.2,1.4, 3.1,3.7), y: mezcla(26,0,salida(tramo(l,.2,1.4))) });
+  pon(document.getElementById('e0-b'), { o: velo(l,3.5,4.6), y: mezcla(26,0,salida(tramo(l,3.5,4.6))) });
+}
+
+/* ══ BLOQUE 1 · CLIENTE ════════════════════════════════════ */
+function cliente(t){
+  const l = t - B.cliente[0];                 // 0 … 35
+  const lz = document.getElementById('e1-l');
+
+  entra(document.getElementById('e1-rot'), l, .2, .8, 18, 28.4, 29);
+  entra(document.getElementById('e1-h1'),  l, .5, 1.0, 30, 28.4, 29);
+  entra(document.getElementById('e1-p'),   l, 1.0, 1.0, 26, 28.4, 29);
+
+  // El teléfono sube a cuadro y se queda todo el bloque de chats
+  const tel = document.getElementById('e1-tel');
+  const pe = salida(tramo(l,1.2,2.4));
+  pon(tel, { o: pe * (1 - salida(tramo(l,28.4,29.2))), y: mezcla(70,0,pe), s: mezcla(.94,1,pe) });
+
+  // ── Qué chat se ve y cuándo aparece cada burbuja ──
+  const GUION = [
+    { id:'a', desde:2.4,  hasta:11.4, burbujas:[3.0, 4.1, 6.2] },
+    { id:'b', desde:11.9, hasta:21.0, burbujas:[12.4, 13.6, 15.2, 16.2, 17.6] },
+    { id:'c', desde:21.5, hasta:28.4, burbujas:[22.0, 23.3, 25.0] }
+  ];
+  GUION.forEach(g => {
+    const ch = document.getElementById('chat-' + g.id);
+    ch.style.opacity = velo(l, g.desde, g.desde+.35, g.hasta, g.hasta+.35);
+    g.burbujas.forEach((tb, i) => {
+      const bb = document.getElementById(`bb-${g.id}-${i}`);
+      const p = salida(tramo(l, tb, tb+.34));
+      pon(bb, { o: p, y: mezcla(16,0,p) });
+    });
+  });
+
+  // ── Empujes de cámara sobre lo que hay que leer sí o sí ──
+  // (escala, centro x, centro y, desde, hasta)
+  // El teléfono está en x 1180–1650. Con escala ~1.5 desde su eje queda
+  // en la mitad derecha del cuadro y la izquierda libre para la anotación.
+  const ZOOMS = [
+    { a:7.0,  b:11.2, s:1.52, f:FOCO.visto    },   // "Visto hace 2 días"
+    { a:18.0, b:20.8, s:1.52, f:FOCO.silencio },   // "3 días después" + "Visto"
+    { a:25.4, b:28.2, s:1.58, f:FOCO.precio   }    // el precio que cambió
+  ];
+  let esc = 1, cx = 960, cy = 540;
+  ZOOMS.forEach(z => {
+    // entra en .9 s, se mantiene, sale en .7 s
+    const p = salida(tramo(l, z.a, z.a+.9)) * (1 - salida(tramo(l, z.b-.7, z.b)));
+    if(p > 0.002){ esc = mezcla(1, z.s, p); cx = z.f.x; cy = z.f.y; }
+  });
+  camara(lz, esc, cx, cy);
+
+  // Anotación que acompaña a cada zoom
+  const NOTAS = [
+    { a:7.6,  b:11.0, tx:'Dos días después, sigue sin respuesta.' },
+    { a:18.4, b:20.6, tx:'“Te paso la info” y nunca llega.' },
+    { a:25.8, b:28.0, tx:'Y cuando llega un precio, cambia.' }
+  ];
+  const pieza = document.getElementById('e1-pieza');
+  let notaTxt = '', notaO = 0;
+  NOTAS.forEach(n => {
+    const o = velo(l, n.a, n.a+.5, n.b-.4, n.b);
+    if(o > notaO){ notaO = o; notaTxt = n.tx; }
+  });
+  if(notaTxt) pieza.textContent = notaTxt;
+  pieza.style.opacity = notaO;
+
+  // ── Rejilla de conversaciones muertas + marcador ──
+  entra(document.getElementById('e1-rot2'), l, 28.9, .8, 20, 32.8, 33.4);
+  const rej = document.getElementById('e1-rejilla');
+  rej.style.opacity = velo(l, 29.0, 29.8, 32.8, 33.4);
+  MINIS.forEach((m,i) => {
+    const p = salida(tramo(l, 29.2 + i*0.13, 29.2 + i*0.13 + .45));
+    pon(document.getElementById('mini-'+i), { o: p, y: mezcla(30,0,p) });
+  });
+  const mar = document.getElementById('e1-marcador');
+  mar.style.opacity = velo(l, 29.6, 30.4, 32.8, 33.4);
+  const cuenta = (hasta, a, b) => Math.round(mezcla(0, hasta, salida(tramo(l,a,b))));
+  const np = document.getElementById('n-prov'), nr = document.getElementById('n-resp'), nx = document.getElementById('n-precio');
+  if(np) np.textContent = cuenta(9, 29.8, 31.4);
+  if(nr) nr.textContent = cuenta(3, 30.2, 31.8);
+  if(nx) nx.textContent = cuenta(0, 30.6, 32.2);
+
+  // ── Remate del bloque ──
+  const rem = document.getElementById('e1-remate');
+  rem.style.opacity = velo(l, 33.4, 34.1, 34.7, 35);
+  pon(rem, { o: rem.style.opacity, s: mezcla(.96, 1, salida(tramo(l,33.4,34.4))) });
+}
+
+/* ══ BLOQUE 2 · PROVEEDOR ══════════════════════════════════ */
+function proveedor(t){
+  const l = t - B.proveedor[0];               // 0 … 30
+  const lz = document.getElementById('e2-l');
+
+  entra(document.getElementById('e2-rot'), l, .2, .8, 18, 25.4, 26);
+  entra(document.getElementById('e2-h1'),  l, .5, 1.0, 30, 25.4, 26);
+  entra(document.getElementById('e2-p'),   l, 1.0, 1.0, 26, 19.0, 19.6);
+
+  // Bandeja: 8 mensajes sin responder cayendo uno tras otro
+  const tel = document.getElementById('e2-tel');
+  const pe = salida(tramo(l,1.2,2.4));
+  pon(tel, { o: pe * (1 - salida(tramo(l,9.4,10.2))), y: mezcla(70,0,pe), s: mezcla(.94,1,pe) });
+  BANDEJA.forEach((f,i) => {
+    const p = salida(tramo(l, 2.4 + i*0.28, 2.4 + i*0.28 + .4));
+    pon(document.getElementById('fila-'+i), { o: p, y: mezcla(22,0,p) });
+  });
+
+  // Libreta: entra cuando el teléfono sale
+  const lib = document.getElementById('e2-libreta');
+  const pl = salida(tramo(l,10.0,11.4));
+  pon(lib, { o: pl * (1 - salida(tramo(l,19.0,19.8))), y: mezcla(50,0,pl), r: mezcla(2.4,0,pl) });
+  LIBRETA.forEach((x,i) => {
+    const p = salida(tramo(l, 11.4 + i*0.32, 11.4 + i*0.32 + .3));
+    document.getElementById('lin-'+i).style.opacity = p;
+  });
+  // Sello de CRUCE sobre los dos eventos del mismo sábado
+  const sel = document.getElementById('e2-sello');
+  const ps = salida(tramo(l,16.6,17.1));
+  pon(sel, { o: ps * (1 - salida(tramo(l,19.0,19.6))), s: mezcla(1.7,1,ps), r: -11 });
+
+  // Empujes de cámara
+  const ZOOMS = [
+    { a:5.4,  b:9.2,  s:1.50, f:FOCO.bandeja },   // la bandeja llena
+    { a:15.0, b:18.8, s:1.52, f:FOCO.cruce   }    // las dos fechas que chocan
+  ];
+  let esc = 1, cx = 960, cy = 540;
+  ZOOMS.forEach(z => {
+    const p = salida(tramo(l, z.a, z.a+.9)) * (1 - salida(tramo(l, z.b-.7, z.b)));
+    if(p > 0.002){ esc = mezcla(1, z.s, p); cx = z.f.x; cy = z.f.y; }
+  });
+  camara(lz, esc, cx, cy);
+
+  const NOTAS = [
+    { a:6.0,  b:9.0,  tx:'14 personas preguntando precio.\nTodas por chat, todas distintas.' },
+    { a:16.9, b:18.6, tx:'Dos eventos el mismo sábado.\nNada se lo avisó.' }
+  ];
+  const pieza = document.getElementById('e2-pieza');
+  let notaTxt = '', notaO = 0;
+  NOTAS.forEach(n => {
+    const o = velo(l, n.a, n.a+.5, n.b-.4, n.b);
+    if(o > notaO){ notaO = o; notaTxt = n.tx; }
+  });
+  if(notaTxt) pieza.innerHTML = notaTxt.replace(/\n/g,'<br>');
+  pieza.style.opacity = notaO;
+
+  // Tres tarjetas con el diagnóstico
+  const tar = document.getElementById('e2-tarjetas');
+  tar.style.opacity = velo(l, 19.8, 20.6, 25.4, 26.0);
+  TARJETAS.forEach((x,i) => {
+    const p = salida(tramo(l, 20.0 + i*0.30, 20.0 + i*0.30 + .55));
+    pon(document.getElementById('tj-'+i), { o: p, y: mezcla(34,0,p) });
+  });
+
+  const rem = document.getElementById('e2-remate');
+  const ro = velo(l, 26.2, 27.0, 29.5, 30);
+  pon(rem, { o: ro, s: mezcla(.96, 1, salida(tramo(l,26.2,27.2))) });
+}
+
+/* ══ BLOQUE 3 · LA BRECHA ══════════════════════════════════ */
+function brecha(t){
+  const l = t - B.brecha[0];                  // 0 … 8
+  const p = suave(tramo(l, .4, 3.2));
+
+  // Las dos mitades se separan
+  pon(document.getElementById('e3-izq'), { o: velo(l,0,.5), x: mezcla(0,-120,p) });
+  pon(document.getElementById('e3-der'), { o: velo(l,0,.5), x: mezcla(0, 120,p) });
+  document.getElementById('e3-hend').style.opacity = velo(l, .6, 1.6, 6.6, 7.4) * mezcla(.2,1,p);
+
+  const o = velo(l, 2.4, 3.4, 7.2, 8);
+  document.getElementById('e3-velo').style.opacity = o;
+  pon(document.getElementById('e3-txt'), { o, s: mezcla(.94,1,salida(tramo(l,2.4,3.6))) });
+}
+/* Las mitades muestran, apagados, el teléfono de ella y la libreta de él.
+   Se clonan los nodos reales y se reubican: los originales viven en
+   coordenadas del escenario completo y aquí van dentro de una mitad. */
+function prepararBrecha(){
+  const poner = (destino, origen, izquierda, arriba, escala, giro) => {
+    const clon = origen.cloneNode(true);
+    clon.removeAttribute('id');
+    clon.querySelectorAll('[id]').forEach(e => e.removeAttribute('id'));
+    Object.assign(clon.style, {
+      position:'absolute', left: izquierda+'px', top: arriba+'px', opacity:'1',
+      transform:`scale(${escala}) rotate(${giro}deg)`, transformOrigin:'50% 0'
+    });
+    // El clon heredó el estado oculto de cada pieza: aquí se ve todo.
+    clon.querySelectorAll('.bb,.lin,.fila,.chat,.sello,.mini').forEach(e => {
+      e.style.opacity = 1; e.style.transform = 'none';
+    });
+    // En el teléfono solo debe quedar una conversación a la vista.
+    const chats = clon.querySelectorAll('.chat');
+    chats.forEach((c,i) => { if(i > 0) c.style.opacity = 0; });
+    destino.insertBefore(clon, destino.firstChild);
+    return clon;
+  };
+  const izq = document.getElementById('e3-izq'), der = document.getElementById('e3-der');
+  izq.style.opacity = der.style.opacity = 1;
+  poner(izq, document.getElementById('e1-tel'),     245,  120, .82,  -3).style.filter = 'grayscale(.3) brightness(.78)';
+  poner(der, document.getElementById('e2-libreta'),  70,  150, .78,   3).style.filter = 'grayscale(.3) brightness(.82)';
+}
+
+/* ══ BLOQUE 4 · LA SOLUCIÓN ════════════════════════════════ */
+/* Cada toma: captura del producto, con recorte y empuje propios.
+   escala/x/y mueven la imagen dentro del visor (pan + zoom). */
+/* Las regiones van en píxeles de la PÁGINA capturada (no de la imagen):
+   {x, y, w}. El alto sale solo de la proporción del visor, así el encuadre
+   nunca deja bordes en blanco. Las capturas se tomaron a 2x. */
+const VISOR_W = 1500, VISOR_H = 730, CAPTURA_DPR = 2;
+
+const TOMAS = [
+  { a:4.0,  b:9.6,  img:'capturas/catalogo-grilla.png',        url:'todoeventos.website/catalogo',
+    de:{x:0,   y:130, w:1600}, a2:{x:280, y:225, w:1320},
+    tit:'Todos los proveedores, con precio',
+    pie:'Filtras por categoría, distrito y presupuesto. El precio está a la vista antes de escribirle a nadie.' },
+
+  { a:9.6,  b:14.4, img:'capturas/panel-agenda.png',           url:'todoeventos.website/dashboard',
+    de:{x:0,   y:80,  w:1600}, a2:{x:300, y:430, w:1300},
+    tit:'Su agenda, sin cruces',
+    pie:'Cada reserva confirmada cae sola en el calendario. La base de datos rechaza dos eventos a la misma hora.' },
+
+  { a:14.4, b:19.0, img:'capturas/panel-cotizador-total.png',  url:'todoeventos.website/dashboard',
+    de:{x:0,   y:0,   w:1600}, a2:{x:400, y:682, w:1180},
+    tit:'Cotización en PDF, en dos minutos',
+    pie:'Los mismos datos, siempre. Se descarga en PDF con su marca y se manda por donde el cliente prefiera.' },
+
+  { a:19.0, b:23.4, img:'capturas/panel-reportes.png',         url:'todoeventos.website/dashboard',
+    de:{x:0,   y:80,  w:1600}, a2:{x:300, y:170, w:1300},
+    tit:'Por fin sabe cuánto ganó',
+    pie:'Caja, ingresos por mes y ticket promedio. Números, no cálculos de memoria.' }
+];
+
+function solucion(t){
+  const l = t - B.solucion[0];                // 0 … 24
+
+  const intro = document.getElementById('e4-intro');
+  pon(intro, { o: velo(l, .3, 1.5, 3.2, 3.9), s: mezcla(.95,1,salida(tramo(l,.3,1.6))) });
+
+  const marco = document.getElementById('e4-marco');
+  const pm = salida(tramo(l, 3.4, 4.4));
+  pon(marco, { o: pm * (1 - salida(tramo(l, 23.4, 24))), y: mezcla(46,0,pm), s: mezcla(.96,1,pm) });
+
+  const img = document.getElementById('e4-img');
+  const pie = document.getElementById('e4-pie');
+
+  let activa = null, po = 0;
+  TOMAS.forEach(k => {
+    const o = velo(l, k.a, k.a+.45, k.b-.45, k.b);
+    if(o > po){ po = o; activa = k; }
+  });
+  if(activa){
+    if(!img.src.endsWith(activa.img)) img.src = activa.img;
+    document.getElementById('e4-url').textContent = activa.url;
+    // Empuje continuo dentro de la captura: se interpola la REGIÓN visible
+    // y de ahí sale la transformación, así el encuadre siempre llena el visor.
+    const p  = suave(tramo(l, activa.a, activa.b));
+    const rx = mezcla(activa.de.x, activa.a2.x, p);
+    const ry = mezcla(activa.de.y, activa.a2.y, p);
+    const rw = mezcla(activa.de.w, activa.a2.w, p);
+    const s  = VISOR_W / (rw * CAPTURA_DPR);
+    img.style.transform = `translate(${-rx*CAPTURA_DPR*s}px,${-ry*CAPTURA_DPR*s}px) scale(${s})`;
+    img.style.opacity = po;
+
+    pie.querySelector('.g').textContent = activa.tit;
+    pie.querySelector('.p').textContent = activa.pie;
+    pie.style.opacity = po;
+  }
+}
+
+/* ══ BLOQUE 5 · CIERRE ═════════════════════════════════════ */
+function cierre(t){
+  const l = t - B.cierre[0];                  // 0 … 8
+  pon(document.getElementById('e5-a'), { o: velo(l, .3, 1.4), s: mezcla(.94,1,salida(tramo(l,.3,1.6))) });
+  pon(document.getElementById('e5-b'), { o: velo(l, 1.4, 2.3), y: mezcla(22,0,salida(tramo(l,1.4,2.4))) });
+}
+
+/* ── seek: dibuja el fotograma del segundo t ──────────────── */
+function seek(t){
+  t = lim(t, 0, DURACION);
+  if(visible('e0', t, B.apertura[0],  B.apertura[1]))  apertura(t);
+  if(visible('e1', t, B.cliente[0],   B.cliente[1]))   cliente(t);
+  if(visible('e2', t, B.proveedor[0], B.proveedor[1])) proveedor(t);
+  if(visible('e3', t, B.brecha[0],    B.brecha[1]))    brecha(t);
+  if(visible('e4', t, B.solucion[0],  B.solucion[1]))  solucion(t);
+  if(visible('e5', t, B.cierre[0],    B.cierre[1]))    cierre(t);
+}
+window.seek = seek;
+window.DURACION = DURACION;
+
+medirFocos();
+prepararBrecha();
+seek(0);
+
+/* Reproducción en vivo (solo para revisar en el navegador; la
+   captura no la usa porque llama a seek directamente). */
+window.reproducir = function(){
+  const t0 = performance.now();
+  (function paso(){
+    const t = (performance.now() - t0) / 1000;
+    seek(t);
+    if(t < DURACION) requestAnimationFrame(paso);
+  })();
+};
+</script>
+</body>
+</html>
