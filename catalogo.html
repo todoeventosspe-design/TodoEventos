@@ -688,7 +688,7 @@ async function cargarProvidersReales(){
   // badges antes que un catálogo en blanco.
   const consulta = campoFundador => sb
     .from('services')
-    .select(`id, name, description, no_incluye, website_url, price, precio_a_cotizar, category, image_url, imagenes, provider_id, profiles!services_provider_id_fkey(full_name, location, rating, reviews_count${campoFundador})`)
+    .select(`id, name, description, no_incluye, website_url, price, precio_a_cotizar, category, image_url, imagenes, videos, provider_id, profiles!services_provider_id_fkey(full_name, location, rating, reviews_count${campoFundador})`)
     .eq('active', true);
 
   let { data, error } = await consulta(', is_founder');
@@ -725,6 +725,7 @@ async function cargarProvidersReales(){
         // una URL puesta a mano (otro dominio, "javascript:", "data:") se descarta.
         foto: fotoSegura(s.image_url),
         imagenes: (Array.isArray(s.imagenes) ? s.imagenes : []).map(fotoSegura).filter(Boolean),
+        videos: (Array.isArray(s.videos) ? s.videos : []).map(fotoSegura).filter(Boolean),
         img: CAT_IMG[s.category] || 'a',
         icon: CAT_ICON[s.category] || 'ti-star',
         badge: esNuevo ? 'Nuevo' : badgeParaRating(Number(s.profiles.rating) || 0),
@@ -870,7 +871,7 @@ async function openProvider(providerId) {
 
   const [{ data: perfilReal }, { data: serviciosReal }, { data: feedReal }, { data: comentariosReal }] = await Promise.all([
     sb.from('profiles').select('full_name, categoria, location, bio, avatar_url, banner_url, rating, reviews_count').eq('id', providerId).single(),
-    sb.from('services').select('id, name, price, precio_a_cotizar, description, no_incluye, website_url, imagenes, video_url, opciones').eq('provider_id', providerId).eq('active', true),
+    sb.from('services').select('id, name, price, precio_a_cotizar, description, no_incluye, website_url, imagenes, videos, opciones').eq('provider_id', providerId).eq('active', true),
     sb.from('feed_photos').select('url').eq('provider_id', providerId),
     sb.from('comentarios_perfil').select('client_name, comment, created_at').eq('provider_id', providerId).order('created_at', { ascending: false })
   ]);
@@ -886,7 +887,7 @@ async function openProvider(providerId) {
   const rating = Number(perfilReal.rating) || 0;
   const reviews = perfilReal.reviews_count || 0;
   const esNuevo = reviews === 0;
-  const servicios = (serviciosReal || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, precioACotizar: s.precio_a_cotizar === true, descripcion: s.description, noIncluye: s.no_incluye || '', website: linkSeguro(s.website_url), imagenes: (s.imagenes || []).map(fotoSegura).filter(Boolean), video: fotoSegura(s.video_url), opciones: Array.isArray(s.opciones) ? s.opciones : [] }));
+  const servicios = (serviciosReal || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, precioACotizar: s.precio_a_cotizar === true, descripcion: s.description, noIncluye: s.no_incluye || '', website: linkSeguro(s.website_url), imagenes: (s.imagenes || []).map(fotoSegura).filter(Boolean), videos: (Array.isArray(s.videos) ? s.videos : []).map(fotoSegura).filter(Boolean), opciones: Array.isArray(s.opciones) ? s.opciones : [] }));
   let galeria = [];
   servicios.forEach(s => { (s.imagenes||[]).forEach(u => galeria.push(u)); });
   galeria = galeria.concat((feedReal || []).map(f => fotoSegura(f.url)).filter(Boolean));
@@ -918,7 +919,10 @@ async function openProvider(providerId) {
       ? `<div class="pm-svc-gallery">${imgs.slice(0,6).map(u => `<img src="${esc(u)}" alt="${esc(s.nombre)}">`).join('')}</div>`
       : `<div class="pm-svc-nofotos">Este paquete aún no tiene fotos.</div>`;
     const opcionesHtml = opcionesServicioHtml(s.opciones);
-    const videoHtml = s.video ? `<video src="${esc(s.video)}" controls style="width:100%;border-radius:10px;margin-bottom:10px;display:block;"></video>` : '';
+    const videosArr = Array.isArray(s.videos) ? s.videos : [];
+    const videoHtml = videosArr.length
+      ? `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-bottom:10px;">${videosArr.map(v => `<video src="${esc(v)}" controls style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block;background:#000;"></video>`).join('')}</div>`
+      : '';
     const noIncluyeHtml = s.noIncluye ? `<div class="pm-svc-no-incluye"><b>No incluye:</b> ${esc(s.noIncluye)}</div>` : '';
     const websiteHtml = s.website ? `<a href="${esc(s.website)}" target="_blank" rel="noopener noreferrer" class="sd-website-btn" onclick="event.stopPropagation();"><i class="ti ti-world"></i> Visitar página web <i class="ti ti-external-link" style="margin-left:auto;"></i></a>` : '';
     return `
@@ -1161,6 +1165,20 @@ function openServiceDetail(providerId){
   document.getElementById('sd-desc').textContent = p.desc || 'Este proveedor todavía no agregó una descripción para este servicio.';
   document.getElementById('sd-no-incluye-block').style.display = p.noIncluye ? 'block' : 'none';
   document.getElementById('sd-no-incluye').textContent = p.noIncluye || '';
+
+  // Bug real: esta ficha (la que abre al tocar la card) nunca mostraba el
+  // video del servicio porque ni la consulta ni el mapeo de "providers" lo
+  // traían -- solo la ficha del perfil del proveedor lo tenia cableado.
+  const videosArr = Array.isArray(p.videos) ? p.videos : [];
+  const sdVideoBlock = document.getElementById('sd-video-block');
+  if(videosArr.length){
+    document.getElementById('sd-videos').innerHTML = videosArr.map(v =>
+      `<video src="${esc(v)}" controls style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block;background:#000;"></video>`
+    ).join('');
+    sdVideoBlock.style.display = 'block';
+  } else {
+    sdVideoBlock.style.display = 'none';
+  }
 
   const sdWebsite = document.getElementById('sd-website');
   if(p.website){ sdWebsite.href = p.website; sdWebsite.style.display = 'flex'; }
@@ -2001,6 +2019,11 @@ async function confirmarReserva(){
       <div class="sd-block sd-no-incluye-box" id="sd-no-incluye-block" style="display:none;">
         <div class="sd-block-title"><i class="ti ti-alert-triangle-filled"></i> Qué NO incluye</div>
         <div class="sd-text" id="sd-no-incluye">—</div>
+      </div>
+
+      <div class="sd-block" id="sd-video-block" style="display:none;">
+        <div class="sd-block-title"><i class="ti ti-video"></i> Videos del servicio</div>
+        <div class="sd-galeria" id="sd-videos"></div>
       </div>
 
       <div class="sd-block" id="sd-galeria-block" style="display:none;">

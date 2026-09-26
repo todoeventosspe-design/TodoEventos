@@ -296,6 +296,8 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .img-cover-badge i{font-size:10px;}
 .service-img-item img{width:100%;height:100%;object-fit:cover;display:block;}
 .service-img-item .gallery-remove{width:20px;height:20px;top:3px;right:3px;font-size:10px;}
+.service-video-item{position:relative;border-radius:9px;overflow:hidden;aspect-ratio:1;background:#000;}
+.service-video-item .gallery-remove{width:20px;height:20px;top:3px;right:3px;font-size:10px;}
 /* "Hacer portada": un solo toque/clic para que ESA foto sea la que se ve
    por defecto en el marketplace. Antes la única forma de cambiar cuál era
    la portada era arrastrar, que en celular nunca funcionaba (el drag nativo
@@ -1200,8 +1202,8 @@ verificarAccesoDashboard();
     </div>
 
     <div class="field">
-      <label>Video del servicio <span style="color:var(--sub);font-weight:400;">(opcional, máx. 50MB)</span></label>
-      <div id="service-video-box"></div>
+      <label>Videos del servicio <span id="service-video-count" style="color:var(--sub);font-weight:400;"></span> <span style="color:var(--sub);font-weight:400;">(máx. 50MB c/u)</span></label>
+      <div class="service-img-grid" id="service-video-box"></div>
     </div>
 
     <div class="modal-actions">
@@ -2674,7 +2676,7 @@ async function cargarPerfilDesdeSupabase(){
   const p = perfilRowInicial;
 
   const [{ data: servicios }, { data: resenas }, { data: comentarios }, { data: feedFotos }] = await Promise.all([
-    sb.from('services').select('id, name, price, precio_a_cotizar, category, description, no_incluye, website_url, imagenes, video_url, active, opciones').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true }),
+    sb.from('services').select('id, name, price, precio_a_cotizar, category, description, no_incluye, website_url, imagenes, videos, active, opciones').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true }),
     sb.from('reviews').select('id, service_id, rating, comment, created_at, client_name').eq('provider_id', usuarioActual.id).order('created_at', { ascending: false }),
     sb.from('comentarios_perfil').select('id, comment, created_at, client_name').eq('provider_id', usuarioActual.id).order('created_at', { ascending: false }),
     sb.from('feed_photos').select('id, url').eq('provider_id', usuarioActual.id).order('created_at', { ascending: true })
@@ -2701,7 +2703,7 @@ async function cargarPerfilDesdeSupabase(){
     bannerUrl: p.banner_url || '',
     ratingReal: p.rating || 0,
     reviews_count: p.reviews_count || 0,
-    servicios: (servicios || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, precioACotizar: s.precio_a_cotizar === true, categoria: s.category || 'musica', descripcion: s.description || '', noIncluye: s.no_incluye || '', websiteUrl: s.website_url || '', imagenes: s.imagenes || [], video: s.video_url || null, opciones: Array.isArray(s.opciones) ? s.opciones : [], activo: s.active === true })),
+    servicios: (servicios || []).map(s => ({ id: s.id, nombre: s.name, precio: s.price, precioACotizar: s.precio_a_cotizar === true, categoria: s.category || 'musica', descripcion: s.description || '', noIncluye: s.no_incluye || '', websiteUrl: s.website_url || '', imagenes: s.imagenes || [], videos: Array.isArray(s.videos) ? s.videos : [], opciones: Array.isArray(s.opciones) ? s.opciones : [], activo: s.active === true })),
     resenasPorServicio,
     // "Comentarios" del perfil: sobre el proveedor como persona/negocio,
     // distintos de las reseñas de un servicio puntual.
@@ -3009,7 +3011,7 @@ function changeProfileImage(target){
 // ─── MODAL DE SERVICIO: crear / editar / eliminar ───
 const SERVICIO_IMG_MAX = 20;
 let servicioImagenesDraft = [];
-let servicioVideoDraft = null;
+let servicioVideosDraft = [];
 
 // ─── Opciones de precio del servicio (unidad / paquete / mínimo + extra) ───
 let opcionesDraft = [];
@@ -3086,7 +3088,7 @@ function openServiceModal(id){
   servicioImagenesDraft = existing && Array.isArray(existing.imagenes) ? existing.imagenes.slice() : [];
   renderServiceModalImages();
 
-  servicioVideoDraft = existing ? (existing.video || null) : null;
+  servicioVideosDraft = existing && Array.isArray(existing.videos) ? existing.videos.slice() : [];
   renderServiceModalVideo();
 
   // Opciones de precio: se cargan las que ya tenga el servicio.
@@ -3102,7 +3104,7 @@ function closeServiceModal(){
   document.getElementById('service-modal-overlay').classList.remove('open');
   servicioEditingId = null;
   servicioImagenesDraft = [];
-  servicioVideoDraft = null;
+  servicioVideosDraft = [];
   opcionesDraft = [];
 }
 
@@ -3349,25 +3351,36 @@ function removeServiceModalImage(index){
   renderServiceModalImages();
 }
 
+const SERVICIO_VIDEO_MAX = 5;
+
 function renderServiceModalVideo(){
   const box = document.getElementById('service-video-box');
-  box.innerHTML = servicioVideoDraft
-    ? `<div class="service-video-item" style="position:relative;max-width:280px;">
-        <video src="${esc(servicioVideoDraft)}" controls style="width:100%;border-radius:10px;display:block;"></video>
-        <button class="gallery-remove" onclick="removeServiceModalVideo()" style="position:absolute;top:8px;right:8px;"><i class="ti ti-x"></i></button>
-      </div>`
-    : `<button type="button" class="btn-outline-or" onclick="addServiceModalVideo()"><i class="ti ti-video-plus"></i> Subir video</button>`;
+  let html = servicioVideosDraft.map((url, i) => `
+    <div class="service-video-item" style="position:relative;">
+      <video src="${esc(url)}" controls style="width:100%;height:100%;border-radius:10px;display:block;object-fit:cover;"></video>
+      <button class="gallery-remove" onclick="removeServiceModalVideo(${i})"><i class="ti ti-x"></i></button>
+    </div>`).join('');
+  if(servicioVideosDraft.length < SERVICIO_VIDEO_MAX){
+    html += `<div class="service-img-add" onclick="addServiceModalVideo()" title="Agregar video"><i class="ti ti-video-plus"></i></div>`;
+  }
+  box.innerHTML = html;
+  const countEl = document.getElementById('service-video-count');
+  if(countEl) countEl.textContent = '(' + servicioVideosDraft.length + '/' + SERVICIO_VIDEO_MAX + ')';
 }
 
 function addServiceModalVideo(){
+  if(servicioVideosDraft.length >= SERVICIO_VIDEO_MAX){
+    alert('Ya tienes ' + SERVICIO_VIDEO_MAX + ' videos en este servicio, que es el máximo permitido.');
+    return;
+  }
   elegirVideo((url) => {
-    servicioVideoDraft = url;
+    servicioVideosDraft.push(url);
     renderServiceModalVideo();
   });
 }
 
-function removeServiceModalVideo(){
-  servicioVideoDraft = null;
+function removeServiceModalVideo(index){
+  servicioVideosDraft.splice(index, 1);
   renderServiceModalVideo();
 }
 
@@ -3396,29 +3409,29 @@ async function saveService(){
   }
 
   const imagenes = servicioImagenesDraft.slice();
-  const video_url = servicioVideoDraft || null;
+  const videos = servicioVideosDraft.slice();
 
   const opciones = opcionesDraft.map(o => ({ ...o }));
 
   if(servicioEditingId){
     const { error } = await sb.from('services').update({
       name: nombre, price: precio, precio_a_cotizar: precioACotizar, category: categoria, description: descripcion, no_incluye: noIncluye || null, imagenes,
-      image_url: imagenes[0] || null, video_url, opciones
+      image_url: imagenes[0] || null, videos, opciones
     }).eq('id', servicioEditingId).eq('provider_id', usuarioActual.id);
     if(error){ alert('No se pudo guardar el servicio: ' + error.message); return; }
 
     const idx = perfilData.servicios.findIndex(s => s.id === servicioEditingId);
-    if(idx >= 0) perfilData.servicios[idx] = { ...perfilData.servicios[idx], nombre, precio, precioACotizar, categoria, descripcion, noIncluye, imagenes, video: video_url, opciones };
+    if(idx >= 0) perfilData.servicios[idx] = { ...perfilData.servicios[idx], nombre, precio, precioACotizar, categoria, descripcion, noIncluye, imagenes, videos, opciones };
   } else {
     // Un servicio nuevo nace como BORRADOR: no aparece en el catálogo hasta
     // que el proveedor lo lanza al mercado a propósito.
     const { data, error } = await sb.from('services').insert({
       provider_id: usuarioActual.id, name: nombre, price: precio, precio_a_cotizar: precioACotizar, category: categoria, description: descripcion, no_incluye: noIncluye || null,
-      imagenes, image_url: imagenes[0] || null, video_url, active: false, opciones
+      imagenes, image_url: imagenes[0] || null, videos, active: false, opciones
     }).select('id').single();
     if(error){ alert('No se pudo crear el servicio: ' + error.message); return; }
 
-    perfilData.servicios.push({ id: data.id, nombre, precio, precioACotizar, categoria, descripcion, noIncluye, imagenes, video: video_url, opciones, activo: false });
+    perfilData.servicios.push({ id: data.id, nombre, precio, precioACotizar, categoria, descripcion, noIncluye, imagenes, videos, opciones, activo: false });
   }
 
   closeServiceModal();
@@ -3462,8 +3475,9 @@ function openServiceViewer(id){
   }).join('')) : '';
 
   const videoBox = document.getElementById('viewer-video-box');
-  videoBox.innerHTML = s.video
-    ? `<video src="${esc(s.video)}" controls style="width:100%;border-radius:10px;margin-bottom:16px;display:block;"></video>`
+  const videosViewer = Array.isArray(s.videos) ? s.videos : [];
+  videoBox.innerHTML = videosViewer.length
+    ? `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:16px;">${videosViewer.map(v => `<video src="${esc(v)}" controls style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block;background:#000;"></video>`).join('')}</div>`
     : '';
 
   const imgs = s.imagenes || [];
