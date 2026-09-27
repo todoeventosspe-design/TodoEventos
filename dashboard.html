@@ -269,6 +269,10 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 
 .services-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
 .service-card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:default;transition:border-color .16s;}
+.service-card-add{background:var(--card2);border:2px dashed var(--line);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:220px;cursor:pointer;color:var(--sub);transition:all .16s;}
+.service-card-add:hover{border-color:var(--or-line);color:var(--or);background:var(--or-soft);}
+.service-card-add i{font-size:30px;}
+.service-card-add span{font-size:13.5px;font-weight:700;}
 .service-card.editable{cursor:pointer;}
 .service-card.editable:hover{border-color:var(--or-line);}
 .service-img{width:100%;height:130px;object-fit:cover;display:block;background:var(--card2);}
@@ -1075,7 +1079,6 @@ verificarAccesoDashboard();
         <div class="profile-panel active" id="ppanel-servicios">
           <div class="tool-desc" style="margin-bottom:14px;">Haz clic en un servicio para ver sus fotos.</div>
           <div class="services-grid" id="perfil-servicios-grid"></div>
-          <button class="btn-or" id="btn-add-servicio" style="display:none;margin-top:16px;" onclick="openServiceModal()"><i class="ti ti-plus"></i> Añadir nuevo servicio</button>
         </div>
 
         <!-- Comentarios de perfil: solo lectura, los genera el mercado, no el proveedor -->
@@ -2871,7 +2874,8 @@ function renderServiciosGrid(){
       </div>
     </div>`;
   });
-  grid.innerHTML = html || '<div style="color:var(--sub);font-size:13px;">Aún no has agregado servicios.</div>';
+  html += `<div class="service-card-add" onclick="openServiceModal()"><i class="ti ti-plus"></i><span>Añadir servicio</span></div>`;
+  grid.innerHTML = html;
 }
 
 // Publicar / despublicar un servicio en el marketplace. Un servicio nuevo
@@ -2938,7 +2942,6 @@ function applyEditModeUI(){
   document.getElementById('perfil-bio-edit').style.display = perfilEditMode ? 'block' : 'none';
   document.getElementById('perfil-banner-btn').style.display = perfilEditMode ? 'flex' : 'none';
   document.getElementById('perfil-avatar-btn').style.display = perfilEditMode ? 'flex' : 'none';
-  document.getElementById('btn-add-servicio').style.display = perfilEditMode ? 'inline-flex' : 'none';
   document.getElementById('perfil-save-row').style.display = perfilEditMode ? 'flex' : 'none';
 
   const btn = document.getElementById('btn-edit-profile');
