@@ -63,6 +63,7 @@ h1{font-size:22px;font-weight:700;margin:22px 0 4px;}
 
 .acciones-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .btn-fundador{background:transparent;border:1px solid rgba(251,191,36,.4);color:var(--gold);padding:7px 14px;font-size:12.5px;}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--sub);padding:7px 14px;font-size:12.5px;}
 .btn-fundador:hover{background:rgba(251,191,36,.1);}
 .fund-info{font-size:12.5px;color:var(--sub);margin:-8px 0 20px;line-height:1.6;}
 .fund-info b{color:var(--gold);}
@@ -547,6 +548,10 @@ function render(){
                   onclick="toggleFundador(this.dataset.uid, this.dataset.marcar === '1')">
             <i class="ti ti-crown"></i> ${esFundador ? 'Quitar de fundadores' : 'Marcar como fundador'}
           </button>` : ''}
+        ${s.estado === 'aprobado' ? `
+          <button class="btn btn-ghost" data-uid="${esc(s.user_id)}" onclick="corregirRol(this.dataset.uid)">
+            <i class="ti ti-refresh"></i> Corregir rol
+          </button>` : ''}
       </div>
       ${s.motivo_rechazo ? `<div class="motivo">Motivo: ${esc(s.motivo_rechazo)}</div>` : ''}
     `;
@@ -596,6 +601,19 @@ async function aprobar(solicitudId, userId){
     return;
   }
   await cargarSolicitudes();
+}
+
+// Para cuentas creadas a mano por admin donde el rol quedó mal (bug ya
+// arreglado en la función, pero las cuentas viejas se re-aprueban una vez
+// mas para que se les aplique la corrección).
+async function corregirRol(userId){
+  const { error } = await sb.rpc('aprobar_proveedor', { p_user_id: userId });
+  if(error){
+    alert('No se pudo corregir. Intenta de nuevo.');
+    console.error(error);
+    return;
+  }
+  alert('Rol corregido. Ya puede entrar por "Acceso Proveedores".');
 }
 
 async function rechazar(solicitudId, userId){

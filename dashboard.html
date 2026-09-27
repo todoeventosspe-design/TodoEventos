@@ -170,6 +170,16 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(18,14,31,.6);backdrop-filter:blur(4px);z-index:2000;align-items:center;justify-content:center;padding:20px;}
 .modal-overlay.open{display:flex;}
 .modal-box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;width:100%;max-width:380px;animation:modalIn .18s ease;}
+.tour-box{max-width:400px;text-align:center;padding-top:36px;}
+.tour-ico{width:64px;height:64px;border-radius:16px;background:var(--or-soft);color:var(--or);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
+.tour-ico i{font-size:30px;}
+.tour-title{font-size:18px;font-weight:700;margin-bottom:8px;}
+.tour-texto{font-size:13.5px;color:var(--sub);line-height:1.55;margin-bottom:18px;min-height:60px;}
+.tour-dots{display:flex;justify-content:center;gap:6px;margin-bottom:18px;}
+.tour-dots span{width:7px;height:7px;border-radius:50%;background:var(--line);transition:all .16s;}
+.tour-dots span.active{width:20px;border-radius:4px;background:var(--or);}
+.tour-saltar{background:none;border:none;color:var(--sub);font-size:12.5px;font-family:inherit;cursor:pointer;margin-top:12px;text-decoration:underline;}
+.tour-saltar:hover{color:var(--fg);}
 @keyframes modalIn{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
 .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
 .modal-title{font-size:16px;font-weight:700;}
@@ -553,6 +563,8 @@ verificarAccesoDashboard();
     <button class="side-item" onclick="openTool('crm')"><i class="ti ti-users"></i> CRM Clientes</button>
     <button class="side-item" onclick="openTool('inventario')"><i class="ti ti-package"></i> Inventario</button>
     <button class="side-item" onclick="openTool('analytics')"><i class="ti ti-chart-bar"></i> Reportes</button>
+
+    <button class="side-item" onclick="iniciarTour()"><i class="ti ti-help-circle"></i> Cómo funciona</button>
 
     <div class="side-spacer"></div>
 
@@ -1097,6 +1109,22 @@ verificarAccesoDashboard();
 </div>
 
 <!-- ─── MODAL: Crear / Editar / Eliminar servicio del perfil ─── -->
+<!-- ─── TOUR: guía de bienvenida al dashboard ─── -->
+<div class="modal-overlay" id="tour-overlay">
+  <div class="modal-box tour-box">
+    <button class="modal-close" id="tour-close" onclick="cerrarTour()"><i class="ti ti-x"></i></button>
+    <div class="tour-ico"><i class="ti" id="tour-ico"></i></div>
+    <div class="tour-title" id="tour-title">—</div>
+    <div class="tour-texto" id="tour-texto">—</div>
+    <div class="tour-dots" id="tour-dots"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="tour-atras" style="flex:1;justify-content:center;" onclick="tourAnterior()"><i class="ti ti-chevron-left"></i> Atrás</button>
+      <button class="btn-or" id="tour-siguiente" style="flex:2;justify-content:center;" onclick="tourSiguiente()">Siguiente <i class="ti ti-chevron-right"></i></button>
+    </div>
+    <button class="tour-saltar" onclick="cerrarTour()">Saltar guía</button>
+  </div>
+</div>
+
 <div class="modal-overlay" id="service-modal-overlay" onclick="if(event.target===this) closeServiceModal()">
   <div class="modal-box" style="max-width:560px;max-height:88vh;overflow-y:auto;">
     <div class="modal-head">
@@ -1375,6 +1403,71 @@ async function onAccesoDashboardOk(){
   renderCaja();
   renderCrm();
   renderInventario();
+
+  // Primera vez que este proveedor entra al dashboard: le mostramos la guía
+  // sola, sin que tenga que buscarla. Despues queda disponible en "Cómo
+  // funciona" (sidebar) por si la quiere volver a ver.
+  if(!localStorage.getItem('te_tour_visto')){
+    setTimeout(iniciarTour, 600);
+  }
+}
+
+// ─── TOUR DE BIENVENIDA: qué es cada cosa del dashboard ───────────────────
+const TOUR_STEPS = [
+  { ico:'ti-layout-dashboard', titulo:'¡Bienvenido a tu panel!',
+    texto:'Acá manejas todo tu negocio en TodoEventos: qué servicios ofreces, tus reservas, tu agenda y tus cuentas. Esta guía te muestra rápido qué es cada cosa — te toma menos de un minuto.' },
+  { ico:'ti-id-badge-2', titulo:'Mi Perfil',
+    texto:'Acá está la información que ven tus clientes (foto, nombre, ubicación) y la lista de tus servicios. Con el botón "+" agregas un servicio nuevo directamente, sin buscarlo en ningún menú.' },
+  { ico:'ti-inbox', titulo:'Solicitudes',
+    texto:'Cuando un cliente reserva desde el catálogo, te llega acá como pendiente. Tienes que Aceptarla o Rechazarla — recién ahí queda confirmada en tu agenda.' },
+  { ico:'ti-calendar-event', titulo:'Agenda',
+    texto:'El calendario de tus eventos confirmados. Las fechas que aceptas en Solicitudes se bloquean acá solas, para que nunca te cruces dos eventos el mismo día.' },
+  { ico:'ti-file-invoice', titulo:'Cotizador',
+    texto:'Arma una cotización con los servicios/ítems que quiera un cliente y descárgala en PDF para mandársela por WhatsApp o correo.' },
+  { ico:'ti-cash', titulo:'Control de Caja',
+    texto:'Registra tus ingresos y gastos de cada evento, para saber cuánto ganaste de verdad después de cubrir costos.' },
+  { ico:'ti-users', titulo:'CRM Clientes',
+    texto:'La lista de clientes con los que ya trabajaste: sus datos y el historial de eventos que les hiciste, para no perder el hilo.' },
+  { ico:'ti-package', titulo:'Inventario',
+    texto:'Si usas equipos o materiales (luces, mesas, insumos), acá llevas la cuenta de lo que tienes y lo que se va gastando o prestando.' },
+  { ico:'ti-chart-bar', titulo:'Reportes',
+    texto:'Un resumen de cómo te está yendo: cuánto facturaste, cuántos eventos hiciste, qué tan seguido te reservan.' },
+  { ico:'ti-layout-grid', titulo:'Ver Catálogo',
+    texto:'Te lleva al marketplace público — así ven tu perfil y tus servicios los clientes que buscan en TodoEventos. Cuando tengas dudas, tocas "Cómo funciona" en el menú para volver a ver esta guía.' }
+];
+let tourStep = 0;
+
+function iniciarTour(){
+  tourStep = 0;
+  renderTourStep();
+  document.getElementById('tour-overlay').classList.add('open');
+}
+
+function renderTourStep(){
+  const s = TOUR_STEPS[tourStep];
+  document.getElementById('tour-ico').className = 'ti ' + s.ico;
+  document.getElementById('tour-title').textContent = s.titulo;
+  document.getElementById('tour-texto').textContent = s.texto;
+  document.getElementById('tour-dots').innerHTML = TOUR_STEPS.map((_, i) =>
+    `<span class="${i === tourStep ? 'active' : ''}"></span>`).join('');
+  document.getElementById('tour-atras').style.visibility = tourStep === 0 ? 'hidden' : 'visible';
+  document.getElementById('tour-siguiente').innerHTML = tourStep === TOUR_STEPS.length - 1
+    ? '<i class="ti ti-check"></i> Entendido'
+    : 'Siguiente <i class="ti ti-chevron-right"></i>';
+}
+
+function tourSiguiente(){
+  if(tourStep < TOUR_STEPS.length - 1){ tourStep++; renderTourStep(); }
+  else cerrarTour();
+}
+
+function tourAnterior(){
+  if(tourStep > 0){ tourStep--; renderTourStep(); }
+}
+
+function cerrarTour(){
+  document.getElementById('tour-overlay').classList.remove('open');
+  localStorage.setItem('te_tour_visto', '1');
 }
 
 // ─── NAVEGACIÓN ENTRE VISTAS (vanilla JS) ───
