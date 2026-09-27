@@ -171,6 +171,10 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .modal-overlay.open{display:flex;}
 .modal-box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;width:100%;max-width:380px;animation:modalIn .18s ease;}
 .tour-box{max-width:400px;text-align:center;padding-top:36px;}
+.tour-box.tour-anclada{position:fixed;text-align:left;padding-top:20px;}
+.sidebar.tour-resaltando{z-index:2001;}
+.sidebar.tour-resaltando .side-item,.sidebar.tour-resaltando .side-user{opacity:.3;pointer-events:none;transition:opacity .2s;}
+.sidebar.tour-resaltando .tour-resaltado{opacity:1;box-shadow:0 0 0 3px var(--or);border-radius:10px;}
 .tour-ico{width:64px;height:64px;border-radius:16px;background:var(--or-soft);color:var(--or);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
 .tour-ico i{font-size:30px;}
 .tour-title{font-size:18px;font-weight:700;margin-bottom:8px;}
@@ -552,23 +556,23 @@ verificarAccesoDashboard();
     <span class="logo"><span class="lp">Todo</span><span class="lo">Eventos</span><span class="dot">.pe</span></span>
 
     <div class="side-label">Panel</div>
-    <button class="side-item" onclick="openTool('perfil')"><i class="ti ti-id-badge-2"></i> Mi Perfil</button>
+    <button class="side-item" id="nav-perfil" onclick="openTool('perfil')"><i class="ti ti-id-badge-2"></i> Mi Perfil</button>
     <button class="side-item active" id="nav-home" onclick="goHome()"><i class="ti ti-layout-dashboard"></i> Inicio</button>
-    <button class="side-item" onclick="openTool('solicitudes')"><i class="ti ti-inbox"></i> Solicitudes <span class="req-badge" id="req-badge">0</span></button>
+    <button class="side-item" id="nav-solicitudes" onclick="openTool('solicitudes')"><i class="ti ti-inbox"></i> Solicitudes <span class="req-badge" id="req-badge">0</span></button>
 
     <div class="side-label">Herramientas</div>
-    <button class="side-item" onclick="openTool('agenda')"><i class="ti ti-calendar-event"></i> Agenda</button>
-    <button class="side-item" onclick="openTool('cotizador')"><i class="ti ti-file-invoice"></i> Cotizador</button>
-    <button class="side-item" onclick="openTool('caja')"><i class="ti ti-cash"></i> Control de Caja</button>
-    <button class="side-item" onclick="openTool('crm')"><i class="ti ti-users"></i> CRM Clientes</button>
-    <button class="side-item" onclick="openTool('inventario')"><i class="ti ti-package"></i> Inventario</button>
-    <button class="side-item" onclick="openTool('analytics')"><i class="ti ti-chart-bar"></i> Reportes</button>
+    <button class="side-item" id="nav-agenda" onclick="openTool('agenda')"><i class="ti ti-calendar-event"></i> Agenda</button>
+    <button class="side-item" id="nav-cotizador" onclick="openTool('cotizador')"><i class="ti ti-file-invoice"></i> Cotizador</button>
+    <button class="side-item" id="nav-caja" onclick="openTool('caja')"><i class="ti ti-cash"></i> Control de Caja</button>
+    <button class="side-item" id="nav-crm" onclick="openTool('crm')"><i class="ti ti-users"></i> CRM Clientes</button>
+    <button class="side-item" id="nav-inventario" onclick="openTool('inventario')"><i class="ti ti-package"></i> Inventario</button>
+    <button class="side-item" id="nav-analytics" onclick="openTool('analytics')"><i class="ti ti-chart-bar"></i> Reportes</button>
 
     <button class="side-item" onclick="iniciarTour()"><i class="ti ti-help-circle"></i> Cómo funciona</button>
 
     <div class="side-spacer"></div>
 
-    <a href="catalogo.html" class="side-item"><i class="ti ti-layout-grid"></i> Ver Catálogo</a>
+    <a href="catalogo.html" class="side-item" id="nav-catalogo"><i class="ti ti-layout-grid"></i> Ver Catálogo</a>
     <a href="login.html" class="side-item logout"><i class="ti ti-logout"></i> Cerrar Sesión</a>
 
     <div class="side-user" onclick="openTool('perfil')" style="cursor:pointer;" title="Ver mi perfil público">
@@ -1414,31 +1418,33 @@ async function onAccesoDashboardOk(){
 
 // ─── TOUR DE BIENVENIDA: qué es cada cosa del dashboard ───────────────────
 const TOUR_STEPS = [
-  { ico:'ti-layout-dashboard', titulo:'¡Bienvenido a tu panel!',
-    texto:'Acá manejas todo tu negocio en TodoEventos: qué servicios ofreces, tus reservas, tu agenda y tus cuentas. Esta guía te muestra rápido qué es cada cosa — te toma menos de un minuto.' },
-  { ico:'ti-id-badge-2', titulo:'Mi Perfil',
+  { ico:'ti-layout-dashboard', titulo:'¡Bienvenido a tu panel!', target:null,
+    texto:'Acá manejas todo tu negocio en TodoEventos: qué servicios ofreces, tus reservas, tu agenda y tus cuentas. Esta guía te muestra rápido qué es cada cosa y dónde está — te toma menos de un minuto.' },
+  { ico:'ti-id-badge-2', titulo:'Mi Perfil', target:'nav-perfil',
     texto:'Acá está la información que ven tus clientes (foto, nombre, ubicación) y la lista de tus servicios. Con el botón "+" agregas un servicio nuevo directamente, sin buscarlo en ningún menú.' },
-  { ico:'ti-inbox', titulo:'Solicitudes',
+  { ico:'ti-inbox', titulo:'Solicitudes', target:'nav-solicitudes',
     texto:'Cuando un cliente reserva desde el catálogo, te llega acá como pendiente. Tienes que Aceptarla o Rechazarla — recién ahí queda confirmada en tu agenda.' },
-  { ico:'ti-calendar-event', titulo:'Agenda',
+  { ico:'ti-calendar-event', titulo:'Agenda', target:'nav-agenda',
     texto:'El calendario de tus eventos confirmados. Las fechas que aceptas en Solicitudes se bloquean acá solas, para que nunca te cruces dos eventos el mismo día.' },
-  { ico:'ti-file-invoice', titulo:'Cotizador',
+  { ico:'ti-file-invoice', titulo:'Cotizador', target:'nav-cotizador',
     texto:'Arma una cotización con los servicios/ítems que quiera un cliente y descárgala en PDF para mandársela por WhatsApp o correo.' },
-  { ico:'ti-cash', titulo:'Control de Caja',
+  { ico:'ti-cash', titulo:'Control de Caja', target:'nav-caja',
     texto:'Registra tus ingresos y gastos de cada evento, para saber cuánto ganaste de verdad después de cubrir costos.' },
-  { ico:'ti-users', titulo:'CRM Clientes',
+  { ico:'ti-users', titulo:'CRM Clientes', target:'nav-crm',
     texto:'La lista de clientes con los que ya trabajaste: sus datos y el historial de eventos que les hiciste, para no perder el hilo.' },
-  { ico:'ti-package', titulo:'Inventario',
+  { ico:'ti-package', titulo:'Inventario', target:'nav-inventario',
     texto:'Si usas equipos o materiales (luces, mesas, insumos), acá llevas la cuenta de lo que tienes y lo que se va gastando o prestando.' },
-  { ico:'ti-chart-bar', titulo:'Reportes',
+  { ico:'ti-chart-bar', titulo:'Reportes', target:'nav-analytics',
     texto:'Un resumen de cómo te está yendo: cuánto facturaste, cuántos eventos hiciste, qué tan seguido te reservan.' },
-  { ico:'ti-layout-grid', titulo:'Ver Catálogo',
+  { ico:'ti-layout-grid', titulo:'Ver Catálogo', target:'nav-catalogo',
     texto:'Te lleva al marketplace público — así ven tu perfil y tus servicios los clientes que buscan en TodoEventos. Cuando tengas dudas, tocas "Cómo funciona" en el menú para volver a ver esta guía.' }
 ];
 let tourStep = 0;
 
 function iniciarTour(){
   tourStep = 0;
+  // En celular el sidebar está oculto por defecto: lo abrimos para poder señalar.
+  if(window.innerWidth <= 720) document.body.classList.add('nav-open');
   renderTourStep();
   document.getElementById('tour-overlay').classList.add('open');
 }
@@ -1454,6 +1460,36 @@ function renderTourStep(){
   document.getElementById('tour-siguiente').innerHTML = tourStep === TOUR_STEPS.length - 1
     ? '<i class="ti ti-check"></i> Entendido'
     : 'Siguiente <i class="ti ti-chevron-right"></i>';
+
+  posicionarTourJuntoATarget(s.target);
+}
+
+// Apaga el resto del sidebar y le pone un anillo naranja al botón del paso
+// actual, y mueve el cuadro de texto justo al lado — así el proveedor ve
+// exactamente de qué botón se está hablando, no solo el texto.
+function posicionarTourJuntoATarget(targetId){
+  const sidebar = document.querySelector('.sidebar');
+  const box = document.querySelector('.tour-box');
+  document.querySelectorAll('.tour-resaltado').forEach(el => el.classList.remove('tour-resaltado'));
+
+  const targetEl = targetId ? document.getElementById(targetId) : null;
+  if(!targetEl){
+    sidebar.classList.remove('tour-resaltando');
+    box.classList.remove('tour-anclada');
+    box.style.top = box.style.left = box.style.right = '';
+    return;
+  }
+
+  sidebar.classList.add('tour-resaltando');
+  targetEl.classList.add('tour-resaltado');
+  targetEl.scrollIntoView({ block:'nearest' });
+
+  const r = targetEl.getBoundingClientRect();
+  box.classList.add('tour-anclada');
+  const arriba = r.top + 220 > window.innerHeight;
+  box.style.left = Math.min(r.right + 16, window.innerWidth - 416) + 'px';
+  box.style.top = (arriba ? Math.max(16, r.bottom - 260) : r.top) + 'px';
+  box.style.right = 'auto';
 }
 
 function tourSiguiente(){
@@ -1467,6 +1503,8 @@ function tourAnterior(){
 
 function cerrarTour(){
   document.getElementById('tour-overlay').classList.remove('open');
+  document.querySelector('.sidebar').classList.remove('tour-resaltando');
+  document.querySelectorAll('.tour-resaltado').forEach(el => el.classList.remove('tour-resaltado'));
   localStorage.setItem('te_tour_visto', '1');
 }
 
