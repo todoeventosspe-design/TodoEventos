@@ -39,7 +39,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .side-item.logout{color:var(--red);}
 .side-item.logout:hover{background:rgba(248,113,113,.1);color:var(--red);}
 .side-user{display:flex;align-items:center;gap:10px;padding:12px 8px 4px;margin-top:12px;border-top:1px solid var(--line);}
-.side-avatar{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--or),var(--gold));display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex-shrink:0;}
+.side-avatar{width:36px;height:36px;border-radius:10px;object-fit:cover;flex-shrink:0;}
 .side-uname{font-size:13px;font-weight:600;}
 .side-urole{font-size:11px;color:var(--sub);}
 
@@ -572,7 +572,7 @@ verificarAccesoDashboard();
     <a href="login.html" class="side-item logout"><i class="ti ti-logout"></i> Cerrar Sesión</a>
 
     <div class="side-user" onclick="openTool('perfil')" style="cursor:pointer;" title="Ver mi perfil público">
-      <div class="side-avatar">DJ</div>
+      <img class="side-avatar" id="sidebar-avatar" src="" alt="">
       <div>
         <div class="side-uname" id="sidebar-nombre">—</div>
         <div class="side-urole" id="sidebar-rol">Plan Pro · Miraflores</div>
@@ -2857,8 +2857,10 @@ function renderPerfil(){
   // Mantiene el sidebar (nombre y ubicación) consistente con el perfil
   const sbNombre = document.getElementById('sidebar-nombre');
   const sbRol = document.getElementById('sidebar-rol');
+  const sbAvatar = document.getElementById('sidebar-avatar');
   if(sbNombre) sbNombre.textContent = perfilData.nombre;
   if(sbRol) sbRol.textContent = 'Plan Pro · ' + perfilData.ubicacion.split(',')[0];
+  if(sbAvatar) sbAvatar.src = perfilData.avatarUrl;
   renderServiciosGrid();
   renderFeedGrid();
   renderResenasTab();
@@ -3081,8 +3083,10 @@ async function saveProfileChanges(){
 
   const sbNombre = document.getElementById('sidebar-nombre');
   const sbRol = document.getElementById('sidebar-rol');
+  const sbAvatar = document.getElementById('sidebar-avatar');
   if(sbNombre) sbNombre.textContent = perfilData.nombre;
   if(sbRol) sbRol.textContent = 'Plan Pro · ' + perfilData.ubicacion.split(',')[0];
+  if(sbAvatar) sbAvatar.src = perfilData.avatarUrl;
 
   renderServiciosGrid();
   renderFeedGrid();
@@ -3095,6 +3099,8 @@ function changeProfileImage(target){
     if(target === 'avatar'){
       perfilData.avatarUrl = url;
       document.getElementById('perfil-avatar-img').src = perfilData.avatarUrl;
+      const sbAvatar = document.getElementById('sidebar-avatar');
+      if(sbAvatar) sbAvatar.src = perfilData.avatarUrl;
     } else {
       perfilData.bannerUrl = url;
       const bannerImgEl = document.getElementById('perfil-banner-img');
