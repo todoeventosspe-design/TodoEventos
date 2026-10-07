@@ -268,7 +268,7 @@ dinamismo. Pero la regla dura es: **ningún video puede sonar igual al anterior.
 | Versus Halloween | scratch de DJ, bombo, tarola, campana de box, aplausos |
 | IA | glitch digital, tecleo, burbujas, pings de respuesta, chime |
 
-**Biblioteca disponible** (44 efectos, mezcla de librería y sintetizados):
+**Biblioteca disponible** (45 efectos, mezcla de librería y sintetizados):
 airhorn, balloon, beep, bell-ring, boing, bubble, buzz, chime, clap, click,
 click-soft, coin, error, glitch-1/2/3, impact-bass-1/2, kaching, key-press,
 kick, marimba-hi, marimba-lo, msg, notification, paper, ping, pop, register,
