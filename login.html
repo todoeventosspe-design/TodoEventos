@@ -5,11 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ingresar a TodoEventos.pe</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" media="print" onload="this.media='all'">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Epilogue:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="estilo.css">
+<link rel="preconnect" href="https://vqnyaozauljtashpjfoo.supabase.co" crossorigin>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
@@ -36,9 +37,11 @@ body.role-proveedor{
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{overflow-x:clip;} /* los glows de fondo se salían del borde en celular */
 body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;overflow:clip;transition:background .3s;} /* clip: no deja que el body se desplace de lado en celular */
-.glow{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;}
-.glow.g1{width:420px;height:420px;background:var(--glow1);top:-120px;right:-100px;}
-.glow.g2{width:360px;height:360px;background:var(--glow2);bottom:-120px;left:-100px;}
+/* Degradado radial en vez de filter:blur(90px): mismo halo, pero el blur
+   era carísimo de repintar en celular (sobre todo al cambiar de pestaña). */
+.glow{position:absolute;border-radius:50%;pointer-events:none;z-index:0;}
+.glow.g1{width:600px;height:600px;background:radial-gradient(circle,var(--glow1),transparent 68%);top:-210px;right:-190px;}
+.glow.g2{width:540px;height:540px;background:radial-gradient(circle,var(--glow2),transparent 68%);bottom:-210px;left:-190px;}
 
 .login-wrap{width:100%;max-width:420px;position:relative;z-index:1;}
 .logo{font-size:24px;font-weight:700;text-decoration:none;display:block;text-align:center;margin-bottom:8px;}
@@ -49,10 +52,14 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:30px;}
 
-.role-tabs{display:flex;gap:6px;background:var(--card2);border-radius:12px;padding:5px;margin-bottom:24px;}
-.role-tab{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--sub);cursor:pointer;border:none;background:transparent;font-family:inherit;transition:all .18s;}
+.role-tabs{display:flex;gap:6px;background:var(--card2);border-radius:12px;padding:5px;margin-bottom:24px;position:relative;}
+/* Píldora que se desliza entre Clientes y Proveedores (antes el fondo saltaba de un botón al otro) */
+.role-tabs::before{content:"";position:absolute;top:5px;bottom:5px;left:5px;width:calc(50% - 8px);background:var(--ac);border-radius:9px;box-shadow:0 4px 14px var(--ac-glow);transition:transform .28s cubic-bezier(.3,.9,.3,1.1),background-color .28s;}
+body.role-proveedor .role-tabs::before{transform:translateX(calc(100% + 6px));}
+.role-tab{flex:1;position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--sub);cursor:pointer;border:none;background:transparent;font-family:inherit;transition:color .2s,transform .1s;}
+.role-tab:active{transform:scale(.95);}
 .role-tab i{font-size:17px;}
-.role-tab.active{background:var(--ac);color:var(--ac-ink);box-shadow:0 4px 14px var(--ac-glow);}
+.role-tab.active{color:var(--ac-ink);}
 
 .role-ctx{text-align:center;margin-bottom:20px;padding:12px;background:var(--card2);border:1px solid var(--line);border-radius:11px;}
 .role-ctx-title{font-size:13.5px;font-weight:600;color:var(--fg);}
@@ -69,6 +76,9 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .field-plain label{display:block;font-size:12.5px;color:var(--sub);margin-bottom:7px;font-weight:500;}
 .field-plain input,.field-plain select,.field-plain textarea{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:11px 13px;color:var(--fg);font-size:13.5px;font-family:inherit;}
 .field-plain input:focus,.field-plain select:focus,.field-plain textarea:focus{outline:none;border-color:var(--ac-line);}
+/* iPhone hace zoom automático al tocar un campo con letra < 16px y la pantalla
+   queda ampliada y "trabada" hasta pellizcar. En celular, 16px y sin zoom. */
+@media(max-width:760px){ .field input,.field-plain input,.field-plain select,.field-plain textarea,#fbk-box textarea,#fbk-box input{font-size:16px !important;} }
 /* align-items:end alinea los inputs de la fila aunque un label ocupe 2
    lineas y el otro 1 (ej. "Años de experiencia" vs "Instagram / Web"):
    los campos quedan siempre parejos por abajo. */
@@ -89,12 +99,31 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .spinner{width:14px;height:14px;border:2px solid #86EFAC;border-top-color:var(--green);border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
-.btn-login{width:100%;background:var(--ac);color:var(--ac-ink);border:none;padding:13px;border-radius:10px;font-size:14.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .16s;}
+.btn-login{width:100%;background:var(--ac);color:var(--ac-ink);border:none;padding:14px;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 0 var(--ac-2);transition:transform .08s,box-shadow .08s,opacity .16s,background-color .28s;}
+.btn-login:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 var(--ac-2);}
 .btn-login:hover{opacity:.9;}
 .btn-login:disabled{opacity:.6;cursor:not-allowed;}
 
 .foot-note{text-align:center;font-size:12.5px;color:var(--sub);margin-top:20px;}
 .foot-note a{color:var(--ac);text-decoration:none;font-weight:600;display:inline-block;padding:12px 4px;margin:-12px 0;} /* zona de toque de ~40px sin mover el diseño */
+/* Crear cuenta / Iniciar sesión: botón de verdad, no un link chiquito */
+.btn-alt{width:100%;margin-top:12px;background:var(--naranja);color:#fff;border:2px solid var(--naranja);padding:16px;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 5px 0 var(--naranja-osc);transition:transform .08s,box-shadow .08s;}
+.btn-alt:active{transform:translateY(4px);box-shadow:0 1px 0 var(--naranja-osc);}
+.btn-alt.outline{background:transparent;color:var(--naranja);box-shadow:0 4px 0 rgba(234,88,12,.25);}
+.btn-alt.outline:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(234,88,12,.25);}
+.btn-alt i{font-size:20px;}
+/* Al cambiar de pestaña el contenido entra con un fundido corto (las pestañas
+   no se mueven, así no "saltan" bajo el dedo). Solo opacity/transform: barato. */
+/* Login <-> registro (toggleAuthMode): la tarjeta se estira/encoge suave y el
+   texto no se deforma (object-fit:none, anclado arriba). */
+.card{view-transition-name:auth-card;}
+.back-home{view-transition-name:auth-back;}
+::view-transition-group(auth-card),::view-transition-group(auth-back){animation-duration:.34s;animation-timing-function:cubic-bezier(.3,.9,.3,1);}
+::view-transition-group(auth-card){overflow:hidden;border-radius:18px;}
+::view-transition-old(auth-card),::view-transition-new(auth-card){height:100%;width:100%;object-fit:none;object-position:top;animation-duration:.26s;}
+@keyframes swapIn{from{opacity:.25;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.card.swap :is(.role-ctx,.field,#campos-proveedor,.row-between,.btn-login,.foot-note){animation:swapIn .22s ease-out;}
+.fn-link{display:inline-block;margin-top:6px;}
 .back-home{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:18px;padding:12px;font-size:13.5px;font-weight:600;color:var(--sub);text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:12px;transition:all .18s;}
 .back-home:hover{color:var(--fg);border-color:var(--ac-line);background:var(--card2);}
 /* Fotos del proveedor al registrarse */
@@ -233,7 +262,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 
     <button class="btn-login" id="btn-login" onclick="handleSubmit()"><i class="ti ti-login-2" id="btn-icon"></i> <span id="btn-text">Ingresar al marketplace</span></button>
 
-    <p class="foot-note" id="foot-note">¿No tienes cuenta? <a href="#" onclick="toggleAuthMode();return false;">Regístrate, es gratis</a></p>
+    <div class="foot-note" id="foot-note">¿No tienes cuenta?<button type="button" class="btn-alt" onclick="toggleAuthMode()"><i class="ti ti-user-plus"></i> Crear cuenta gratis</button></div>
     </div>
 
     <!-- ─── Verificación por código (reemplaza el link de confirmación) ─── -->
@@ -419,24 +448,47 @@ async function insertarSolicitudProveedor(userId, datos){
   return error;
 }
 
+function animarCambio(){
+  const card = document.querySelector('.card');
+  card.classList.remove('swap');
+  void card.offsetWidth; // reinicia la animación aunque se toque dos veces seguidas
+  card.classList.add('swap');
+}
+
 function switchRole(role){
+  if(role !== currentRole) animarCambio();
   currentRole = role;
   // cambia la paleta de colores del body según el rol
   document.body.classList.remove('role-cliente','role-proveedor');
   document.body.classList.add('role-' + role);
   document.getElementById('tab-cliente').classList.toggle('active', role === 'cliente');
   document.getElementById('tab-proveedor').classList.toggle('active', role === 'proveedor');
-  montarAsistente(role);
   updateUI();
+  // El widget pesa: primero se pinta la pestaña nueva, después se cambia el asistente.
+  setTimeout(() => montarAsistente(currentRole), 350);
 }
 
 function toggleAuthMode(){
-  authMode = (authMode === 'login') ? 'registro' : 'login';
-  updateUI();
-  hideMessages();
-  // En celular el link está abajo y lo que cambia (campos nuevos, título)
-  // queda arriba, fuera de vista: parecía que el toque no había hecho nada.
-  document.querySelector('.card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const cambiar = () => {
+    authMode = (authMode === 'login') ? 'registro' : 'login';
+    updateUI();
+    hideMessages();
+  };
+  // En celular el botón está abajo y lo que cambia (campos nuevos, título)
+  // queda arriba, fuera de vista: se sube a la tarjeta al terminar.
+  const subir = () => {
+    const card = document.querySelector('.card');
+    if(card.getBoundingClientRect().top < 0) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  // View Transition: la tarjeta cambia de alto con suavidad y el contenido se
+  // funde, en vez de saltar. Navegadores sin soporte: fundido simple.
+  if(document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches){
+    document.startViewTransition(cambiar).finished.then(subir);
+  } else {
+    animarCambio();
+    cambiar();
+    subir();
+  }
 }
 
 // Combina el rol (cliente/proveedor) y el modo (login/registro) para
@@ -461,13 +513,13 @@ function updateUI(){
     document.getElementById('btn-text').textContent = currentRole === 'cliente'
       ? 'Crear mi cuenta' : 'Crear cuenta de proveedor';
     document.getElementById('foot-note').innerHTML =
-      '¿Ya tienes cuenta? <a href="#" onclick="toggleAuthMode();return false;">Inicia sesión</a>';
+      '¿Ya tienes cuenta?<button type="button" class="btn-alt outline" onclick="toggleAuthMode()"><i class="ti ti-login-2"></i> Iniciar sesión</button>';
   } else {
     document.getElementById('btn-text').textContent = currentRole === 'cliente'
       ? 'Ingresar al marketplace' : 'Ingresar al dashboard';
     document.getElementById('foot-note').innerHTML = (currentRole === 'cliente')
-      ? '¿No tienes cuenta? <a href="#" onclick="toggleAuthMode();return false;">Regístrate, es gratis</a>'
-      : '¿Quieres vender en TodoEventos? <a href="proveedores.html">Conoce los planes</a> · <a href="#" onclick="toggleAuthMode();return false;">o crea tu cuenta</a>';
+      ? '¿No tienes cuenta?<button type="button" class="btn-alt" onclick="toggleAuthMode()"><i class="ti ti-user-plus"></i> Crear cuenta gratis</button>'
+      : '¿Quieres vender en TodoEventos?<button type="button" class="btn-alt outline" onclick="toggleAuthMode()"><i class="ti ti-building-store"></i> Crear cuenta de proveedor</button><a href="proveedores.html" class="fn-link">Conoce los planes</a>';
   }
 }
 

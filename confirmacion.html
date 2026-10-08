@@ -5,11 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cuenta confirmada en TodoEventos.pe</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" media="print" onload="this.media='all'">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Epilogue:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="estilo.css">
+<link rel="preconnect" href="https://vqnyaozauljtashpjfoo.supabase.co" crossorigin>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
@@ -32,9 +33,10 @@ body.role-proveedor{
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{overflow-x:clip;} /* los glows de fondo se salían del borde en celular */
 body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;}
-.glow{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;}
-.glow.g1{width:420px;height:420px;background:var(--glow1);top:-120px;right:-100px;}
-.glow.g2{width:360px;height:360px;background:var(--glow2);bottom:-120px;left:-100px;}
+/* Degradado radial en vez de filter:blur(90px): mismo halo, mucho más liviano en celular */
+.glow{position:absolute;border-radius:50%;pointer-events:none;z-index:0;}
+.glow.g1{width:600px;height:600px;background:radial-gradient(circle,var(--glow1),transparent 68%);top:-210px;right:-190px;}
+.glow.g2{width:540px;height:540px;background:radial-gradient(circle,var(--glow2),transparent 68%);bottom:-210px;left:-190px;}
 
 .wrap{width:100%;max-width:440px;position:relative;z-index:1;text-align:center;}
 .logo{font-size:22px;font-weight:700;text-decoration:none;display:block;margin-bottom:34px;}
