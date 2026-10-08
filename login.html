@@ -107,10 +107,10 @@ body.role-proveedor .role-tabs::before{transform:translateX(calc(100% + 6px));}
 .foot-note{text-align:center;font-size:12.5px;color:var(--sub);margin-top:20px;}
 .foot-note a{color:var(--ac);text-decoration:none;font-weight:600;display:inline-block;padding:12px 4px;margin:-12px 0;} /* zona de toque de ~40px sin mover el diseño */
 /* Crear cuenta / Iniciar sesión: botón de verdad, no un link chiquito */
-.btn-alt{width:100%;margin-top:12px;background:var(--naranja);color:#fff;border:2px solid var(--naranja);padding:16px;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 5px 0 var(--naranja-osc);transition:transform .08s,box-shadow .08s;}
-.btn-alt:active{transform:translateY(4px);box-shadow:0 1px 0 var(--naranja-osc);}
-.btn-alt.outline{background:transparent;color:var(--naranja);box-shadow:0 4px 0 rgba(234,88,12,.25);}
-.btn-alt.outline:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(234,88,12,.25);}
+.btn-alt{width:100%;margin-top:12px;background:var(--ac);color:#fff;border:2px solid var(--ac);padding:16px;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 5px 0 var(--ac-2);transition:transform .08s,box-shadow .08s,background-color .28s;} /* color del rol: morado cliente, naranja proveedor */
+.btn-alt:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ac-2);}
+.btn-alt.outline{background:transparent;color:var(--ac);box-shadow:0 4px 0 var(--ac-line);}
+.btn-alt.outline:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ac-line);}
 .btn-alt i{font-size:20px;}
 /* Al cambiar de pestaña el contenido entra con un fundido corto (las pestañas
    no se mueven, así no "saltan" bajo el dedo). Solo opacity/transform: barato. */
@@ -123,7 +123,7 @@ body.role-proveedor .role-tabs::before{transform:translateX(calc(100% + 6px));}
 ::view-transition-old(auth-card),::view-transition-new(auth-card){height:100%;width:100%;object-fit:none;object-position:top;animation-duration:.26s;}
 @keyframes swapIn{from{opacity:.25;transform:translateY(6px);}to{opacity:1;transform:none;}}
 .card.swap :is(.role-ctx,.field,#campos-proveedor,.row-between,.btn-login,.foot-note){animation:swapIn .22s ease-out;}
-.fn-link{display:inline-block;margin-top:6px;}
+.foot-note a.fn-link{margin:6px 0 -12px;}
 .back-home{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:18px;padding:12px;font-size:13.5px;font-weight:600;color:var(--sub);text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:12px;transition:all .18s;}
 .back-home:hover{color:var(--fg);border-color:var(--ac-line);background:var(--card2);}
 /* Fotos del proveedor al registrarse */
@@ -519,7 +519,7 @@ function updateUI(){
       ? 'Ingresar al marketplace' : 'Ingresar al dashboard';
     document.getElementById('foot-note').innerHTML = (currentRole === 'cliente')
       ? '¿No tienes cuenta?<button type="button" class="btn-alt" onclick="toggleAuthMode()"><i class="ti ti-user-plus"></i> Crear cuenta gratis</button>'
-      : '¿Quieres vender en TodoEventos?<button type="button" class="btn-alt outline" onclick="toggleAuthMode()"><i class="ti ti-building-store"></i> Crear cuenta de proveedor</button><a href="proveedores.html" class="fn-link">Conoce los planes</a>';
+      : '¿Quieres vender en TodoEventos?<button type="button" class="btn-alt" onclick="toggleAuthMode()"><i class="ti ti-building-store"></i> Crear cuenta de proveedor</button><a href="proveedores.html" class="fn-link">Conoce los planes</a>';
   }
 }
 
