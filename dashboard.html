@@ -82,6 +82,8 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .tool-desc{font-size:13px;color:var(--sub);line-height:1.55;}
 .tool-arrow{margin-top:14px;font-size:13px;color:var(--or);font-weight:600;display:flex;align-items:center;gap:5px;opacity:0;transition:opacity .2s;}
 .tool-card:hover .tool-arrow{opacity:1;}
+/* En táctil no hay hover: si la flecha aparece al tocar, iOS se come el primer toque */
+@media(hover:none){.tool-arrow{opacity:1;}}
 
 /* ── INTERNAL VIEWS ── */
 .view{display:none;}
@@ -830,7 +832,7 @@ verificarAccesoDashboard();
         <div class="field" style="margin-bottom:0;">
           <label><i class="ti ti-file-invoice" style="font-size:12px;"></i> Plantilla a usar en el PDF</label>
           <select id="cot-plantilla"></select>
-          <div style="font-size:11.5px;color:var(--sub);margin-top:6px;">Se elige sola según el tipo de evento. Puedes cambiarla o <a href="#" onclick="openPlantillaLista();return false;" style="color:var(--or);font-weight:600;">crear una nueva</a>.</div>
+          <div style="font-size:11.5px;color:var(--sub);margin-top:6px;">Se elige sola según el tipo de evento. Puedes cambiarla o <a href="#" onclick="openPlantillaLista();return false;" style="color:var(--or);font-weight:600;display:inline-block;padding:10px 0;margin:-10px 0;">crear una nueva</a>.</div>
         </div>
       </div>
       <div class="panel">
@@ -3829,8 +3831,8 @@ document.querySelector('.sidebar')?.addEventListener('click', e => {
      para el proveedor: soporte del panel paso a paso + consejos de venta.
      El mismo agente va embebido en login.html. -->
 <elevenlabs-convai agent-id="agent_5301kz33f0fbfztb6rpxnr8nxf7z"></elevenlabs-convai>
-<script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
 <script src="feedback.js"></script>
 <script src="analytics.js"></script>
+<script src="tactil.js"></script>
 </body>
 </html>

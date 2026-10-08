@@ -415,3 +415,16 @@ footer .logo .b{color:var(--naranja);}
   .app-row-img{width:52px;height:52px;}
   .app-row-end{align-items:flex-start;}
 }
+
+/* ── Fluidez táctil (todas las páginas) ──
+   manipulation: el navegador ya no espera para ver si es un doble toque
+   (zoom), el tap se dispara al instante. El pellizco para hacer zoom sigue. */
+html{touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+/* Respuesta visual inmediata al tocar; sin esperar la transición de hover */
+:is(button,a,[role="button"],.btn,label[for]):not(:disabled):active{opacity:.7;transition:none;}
+/* Botón esperando al servidor (lo pone tactil.js): se ve ocupado y no
+   acepta un segundo toque, que antes duplicaba guardados. */
+.te-busy{opacity:.6!important;pointer-events:none;cursor:progress;}
+/* El asistente de ElevenLabs flota abajo a la derecha y en celular tapaba
+   los últimos botones de la página: se deja espacio para hacer scroll. */
+@media(max-width:760px){ body:has(elevenlabs-convai){padding-bottom:150px;} }

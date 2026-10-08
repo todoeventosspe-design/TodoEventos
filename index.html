@@ -48,8 +48,9 @@
 .hslide{grid-area:1/1;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(10px);transition:opacity .45s ease,transform .45s ease;}
 .hslide.on{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0);}
 .hdots{display:flex;justify-content:center;gap:8px;margin-top:28px;}
-.hdot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.32);border:none;padding:0;cursor:pointer;transition:all .25s;}
+.hdot{position:relative;width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.32);border:none;padding:0;cursor:pointer;transition:all .25s;}
 .hdot.on{width:24px;border-radius:20px;background:var(--amarillo);}
+.hdot::after{content:"";position:absolute;inset:-14px -4px;} /* zona de toque de ~36px; el punto se ve igual */
 
 .hero-rings{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1;}
 .hero-rings i{position:absolute;border:1.5px solid rgba(255,255,255,.14);border-radius:50%;}
@@ -339,5 +340,6 @@
 </script>
 <script src="feedback.js"></script>
 <script src="analytics.js"></script>
+<script src="tactil.js"></script>
 </body>
 </html>
