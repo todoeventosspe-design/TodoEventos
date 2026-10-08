@@ -445,7 +445,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 <header id="nav">
   <div class="nav-i">
     <div style="display:flex;align-items:center;gap:14px;">
-      <a href="index.html" style="display:inline-flex;align-items:center;gap:5px;color:var(--tinta-2);text-decoration:none;font-size:13px;font-weight:500;transition:color .18s;flex-shrink:0;" onmouseover="this.style.color='var(--pu)'" onmouseout="this.style.color='var(--tinta-2)'">
+      <a href="index.html" style="display:inline-flex;align-items:center;gap:5px;padding:10px 0;margin:-10px 0;color:var(--tinta-2);text-decoration:none;font-size:13px;font-weight:500;transition:color .18s;flex-shrink:0;" onmouseover="this.style.color='var(--pu)'" onmouseout="this.style.color='var(--tinta-2)'">
         <i class="ti ti-arrow-left" style="font-size:14px;"></i> Inicio
       </a>
       <span style="color:rgba(255,255,255,.12);font-size:18px;">|</span>
@@ -569,7 +569,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 <!-- ═══ BREADCRUMB ═══ -->
 <div style="background:var(--bg);border-bottom:1px solid var(--border);">
   <div style="max-width:1200px;margin:0 auto;padding:10px 2rem;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sub);">
-    <a href="index.html" style="display:inline-flex;align-items:center;gap:5px;color:var(--sub);text-decoration:none;transition:color .18s;" onmouseover="this.style.color='var(--pu)'" onmouseout="this.style.color='var(--sub)'">
+    <a href="index.html" style="display:inline-flex;align-items:center;gap:5px;padding:10px 0;margin:-10px 0;color:var(--sub);text-decoration:none;transition:color .18s;" onmouseover="this.style.color='var(--pu)'" onmouseout="this.style.color='var(--sub)'">
       <i class="ti ti-home" style="font-size:14px;"></i> Inicio
     </a>
     <i class="ti ti-chevron-right" style="font-size:12px;opacity:.4;"></i>
@@ -612,7 +612,6 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 <!-- Los textos y colores salen del panel del agente (pestaña Widget), no de acá:
      ponerlos en los dos lados sería tener dos configuraciones peleándose. -->
 <elevenlabs-convai agent-id="agent_1801kyrek4bjebtsayxyheen8zqc"></elevenlabs-convai>
-<script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
 
 <script>
 // Escapa texto de usuario antes de meterlo en innerHTML (anti-XSS).
@@ -869,6 +868,17 @@ function handleNavSearch(val) {
 async function openProvider(providerId) {
   if(!sb || !providerId) return;
 
+  // Abrir YA con "Cargando…" y rellenar cuando llegue la base: antes el
+  // modal esperaba las 4 consultas y en datos móviles el toque parecía muerto.
+  const overlay = document.getElementById('provider-modal-overlay');
+  overlay.dataset.cargando = providerId;
+  document.getElementById('pm-name').textContent = 'Cargando…';
+  ['pm-categoria','pm-ubicacion','pm-rating','pm-reviews','pm-bio','pm-badge'].forEach(id => document.getElementById(id).textContent = '');
+  ['pm-services','pm-gallery','pm-comentarios'].forEach(id => document.getElementById(id).innerHTML = '');
+  document.getElementById('pm-avatar-img').removeAttribute('src');
+  document.getElementById('pm-banner-img').removeAttribute('src');
+  overlay.classList.add('open');
+
   const [{ data: perfilReal }, { data: serviciosReal }, { data: feedReal }, { data: comentariosReal }] = await Promise.all([
     sb.from('profiles').select('full_name, categoria, location, bio, avatar_url, banner_url, rating, reviews_count').eq('id', providerId).single(),
     sb.from('services').select('id, name, price, precio_a_cotizar, description, no_incluye, website_url, imagenes, videos, opciones').eq('provider_id', providerId).eq('active', true),
@@ -876,7 +886,9 @@ async function openProvider(providerId) {
     sb.from('comentarios_perfil').select('client_name, comment, created_at').eq('provider_id', providerId).order('created_at', { ascending: false })
   ]);
 
-  if(!perfilReal) return;
+  // El usuario cerró el modal o abrió otro proveedor mientras cargaba
+  if(overlay.dataset.cargando !== providerId || !overlay.classList.contains('open')) return;
+  if(!perfilReal){ closeProviderModal(); return; }
 
   const nombre = perfilReal.full_name || 'Proveedor';
   const categoria = perfilReal.categoria || 'Servicios para eventos';
@@ -2139,5 +2151,6 @@ async function confirmarReserva(){
 </script>
 <script src="feedback.js"></script>
 <script src="analytics.js"></script>
+<script src="tactil.js"></script>
 </body>
 </html>

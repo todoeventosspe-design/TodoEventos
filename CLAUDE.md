@@ -37,6 +37,7 @@ caja, CRM, inventario, reportes); el marketplace viene de yapa.
 | `nosotros.html`, `proveedores.html`, `confirmacion.html` | Institucionales / flujo |
 | `feedback.js` | Widget de feedback incluido en todas las páginas |
 | `analytics.js` | Vercel Web Analytics + evento `clic_boton` por cada clic en botón/enlace, incluido en todas las páginas. Falta activar "Web Analytics" en el panel de Vercel (paso del humano). |
+| `tactil.js` | Fluidez en celular, incluido en todas las páginas DESPUÉS de sus scripts: marca `.te-busy` el botón que dispara una función async hasta que termina (sin doble tap), activa `:active` en iOS y carga el widget de ElevenLabs recién con la página quieta (antes bloqueaba los primeros toques). Va con el bloque "Fluidez táctil" de `estilo.css`. |
 | `*.sql` | Migraciones que se corren A MANO en el SQL editor de Supabase |
 | `MARKETING.md`, `SEGURIDAD.md`, `ASISTENTE.md` | Decisiones de fondo — LEER |
 

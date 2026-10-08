@@ -35,7 +35,7 @@ body.role-proveedor{
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{overflow-x:clip;} /* los glows de fondo se salían del borde en celular */
-body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;transition:background .3s;}
+body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;overflow:clip;transition:background .3s;} /* clip: no deja que el body se desplace de lado en celular */
 .glow{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;}
 .glow.g1{width:420px;height:420px;background:var(--glow1);top:-120px;right:-100px;}
 .glow.g2{width:360px;height:360px;background:var(--glow2);bottom:-120px;left:-100px;}
@@ -78,7 +78,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .row-between{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;font-size:12.5px;}
 .remember{display:flex;align-items:center;gap:7px;color:var(--sub);cursor:pointer;}
 .remember input{accent-color:var(--ac);width:15px;height:15px;}
-.forgot{color:var(--ac);text-decoration:none;}
+.forgot{color:var(--ac);text-decoration:none;display:inline-block;padding:12px 0;margin:-12px 0;}
 .forgot:hover{text-decoration:underline;}
 
 .msg{border-radius:10px;padding:11px 13px;font-size:12.5px;margin-bottom:16px;display:none;align-items:center;gap:8px;}
@@ -94,7 +94,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .btn-login:disabled{opacity:.6;cursor:not-allowed;}
 
 .foot-note{text-align:center;font-size:12.5px;color:var(--sub);margin-top:20px;}
-.foot-note a{color:var(--ac);text-decoration:none;font-weight:600;}
+.foot-note a{color:var(--ac);text-decoration:none;font-weight:600;display:inline-block;padding:12px 4px;margin:-12px 0;} /* zona de toque de ~40px sin mover el diseño */
 .back-home{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:18px;padding:12px;font-size:13.5px;font-weight:600;color:var(--sub);text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:12px;transition:all .18s;}
 .back-home:hover{color:var(--fg);border-color:var(--ac-line);background:var(--card2);}
 /* Fotos del proveedor al registrarse */
@@ -111,7 +111,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 
 <div class="login-wrap">
   <span class="logo"><span class="lp">Todo</span><span class="lo">Eventos</span><span class="dot">.pe</span></span>
-  <p class="login-sub">Bienvenido de vuelta</p>
+  <p class="login-sub" id="login-sub">Bienvenido de vuelta</p>
 
   <div class="card">
     <div id="vista-form">
@@ -313,6 +313,9 @@ let currentRole = 'cliente';
 const AGENTE_CLIENTE   = 'agent_1801kyrek4bjebtsayxyheen8zqc'; // Raymi
 const AGENTE_PROVEEDOR = 'agent_5301kz33f0fbfztb6rpxnr8nxf7z'; // Asesor Personal
 function montarAsistente(role){
+  const agente = role === 'proveedor' ? AGENTE_PROVEEDOR : AGENTE_CLIENTE;
+  // Re-montarlo es caro (recarga el agente y su animación): solo si cambia.
+  if(document.querySelector(`elevenlabs-convai[agent-id="${agente}"]`)) return;
   document.querySelectorAll('elevenlabs-convai').forEach(el => el.remove());
   const w = document.createElement('elevenlabs-convai');
   w.setAttribute('agent-id', role === 'proveedor' ? AGENTE_PROVEEDOR : AGENTE_CLIENTE);
@@ -431,16 +434,22 @@ function toggleAuthMode(){
   authMode = (authMode === 'login') ? 'registro' : 'login';
   updateUI();
   hideMessages();
+  // En celular el link está abajo y lo que cambia (campos nuevos, título)
+  // queda arriba, fuera de vista: parecía que el toque no había hecho nada.
+  document.querySelector('.card').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // Combina el rol (cliente/proveedor) y el modo (login/registro) para
 // dejar todos los textos de la pantalla correctos.
 function updateUI(){
   const ui = ROLE_UI[currentRole];
-  document.getElementById('ctx-title').textContent = ui.ctxTitle;
+  const esRegistro = authMode === 'registro';
+  document.getElementById('login-sub').textContent = esRegistro ? 'Crea tu cuenta gratis' : 'Bienvenido de vuelta';
+  document.getElementById('ctx-title').textContent = esRegistro
+    ? (currentRole === 'cliente' ? 'Crea tu cuenta de Cliente' : 'Crea tu cuenta de Proveedor')
+    : ui.ctxTitle;
   document.getElementById('ctx-desc').textContent = ui.ctxDesc;
 
-  const esRegistro = authMode === 'registro';
   // El nombre personal solo se le pide al CLIENTE. El proveedor usa un único
   // campo (el nombre de su negocio) como nombre de la cuenta.
   document.getElementById('field-nombre').style.display = (esRegistro && currentRole !== 'proveedor') ? 'block' : 'none';
@@ -847,8 +856,8 @@ montarAsistente(currentRole);
      Cambia según la pestaña: en "Acceso Clientes" aparece Raymi (para clientes)
      y en "Acceso Proveedores" el Asesor (para proveedores). Un cliente nunca
      debe recibir consejos de proveedor. El montaje lo hace montarAsistente(). -->
-<script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
 <script src="feedback.js"></script>
 <script src="analytics.js"></script>
+<script src="tactil.js"></script>
 </body>
 </html>
