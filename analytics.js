@@ -24,7 +24,12 @@
   var s = document.createElement('script');
   s.defer = true;
   s.src = '/_vercel/insights/script.js';
-  document.head.appendChild(s);
+  // Si la página se pre-cargó (tactil.js) y nadie la abrió todavía, no es una visita.
+  if (document.prerendering) {
+    document.addEventListener('prerenderingchange', function () { document.head.appendChild(s); }, { once: true });
+  } else {
+    document.head.appendChild(s);
+  }
 
   // 3) Un evento por cada clic en botón / enlace / control.
   function etiquetaDe(el) {

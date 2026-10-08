@@ -41,18 +41,35 @@
     };
   });
 
+  // Se carga tras 3 s SIN toques ni scroll: si arrancara mientras el usuario
+  // navega, sus ~1 s de procesador en celular caerían justo sobre sus toques.
   if (document.querySelector('elevenlabs-convai')) {
+    var eventos = ['pointerdown', 'scroll', 'keydown'], espera;
     var cargarAsistente = function () {
+      eventos.forEach(function (t) { removeEventListener(t, reprogramar, true); });
       var s = document.createElement('script');
       s.src = 'https://unpkg.com/@elevenlabs/convai-widget-embed';
       s.async = true;
       document.body.appendChild(s);
     };
-    var cuandoQuieta = function () {
-      if (window.requestIdleCallback) requestIdleCallback(cargarAsistente, { timeout: 4000 });
-      else setTimeout(cargarAsistente, 1500);
-    };
-    if (document.readyState === 'complete') cuandoQuieta();
-    else addEventListener('load', cuandoQuieta);
+    var reprogramar = function () { clearTimeout(espera); espera = setTimeout(cargarAsistente, 3000); };
+    eventos.forEach(function (t) { addEventListener(t, reprogramar, { capture: true, passive: true }); });
+    reprogramar();
+  }
+
+  // 4) Cada "pestaña" es una página aparte: sin esto, cada toque bajaba la
+  //    página nueva de cero. El navegador la descarga de antemano (prefetch)
+  //    y la deja armada al acercar el dedo (prerender), así abre al instante.
+  //    Chrome/Edge lo usan; los que no lo entienden lo ignoran.
+  if (HTMLScriptElement.supports && HTMLScriptElement.supports('speculationrules')) {
+    var publicas = "a[href^='index.html'], a[href^='catalogo.html'], a[href^='login.html'], a[href^='nosotros.html'], a[href^='proveedores.html'], a[href^='cuenta.html'], a[href^='dashboard.html']";
+    var reglas = document.createElement('script');
+    reglas.type = 'speculationrules';
+    reglas.textContent = JSON.stringify({
+      prefetch: [{ where: { selector_matches: publicas }, eagerness: 'immediate' }],
+      // ponytail: prerender solo páginas sin sesión obligatoria; cuenta/dashboard redirigen si no hay sesión
+      prerender: [{ where: { selector_matches: "a[href^='index.html'], a[href^='catalogo.html'], a[href^='login.html'], a[href^='nosotros.html'], a[href^='proveedores.html']" }, eagerness: 'moderate' }]
+    });
+    document.head.appendChild(reglas);
   }
 })();

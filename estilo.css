@@ -50,7 +50,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
 /* Mismo look compacto que catalogo.html: barra translucida con blur,
    texto mas chico, todo mas apretado - se siente mas profesional que
    la barra grande de antes. */
-#nav{position:sticky;top:0;z-index:200;background:rgba(255,255,255,.96);backdrop-filter:blur(20px);border-bottom:1px solid var(--linea);}
+#nav{position:sticky;top:0;z-index:200;background:#fff;border-bottom:1px solid var(--linea);} /* sin backdrop-filter: con fondo casi opaco no se notaba y en celular re-difuminaba el nav en cada frame */
 .nav-in{max-width:1200px;margin:0 auto;padding:14px 2rem;display:flex;align-items:center;gap:16px;}
 .logo{font-family:'Epilogue',sans-serif;font-size:17px;font-weight:700;flex-shrink:0;line-height:1;}
 .logo .a{color:var(--morado);}
@@ -66,7 +66,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
 .nav-links{display:flex;gap:2px;margin-left:8px;flex:1;align-items:center;}
 .nlink{padding:8px 12px;font-size:13.5px;font-weight:500;color:var(--tinta);border-radius:8px;transition:background .18s;}
 .nlink:hover{background:var(--hueso);}
-.nprov{background:linear-gradient(135deg,var(--naranja),var(--naranja-osc));color:#fff;padding:8px 16px;border-radius:8px;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:5px;animation:navpulse 2.5s ease infinite;}
+.nprov{background:linear-gradient(135deg,var(--naranja),var(--naranja-osc));color:#fff;padding:8px 16px;border-radius:8px;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:5px;animation:navpulse 2.5s ease 3;} /* 3 pulsos y para: en bucle repintaba el nav sin parar */
 @keyframes navpulse{0%,100%{box-shadow:0 0 0 0 rgba(234,88,12,.45);}70%{box-shadow:0 0 0 10px rgba(234,88,12,0);}}
 /* Ingresar es la unica accion del nav que lleva a una cuenta: tiene que
    distinguirse de un link de navegacion comun, por eso lleva relleno propio
@@ -421,10 +421,17 @@ footer .logo .b{color:var(--naranja);}
    (zoom), el tap se dispara al instante. El pellizco para hacer zoom sigue. */
 html{touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
 /* Respuesta visual inmediata al tocar; sin esperar la transición de hover */
-:is(button,a,[role="button"],.btn,label[for]):not(:disabled):active{opacity:.7;transition:none;}
+/* :where = especificidad mínima: si un botón ya tiene su propia animación de presionado, gana la suya */
+:where(button,a,[role="button"],.btn,label[for]):where(:not(:disabled,#fbk-tab)):active{opacity:.8;transform:scale(.96);transition:transform .08s ease-out,opacity .08s;}
 /* Botón esperando al servidor (lo pone tactil.js): se ve ocupado y no
    acepta un segundo toque, que antes duplicaba guardados. */
 .te-busy{opacity:.6!important;pointer-events:none;cursor:progress;}
 /* El asistente de ElevenLabs flota abajo a la derecha y en celular tapaba
    los últimos botones de la página: se deja espacio para hacer scroll. */
 @media(max-width:760px){ body:has(elevenlabs-convai){padding-bottom:150px;} }
+
+/* Cambio de página suave: el navegador funde la página vieja con la nueva
+   en vez de mostrar la pantalla en blanco (Chrome/Edge 126+, Safari 18.2+;
+   en los demás simplemente navega como antes). */
+@view-transition{navigation:auto;}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.18s;}
