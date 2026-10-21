@@ -46,7 +46,7 @@ try {
 
 const CHROME_NAV = `
 <header id="nav"><div class="nav-in">
-  <a href="index.html" class="logo"><span class="a">Todo</span><span class="b">Eventos</span></a>
+  <a href="index.html" class="logo"><img src="logo-te.png" alt="" class="logo-te" width="41" height="32"><span class="a">Todo</span><span class="b">Eventos</span></a>
   <nav class="nav-links">
     <a href="index.html" class="nlink">Inicio</a>
     <a href="marketplace" class="nlink">Marketplace</a>
