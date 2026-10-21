@@ -3,7 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ingresar a TodoEventos.pe</title>
+<title>Ingresar a TodoEventos</title>
+<meta name="description" content="Ingresa o crea tu cuenta gratis en TodoEventos, el marketplace de proveedores para eventos en Lima.">
+<!-- Vista previa al compartir el link (WhatsApp, Facebook, Instagram, LinkedIn). -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TodoEventos">
+<meta property="og:locale" content="es_PE">
+<meta property="og:title" content="Ingresar a TodoEventos">
+<meta property="og:description" content="Ingresa o crea tu cuenta gratis en TodoEventos, el marketplace de proveedores para eventos en Lima.">
+<meta property="og:image" content="https://www.todoeventos.website/og-imagen.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" media="print" onload="this.media='all'">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -47,7 +58,6 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .logo{font-size:24px;font-weight:700;text-decoration:none;display:block;text-align:center;margin-bottom:8px;}
 .logo .lp{color:var(--logo-a,var(--ac));}
 .logo .lo{color:var(--logo-b,var(--ac-2));}
-.logo .dot{color:var(--tinta-3);font-weight:400;}
 .login-sub{text-align:center;color:var(--sub);font-size:13.5px;margin-bottom:26px;}
 
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:30px;}
@@ -139,7 +149,7 @@ body.role-proveedor .role-tabs::before{transform:translateX(calc(100% + 6px));}
 <div class="glow g2"></div>
 
 <div class="login-wrap">
-  <span class="logo"><span class="lp">Todo</span><span class="lo">Eventos</span><span class="dot">.pe</span></span>
+  <span class="logo"><img src="logo-te.png" alt="" class="logo-te" width="41" height="32"><span class="lp">Todo</span><span class="lo">Eventos</span></span>
   <p class="login-sub" id="login-sub">Bienvenido de vuelta</p>
 
   <div class="card">
@@ -534,7 +544,7 @@ function updateUI(){
   // Título de la pestaña y URL según la pantalla. Se conserva el resto de la
   // URL (ej. el #access_token que deja el correo de confirmación de Supabase).
   const [slug, titulo] = AUTH_URL[authMode + '-' + currentRole];
-  document.title = titulo + ' | TodoEventos.pe';
+  document.title = titulo + ' | TodoEventos';
   if(location.protocol !== 'file:'){
     const url = new URL(location.href);
     url.pathname = '/' + slug;

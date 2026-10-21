@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel del proveedor en TodoEventos.pe</title>
+<title>Panel del proveedor en TodoEventos</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,7 +26,6 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .logo{font-size:19px;font-weight:700;text-decoration:none;padding:6px 8px 20px;display:block;}
 .logo .lp{color:var(--or);}
 .logo .lo{color:var(--gold);}
-.logo .dot{color:var(--tinta-3);font-weight:400;}
 .side-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--sub);padding:12px 8px 8px;font-weight:600;}
 .side-item{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:10px;color:var(--sub);font-size:14px;font-weight:500;cursor:pointer;border:none;background:transparent;width:100%;text-align:left;font-family:inherit;transition:all .16s;text-decoration:none;}
 .side-item i{font-size:19px;width:20px;text-align:center;}
@@ -543,7 +542,7 @@ verificarAccesoDashboard();
 <!-- Barra superior solo-móvil: botón de menú que abre la barra lateral -->
 <div class="mtopbar">
   <button class="nav-hamb" onclick="toggleNav()" aria-label="Abrir menú"><i class="ti ti-menu-2"></i></button>
-  <span class="logo"><span class="lp">Todo</span><span class="lo">Eventos</span><span class="dot">.pe</span></span>
+  <span class="logo"><img src="logo-te.png" alt="" class="logo-te" width="41" height="32"><span class="lp">Todo</span><span class="lo">Eventos</span></span>
 </div>
 <div class="nav-backdrop" onclick="closeNav()"></div>
 
@@ -551,7 +550,7 @@ verificarAccesoDashboard();
 
   <!-- ═══ SIDEBAR ═══ -->
   <aside class="sidebar">
-    <span class="logo"><span class="lp">Todo</span><span class="lo">Eventos</span><span class="dot">.pe</span></span>
+    <span class="logo"><img src="logo-te.png" alt="" class="logo-te" width="41" height="32"><span class="lp">Todo</span><span class="lo">Eventos</span></span>
 
     <div class="side-label">Panel</div>
     <button class="side-item" onclick="openTool('perfil')"><i class="ti ti-id-badge-2"></i> Mi Perfil</button>
@@ -2084,7 +2083,7 @@ function exportCotizacionPDF(){
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.5);
   setTC(doc, '#777777');
-  doc.text('Vía TodoEventos.pe · Marketplace de servicios para eventos, Lima', marginX, y + 5);
+  doc.text('Vía TodoEventos · Marketplace de servicios para eventos, Lima', marginX, y + 5);
   let contactoY = y + 5;
   if(pl.telefono){ contactoY += 4.2; doc.text('Tel/WhatsApp: ' + pl.telefono, marginX, contactoY); }
   if(pl.correo){ contactoY += 4.2; doc.text('Correo: ' + pl.correo, marginX, contactoY); }
@@ -2243,7 +2242,7 @@ function exportCotizacionPDF(){
   doc.setFontSize(8);
   setTC(doc, '#999999');
   const pieTexto = (pl.terminos ? pl.terminos + '  ' : '') +
-    'Cotización generada por ' + pl.negocio + ' vía TodoEventos.pe · Válida por ' + pl.validez + ' días desde su emisión.';
+    'Cotización generada por ' + pl.negocio + ' vía TodoEventos · Válida por ' + pl.validez + ' días desde su emisión.';
   const pieLines = doc.splitTextToSize(pieTexto, contentW);
   doc.text(pieLines, pageW / 2, y, { align: 'center' });
 

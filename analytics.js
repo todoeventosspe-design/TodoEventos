@@ -9,6 +9,9 @@
  *     no hace nada.
  *  2) Manda un EVENTO por cada clic en un botón o enlace, con el nombre del botón
  *     y la página, para poder ver en el panel de Vercel qué se toca más.
+ *  3) Google Analytics 4 (si GA_ID tiene valor): visitas, de dónde llegan
+ *     (Google, Instagram, directo) y el mismo evento de clic, sin tope mensual.
+ *     Solo en el dominio real, para que local y los previews no ensucien datos.
  *
  * OJO con el plan gratis de Vercel: los eventos personalizados tienen un tope
  * mensual (aprox. 2.500 en Hobby). Cada clic cuenta como un evento. Si el sitio
@@ -24,11 +27,28 @@
   var s = document.createElement('script');
   s.defer = true;
   s.src = '/_vercel/insights/script.js';
+
+  // 3) Google Analytics 4. El ID sale de analytics.google.com → Administrar →
+  //    Flujos de datos → Web ("G-XXXXXXXXXX"). Vacío = GA apagado.
+  var GA_ID = '';
+  var conGA = GA_ID && /(^|\.)todoeventos\.website$/.test(location.hostname);
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = window.gtag || function () { dataLayer.push(arguments); };
+  if (conGA) { gtag('js', new Date()); gtag('config', GA_ID); }
+
+  function cargar() {
+    document.head.appendChild(s);
+    if (!conGA) return;
+    var g = document.createElement('script');
+    g.async = true;
+    g.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+    document.head.appendChild(g);
+  }
   // Si la página se pre-cargó (tactil.js) y nadie la abrió todavía, no es una visita.
   if (document.prerendering) {
-    document.addEventListener('prerenderingchange', function () { document.head.appendChild(s); }, { once: true });
+    document.addEventListener('prerenderingchange', cargar, { once: true });
   } else {
-    document.head.appendChild(s);
+    cargar();
   }
 
   // 3) Un evento por cada clic en botón / enlace / control.
@@ -52,10 +72,9 @@
              e.target.closest('button, a, [role="button"], input[type="submit"], input[type="button"], .btn, [onclick]');
     if (!el) return;
     try {
-      window.va('event', {
-        name: 'clic_boton',
-        data: { boton: etiquetaDe(el), pagina: paginaActual() }
-      });
+      var data = { boton: etiquetaDe(el), pagina: paginaActual() };
+      window.va('event', { name: 'clic_boton', data: data });
+      if (conGA) gtag('event', 'clic_boton', data);
     } catch (err) { /* nunca romper la página por analytics */ }
   }, true);
 })();
