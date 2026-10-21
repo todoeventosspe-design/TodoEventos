@@ -36,7 +36,8 @@ caja, CRM, inventario, reportes); el marketplace viene de yapa.
 | `login.html` | Login + registro (cliente y proveedor), verificación por código |
 | `nosotros.html`, `proveedores.html`, `confirmacion.html` | Institucionales / flujo |
 | `feedback.js` | Widget de feedback incluido en todas las páginas |
-| `analytics.js` | Vercel Web Analytics + evento `clic_boton` por cada clic en botón/enlace, incluido en todas las páginas. Falta activar "Web Analytics" en el panel de Vercel (paso del humano). |
+| `analytics.js` | Vercel Web Analytics + Google Analytics 4 + evento `clic_boton` por cada clic en botón/enlace, incluido en todas las páginas. GA4 se prende poniendo el ID `G-...` en `GA_ID` (solo cuenta en el dominio real). Falta activar "Web Analytics" en el panel de Vercel (paso del humano). |
+| `og-imagen.jpg` | Imagen 1200×630 de la vista previa al compartir (etiquetas `og:*` de las páginas públicas). |
 | `tactil.js` | Fluidez en celular, incluido en todas las páginas DESPUÉS de sus scripts: marca `.te-busy` el botón que dispara una función async hasta que termina (sin doble tap), activa `:active` en iOS carga el widget de ElevenLabs tras 3 s sin toques (antes bloqueaba los primeros toques) y pre-carga las páginas públicas con Speculation Rules (analytics.js no cuenta la visita hasta que se abre). Va con el bloque "Fluidez táctil" de `estilo.css`. |
 | `vercel.json` | URLs propias (rewrites): `/marketplace` y `/<categoria>-lima` sirven `catalogo.html`; `/ingresar`, `/ingresar-proveedor`, `/registro-cliente`, `/registro-proveedor` sirven `login.html`. Cada página pone su título/URL con `CAT_SEO` (catálogo) y `AUTH_URL` (login). Un slug nuevo va en los 3 sitios + `sitemap.xml`. Los links viejos `catalogo.html?cat=...` siguen andando. |
 | `sitemap.xml`, `robots.txt` | Para Google. Subir el sitemap en Search Console. |
