@@ -1,5 +1,5 @@
 // ============================================================
-// TodoEventos.pe - chrome compartido (topbar + nav + footer) y sesion.
+// TodoEventos - chrome compartido (topbar + nav + footer) y sesion.
 //
 // Antes este codigo vivia copiado y pegado en index, nosotros y
 // proveedores; cualquier cambio habia que hacerlo tres veces. Ahora las
@@ -79,6 +79,7 @@ const CHROME_FOOTER = `
       <div>
         <span class="logo"><span class="a" style="color:#A78BFA">Todo</span><span class="b">Eventos</span></span>
         <p class="f-desc">El marketplace de servicios para eventos en Lima, Perú.</p>
+        <a class="f-ig" href="https://www.instagram.com/todoeventos.pe/" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6" fill="currentColor"/></svg>@todoeventos.pe</a>
       </div>
       <div class="f-col"><h5>Marketplace</h5>
         <a href="marketplace">Todo el catálogo</a>
@@ -98,7 +99,7 @@ const CHROME_FOOTER = `
       </div>
     </div>
     <div class="f-bot">
-      <span>© 2026 TodoEventos.pe · Lima, Perú</span>
+      <span>© 2026 TodoEventos · Lima, Perú</span>
       <div class="f-links"><a href="#">Términos</a><a href="#">Privacidad</a><a href="#">Contacto</a></div>
     </div>
   </div>

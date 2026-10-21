@@ -225,6 +225,8 @@ section{padding:52px 0;}
 footer{background:var(--tinta);color:rgba(255,255,255,.72);padding:44px 0 24px;}
 .f-top{display:grid;grid-template-columns:1.7fr 1fr 1fr 1fr;gap:32px;margin-bottom:30px;}
 .f-desc{font-size:14px;margin-top:11px;max-width:250px;font-weight:500;}
+.f-ig{display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:6px 0;font-size:14.5px;font-weight:600;color:#fff;transition:color .16s;}
+.f-ig:hover{color:var(--naranja);}
 .f-col h5{font-family:'Anton',sans-serif;text-transform:uppercase;font-size:14px;color:#fff;margin-bottom:13px;letter-spacing:.03em;}
 .f-col a{display:block;font-size:14.5px;margin-bottom:10px;font-weight:500;transition:color .16s;}
 .f-col a:hover{color:var(--naranja);}
