@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /cuenta.html
+
+Sitemap: https://www.todoeventos.website/sitemap.xml

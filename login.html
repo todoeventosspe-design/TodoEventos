@@ -332,7 +332,7 @@ try {
   console.error('No se pudo inicializar Supabase:', e);
 }
 
-const REDIRECT_MAP = { cliente: 'catalogo.html', proveedor: 'dashboard.html' };
+const REDIRECT_MAP = { cliente: 'marketplace', proveedor: 'dashboard.html' };
 
 let currentRole = 'cliente';
 
@@ -351,6 +351,15 @@ function montarAsistente(role){
   document.body.appendChild(w);
 }
 let authMode = 'login'; // 'login' | 'registro'
+
+// URL y título propios de cada pantalla (vercel.json reescribe estas rutas a
+// este archivo). La clave es `${authMode}-${currentRole}`.
+const AUTH_URL = {
+  'login-cliente':      ['ingresar',           'Ingresar a tu cuenta'],
+  'login-proveedor':    ['ingresar-proveedor', 'Ingresar al panel de proveedores'],
+  'registro-cliente':   ['registro-cliente',   'Crea tu cuenta gratis y organiza tu evento'],
+  'registro-proveedor': ['registro-proveedor', 'Registra tu negocio de eventos gratis'],
+};
 
 const ROLE_UI = {
   cliente: {
@@ -520,6 +529,17 @@ function updateUI(){
     document.getElementById('foot-note').innerHTML = (currentRole === 'cliente')
       ? '¿No tienes cuenta?<button type="button" class="btn-alt" onclick="toggleAuthMode()"><i class="ti ti-user-plus"></i> Crear cuenta gratis</button>'
       : '¿Quieres vender en TodoEventos?<button type="button" class="btn-alt" onclick="toggleAuthMode()"><i class="ti ti-building-store"></i> Crear cuenta de proveedor</button><a href="proveedores.html" class="fn-link">Conoce los planes</a>';
+  }
+
+  // Título de la pestaña y URL según la pantalla. Se conserva el resto de la
+  // URL (ej. el #access_token que deja el correo de confirmación de Supabase).
+  const [slug, titulo] = AUTH_URL[authMode + '-' + currentRole];
+  document.title = titulo + ' | TodoEventos.pe';
+  if(location.protocol !== 'file:'){
+    const url = new URL(location.href);
+    url.pathname = '/' + slug;
+    ['modo', 'rol', 'v'].forEach(k => url.searchParams.delete(k));
+    history.replaceState(history.state, '', url);
   }
 }
 
@@ -885,12 +905,15 @@ async function enviarCorreoConfirmacion(email, nombre, nombreNegocio){
 }
 
 // Si llegamos desde un botón tipo "Registrarme gratis" con parámetros en
-// la URL (ej. login.html?modo=registro&rol=proveedor), abrimos directo
+// la URL (ej. registro-proveedor), abrimos directo
 // la pantalla de CREAR CUENTA en el rol indicado, en vez de la de login.
 (function aplicarParametrosDeUrl(){
   const params = new URLSearchParams(window.location.search);
-  const modo = params.get('modo');
-  const rol = params.get('rol');
+  // También desde la ruta: /registro-proveedor = modo registro + rol proveedor.
+  const ruta = location.pathname.replace(/^\/|\.html$/g, '');
+  const [modoRuta, rolRuta] = (Object.keys(AUTH_URL).find(k => AUTH_URL[k][0] === ruta) || '').split('-');
+  const modo = params.get('modo') || modoRuta;
+  const rol = params.get('rol') || rolRuta;
 
   if(modo === 'registro'){
     authMode = 'registro';

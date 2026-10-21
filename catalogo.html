@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Marketplace de TodoEventos.pe</title>
+<title>Marketplace de proveedores para eventos en Lima | TodoEventos.pe</title>
+<meta name="description" content="Marketplace de proveedores para eventos en Lima: compara DJ, catering, fotografía, locales y más, con precios publicados y reseñas, y reserva en línea.">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -460,7 +461,7 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
         <i class="ti ti-shopping-cart"></i>
         <span class="cart-badge" id="cart-badge">0</span>
       </button>
-      <a href="login.html?v=2" class="btn-login" id="btn-ingresar" style="text-decoration:none;display:inline-flex;align-items:center;">Ingresar</a>
+      <a href="ingresar" class="btn-login" id="btn-ingresar" style="text-decoration:none;display:inline-flex;align-items:center;">Ingresar</a>
 
       <div class="user-menu" id="user-menu">
         <button class="user-avatar" id="user-avatar-btn" onclick="toggleUserDropdown()"></button>
@@ -751,6 +752,41 @@ let searchQuery = '';
 
 const catNames = {all:'Todos los servicios',musica:'Música & DJs',catering:'Catering',fotografia:'Fotografía & Video',locales:'Locales & Salones',animadores:'Animadores',decoracion:'Decoración',inflables:'Inflables y juegos',bar:'Bar Móvil',pasteleria:'Pastelería',transporte:'Transporte',seguridad:'Seguridad'};
 
+// Cada categoría tiene su propia URL (vercel.json reescribe todas a este
+// archivo) y su propio título: es lo que Google indexa y muestra.
+// Si cambias un slug, cámbialo también en vercel.json y sitemap.xml.
+const CAT_SEO = {
+  all:        ['marketplace',             'Marketplace de proveedores para eventos en Lima'],
+  musica:     ['dj-lima',                 'DJ y música para fiestas en Lima'],
+  catering:   ['catering-lima',           'Catering para eventos en Lima'],
+  fotografia: ['fotografia-lima',         'Fotografía y video para eventos en Lima'],
+  locales:    ['locales-para-eventos-lima','Locales y salones para eventos en Lima'],
+  animadores: ['animadores-lima',         'Animadores para fiestas en Lima'],
+  decoracion: ['decoracion-eventos-lima', 'Decoración de eventos en Lima'],
+  inflables:  ['inflables-lima',          'Alquiler de inflables y juegos en Lima'],
+  bar:        ['bar-movil-lima',          'Bar móvil para eventos en Lima'],
+  pasteleria: ['pasteleria-lima',         'Tortas y pastelería para eventos en Lima'],
+  transporte: ['transporte-eventos-lima', 'Transporte para eventos en Lima'],
+  seguridad:  ['seguridad-eventos-lima',  'Seguridad para eventos en Lima'],
+};
+
+// Pone la URL, el título, la descripción y el canonical de la categoría.
+// replaceState cambia la barra de direcciones sin recargar la página.
+function aplicarUrlCategoria(cat){
+  const [slug, titulo] = CAT_SEO[cat] || CAT_SEO.all;
+  document.title = titulo + ' | TodoEventos.pe';
+  document.querySelector('meta[name="description"]').content =
+    titulo + ': compara proveedores verificados, precios publicados y reseñas, y reserva en línea en TodoEventos.pe.';
+  let canon = document.querySelector('link[rel="canonical"]');
+  if(!canon){ canon = document.createElement('link'); canon.rel = 'canonical'; document.head.appendChild(canon); }
+  canon.href = 'https://www.todoeventos.website/' + slug;
+  if(location.protocol === 'file:') return;
+  const url = new URL(location.href);
+  url.pathname = '/' + slug;
+  url.searchParams.delete('cat');
+  history.replaceState(history.state, '', url);
+}
+
 // ─── RENDER ───
 function render() {
   let data = [...providers];
@@ -839,6 +875,7 @@ function setCategory(cat, el) {
   el.classList.add('active');
   const bcEl = document.getElementById('breadcrumb-cat');
   if(bcEl) bcEl.textContent = cat === 'all' ? 'Marketplace' : (catNames[cat] || 'Marketplace');
+  aplicarUrlCategoria(cat);
   render();
 }
 
@@ -1393,7 +1430,9 @@ document.querySelector('elevenlabs-convai')
 // ─── READ URL PARAMS (from index.html links) ───
 (function(){
   const p = new URLSearchParams(window.location.search);
-  const cat = p.get('cat');
+  // La categoría viene de la ruta (/dj-lima) o, en links viejos, de ?cat=musica.
+  const ruta = location.pathname.replace(/^\/|\.html$/g, '');
+  const cat = p.get('cat') || Object.keys(CAT_SEO).find(c => CAT_SEO[c][0] === ruta);
   const q   = p.get('q');
   if(q) {
     searchQuery = q;
@@ -1411,6 +1450,7 @@ document.querySelector('elevenlabs-convai')
     const bcEl = document.getElementById('breadcrumb-cat');
     if(bcEl && catNames[cat]) bcEl.textContent = catNames[cat];
   }
+  aplicarUrlCategoria(currentCat);
   // "Hablar con Raymi" del home linkea con ?raymi=1: abrimos el widget
   // del asistente directo, en vez de dejarlo cerrado esperando un click aparte.
   if(p.get('raymi')){
@@ -1503,7 +1543,7 @@ async function verificarSesionNav(){
   document.getElementById('user-avatar-btn').textContent = inicial;
   document.getElementById('user-dropdown-name').textContent = nombre;
 
-  const destino = rol === 'proveedor' ? 'dashboard.html' : 'catalogo.html';
+  const destino = rol === 'proveedor' ? 'dashboard.html' : 'marketplace';
   const textoLink = rol === 'proveedor' ? 'Mi dashboard' : 'Ir al marketplace';
   document.getElementById('link-mi-espacio').href = destino;
   document.getElementById('link-mi-espacio-texto').textContent = textoLink;
@@ -1524,7 +1564,7 @@ async function cargarFavoritos(){
 async function toggleFavorito(serviceId, btn){
   if(!sb || !sesionUsuario){
     alert('Ingresa a tu cuenta para guardar favoritos.');
-    window.location.href = 'login.html';
+    window.location.href = 'ingresar';
     return;
   }
   const yaEsFav = favoritos.has(serviceId);
@@ -1626,7 +1666,7 @@ function exigirLogin(mensaje){
     icono: 'ti-user-plus',
     ok: 'Entrar / crear cuenta',
     cancel: 'Ahora no',
-    onOk: function(){ window.location.href = 'login.html?modo=registro&rol=cliente'; }
+    onOk: function(){ window.location.href = 'registro-cliente'; }
   });
   return false;
 }

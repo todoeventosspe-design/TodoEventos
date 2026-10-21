@@ -367,13 +367,13 @@ async function init(){
     // Fail-closed: si el SDK no carga no sabemos si sos admin, asi que no
     // se muestra nada (antes esto dejaba la pagina renderizada y vacia).
     document.getElementById('loading-screen').textContent = 'No se pudo conectar con el servidor. Recarga la página.';
-    window.location.href = 'login.html';
+    window.location.href = 'ingresar';
     return;
   }
 
   const { data } = await sb.auth.getSession();
   if(!data.session){
-    window.location.href = 'login.html';
+    window.location.href = 'ingresar';
     return;
   }
 

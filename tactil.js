@@ -62,13 +62,15 @@
   //    y la deja armada al acercar el dedo (prerender), así abre al instante.
   //    Chrome/Edge lo usan; los que no lo entienden lo ignoran.
   if (HTMLScriptElement.supports && HTMLScriptElement.supports('speculationrules')) {
-    var publicas = "a[href^='index.html'], a[href^='catalogo.html'], a[href^='login.html'], a[href^='nosotros.html'], a[href^='proveedores.html'], a[href^='cuenta.html'], a[href^='dashboard.html']";
+    // marketplace, *-lima (categorías), ingresar y registro-* son rutas de vercel.json
+    var sinSesion = "a[href^='index.html'], a[href^='marketplace'], a[href$='-lima'], a[href^='ingresar'], a[href^='registro-'], a[href^='nosotros.html'], a[href^='proveedores.html']";
+    var publicas = sinSesion + ", a[href^='cuenta.html'], a[href^='dashboard.html']";
     var reglas = document.createElement('script');
     reglas.type = 'speculationrules';
     reglas.textContent = JSON.stringify({
       prefetch: [{ where: { selector_matches: publicas }, eagerness: 'immediate' }],
       // ponytail: prerender solo páginas sin sesión obligatoria; cuenta/dashboard redirigen si no hay sesión
-      prerender: [{ where: { selector_matches: "a[href^='index.html'], a[href^='catalogo.html'], a[href^='login.html'], a[href^='nosotros.html'], a[href^='proveedores.html']" }, eagerness: 'moderate' }]
+      prerender: [{ where: { selector_matches: sinSesion }, eagerness: 'moderate' }]
     });
     document.head.appendChild(reglas);
   }
