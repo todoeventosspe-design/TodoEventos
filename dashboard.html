@@ -447,7 +447,7 @@ async function verificarAccesoDashboard(){
 
   const { data } = await sb.auth.getSession();
   if(!data.session){
-    window.location.href = 'login.html';
+    window.location.href = 'ingresar';
     return;
   }
 
@@ -464,7 +464,7 @@ async function verificarAccesoDashboard(){
   }
 
   if(perfil.role !== 'proveedor'){
-    window.location.href = 'catalogo.html';
+    window.location.href = 'marketplace';
     return;
   }
 
@@ -570,8 +570,8 @@ verificarAccesoDashboard();
 
     <div class="side-spacer"></div>
 
-    <a href="catalogo.html" class="side-item"><i class="ti ti-layout-grid"></i> Ver Catálogo</a>
-    <a href="login.html" class="side-item logout"><i class="ti ti-logout"></i> Cerrar Sesión</a>
+    <a href="marketplace" class="side-item"><i class="ti ti-layout-grid"></i> Ver Catálogo</a>
+    <a href="ingresar" class="side-item logout"><i class="ti ti-logout"></i> Cerrar Sesión</a>
 
     <div class="side-user" onclick="openTool('perfil')" style="cursor:pointer;" title="Ver mi perfil público">
       <div class="side-avatar">DJ</div>

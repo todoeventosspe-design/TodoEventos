@@ -49,7 +49,7 @@ const CHROME_NAV = `
   <a href="index.html" class="logo"><span class="a">Todo</span><span class="b">Eventos</span></a>
   <nav class="nav-links">
     <a href="index.html" class="nlink">Inicio</a>
-    <a href="catalogo.html" class="nlink">Marketplace</a>
+    <a href="marketplace" class="nlink">Marketplace</a>
     <a href="nosotros.html" class="nlink">Nosotros</a>
   </nav>
   <form class="navsearch" onsubmit="goSearch(); return false;">
@@ -57,8 +57,8 @@ const CHROME_NAV = `
     <input type="search" id="nav-q" placeholder="Busca DJ, catering, fotógrafo, local…" aria-label="Buscar proveedores">
   </form>
   <div class="nav-end">
-    <a href="login.html?modo=registro&rol=proveedor" class="nprov">Para proveedores</a>
-    <a href="login.html?v=2" class="btn-ingresar" id="btn-ingresar">Ingresar</a>
+    <a href="registro-proveedor" class="nprov">Para proveedores</a>
+    <a href="ingresar" class="btn-ingresar" id="btn-ingresar">Ingresar</a>
     <div class="user-menu" id="user-menu">
       <button class="user-avatar" id="user-avatar-btn" onclick="toggleUserDropdown()"></button>
       <div class="user-dropdown" id="user-dropdown">
@@ -81,10 +81,10 @@ const CHROME_FOOTER = `
         <p class="f-desc">El marketplace de servicios para eventos en Lima, Perú.</p>
       </div>
       <div class="f-col"><h5>Marketplace</h5>
-        <a href="catalogo.html">Todo el catálogo</a>
-        <a href="catalogo.html?cat=musica">Música &amp; DJs</a>
-        <a href="catalogo.html?cat=catering">Catering</a>
-        <a href="catalogo.html?cat=fotografia">Fotografía</a>
+        <a href="marketplace">Todo el catálogo</a>
+        <a href="dj-lima">Música &amp; DJs</a>
+        <a href="catering-lima">Catering</a>
+        <a href="fotografia-lima">Fotografía</a>
       </div>
       <div class="f-col"><h5>TodoEventos</h5>
         <a href="nosotros.html">Nosotros</a>
@@ -124,7 +124,7 @@ addEventListener('resize', medirNav);
 
 function goSearch() {
   const q = (document.getElementById('nav-q')?.value || '').trim();
-  window.location.href = q ? 'catalogo.html?q=' + encodeURIComponent(q) : 'catalogo.html';
+  window.location.href = q ? 'marketplace?q=' + encodeURIComponent(q) : 'marketplace';
 }
 
 // ── SESION ──────────────────────────────────────────────────────────────
@@ -169,7 +169,7 @@ async function verificarSesionNav() {
   document.getElementById('user-avatar-btn').textContent = nombre.trim().charAt(0).toUpperCase();
   document.getElementById('user-dropdown-name').textContent = nombre;
 
-  const destino = rol === 'proveedor' ? 'dashboard.html' : 'catalogo.html';
+  const destino = rol === 'proveedor' ? 'dashboard.html' : 'marketplace';
   document.getElementById('link-mi-espacio').href = destino;
   document.getElementById('link-mi-espacio-texto').textContent =
     rol === 'proveedor' ? 'Mi dashboard' : 'Ir al marketplace';

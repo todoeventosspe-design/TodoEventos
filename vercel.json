@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/:pagina(marketplace|dj-lima|catering-lima|fotografia-lima|locales-para-eventos-lima|animadores-lima|decoracion-eventos-lima|inflables-lima|bar-movil-lima|pasteleria-lima|transporte-eventos-lima|seguridad-eventos-lima)", "destination": "/catalogo.html" },
+    { "source": "/:pagina(ingresar|ingresar-proveedor|registro-cliente|registro-proveedor)", "destination": "/login.html" }
+  ]
+}
