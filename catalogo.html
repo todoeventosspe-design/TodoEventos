@@ -25,7 +25,13 @@
 :root{--bg:var(--app-bg);--bg2:#fff;--bg3:#fff;--fg:var(--tinta);--sub:var(--tinta-2);--pu:#7C3AED;--ind:#6D28D9;--gold:#B45309;--or:#EA580C;--border:var(--linea);}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
-body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(--fg);overflow-x:clip;padding-bottom:80px;}
+body{font-family:'Epilogue',system-ui,sans-serif;color:var(--fg);overflow-x:clip;padding-bottom:80px;
+  background:
+    radial-gradient(620px 420px at 8% 0%, rgba(124,58,237,.09), transparent 60%),
+    radial-gradient(560px 460px at 96% 18%, rgba(234,88,12,.08), transparent 60%),
+    radial-gradient(700px 520px at 50% 100%, rgba(124,58,237,.06), transparent 55%),
+    var(--bg);
+  background-attachment:fixed;}
 
 /* ── NAV ── */
 #nav{position:sticky;top:0;z-index:200;background:rgba(255,255,255,.96);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
@@ -93,8 +99,11 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
    resto es fondo de pagina normal, no una columna de grid en blanco. */
 #prov-grid{display:flex;flex-wrap:wrap;gap:1.25rem;}
 #prov-grid .pcard{flex:0 1 calc((100% - 2*1.25rem)/3);}
-.pcard{background:var(--bg3);border:1px solid var(--border);border-radius:18px;overflow:hidden;transition:transform .22s,border-color .22s;cursor:pointer;}
-.pcard:hover{transform:translateY(-4px);border-color:rgba(124,58,237,.3);}
+.pcard{background:var(--bg3);border:1px solid rgba(18,14,31,.05);border-radius:20px;overflow:hidden;cursor:pointer;
+  box-shadow:0 2px 8px -4px rgba(18,14,31,.10),0 10px 24px -18px rgba(109,40,217,.22);
+  transition:transform .24s cubic-bezier(.2,.8,.2,1),box-shadow .24s,border-color .24s;}
+.pcard:hover{transform:translateY(-6px);border-color:rgba(124,58,237,.25);
+  box-shadow:0 4px 10px -4px rgba(18,14,31,.12),0 26px 40px -20px rgba(109,40,217,.38);}
 .pcard[data-hidden="true"]{display:none;}
 .pcard-img{height:185px;display:flex;align-items:center;justify-content:center;position:relative;}
 .pcard-img i{font-size:3.25rem;color:var(--tinta-2);}
@@ -110,8 +119,8 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .ci-j{background:linear-gradient(135deg,#92400e,#dc2626);}
 .ci-k{background:linear-gradient(135deg,#6d28d9,#0891b2);}
 .ci-l{background:linear-gradient(135deg,#065f46,#1d4ed8);}
-.pcard-vbdg{position:absolute;top:10px;left:10px;background:rgba(18,14,31,.72);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px;}
-.pcard-price-tag{position:absolute;bottom:10px;right:10px;background:rgba(18,14,31,.72);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;}
+.pcard-vbdg{position:absolute;top:10px;left:10px;background:rgba(18,14,31,.6);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:10px;font-weight:700;letter-spacing:.02em;padding:4px 10px;border-radius:100px;}
+.pcard-price-tag{position:absolute;bottom:10px;right:10px;background:linear-gradient(135deg,var(--or),#c2410c);color:#fff;font-size:11.5px;font-weight:800;padding:5px 11px;border-radius:100px;box-shadow:0 4px 14px -4px rgba(194,65,12,.55);}
 .pcard-fav{position:absolute;top:10px;right:10px;width:30px;height:30px;background:rgba(18,14,31,.68);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .18s,transform .12s;}
 .pcard-fav:hover{background:rgba(124,58,237,.3);}
 .pcard-fav:active{transform:scale(.85);}
@@ -128,19 +137,19 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 /* Fundador: anillo dorado por dentro del banner. Va como box-shadow y no como
    border para que la foto no se recorte ni la tarjeta cambie de tamaño al
    pasar de un proveedor normal a uno fundador. */
-.pcard.founder{border-color:rgba(252,211,77,.32);}
-.pcard.founder:hover{border-color:rgba(252,211,77,.55);}
+.pcard.founder{box-shadow:0 2px 8px -4px rgba(18,14,31,.10),0 10px 26px -16px rgba(245,158,11,.35);}
+.pcard.founder:hover{box-shadow:0 4px 10px -4px rgba(18,14,31,.12),0 26px 42px -18px rgba(245,158,11,.45);}
 .pcard.founder .pcard-img{box-shadow:inset 0 0 0 2px rgba(252,211,77,.85);}
-.pcard-fbdg{position:absolute;bottom:10px;left:10px;display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#B45309,#f59e0b);color:#2b1c02;font-size:10px;font-weight:800;padding:4px 10px;border-radius:100px;box-shadow:0 2px 12px rgba(245,158,11,.4);}
+.pcard-fbdg{position:absolute;bottom:10px;left:10px;display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#D97706,#FBBF24);color:#2b1c02;font-size:10px;font-weight:800;letter-spacing:.02em;padding:4px 10px;border-radius:100px;box-shadow:0 4px 14px -4px rgba(245,158,11,.55);}
 .pcard-fbdg i{font-size:11px;}
 .pcard-body{padding:14px 16px;}
-.pcard-name{font-size:14px;font-weight:700;margin-bottom:5px;}
-.pcard-rat{display:flex;align-items:center;gap:4px;margin-bottom:5px;}
+.pcard-name{font-size:14.5px;font-weight:800;margin-bottom:5px;letter-spacing:-.01em;}
+.pcard-rat{display:flex;align-items:center;gap:4px;margin-bottom:6px;}
 .stars{color:#B45309;font-size:12px;letter-spacing:.5px;}
-.rn{font-size:12px;font-weight:700;}.rc{font-size:11.5px;color:var(--sub);}
-.pcard-loc{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--sub);margin-bottom:9px;}
+.rn{font-size:12px;font-weight:700;}.rc{font-size:11.5px;color:var(--sub);font-weight:600;}
+.pcard-loc{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--sub);margin-bottom:10px;}
 .ptags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;}
-.ptag{background:rgba(124,58,237,.1);color:var(--pu);border:1px solid rgba(124,58,237,.18);padding:2px 9px;border-radius:100px;font-size:10.5px;font-weight:600;}
+.ptag{background:rgba(124,58,237,.08);color:var(--pu);border:1px solid rgba(124,58,237,.14);padding:2px 9px;border-radius:100px;font-size:10.5px;font-weight:600;}
 .ptag.i{background:rgba(109,40,217,.1);color:#818cf8;border-color:rgba(109,40,217,.18);}
 .pcard-btn{display:block;text-align:center;background:linear-gradient(135deg,rgba(124,58,237,.18),rgba(109,40,217,.16));border:1px solid rgba(124,58,237,.2);color:var(--fg);padding:9px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Epilogue',sans-serif;transition:all .18s;}
 .pcard-btn:hover{background:rgba(124,58,237,.28);border-color:rgba(124,58,237,.42);}
@@ -306,9 +315,9 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .pcard-clickable{cursor:pointer;}
 .pcard-body-top{padding:14px 16px 10px;}
 .pcard-actions{display:flex;gap:8px;padding:0 16px 16px;}
-.pcard-btn-outline{flex:1;background:transparent;border:1.5px solid var(--or);color:var(--or);padding:10px;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:'Epilogue',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .18s;}
+.pcard-btn-outline{flex:1;background:transparent;border:1.5px solid var(--or);color:var(--or);padding:10px;border-radius:10px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:'Epilogue',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .18s;}
 .pcard-btn-outline:hover{background:rgba(194,65,12,.12);}
-.pcard-btn-solid{flex:1;background:var(--or);border:1.5px solid var(--or);color:#fff;padding:10px;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:'Epilogue',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .18s;}
+.pcard-btn-solid{flex:1;background:linear-gradient(135deg,var(--or),#c2410c);border:1.5px solid transparent;color:#fff;padding:10px;border-radius:10px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:'Epilogue',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .18s;box-shadow:0 6px 16px -8px rgba(194,65,12,.5);}
 .pcard-btn-solid:hover{opacity:.88;}
 .pcard-btn-solid.added{background:#15803D;border-color:#15803D;}
 
@@ -860,12 +869,12 @@ function render() {
         </div>
         <div class="pcard-body-top">
           <div class="pcard-name">${esc(p.name)}</div>
+          ${p.esNuevo ? '' : `
           <div class="pcard-rat">
-            ${p.esNuevo ? `<span class="rc">Proveedor nuevo · sin reseñas todavía</span>` : `
             <span class="stars">${'★'.repeat(Math.floor(p.rating))}${p.rating % 1 ? '½' : ''}</span>
             <span class="rn">${p.rating.toFixed(1)}</span>
-            <span class="rc">(${p.reviews} reseñas)</span>`}
-          </div>
+            <span class="rc">(${p.reviews} reseñas)</span>
+          </div>`}
           <div class="pcard-loc"><i class="ti ti-map-pin" style="font-size:12px;"></i> ${esc(p.district)}, Lima</div>
           <div class="ptags">${p.tags.map((t,i) => `<span class="ptag${i>0?' i':''}">${t}</span>`).join('')}</div>
         </div>
