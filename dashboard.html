@@ -55,6 +55,19 @@ body{font-family:'Epilogue',system-ui,sans-serif;background:var(--bg);color:var(
 .greeting p{font-size:13.5px;color:var(--sub);margin-top:3px;}
 .top-badge{display:inline-flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);padding:8px 15px;border-radius:100px;font-size:12.5px;color:var(--sub);}
 .top-badge .dot-live{width:8px;height:8px;border-radius:50%;background:var(--green);}
+.top-badge.off .dot-live{background:var(--or);}
+.onb{background:var(--card);border:1px solid var(--or-line);border-radius:14px;padding:18px 20px;margin-bottom:22px;}
+.onb h3{font-size:15px;margin-bottom:4px;}
+.onb p{font-size:13px;color:var(--sub);margin-bottom:14px;}
+.onb-step{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:13.5px;}
+.onb-n{width:26px;height:26px;border-radius:50%;background:var(--or-soft);color:#9A3412;font-weight:800;font-size:12.5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.onb-step.hecho{color:var(--sub);}
+.onb-step.hecho .onb-n{background:var(--green);color:#fff;}
+#onb-modal-body h3{padding-right:38px;}
+.onb-step span.t{flex:1;}
+.onb-step .btn-or{flex-shrink:0;}
+@media (max-width:520px){.onb-step{flex-wrap:wrap;}.onb-step .btn-or{flex:1 0 100%;justify-content:center;}}
+@media (pointer:coarse){.onb-step .btn-or,#onb-overlay .btn-ghost{min-height:44px;}}
 
 /* ── KPI STRIP ── */
 .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;}
@@ -591,8 +604,10 @@ verificarAccesoDashboard();
           <h1 id="home-greeting-nombre">Hola</h1>
           <p>Así va tu negocio hoy.</p>
         </div>
-        <div class="top-badge"><span class="dot-live"></span> Perfil activo y visible</div>
+        <div class="top-badge" id="home-visibilidad"><span class="dot-live"></span> <span>Cargando…</span></div>
       </div>
+
+      <div id="onb-card" class="onb" style="display:none;"></div>
 
       <!-- KPIs -->
       <div class="kpi-row">
@@ -1126,6 +1141,14 @@ verificarAccesoDashboard();
   </div>
 </div>
 
+<div class="modal-overlay" id="onb-overlay">
+  <div class="modal-box" style="max-width:520px;position:relative;">
+    <button class="modal-close" style="position:absolute;top:14px;right:14px;" onclick="cerrarPasos()" aria-label="Cerrar"><i class="ti ti-x"></i></button>
+    <div id="onb-modal-body" class="onb" style="border:none;padding:0;margin:0;"></div>
+    <button class="btn-ghost" style="width:100%;justify-content:center;margin-top:14px;" onclick="cerrarPasos()">Entendido</button>
+  </div>
+</div>
+
 <div class="modal-overlay" id="service-modal-overlay" onclick="if(event.target===this) closeServiceModal()">
   <div class="modal-box" style="max-width:560px;max-height:88vh;overflow-y:auto;">
     <div class="modal-head">
@@ -1469,6 +1492,7 @@ function tourAnterior(){
 function cerrarTour(){
   document.getElementById('tour-overlay').classList.remove('open');
   localStorage.setItem('te_tour_visto', '1');
+  if(typeof intentarMostrarPasos === 'function') intentarMostrarPasos();
 }
 
 // ─── NAVEGACIÓN ENTRE VISTAS (vanilla JS) ───
@@ -2970,7 +2994,50 @@ function renderServiciosGrid(){
   });
   html += `<div class="service-card-add" onclick="openServiceModal()"><i class="ti ti-plus"></i><span>Añadir servicio</span></div>`;
   grid.innerHTML = html;
+  renderOnboarding();
 }
+
+// Llenar el perfil NO publica nada: el cliente solo ve servicios lanzados al
+// mercado. Esta guía de 3 pasos se muestra hasta que haya uno publicado.
+function renderOnboarding(){
+  const card = document.getElementById('onb-card');
+  const badge = document.getElementById('home-visibilidad');
+  if(!card || !perfilData) return;
+  const sv = perfilData.servicios;
+  const publicado = sv.some(s => s.activo);
+  badge.classList.toggle('off', !publicado);
+  badge.lastElementChild.textContent = publicado ? 'Visible en el catálogo' : 'Aún no apareces en el catálogo';
+  if(publicado){ card.style.display = 'none'; return; }
+
+  const pasos = [
+    { ok: !!(perfilData.ubicacion && perfilData.bio), txt: 'Completa tu perfil (ubicación y descripción)', btn: 'Ir a mi perfil', fn: "openTool('perfil')" },
+    { ok: sv.length > 0, txt: 'Añade tu primer servicio (con fotos, descripción y precio)', btn: 'Añadir servicio', fn: "openTool('perfil');openServiceModal()" },
+    { ok: false, txt: 'Lánzalo al mercado: sin este paso los clientes NO te ven', btn: 'Ver mis servicios', fn: "openTool('perfil')" }
+  ];
+  const actual = pasos.findIndex(p => !p.ok);
+  const armar = (alCerrar) => `<h3>Te faltan pasos para aparecer en el catálogo</h3>
+    <p>Tener el perfil lleno no basta: los clientes solo ven los servicios que lanzas al mercado.</p>` +
+    pasos.map((p, i) => `<div class="onb-step${p.ok ? ' hecho' : ''}">
+      <div class="onb-n">${p.ok ? '✓' : i + 1}</div><span class="t">${p.txt}</span>
+      ${i === actual ? `<button class="btn-or" style="padding:8px 14px;font-size:12.5px;" onclick="${alCerrar}${p.fn}">${p.btn}</button>` : ''}
+    </div>`).join('');
+  card.innerHTML = armar('');
+  card.style.display = '';
+  document.getElementById('onb-modal-body').innerHTML = armar('cerrarPasos();');
+  intentarMostrarPasos();
+}
+
+// Pop-up que el proveedor ve sí o sí al entrar mientras no tenga nada publicado
+// (una vez por sesión). Si todavía no vio la guía de bienvenida, espera a que la cierre.
+function intentarMostrarPasos(){
+  if(!localStorage.getItem('te_tour_visto')) return;
+  if(document.getElementById('tour-overlay').classList.contains('open')) return;
+  if(document.getElementById('onb-card').style.display === 'none') return;
+  if(sessionStorage.getItem('te_pasos_visto')) return;
+  sessionStorage.setItem('te_pasos_visto', '1');
+  document.getElementById('onb-overlay').classList.add('open');
+}
+function cerrarPasos(){ document.getElementById('onb-overlay').classList.remove('open'); }
 
 // Publicar / despublicar un servicio en el marketplace. Un servicio nuevo
 // nace como borrador: solo aparece en el catálogo cuando lo lanzas.
@@ -3509,6 +3576,7 @@ async function saveService(){
   const videos = servicioVideosDraft.slice();
 
   const opciones = opcionesDraft.map(o => ({ ...o }));
+  let nuevoId = null;
 
   if(servicioEditingId){
     const { error } = await sb.from('services').update({
@@ -3529,10 +3597,20 @@ async function saveService(){
     if(error){ alert('No se pudo crear el servicio: ' + error.message); return; }
 
     perfilData.servicios.push({ id: data.id, nombre, precio, precioACotizar, categoria, descripcion, noIncluye, imagenes, videos, opciones, activo: false });
+    nuevoId = data.id;
   }
 
   closeServiceModal();
   renderServiciosGrid();
+
+  // Guardar no publica: se pregunta en el momento para que no quede olvidado como borrador.
+  if(nuevoId){
+    if(imagenes.length && descripcion){
+      if(confirm('Servicio guardado como BORRADOR: todavía no lo ve ningún cliente.\n\n¿Lanzarlo al mercado ahora?')) await toggleServicioEnMercado(nuevoId, true);
+    } else {
+      alert('Servicio guardado como BORRADOR (los clientes aún no lo ven).\n\nPara lanzarlo al mercado necesita al menos una foto y una descripción. Agrégalas con "Editar" y luego toca "Lanzar al mercado".');
+    }
+  }
 }
 
 async function deleteService(){
