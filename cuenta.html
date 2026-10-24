@@ -459,7 +459,7 @@ async function cargarContratados(){
     .from('requests')
     .select('id, event_date, status, provider_id, service_id, services(name), profiles!requests_provider_id_fkey(full_name)')
     .eq('client_id', usuarioActual.id)
-    .in('status', ['confirmada', 'pendiente'])
+    .in('status', ['confirmada', 'pendiente', 'rechazada', 'cancelada'])
     .order('event_date', { ascending: false });
 
   if(error){
@@ -503,10 +503,12 @@ async function cargarContratados(){
     const acciones = document.createElement('div');
     acciones.className = 'contratado-acciones';
 
-    if(s.status === 'pendiente'){
+    if(s.status === 'pendiente' || s.status === 'rechazada' || s.status === 'cancelada'){
       const badge = document.createElement('div');
       badge.className = 'sol-pendiente';
-      badge.innerHTML = '<i class="ti ti-clock-hour-4"></i> Esperando que el proveedor confirme';
+      badge.innerHTML = s.status === 'pendiente'
+        ? '<i class="ti ti-clock-hour-4"></i> Esperando que el proveedor confirme'
+        : '<i class="ti ti-circle-x"></i> ' + (s.status === 'rechazada' ? 'El proveedor no pudo aceptar esta fecha' : 'Reserva cancelada');
       acciones.appendChild(badge);
       item.appendChild(acciones);
       cont.appendChild(item);

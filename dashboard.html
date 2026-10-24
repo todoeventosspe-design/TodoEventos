@@ -3777,8 +3777,8 @@ async function renderSolicitudes(){
 
     const acciones = r.estado === 'pendiente'
       ? `<div class="req-actions">
-           <button class="req-btn-accept" onclick="aceptarSolicitud(${r.id})"><i class="ti ti-check"></i> Aceptar Fecha</button>
-           <button class="req-btn-reject" onclick="rechazarSolicitud(${r.id})"><i class="ti ti-x"></i> Fecha Ocupada</button>
+           <button class="req-btn-accept" onclick="aceptarSolicitud(${r.id})"><i class="ti ti-check"></i> Aceptar</button>
+           <button class="req-btn-reject" onclick="rechazarSolicitud(${r.id})"><i class="ti ti-x"></i> Denegar</button>
          </div>`
       : yaPaso
         ? `<div class="req-accepted-note"><i class="ti ti-circle-check"></i> Evento realizado. ${esc(r.cliente)} ya puede dejarte una reseña.</div>`
@@ -3815,21 +3815,16 @@ async function renderSolicitudes(){
 // El proveedor acepta una solicitud pendiente: la pasa a "confirmada" (mismo
 // nombre de estado que usan el badge, la lista y el resto del dashboard) y
 // bloquea la fecha en su agenda si todavía no estaba bloqueada.
+// La agenda la maneja la base (reservas-blindaje.sql): el bloque se toma al
+// nacer la solicitud y un trigger lo confirma, o lo libera si se rechaza o cancela.
 async function aceptarSolicitud(id){
   const r = solicitudes.find(x => x.id === id);
   if(!r) return;
 
-  const yaOcupado = agendaEvents.some(e => e.date === r.fecha);
-  if(yaOcupado){
-    const seguir = confirm('Ya tienes un evento agendado el ' + r.fecha + '.\n\n¿Aceptar de todos modos? Podrías generar un cruce de reservas.');
-    if(!seguir) return;
-  }
-
   const { error } = await sb.from('requests').update({ status: 'confirmada' }).eq('id', id).eq('provider_id', usuarioActual.id);
   if(error){ alert('No se pudo aceptar: ' + error.message); return; }
 
-  await bloquearFechaEnAgenda(r);
-  alert('Fecha aceptada. Quedó bloqueada en tu agenda.');
+  alert('Reserva aceptada. Quedó confirmada en tu agenda.');
 
   await refrescarReservasYAgenda();
 }
@@ -3842,10 +3837,6 @@ async function rechazarSolicitud(id){
   const { error } = await sb.from('requests').update({ status: 'rechazada' }).eq('id', id).eq('provider_id', usuarioActual.id);
   if(error){ alert('No se pudo rechazar: ' + error.message); return; }
 
-  // La solicitud (mientras esperaba respuesta) ya tenía la fecha tomada en la
-  // agenda para que nadie más la reserve encima; al rechazar hay que soltarla.
-  await sb.from('agenda').delete().eq('request_id', id).eq('provider_id', usuarioActual.id);
-
   await refrescarReservasYAgenda();
 }
 
@@ -3857,29 +3848,7 @@ async function cancelarReserva(id){
   const { error } = await sb.from('requests').update({ status: 'cancelada' }).eq('id', id).eq('provider_id', usuarioActual.id);
   if(error){ alert('No se pudo cancelar: ' + error.message); return; }
 
-  // El bloque de agenda ligado a esta reserva se borra solo (ON DELETE
-  // CASCADE no aplica aqui porque la reserva no se borra), asi que lo
-  // quitamos a mano para liberar la fecha.
-  await sb.from('agenda').delete().eq('request_id', id).eq('provider_id', usuarioActual.id);
-
   await refrescarReservasYAgenda();
-}
-
-async function bloquearFechaEnAgenda(r){
-  const yaExiste = agendaEvents.some(e => e.requestId === r.id);
-  if(yaExiste) return;
-
-  await sb.from('agenda').insert({
-    provider_id: usuarioActual.id,
-    request_id: r.id,
-    title: (r.tipoEvento || 'Evento') + ': ' + r.cliente,
-    event_date: r.fecha,
-    type: r.tipoEvento || 'Evento',
-    client_name: r.cliente,
-    start_time: r.hora || null,
-    end_time: r.horaFin || null,
-    status: 'Confirmado'
-  });
 }
 
 async function refrescarReservasYAgenda(){
